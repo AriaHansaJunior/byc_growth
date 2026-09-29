@@ -17,6 +17,6 @@ class ExampleTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('welcome');
         $response->assertSee('BYC GROWTH');
-        $response->assertSee('Tumbuh bersama');
+        $response->assertSee('For we walk by faith, not by sight');
     }
 }

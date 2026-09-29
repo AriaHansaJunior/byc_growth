@@ -18,7 +18,7 @@ class GameController extends Controller
     }
 
     /**
-     * Homepage (/) — Shows Final Red & Final Blue calculated from Game 1 + Game 2
+     * Homepage (/) — Legacy / redirected to information hub
      */
     public function home()
     {
@@ -26,6 +26,20 @@ class GameController extends Controller
         $gameState = $this->storageService->getGameState();
 
         return view('welcome', [
+            'finalScores' => $scores,
+            'gameState' => $gameState,
+        ]);
+    }
+
+    /**
+     * Game Center (/game-center) — Hub for interactive games, scoreboards, and rules
+     */
+    public function gameCenter()
+    {
+        $scores = $this->storageService->getFinalScores();
+        $gameState = $this->storageService->getGameState();
+
+        return view('pages.game-center', [
             'finalScores' => $scores,
             'gameState' => $gameState,
         ]);

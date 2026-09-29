@@ -2,6 +2,7 @@
 
 @import './byc-growth/variables.css';
 @import './byc-growth/components.css';
+@import './byc-growth/layout.css';
 @import './byc-growth/home.css';
 @import './byc-growth/game-guess.css';
 @import './byc-growth/game-growth.css';

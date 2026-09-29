@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750" width="1200" height="750">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#284e3b" />
+      <stop offset="50%" stop-color="#1f3d2e" />
+      <stop offset="100%" stop-color="#173426" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#bad259" />
+      <stop offset="100%" stop-color="#e7bd52" />
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#bad259" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#284e3b" stop-opacity="0" />
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="750" rx="36" fill="url(#bgGradient)"/>
+  <rect width="1200" height="750" rx="36" fill="url(#sunGlow)"/>
+  <rect width="1200" height="750" rx="36" fill="url(#grid)"/>
+
+  <!-- Decorative circles & arcs -->
+  <circle cx="600" cy="360" r="280" fill="none" stroke="rgba(186, 210, 89, 0.15)" stroke-width="2" stroke-dasharray="8 8"/>
+  <circle cx="600" cy="360" r="340" fill="none" stroke="rgba(231, 189, 82, 0.12)" stroke-width="1.5"/>
+
+  <!-- Stylized Community Silhouettes (Youth Fellowship Group) -->
+  <g fill="#f8f5ec" opacity="0.95" transform="translate(100, 20)">
+    <!-- Central leader 1 -->
+    <circle cx="500" cy="270" r="36" fill="#bad259"/>
+    <path d="M460 380 C460 320, 540 320, 540 380 Z" fill="#bad259"/>
+
+    <!-- Central leader 2 -->
+    <circle cx="430" cy="285" r="32" fill="#fffef9"/>
+    <path d="M395 390 C395 330, 465 330, 465 390 Z" fill="#eee8d3"/>
+
+    <!-- Person 3 (Right) -->
+    <circle cx="570" cy="285" r="32" fill="#e7bd52"/>
+    <path d="M535 390 C535 330, 605 330, 605 390 Z" fill="#e7bd52"/>
+
+    <!-- Person 4 (Left) -->
+    <circle cx="360" cy="310" r="28" fill="#bad259"/>
+    <path d="M330 410 C330 355, 390 355, 390 410 Z" fill="#bad259" opacity="0.9"/>
+
+    <!-- Person 5 (Far Left) -->
+    <circle cx="295" cy="330" r="26" fill="#fffef9"/>
+    <path d="M270 425 C270 375, 320 375, 320 425 Z" fill="#eee8d3"/>
+
+    <!-- Person 6 (Right Outer) -->
+    <circle cx="640" cy="310" r="28" fill="#fffef9"/>
+    <path d="M610 410 C610 355, 670 355, 670 410 Z" fill="#eee8d3"/>
+
+    <!-- Person 7 (Far Right) -->
+    <circle cx="705" cy="330" r="26" fill="#bad259"/>
+    <path d="M680 425 C680 375, 730 375, 730 425 Z" fill="#bad259"/>
+
+    <!-- Background row members -->
+    <circle cx="330" cy="260" r="22" fill="rgba(255,255,255,0.4)"/>
+    <path d="M310 325 C310 290, 350 290, 350 325 Z" fill="rgba(255,255,255,0.3)"/>
+
+    <circle cx="400" cy="240" r="24" fill="rgba(186,210,89,0.5)"/>
+    <path d="M378 305 C378 270, 422 270, 422 305 Z" fill="rgba(186,210,89,0.35)"/>
+
+    <circle cx="470" cy="235" r="24" fill="rgba(255,255,255,0.5)"/>
+    <path d="M448 300 C448 265, 492 265, 492 300 Z" fill="rgba(255,255,255,0.35)"/>
+
+    <circle cx="540" cy="240" r="24" fill="rgba(231,189,82,0.5)"/>
+    <path d="M518 305 C518 270, 562 270, 562 305 Z" fill="rgba(231,189,82,0.35)"/>
+
+    <circle cx="610" cy="255" r="22" fill="rgba(255,255,255,0.4)"/>
+    <path d="M590 320 C590 285, 630 285, 630 320 Z" fill="rgba(255,255,255,0.3)"/>
+
+    <circle cx="670" cy="270" r="20" fill="rgba(186,210,89,0.4)"/>
+    <path d="M652 330 C652 295, 688 295, 688 330 Z" fill="rgba(186,210,89,0.3)"/>
+  </g>
+
+  <!-- Platform base -->
+  <path d="M260 480 Q600 450 940 480 L970 510 Q600 480 230 510 Z" fill="rgba(0,0,0,0.2)"/>
+
+  <!-- Badge / Tag at Top Right -->
+  <g transform="translate(920, 40)">
+    <rect width="230" height="42" rx="21" fill="rgba(255, 255, 255, 0.12)" stroke="rgba(255, 255, 255, 0.25)" stroke-width="1"/>
+    <circle cx="24" cy="21" r="6" fill="#bad259"/>
+    <text x="40" y="26" font-family="'DM Sans', sans-serif" font-size="13" font-weight="700" fill="#fffef9" letter-spacing="1">GROUP PHOTO DUMMY</text>
+  </g>
+
+  <!-- Overlay Banner at Bottom -->
+  <g transform="translate(60, 560)">
+    <rect width="1080" height="140" rx="24" fill="rgba(23, 52, 38, 0.85)" stroke="rgba(255, 255, 255, 0.15)" stroke-width="1.5"/>
+    
+    <text x="48" y="58" font-family="'Manrope', sans-serif" font-size="30" font-weight="800" fill="#fffef9" letter-spacing="-0.5">
+      Bethany Youth Community (BYC) Growth
+    </text>
+    <text x="48" y="96" font-family="'DM Sans', sans-serif" font-size="16" font-weight="500" fill="#bad259">
+      Temporary Group Photo Placeholder &bull; Replace with official fellowship group photo
+    </text>
+
+    <!-- Stamp indicator on right -->
+    <g transform="translate(940, 26)">
+      <rect width="90" height="88" rx="16" fill="rgba(186, 210, 89, 0.18)" stroke="#bad259" stroke-width="1.5"/>
+      <text x="45" y="44" font-family="'Manrope', sans-serif" font-size="24" font-weight="800" fill="#bad259" text-anchor="middle">BYC</text>
+      <text x="45" y="66" font-family="'DM Sans', sans-serif" font-size="11" font-weight="700" fill="#fffef9" text-anchor="middle" letter-spacing="1">PHOTO</text>
+    </g>
+  </g>
+</svg>

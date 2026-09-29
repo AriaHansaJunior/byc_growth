@@ -1,246 +1,544 @@
-/* Home Screen & Hero Styles */
+/* Home Screen & BYC Growth 2.0 Information Hub Styles */
 
 .home {
   min-height: 100vh;
-  overflow: hidden;
+  position: relative;
 }
 
+/* Hero Section */
 .home-hero {
-  min-height: 590px;
-  padding: 74px max(7vw, 72px) 70px;
+  padding: 60px max(7vw, 72px) 70px;
   display: grid;
-  grid-template-columns: .9fr 1.1fr;
+  grid-template-columns: 1fr 1.15fr;
   align-items: center;
-  gap: 6vw;
+  gap: 5vw;
   position: relative;
 }
 
 .home-hero::before {
   content: "";
   position: absolute;
-  width: 480px;
-  height: 480px;
+  width: 520px;
+  height: 520px;
   border-radius: 50%;
   background: var(--cream);
-  top: -210px;
-  left: -160px;
+  top: -180px;
+  left: -140px;
   z-index: -1;
+  opacity: .7;
+}
+
+.home-copy {
+  max-width: 560px;
 }
 
 .home-copy h1 {
-  margin: 46px 0 20px;
-  font: 700 clamp(48px, 5vw, 72px)/1.02 "Manrope", sans-serif;
-  letter-spacing: -.055em;
+  margin: 16px 0 20px;
+  font: 800 clamp(42px, 4.4vw, 64px)/1.06 "Manrope", sans-serif;
+  letter-spacing: -.05em;
+  color: var(--ink);
 }
 
 .home-copy h1 em {
   color: var(--forest);
   font-style: normal;
+  display: block;
 }
 
 .home-copy > p {
-  max-width: 550px;
   color: var(--muted);
   font-size: 17px;
   line-height: 1.7;
+  margin: 0 0 28px;
 }
 
 .home-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 30px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
 }
 
-.hero-art {
+/* Large Group Photo Area */
+.hero-photo-wrap {
   position: relative;
+  width: 100%;
 }
 
-.image-frame {
-  padding: 16px;
+.hero-photo-frame {
+  position: relative;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 90px 24px 90px 24px;
+  border-radius: 28px;
+  padding: 12px;
   box-shadow: var(--shadow);
-  transform: rotate(1deg);
-  transition: transform .3s ease;
+  transition: transform .3s ease, box-shadow .3s ease;
 }
 
-.image-frame:hover {
-  transform: rotate(0deg);
+.hero-photo-frame:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(32, 48, 41, .16);
 }
 
-.image-frame img {
+.hero-group-photo {
   display: block;
   width: 100%;
-  aspect-ratio: 1.45;
+  height: auto;
+  aspect-ratio: 1.6 / 1;
   object-fit: cover;
-  border-radius: 76px 16px 76px 16px;
+  border-radius: 20px;
 }
 
-.round-stamp {
+.photo-caption-badge {
   position: absolute;
-  bottom: -28px;
-  left: -24px;
-  width: 112px;
-  height: 112px;
-  border-radius: 50%;
-  color: var(--forest-dark);
-  background: var(--lime);
-  border: 7px solid var(--paper);
-  display: grid;
-  place-content: center;
-  text-align: center;
-  transform: rotate(-8deg);
-  box-shadow: 0 10px 25px rgba(32, 48, 41, .15);
-}
-
-.round-stamp strong {
-  font: 800 38px/1 "Manrope", sans-serif;
-}
-
-.round-stamp span {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
+  bottom: 24px;
+  left: 24px;
+  background: rgba(23, 52, 38, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Game Selection Section */
-.game-select {
-  padding: 86px max(7vw, 72px);
-  background: var(--forest-dark);
+.photo-caption-badge span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lime);
+}
+
+/* Scripture / Statement Section */
+.scripture-section {
+  padding: 20px max(7vw, 72px) 70px;
+}
+
+.scripture-card {
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+  color: #ffffff;
+  border-radius: 28px;
+  padding: 56px 64px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.scripture-card::before {
+  content: "“";
+  position: absolute;
+  top: -30px;
+  left: 30px;
+  font: 800 240px/1 "Manrope", sans-serif;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.scripture-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+}
+
+.scripture-eyebrow {
+  color: var(--lime);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.scripture-card blockquote {
+  margin: 0 0 16px;
+  padding: 0;
+  font: 800 clamp(28px, 3.2vw, 44px)/1.2 "Manrope", sans-serif;
+  letter-spacing: -.03em;
   color: #ffffff;
 }
 
-.section-heading {
+.scripture-reference {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(186, 210, 89, .18);
+  color: var(--lime);
+  font-weight: 800;
+  font-size: 15px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(186, 210, 89, .3);
+  margin-bottom: 14px;
+}
+
+.scripture-subtext {
+  color: #b8c5bf;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.scripture-stamp {
+  flex-shrink: 0;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px dashed rgba(186, 210, 89, 0.4);
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--lime);
+  font: 800 13px/1.3 "Manrope", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+/* Destination Section */
+.destinations-section {
+  padding: 80px max(7vw, 72px) 90px;
+  background: var(--forest-dark);
+  color: #ffffff;
+  position: relative;
+}
+
+.destinations-heading {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 34px;
+  margin-bottom: 44px;
+  gap: 24px;
 }
 
-.section-heading .eyebrow {
+.destinations-heading .eyebrow {
   color: var(--lime);
+  margin-bottom: 10px;
 }
 
-.section-heading h2,
-.overall h2 {
+.destinations-heading h2 {
   margin: 0;
-  font: 700 36px "Manrope", sans-serif;
-  letter-spacing: -.03em;
+  font: 800 clamp(32px, 3.5vw, 44px) "Manrope", sans-serif;
+  letter-spacing: -.04em;
+  color: #ffffff;
 }
 
-.section-heading p {
+.destinations-heading p {
   color: #b8c5bf;
-  max-width: 380px;
+  max-width: 440px;
   line-height: 1.6;
+  margin: 0;
+  font-size: 16px;
 }
 
-.game-grid {
+.destinations-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 22px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
 }
 
-.game-card {
-  min-height: 230px;
-  border: 1px solid rgba(255, 255, 255, .14);
+.destination-card {
+  min-height: 290px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
-  padding: 28px;
+  padding: 32px 28px;
   text-align: left;
   position: relative;
   overflow: hidden;
   display: flex;
-  align-items: flex-end;
-  gap: 22px;
+  flex-direction: column;
+  justify-content: space-between;
   cursor: pointer;
   text-decoration: none;
-  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
-}
-
-.game-card:hover {
-  transform: translateY(-5px);
-  border-color: var(--lime);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, .25);
-}
-
-.guess-card {
-  background: #365b46;
   color: #ffffff;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease;
 }
 
-.growth-card {
-  background: var(--cream);
-  color: var(--ink);
+.destination-card:hover {
+  transform: translateY(-6px);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--lime);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, .35);
 }
 
-.game-number {
-  position: absolute;
-  right: 20px;
-  top: 14px;
-  font: 800 72px "Manrope", sans-serif;
-  opacity: .09;
+.destination-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.game-icon {
-  width: 72px;
-  height: 72px;
-  flex: 0 0 auto;
-  border-radius: 20px 8px;
+.destination-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
   display: grid;
   place-items: center;
   background: var(--lime);
   color: var(--forest-dark);
-  font: 800 28px "Manrope", sans-serif;
 }
 
-.growth-card .game-icon {
-  background: var(--gold);
+.destination-icon-box .icon {
+  width: 1.6em;
+  height: 1.6em;
 }
 
-.game-card-copy {
+.destination-card-top .dest-number {
+  font: 800 36px "Manrope", sans-serif;
+  color: rgba(255, 255, 255, 0.16);
+}
+
+.destination-card-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  margin-bottom: 24px;
 }
 
-.game-card-copy small {
-  opacity: .65;
+.destination-badge {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: .1em;
-  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--lime);
+  margin-bottom: 8px;
 }
 
-.game-card-copy strong {
-  font: 800 28px "Manrope", sans-serif;
-  margin: 5px 0;
+.destination-card-body h3 {
+  font: 800 24px "Manrope", sans-serif;
+  letter-spacing: -.02em;
+  margin: 0 0 10px;
+  color: #ffffff;
 }
 
-.game-card-copy em {
-  font-style: normal;
-  opacity: .7;
+.destination-card-body p {
+  color: #b8c5bf;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin: 0;
 }
 
-.card-arrow {
-  width: 42px;
-  height: 42px;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  opacity: .75;
-}
-
-/* Overall Progress Section */
-.overall {
-  margin: 60px max(7vw, 72px);
-  padding: 38px 42px;
-  border: 1px solid var(--line);
-  background: var(--white);
-  border-radius: 24px;
+.destination-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dest-action-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dest-arrow-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+
+.destination-card:hover .dest-arrow-btn {
+  background: var(--lime);
+  border-color: var(--lime);
+  color: var(--forest-dark);
+  transform: translateX(3px);
+}
+
+/* Card Accent Color Variations */
+.dest-cash .destination-icon-box {
+  background: var(--gold);
+  color: var(--forest-dark);
+}
+
+.dest-cash .destination-badge {
+  color: var(--gold);
+}
+
+.dest-members .destination-icon-box {
+  background: var(--cream);
+  color: var(--forest);
+}
+
+.dest-members .destination-badge {
+  color: var(--cream);
+}
+
+/* Game Center Hub Launcher Styles */
+.game-center-hub {
+  padding: 40px max(7vw, 72px) 80px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.game-center-hero {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  padding: 48px;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+
+.game-center-hero h1 {
+  font: 800 clamp(36px, 4vw, 52px)/1.08 "Manrope", sans-serif;
+  letter-spacing: -.04em;
+  margin: 12px 0 16px;
+  color: var(--ink);
+}
+
+.game-center-hero p {
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+  margin: 0 0 28px;
+}
+
+.game-center-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.game-center-art-frame {
+  position: relative;
+  background: var(--cream);
+  border-radius: 24px;
+  padding: 12px;
+  border: 1px solid var(--line);
+}
+
+.game-center-art-frame img {
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+  display: block;
+}
+
+.game-center-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.gc-card {
+  min-height: 220px;
+  border-radius: 24px;
+  padding: 32px;
+  text-decoration: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.gc-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(32, 48, 41, .18);
+}
+
+.gc-guess {
+  background: var(--forest);
+  color: #ffffff;
+}
+
+.gc-growth {
+  background: var(--cream);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.gc-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: var(--lime);
+  color: var(--forest-dark);
+  font: 800 28px "Manrope", sans-serif;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.gc-growth .gc-icon {
+  background: var(--gold);
+}
+
+.gc-copy {
+  flex: 1;
+}
+
+.gc-copy small {
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  opacity: .8;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.gc-copy strong {
+  font: 800 26px "Manrope", sans-serif;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.gc-copy em {
+  font-style: normal;
+  font-size: 14px;
+  opacity: .8;
+  line-height: 1.5;
+  display: block;
+}
+
+.gc-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  opacity: .85;
+}
+
+.gc-scoreboard {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 32px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  box-shadow: var(--shadow);
 }

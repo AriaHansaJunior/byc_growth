@@ -16,18 +16,27 @@ class GameTest extends TestCase
     }
 
     /**
-     * Test Homepage renders properly with calculated final scores starting at 0
+     * Test Homepage and Game Center render properly under Scope 1 architecture
      */
     public function test_homepage_renders_and_calculates_final_scores(): void
     {
         $this->storage->resetGame();
 
+        // Homepage as Main Information Hub
         $response = $this->get('/');
         $response->assertStatus(200);
         $response->assertViewIs('welcome');
         $response->assertSee('BYC GROWTH');
-        $response->assertSee('Tumbuh bersama');
-        $response->assertSee('Cara Bermain');
+        $response->assertSee('For we walk by faith, not by sight');
+        $response->assertSee('What do you want to go through?');
+        $response->assertSee('Game Center');
+
+        // Game Center Hub
+        $gcRes = $this->get('/game-center');
+        $gcRes->assertStatus(200);
+        $gcRes->assertViewIs('pages.game-center');
+        $gcRes->assertSee('BYC Game Center');
+        $gcRes->assertSee('Team Scoreboard');
     }
 
     /**
@@ -127,11 +136,11 @@ class GameTest extends TestCase
         $this->assertEquals(50, $final['final_red']);
         $this->assertEquals(25, $final['final_blue']);
 
-        // Verify on Homepage
-        $homeRes = $this->get('/');
-        $homeRes->assertStatus(200);
-        $homeRes->assertSee('50');
-        $homeRes->assertSee('25');
+        // Verify on Game Center Hub
+        $gcRes = $this->get('/game-center');
+        $gcRes->assertStatus(200);
+        $gcRes->assertSee('50');
+        $gcRes->assertSee('25');
     }
 
     /**

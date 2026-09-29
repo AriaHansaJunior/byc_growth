@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Game 02 — BYC Growth 100 | BYC GROWTH')
+@section('no-header', true)
+@section('no-footer', true)
 
 @section('content')
 @php
@@ -26,7 +28,7 @@
 <div class="game-shell">
     {{-- Topbar --}}
     <header class="topbar">
-        <a href="{{ route('home') }}" class="brand-button" aria-label="Kembali ke beranda">
+        <a href="{{ route('game.center') }}" class="brand-button" aria-label="Back to Game Center" title="Back to Game Center">
             <x-brand compact="true" />
         </a>
         <x-score-pair :scores="['red' => $redScore, 'blue' => $blueScore]" :compact="true" />

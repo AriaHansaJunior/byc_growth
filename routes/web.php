@@ -1,24 +1,33 @@
 <?php
 
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes — BYC GROWTH Interactive Game
+| Web Routes — BYC GROWTH 2.0
 |--------------------------------------------------------------------------
 |
-| Direct access without login, authentication, or roles.
+| Main website architecture, portal destinations, and interactive games.
 |
 */
 
-Route::get('/', [GameController::class, 'home'])->name('home');
+// Website Architecture & Portals
+Route::get('/', [PageController::class, 'home'])->name('home');
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/members', [PageController::class, 'members'])->name('members');
+Route::get('/game-center', [GameController::class, 'gameCenter'])->name('game.center');
+Route::get('/cash-management', [PageController::class, 'cashManagement'])->name('cash-management');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+
+// Interactive Games (Preserved)
 Route::get('/guess-me', [GameController::class, 'guessMe'])->name('game.guess-me');
 Route::get('/growth-100', [GameController::class, 'growth100'])->name('game.growth-100');
 Route::get('/final', [GameController::class, 'finalScore'])->name('game.final');
 Route::get('/game/image/{filename}', [GameController::class, 'getImage'])->name('game.image');
 
-// Game State & CRUD Endpoints (File-based persistence)
+// Game State & CRUD Endpoints (Preserved)
 Route::prefix('game')->name('game.')->group(function () {
     Route::post('/update-score', [GameController::class, 'updateScore'])->name('update-score');
     Route::post('/reset', [GameController::class, 'resetGame'])->name('reset');

@@ -1,12 +1,14 @@
 @extends('layouts.app')
 
 @section('title', 'Final Score — BYC GROWTH')
+@section('no-header', true)
+@section('no-footer', true)
 
 @section('content')
 @php
     $finalRed = (int) ($scores['final_red'] ?? 0);
     $finalBlue = (int) ($scores['final_blue'] ?? 0);
-    $winner = $finalRed === $finalBlue ? 'Seri' : ($finalRed > $finalBlue ? 'Tim Red' : 'Tim Blue');
+    $winner = $finalRed === $finalBlue ? 'Tie' : ($finalRed > $finalBlue ? 'Red Team' : 'Blue Team');
 @endphp
 
 <main class="final-screen">
@@ -15,7 +17,7 @@
     <div class="confetti confetti-three"></div>
     <div class="confetti confetti-four"></div>
 
-    <a href="{{ route('home') }}" class="brand-button" style="align-self: flex-start;" aria-label="Kembali ke beranda">
+    <a href="{{ route('game.center') }}" class="brand-button" style="align-self: flex-start;" aria-label="Back to Game Center" title="Back to Game Center">
         <x-brand compact="true" />
     </a>
 
