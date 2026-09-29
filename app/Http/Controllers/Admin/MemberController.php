@@ -98,11 +98,16 @@ class MemberController extends Controller
             $photoFileId = $media->id;
         }
 
-        $member->update([
+        $updateData = [
             'full_name' => $validated['full_name'],
-            'date_of_birth' => $validated['date_of_birth'] ?? null,
             'photo_file_id' => $photoFileId,
-        ]);
+        ];
+
+        if (array_key_exists('date_of_birth', $validated)) {
+            $updateData['date_of_birth'] = $validated['date_of_birth'];
+        }
+
+        $member->update($updateData);
 
         return redirect()->route('members')->with('success', 'Member updated successfully.');
     }
@@ -119,6 +124,11 @@ class MemberController extends Controller
             if ($media) {
                 $this->mediaService->deleteMediaFile($media);
             }
+        }
+
+        // Safely disassociate cash transactions to preserve financial history integrity
+        if (class_exists(\App\Models\CashTransaction::class)) {
+            \App\Models\CashTransaction::where('member_id', $member->id)->update(['member_id' => null]);
         }
 
         $member->delete();

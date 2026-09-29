@@ -46,7 +46,7 @@
     @if($members->isEmpty())
         <div class="placeholder-card" style="text-align: center; padding: 48px 24px;">
             <div style="font-size: 36px; margin-bottom: 12px;">👥</div>
-            <h2>No Members Listed Yet</h2>
+            <h2>No members found.</h2>
             <p style="max-width: 480px; margin: 0 auto; color: var(--muted);">
                 Our community members will be showcased here.
             </p>
@@ -54,19 +54,24 @@
     @else
         <div class="members-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
             @foreach($members as $member)
-                <div class="member-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 20px; text-align: center; box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column; align-items: center;">
+                <div class="member-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 20px; text-align: center; box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     {{-- Photo Frame --}}
-                    <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid var(--line); margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+                    <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid var(--line); margin-bottom: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
                         @if($member->photo_url)
                             <img
                                 src="{{ $member->photo_url }}"
                                 alt="{{ $member->full_name }}"
+                                class="member-photo-img"
                                 style="width: 100%; height: 100%; object-fit: cover;"
                                 loading="lazy"
+                                onerror="this.style.display='none'; document.getElementById('fallback-{{ $member->id }}').style.display='flex';"
                             >
+                            <div id="fallback-{{ $member->id }}" class="member-photo-fallback" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; color: var(--forest); font-family: 'Manrope', sans-serif;">
+                                {{ strtoupper(substr($member->full_name, 0, 1)) }}
+                            </div>
                         @else
                             {{-- Default Silhouette / Monogram --}}
-                            <div style="font-size: 40px; font-weight: 800; color: var(--forest); font-family: 'Manrope', sans-serif;">
+                            <div class="member-photo-fallback" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; color: var(--forest); font-family: 'Manrope', sans-serif;">
                                 {{ strtoupper(substr($member->full_name, 0, 1)) }}
                             </div>
                         @endif
