@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
         })->values();
     @endphp
-    const members = {!! json_encode($popupData) !!};
+    const members = @json($popupData);
 
 
     let currentIndex = 0;

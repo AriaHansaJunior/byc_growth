@@ -367,18 +367,25 @@ class GameController extends Controller
     }
 
     /**
-     * Serve uploaded/game images safely
+     * Serve uploaded/game images safely with path traversal protection
      */
     public function getImage(string $filename)
     {
-        $storagePath = storage_path('app/game/images/' . $filename);
-        $publicPath = public_path('assets/images/' . $filename);
+        $safeFilename = basename($filename);
 
-        if (File::exists($storagePath)) {
+        // Disallow path traversal sequences or invalid path characters
+        if ($safeFilename !== $filename || str_contains($filename, '..') || str_contains($filename, '/') || str_contains($filename, '\\')) {
+            abort(404, 'Image not found.');
+        }
+
+        $storagePath = storage_path('app/game/images/' . $safeFilename);
+        $publicPath = public_path('assets/images/' . $safeFilename);
+
+        if (File::exists($storagePath) && is_file($storagePath)) {
             return response()->file($storagePath);
         }
 
-        if (File::exists($publicPath)) {
+        if (File::exists($publicPath) && is_file($publicPath)) {
             return response()->file($publicPath);
         }
 

@@ -24,8 +24,14 @@ class MediaUploadService
      */
     public function storeImage(UploadedFile $file, ?string $prefix = 'media', ?string $fileableType = null, ?int $fileableId = null): MediaFile
     {
-        $extension = $file->getClientOriginalExtension() ?: 'jpg';
-        $filename = ($prefix ? $prefix . '_' : '') . time() . '_' . Str::random(10) . '.' . $extension;
+        $extension = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $dangerousExtensions = ['php', 'phtml', 'phar', 'exe', 'sh', 'bat', 'cmd', 'cgi', 'pl', 'py', 'js', 'html', 'htm'];
+        if (in_array($extension, $dangerousExtensions, true)) {
+            $extension = 'bin';
+        }
+
+        $cleanPrefix = $prefix ? preg_replace('/[^a-zA-Z0-9_-]/', '', $prefix) . '_' : '';
+        $filename = $cleanPrefix . time() . '_' . Str::random(10) . '.' . $extension;
         $file->move($this->uploadDir, $filename);
 
         $relativePath = 'assets/images/uploads/' . $filename;
@@ -48,11 +54,10 @@ class MediaUploadService
      */
     public function deleteMediaFile(MediaFile $media): bool
     {
-        if (str_starts_with($media->file_path, 'assets/images/uploads/')) {
-            $fullPath = public_path($media->file_path);
-            if (File::exists($fullPath)) {
-                File::delete($fullPath);
-            }
+        $filename = basename($media->file_path);
+        $fullPath = $this->uploadDir . DIRECTORY_SEPARATOR . $filename;
+        if (File::exists($fullPath) && is_file($fullPath)) {
+            File::delete($fullPath);
         }
 
         return $media->delete();

@@ -93,6 +93,7 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 ## 7. Error Handling & Resilience
 - **Input Validation**: Every form submission, JSON payload, and route parameter must have strict server-side validation (Laravel FormRequests or `$request->validate()`).
 - **No Silent Logic Failures**: Catch and handle exceptions properly; do not use empty catch blocks or ignore critical failures.
+- **No Raw Exception Exposure**: User-facing exceptions, catch blocks, and HTTP error handlers must never expose raw SQL queries, database credentials, server stack traces, or internal filesystem paths. Generic, understandable English error messaging must be provided to the client while logging full traces internally via `Log::error()`.
 - **Graceful UI Errors**: User-facing actions (AJAX requests, file uploads, score submissions) must display clear, non-intrusive feedback (e.g. toast notification, inline error message) when an error occurs.
 
 ---
@@ -102,6 +103,8 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **No Security Through Obscurity**: Never rely solely on hiding frontend buttons or menus for access control.
 - **Direct Access Prevention**: Prevent unauthorized direct URL access to restricted features, admin screens, or internal actions.
 - **CSRF & Injection Protection**: Always verify CSRF tokens on state-modifying requests (`POST`, `PUT`, `DELETE`), use parameterized Eloquent / query builders, and sanitize rendered outputs.
+- **Path Traversal & Upload Isolation**: File serving endpoints and media deletions must strictly sanitize filenames (e.g. `basename()`) and disallow directory traversal sequences (`..`, `/`, `\`). File uploads must restrict dangerous executable extensions and enforce server-authoritative MIME validation.
+- **XSS & Template Escaping**: All dynamic data in Blade views must be escaped by default using `{{ }}`. When injecting dynamic server state into client-side `<script>` blocks, the `@json()` directive must always be used instead of unescaped `{!! json_encode() !!}` to prevent script breakout attacks.
 
 ---
 

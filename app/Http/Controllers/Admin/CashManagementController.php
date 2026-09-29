@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 
@@ -40,10 +41,11 @@ class CashManagementController extends Controller
         // Filter: Name
         if ($request->filled('name')) {
             $name = trim($request->input('name'));
-            $query->where(function ($q) use ($name) {
-                $q->where('contributor_name', 'like', "%{$name}%")
-                  ->orWhereHas('member', function ($mq) use ($name) {
-                      $mq->where('full_name', 'like', "%{$name}%");
+            $escapedName = addcslashes($name, '%_\\');
+            $query->where(function ($q) use ($escapedName) {
+                $q->where('contributor_name', 'like', "%{$escapedName}%")
+                  ->orWhereHas('member', function ($mq) use ($escapedName) {
+                      $mq->where('full_name', 'like', "%{$escapedName}%");
                   });
             });
         }
@@ -175,7 +177,9 @@ class CashManagementController extends Controller
                 $this->mediaService->deleteMediaFile($media);
             }
 
-            return back()->withInput()->withErrors(['error' => 'Failed to record cash transaction: ' . $e->getMessage()]);
+            Log::error('Failed to record cash transaction: ' . $e->getMessage(), ['exception' => $e]);
+
+            return back()->withInput()->withErrors(['error' => 'Failed to record cash transaction. Please try again.']);
         }
     }
 
