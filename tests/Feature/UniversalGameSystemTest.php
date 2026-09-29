@@ -494,4 +494,228 @@ class UniversalGameSystemTest extends TestCase
 
         $this->assertTrue(in_array($res->status(), [401, 302, 403]));
     }
+
+    // ==========================================
+    // 5. SCOPE 5 REVISION: TEAM GAME OWNERSHIP & ISOLATION TESTS
+    // ==========================================
+
+    public function test_guess_me_can_have_its_own_team_configuration(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        $payload = [
+            'game' => 'game1',
+            'teams' => [
+                ['name' => 'GM Alpha', 'color' => '#bd4c42'],
+                ['name' => 'GM Beta', 'color' => '#315e89'],
+                ['name' => 'GM Gamma', 'color' => '#284e3b'],
+            ],
+        ];
+
+        $res = $this->postJson('/game/teams/configure', $payload);
+        $res->assertOk();
+        $res->assertJsonPath('success', true);
+
+        $g1Teams = $this->storage->getActiveTeams('game1');
+        $this->assertCount(3, $g1Teams);
+        $this->assertEquals('GM Alpha', $g1Teams[0]->name);
+        $this->assertEquals('GM Beta', $g1Teams[1]->name);
+        $this->assertEquals('GM Gamma', $g1Teams[2]->name);
+
+        $game1 = Game::where('code', 'game1')->first();
+        foreach ($g1Teams as $team) {
+            $this->assertEquals($game1->id, $team->game_id);
+        }
+    }
+
+    public function test_growth_100_can_have_a_different_team_configuration(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        $payload = [
+            'game' => 'game2',
+            'teams' => [
+                ['name' => 'G100 Eagles', 'color' => '#bd4c42'],
+                ['name' => 'G100 Falcons', 'color' => '#315e89'],
+                ['name' => 'G100 Hawks', 'color' => '#284e3b'],
+                ['name' => 'G100 Ravens', 'color' => '#c28b28'],
+            ],
+        ];
+
+        $res = $this->postJson('/game/teams/configure', $payload);
+        $res->assertOk();
+        $res->assertJsonPath('success', true);
+
+        $g2Teams = $this->storage->getActiveTeams('game2');
+        $this->assertCount(4, $g2Teams);
+        $this->assertEquals('G100 Eagles', $g2Teams[0]->name);
+        $this->assertEquals('G100 Falcons', $g2Teams[1]->name);
+        $this->assertEquals('G100 Hawks', $g2Teams[2]->name);
+        $this->assertEquals('G100 Ravens', $g2Teams[3]->name);
+
+        $game2 = Game::where('code', 'game2')->first();
+        foreach ($g2Teams as $team) {
+            $this->assertEquals($game2->id, $team->game_id);
+        }
+    }
+
+    public function test_configuring_teams_for_guess_me_does_not_alter_growth_100_teams(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        // 1. Establish distinct Game 2 teams
+        $this->postJson('/game/teams/configure', [
+            'game' => 'game2',
+            'teams' => [
+                ['name' => 'G2 Lions', 'color' => '#bd4c42'],
+                ['name' => 'G2 Tigers', 'color' => '#315e89'],
+                ['name' => 'G2 Bears', 'color' => '#284e3b'],
+            ],
+        ])->assertOk();
+
+        $beforeG2Teams = $this->storage->getActiveTeams('game2')->pluck('name', 'id')->toArray();
+        $this->assertCount(3, $beforeG2Teams);
+
+        // 2. Configure Game 1 teams
+        $this->postJson('/game/teams/configure', [
+            'game' => 'game1',
+            'teams' => [
+                ['name' => 'G1 Wolves', 'color' => '#bd4c42'],
+                ['name' => 'G1 Foxes', 'color' => '#315e89'],
+            ],
+        ])->assertOk();
+
+        // 3. Verify Game 2 teams remain identical
+        $afterG2Teams = $this->storage->getActiveTeams('game2')->pluck('name', 'id')->toArray();
+        $this->assertEquals($beforeG2Teams, $afterG2Teams, 'Game 2 teams must remain untouched when configuring Game 1.');
+    }
+
+    public function test_configuring_teams_for_growth_100_does_not_alter_guess_me_teams(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        // 1. Establish distinct Game 1 teams
+        $this->postJson('/game/teams/configure', [
+            'game' => 'game1',
+            'teams' => [
+                ['name' => 'G1 Sharks', 'color' => '#bd4c42'],
+                ['name' => 'G1 Whales', 'color' => '#315e89'],
+                ['name' => 'G1 Dolphins', 'color' => '#284e3b'],
+            ],
+        ])->assertOk();
+
+        $beforeG1Teams = $this->storage->getActiveTeams('game1')->pluck('name', 'id')->toArray();
+        $this->assertCount(3, $beforeG1Teams);
+
+        // 2. Configure Game 2 teams
+        $this->postJson('/game/teams/configure', [
+            'game' => 'game2',
+            'teams' => [
+                ['name' => 'G2 Cobras', 'color' => '#bd4c42'],
+                ['name' => 'G2 Vipers', 'color' => '#315e89'],
+            ],
+        ])->assertOk();
+
+        // 3. Verify Game 1 teams remain identical
+        $afterG1Teams = $this->storage->getActiveTeams('game1')->pluck('name', 'id')->toArray();
+        $this->assertEquals($beforeG1Teams, $afterG1Teams, 'Game 1 teams must remain untouched when configuring Game 2.');
+    }
+
+    public function test_round_cannot_award_points_to_team_belonging_to_another_game(): void
+    {
+        $this->actingAs($this->adminUser);
+        $this->storage->resetGame();
+
+        // Ensure teams exist for both games
+        $g1Teams = $this->storage->getActiveTeams('game1');
+        $g2Teams = $this->storage->getActiveTeams('game2');
+
+        $g1Team = $g1Teams->first();
+        $g2Team = $g2Teams->first();
+
+        $g1Rounds = $this->storage->getGuessMeRounds();
+        $g1Round = $g1Rounds[0];
+
+        $g2Rounds = $this->storage->getGrowth100Rounds();
+        $g2Round = $g2Rounds[0];
+
+        // Case 1: Attempt to award Game 1 round to Game 2 team
+        $res1 = $this->postJson('/game/assign-round-points', [
+            'game' => 'game1',
+            'round_id' => $g1Round['id'],
+            'team_id' => $g2Team->id,
+        ]);
+
+        $res1->assertStatus(422);
+        $res1->assertJsonPath('success', false);
+        $this->assertStringContainsString('cannot award points to a team belonging to another game', $res1->json('error'));
+
+        // Verify round awarded_team_id was NOT modified
+        $dbG1Round = GameRound::find($g1Round['id']);
+        $this->assertNotEquals($g2Team->id, $dbG1Round->awarded_team_id);
+
+        // Case 2: Attempt to award Game 2 round to Game 1 team
+        $res2 = $this->postJson('/game/assign-round-points', [
+            'game' => 'game2',
+            'round_id' => $g2Round['id'],
+            'team_id' => $g1Team->id,
+        ]);
+
+        $res2->assertStatus(422);
+        $res2->assertJsonPath('success', false);
+        $this->assertStringContainsString('cannot award points to a team belonging to another game', $res2->json('error'));
+
+        // Verify round awarded_team_id was NOT modified
+        $dbG2Round = GameRound::find($g2Round['id']);
+        $this->assertNotEquals($g1Team->id, $dbG2Round->awarded_team_id);
+    }
+
+    public function test_existing_migrated_game_data_remains_intact(): void
+    {
+        $game1 = Game::where('code', 'game1')->first();
+        $game2 = Game::where('code', 'game2')->first();
+
+        $this->assertNotNull($game1, 'Game 1 record must exist in MySQL.');
+        $this->assertNotNull($game2, 'Game 2 record must exist in MySQL.');
+
+        // Game 1 rounds and their relationship
+        $g1Rounds = GameRound::where('game_id', $game1->id)->get();
+        $this->assertNotEmpty($g1Rounds, 'Game 1 must have rounds in MySQL.');
+        foreach ($g1Rounds as $round) {
+            $this->assertEquals($game1->id, $round->game_id);
+            $this->assertEquals($game1->id, $round->game->id);
+            $this->assertNotEmpty($round->correct_answer);
+        }
+
+        // Game 2 rounds and their answers
+        $g2Rounds = GameRound::where('game_id', $game2->id)->with('answers')->get();
+        $this->assertNotEmpty($g2Rounds, 'Game 2 must have rounds in MySQL.');
+        foreach ($g2Rounds as $round) {
+            $this->assertEquals($game2->id, $round->game_id);
+            $this->assertEquals($game2->id, $round->game->id);
+            $this->assertNotEmpty($round->question);
+            $this->assertNotEmpty($round->answers);
+        }
+
+        // Teams relational integrity: all teams must reference a valid game
+        $allTeams = Team::all();
+        $this->assertNotEmpty($allTeams);
+        foreach ($allTeams as $team) {
+            $this->assertNotNull($team->game_id, 'Every team must have a non-null game_id.');
+            $this->assertNotNull($team->game, 'Team game relationship must resolve to a valid Game model.');
+            $this->assertTrue(in_array($team->game_id, [$game1->id, $game2->id]));
+        }
+
+        // GameScores relational integrity: game_id and team.game_id must match
+        $allScores = GameScore::with('team')->get();
+        $this->assertNotEmpty($allScores);
+        foreach ($allScores as $score) {
+            $this->assertNotNull($score->team);
+            $this->assertEquals($score->game_id, $score->team->game_id, 'GameScore game_id must match Team game_id.');
+        }
+
+        // Game model teams relationship
+        $this->assertCount(Team::where('game_id', $game1->id)->count(), $game1->teams);
+        $this->assertCount(Team::where('game_id', $game2->id)->count(), $game2->teams);
+    }
 }

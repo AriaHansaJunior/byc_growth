@@ -29,8 +29,8 @@ export function initGuessMe() {
     const roundDotsContainer = document.getElementById('round-dots-container');
     const hostTeamsContainer = document.getElementById('host-teams-container');
 
-    // Initialize Universal Team Configuration Modal
-    initTeamConfigModal(teams || []);
+    // Initialize Universal Team Configuration Modal for Game 1
+    initTeamConfigModal(teams || [], 'game1');
 
     // Initialize Universal Round Point Assignment (Exclusive Radio Selection & Transfer)
     setupRoundPointAssignment({

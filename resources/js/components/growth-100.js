@@ -30,8 +30,8 @@ export function initGrowth100() {
     const crossOverlayContent = document.getElementById('cross-overlay-content');
     const growthTeamsContainer = document.getElementById('growth-teams-award-container');
 
-    // Initialize Universal Team Configuration Modal
-    initTeamConfigModal(teams || []);
+    // Initialize Universal Team Configuration Modal for Game 2
+    initTeamConfigModal(teams || [], 'game2');
 
     // Initialize Universal Round Point Assignment (Exclusive Radio Selection & Transfer)
     setupRoundPointAssignment({

@@ -59,31 +59,59 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Teams
-        $teamRed = Team::updateOrCreate(
-            ['code' => 'red'],
+        // 3. Teams (Isolated per Game)
+        $g1TeamRed = Team::updateOrCreate(
+            ['game_id' => $game1->id, 'code' => 'red'],
             [
                 'name' => 'Red Team',
                 'color' => '#bd4c42',
+                'sort_order' => 0,
+                'is_active' => true,
             ]
         );
 
-        $teamBlue = Team::updateOrCreate(
-            ['code' => 'blue'],
+        $g1TeamBlue = Team::updateOrCreate(
+            ['game_id' => $game1->id, 'code' => 'blue'],
             [
                 'name' => 'Blue Team',
                 'color' => '#315e89',
+                'sort_order' => 1,
+                'is_active' => true,
+            ]
+        );
+
+        $g2TeamRed = Team::updateOrCreate(
+            ['game_id' => $game2->id, 'code' => 'red'],
+            [
+                'name' => 'Red Team',
+                'color' => '#bd4c42',
+                'sort_order' => 0,
+                'is_active' => true,
+            ]
+        );
+
+        $g2TeamBlue = Team::updateOrCreate(
+            ['game_id' => $game2->id, 'code' => 'blue'],
+            [
+                'name' => 'Blue Team',
+                'color' => '#315e89',
+                'sort_order' => 1,
+                'is_active' => true,
             ]
         );
 
         // 4. Initial Game Scores (Default 0 or from existing state)
-        foreach ([$game1, $game2] as $g) {
-            foreach ([$teamRed, $teamBlue] as $t) {
-                GameScore::firstOrCreate(
-                    ['game_id' => $g->id, 'team_id' => $t->id],
-                    ['score' => 0]
-                );
-            }
+        foreach ([$g1TeamRed, $g1TeamBlue] as $t) {
+            GameScore::firstOrCreate(
+                ['game_id' => $game1->id, 'team_id' => $t->id],
+                ['score' => 0]
+            );
+        }
+        foreach ([$g2TeamRed, $g2TeamBlue] as $t) {
+            GameScore::firstOrCreate(
+                ['game_id' => $game2->id, 'team_id' => $t->id],
+                ['score' => 0]
+            );
         }
 
         // 5. Initial Game States
@@ -131,13 +159,13 @@ class DatabaseSeeder extends Seeder
         }
 
         // 7. Migrate Existing JSON Data
-        $this->migrateExistingJsonData($game1, $game2, $teamRed, $teamBlue, $mediaMap);
+        $this->migrateExistingJsonData($game1, $game2, $g1TeamRed, $g1TeamBlue, $g2TeamRed, $g2TeamBlue, $mediaMap);
     }
 
     /**
      * Migrate existing JSON files if they contain data
      */
-    protected function migrateExistingJsonData(Game $game1, Game $game2, Team $teamRed, Team $teamBlue, array $mediaMap): void
+    protected function migrateExistingJsonData(Game $game1, Game $game2, Team $g1TeamRed, Team $g1TeamBlue, Team $g2TeamRed, Team $g2TeamBlue, array $mediaMap): void
     {
         $storageDir = storage_path('app/game');
 
@@ -211,11 +239,11 @@ class DatabaseSeeder extends Seeder
                 // Game 1 scores
                 if (isset($stateData['game1']['scores'])) {
                     GameScore::updateOrCreate(
-                        ['game_id' => $game1->id, 'team_id' => $teamRed->id],
+                        ['game_id' => $game1->id, 'team_id' => $g1TeamRed->id],
                         ['score' => (int) ($stateData['game1']['scores']['red'] ?? 0)]
                     );
                     GameScore::updateOrCreate(
-                        ['game_id' => $game1->id, 'team_id' => $teamBlue->id],
+                        ['game_id' => $game1->id, 'team_id' => $g1TeamBlue->id],
                         ['score' => (int) ($stateData['game1']['scores']['blue'] ?? 0)]
                     );
                 }
@@ -223,11 +251,11 @@ class DatabaseSeeder extends Seeder
                 // Game 2 scores
                 if (isset($stateData['game2']['scores'])) {
                     GameScore::updateOrCreate(
-                        ['game_id' => $game2->id, 'team_id' => $teamRed->id],
+                        ['game_id' => $game2->id, 'team_id' => $g2TeamRed->id],
                         ['score' => (int) ($stateData['game2']['scores']['red'] ?? 0)]
                     );
                     GameScore::updateOrCreate(
-                        ['game_id' => $game2->id, 'team_id' => $teamBlue->id],
+                        ['game_id' => $game2->id, 'team_id' => $g2TeamBlue->id],
                         ['score' => (int) ($stateData['game2']['scores']['blue'] ?? 0)]
                     );
                 }

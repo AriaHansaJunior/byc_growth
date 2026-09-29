@@ -127,13 +127,15 @@ class GameController extends Controller
     public function configureTeams(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'game' => 'nullable|string|in:game1,game2',
             'teams' => 'required|array|min:2',
             'teams.*.id' => 'nullable|integer',
             'teams.*.name' => 'required|string|max:100',
-            'teams.*.color' => 'nullable|string|max:20',
+            'teams.*.color' => 'nullable|string|max:50',
         ]);
 
-        $result = $this->storageService->configureTeams($validated['teams']);
+        $gameCode = $validated['game'] ?? 'game1';
+        $result = $this->storageService->configureTeams($gameCode, $validated['teams']);
 
         if (!$result['success']) {
             return response()->json($result, 422);

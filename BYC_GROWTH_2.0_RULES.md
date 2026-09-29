@@ -117,3 +117,16 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **No Speculative Features**: Do not anticipate, pre-code, or inject speculative features for future phases.
 - **Preserve Completed Work**: Do not redesign, rewrite, or break completed, working features without an explicit user requirement.
 - **Zero Unrelated Refactoring**: Do not touch unrelated files, rename existing working routes, or restructure working logic outside the current session scope.
+
+---
+
+## 11. Universal Game & Team Relational Architecture
+- **Per-Game Team Isolation**: Dynamic team configurations belong strictly to an individual game context (`games` ↓ `teams` ↓ `game_scores`).
+  - Guess Me! (`game1`) team configuration must never alter BYC GROWTH 100 (`game2`) team configuration, and vice-versa.
+  - The `teams` table has a direct foreign key `game_id` referencing `games.id`.
+- **Relational Integrity for Points & Scores**:
+  - `game_rounds.awarded_team_id` must strictly reference a team belonging to the same game (`team.game_id === round.game_id`).
+  - Cross-game point assignment is rejected at the service and controller layer with HTTP 422.
+  - Team scores in `game_scores` belong to a specific `game_id` and `team_id` pair.
+- **Dynamic Team Sizing**: Both games support 2, 3, 4, or more teams dynamically with persistent names, assigned colors/themes, and stable identities.
+

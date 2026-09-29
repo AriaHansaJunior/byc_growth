@@ -44,10 +44,11 @@ class GameStorageService
     /**
      * Get or create Team model by code.
      */
-    public function getTeam(string $code): Team
+    public function getTeam(string $code, ?string $gameCode = 'game1'): Team
     {
+        $game = $this->getGame($gameCode ?: 'game1');
         return Team::firstOrCreate(
-            ['code' => $code],
+            ['game_id' => $game->id, 'code' => $code],
             [
                 'name' => ucfirst($code) . ' Team',
                 'color' => $code === 'red' ? '#bd4c42' : ($code === 'blue' ? '#315e89' : '#284e3b'),
@@ -58,76 +59,98 @@ class GameStorageService
     }
 
     /**
-     * Get all active teams ordered by sort_order.
+     * Get active teams for a specific game or across games.
      */
-    public function getActiveTeams()
+    public function getActiveTeams(?string $gameCode = 'game1')
     {
-        // Ensure at least Red and Blue exist as initial default teams
-        if (Team::where('is_active', true)->count() < 2) {
-            $this->getTeam('red');
-            $this->getTeam('blue');
+        if ($gameCode !== null) {
+            $game = $this->getGame($gameCode);
+
+            // Ensure at least 2 default teams exist for this specific game
+            if (Team::where('game_id', $game->id)->where('is_active', true)->count() < 2) {
+                $this->getTeam('red', $gameCode);
+                $this->getTeam('blue', $gameCode);
+            }
+
+            return Team::where('game_id', $game->id)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
         }
 
         return Team::where('is_active', true)
+            ->orderBy('game_id')
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
     }
 
     /**
-     * Get dynamic teams along with their scores in each game and total score.
+     * Get dynamic teams with scores for a specific game or combined across games.
      */
     public function getTeamsWithScores(?string $gameCode = null): array
     {
-        $game1 = $this->getGame('game1');
-        $game2 = $this->getGame('game2');
-        $teams = $this->getActiveTeams();
-
         $palette = Team::COLOR_PALETTE;
-        $result = [];
 
-        foreach ($teams as $idx => $team) {
-            $g1Score = GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $team->id], ['score' => 0]);
-            $g2Score = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $team->id], ['score' => 0]);
+        if ($gameCode !== null) {
+            $game = $this->getGame($gameCode);
+            $teams = $this->getActiveTeams($gameCode);
+            $result = [];
 
-            $theme = $team->code;
-            if (!in_array($theme, ['red', 'blue', 'forest', 'gold', 'purple', 'teal'])) {
-                $paletteItem = $palette[$idx % count($palette)];
-                $theme = $paletteItem['theme'] ?? 'forest';
+            foreach ($teams as $idx => $team) {
+                $score = GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $team->id], ['score' => 0]);
+                $theme = $team->color ?: ($palette[$idx % count($palette)]['theme'] ?? 'forest');
+
+                $result[] = [
+                    'id' => (int) $team->id,
+                    'game_id' => (int) $team->game_id,
+                    'code' => $team->code,
+                    'name' => $team->name,
+                    'color' => $team->color ?: ($palette[$idx % count($palette)]['color'] ?? '#284e3b'),
+                    'theme' => $theme,
+                    'sort_order' => (int) $team->sort_order,
+                    'scores' => [
+                        $gameCode => (int) $score->score,
+                        'game1' => $gameCode === 'game1' ? (int) $score->score : 0,
+                        'game2' => $gameCode === 'game2' ? (int) $score->score : 0,
+                    ],
+                    'score' => (int) $score->score,
+                    'total_score' => (int) $score->score,
+                ];
             }
 
-            $result[] = [
-                'id' => (int) $team->id,
-                'code' => $team->code,
-                'name' => $team->name,
-                'color' => $team->color ?: ($palette[$idx % count($palette)]['color'] ?? '#284e3b'),
-                'theme' => $theme,
-                'sort_order' => (int) $team->sort_order,
-                'scores' => [
-                    'game1' => (int) $g1Score->score,
-                    'game2' => (int) $g2Score->score,
-                ],
-                'score' => $gameCode ? (int) ($gameCode === 'game1' ? $g1Score->score : $g2Score->score) : ((int) $g1Score->score + (int) $g2Score->score),
-                'total_score' => (int) $g1Score->score + (int) $g2Score->score,
-            ];
+            return $result;
         }
 
-        return $result;
+        // Combined for both games
+        $g1Teams = $this->getTeamsWithScores('game1');
+        $g2Teams = $this->getTeamsWithScores('game2');
+
+        return array_merge($g1Teams, $g2Teams);
     }
 
     /**
      * Configure dynamic teams (2, 3, 4, or more teams) with persistence in MySQL.
      */
-    public function configureTeams(array $teamsData): array
+    public function configureTeams(string|array $gameOrTeamsData, ?array $teamsData = null): array
     {
-        if (count($teamsData) < 2) {
+        if (is_array($gameOrTeamsData)) {
+            $gameCode = 'game1';
+            $teams = $gameOrTeamsData;
+        } else {
+            $gameCode = $gameOrTeamsData;
+            $teams = $teamsData ?? [];
+        }
+
+        if (count($teams) < 2) {
             return ['success' => false, 'error' => 'A minimum of 2 teams is required for gameplay.'];
         }
 
         $palette = Team::COLOR_PALETTE;
         $seenNames = [];
 
-        foreach ($teamsData as $idx => $t) {
+        foreach ($teams as $idx => $t) {
             $name = trim($t['name'] ?? '');
             if ($name === '') {
                 return ['success' => false, 'error' => "Team " . ($idx + 1) . " name cannot be empty."];
@@ -139,24 +162,23 @@ class GameStorageService
             $seenNames[] = $lower;
         }
 
-        $game1 = $this->getGame('game1');
-        $game2 = $this->getGame('game2');
+        $game = $this->getGame($gameCode);
 
-        return DB::transaction(function () use ($teamsData, $palette, $game1, $game2) {
+        return DB::transaction(function () use ($teams, $palette, $game, $gameCode) {
             $processedIds = [];
-            $existingTeams = Team::orderBy('sort_order')->orderBy('id')->get();
+            $existingTeams = Team::where('game_id', $game->id)->orderBy('sort_order')->orderBy('id')->get();
 
-            foreach ($teamsData as $idx => $t) {
+            foreach ($teams as $idx => $t) {
                 $id = isset($t['id']) && $t['id'] !== '' ? (int) $t['id'] : null;
                 $name = trim($t['name']);
                 $paletteItem = $palette[$idx % count($palette)];
                 $color = !empty($t['color']) ? $t['color'] : $paletteItem['color'];
                 $defaultCode = $paletteItem['code'];
 
-                // 1. If explicit ID provided and exists
-                $team = $id ? Team::find($id) : null;
+                // 1. If explicit ID provided and belongs to this game
+                $team = $id ? Team::where('game_id', $game->id)->find($id) : null;
 
-                // 2. Otherwise reuse existing team at this sort position to preserve stable identity
+                // 2. Otherwise reuse existing team of this game at this sort position to preserve stable identity
                 if (!$team && isset($existingTeams[$idx])) {
                     $team = $existingTeams[$idx];
                 }
@@ -171,11 +193,12 @@ class GameStorageService
                     $processedIds[] = $team->id;
                 } else {
                     $code = $defaultCode;
-                    if (Team::where('code', $code)->exists()) {
+                    if (Team::where('game_id', $game->id)->where('code', $code)->exists()) {
                         $code = 'team_' . ($idx + 1) . '_' . uniqid();
                     }
 
                     $newTeam = Team::create([
+                        'game_id' => $game->id,
                         'code' => $code,
                         'name' => $name,
                         'color' => $color,
@@ -183,20 +206,19 @@ class GameStorageService
                         'is_active' => true,
                     ]);
 
-                    GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $newTeam->id], ['score' => 0]);
-                    GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $newTeam->id], ['score' => 0]);
+                    GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $newTeam->id], ['score' => 0]);
 
                     $processedIds[] = $newTeam->id;
                 }
             }
 
-            // Deactivate any teams not in processedIds
-            Team::whereNotIn('id', $processedIds)->update(['is_active' => false]);
+            // Deactivate only teams belonging to this specific game not in processedIds
+            Team::where('game_id', $game->id)->whereNotIn('id', $processedIds)->update(['is_active' => false]);
 
             return [
                 'success' => true,
                 'message' => 'Teams configured successfully.',
-                'teams' => $this->getTeamsWithScores(),
+                'teams' => $this->getTeamsWithScores($gameCode),
                 'final_scores' => $this->getFinalScores(),
             ];
         });
@@ -209,7 +231,9 @@ class GameStorageService
     {
         $game1 = $this->getGame('game1');
         $game2 = $this->getGame('game2');
-        $teams = $this->getTeamsWithScores();
+
+        $g1Teams = $this->getTeamsWithScores('game1');
+        $g2Teams = $this->getTeamsWithScores('game2');
 
         $g1State = GameState::firstOrCreate(
             ['game_id' => $game1->id],
@@ -222,29 +246,36 @@ class GameStorageService
         );
 
         $g1Scores = [];
-        $g2Scores = [];
-        foreach ($teams as $t) {
-            $g1Scores[$t['code']] = $t['scores']['game1'];
-            $g2Scores[$t['code']] = $t['scores']['game2'];
-            $g1Scores[(string) $t['id']] = $t['scores']['game1'];
-            $g2Scores[(string) $t['id']] = $t['scores']['game2'];
+        foreach ($g1Teams as $t) {
+            $g1Scores[$t['code']] = $t['score'];
+            $g1Scores[(string) $t['id']] = $t['score'];
         }
-
-        // Backward compatibility fallbacks
+        if (!isset($g1Scores['red']) && isset($g1Teams[0])) $g1Scores['red'] = $g1Teams[0]['score'];
+        if (!isset($g1Scores['blue']) && isset($g1Teams[1])) $g1Scores['blue'] = $g1Teams[1]['score'];
         if (!isset($g1Scores['red'])) $g1Scores['red'] = 0;
         if (!isset($g1Scores['blue'])) $g1Scores['blue'] = 0;
+
+        $g2Scores = [];
+        foreach ($g2Teams as $t) {
+            $g2Scores[$t['code']] = $t['score'];
+            $g2Scores[(string) $t['id']] = $t['score'];
+        }
+        if (!isset($g2Scores['red']) && isset($g2Teams[0])) $g2Scores['red'] = $g2Teams[0]['score'];
+        if (!isset($g2Scores['blue']) && isset($g2Teams[1])) $g2Scores['blue'] = $g2Teams[1]['score'];
         if (!isset($g2Scores['red'])) $g2Scores['red'] = 0;
         if (!isset($g2Scores['blue'])) $g2Scores['blue'] = 0;
 
         return [
-            'teams' => $teams,
+            'teams' => array_merge($g1Teams, $g2Teams),
             'game1' => [
                 'scores' => $g1Scores,
+                'teams' => $g1Teams,
                 'current_round' => (int) $g1State->current_round_index,
                 'revealed' => (array) ($g1State->state_data['revealed'] ?? []),
             ],
             'game2' => [
                 'scores' => $g2Scores,
+                'teams' => $g2Teams,
                 'current_round' => (int) $g2State->current_round_index,
                 'crosses' => (array) ($g2State->state_data['crosses'] ?? []),
                 'revealed' => (array) ($g2State->state_data['revealed'] ?? []),
@@ -318,31 +349,32 @@ class GameStorageService
      */
     public function getFinalScores(): array
     {
-        $teams = $this->getTeamsWithScores();
+        $g1Teams = $this->getTeamsWithScores('game1');
+        $g2Teams = $this->getTeamsWithScores('game2');
 
-        $totalRed = 0;
-        $totalBlue = 0;
-        $g1Red = 0;
-        $g1Blue = 0;
-        $g2Red = 0;
-        $g2Blue = 0;
+        $g1Red = 0; $g1Blue = 0;
+        $g2Red = 0; $g2Blue = 0;
 
-        foreach ($teams as $idx => $t) {
+        foreach ($g1Teams as $idx => $t) {
             if ($t['code'] === 'red' || $idx === 0) {
-                if ($totalRed === 0 && $g1Red === 0 && $g2Red === 0) {
-                    $totalRed = $t['total_score'];
-                    $g1Red = $t['scores']['game1'];
-                    $g2Red = $t['scores']['game2'];
-                }
+                if ($g1Red === 0) $g1Red = $t['score'];
             }
             if ($t['code'] === 'blue' || $idx === 1) {
-                if ($totalBlue === 0 && $g1Blue === 0 && $g2Blue === 0) {
-                    $totalBlue = $t['total_score'];
-                    $g1Blue = $t['scores']['game1'];
-                    $g2Blue = $t['scores']['game2'];
-                }
+                if ($g1Blue === 0) $g1Blue = $t['score'];
             }
         }
+
+        foreach ($g2Teams as $idx => $t) {
+            if ($t['code'] === 'red' || $idx === 0) {
+                if ($g2Red === 0) $g2Red = $t['score'];
+            }
+            if ($t['code'] === 'blue' || $idx === 1) {
+                if ($g2Blue === 0) $g2Blue = $t['score'];
+            }
+        }
+
+        $totalRed = $g1Red + $g2Red;
+        $totalBlue = $g1Blue + $g2Blue;
 
         return [
             'final_red' => $totalRed,
@@ -350,12 +382,18 @@ class GameStorageService
             'game1' => [
                 'red' => $g1Red,
                 'blue' => $g1Blue,
+                'teams' => $g1Teams,
             ],
             'game2' => [
                 'red' => $g2Red,
                 'blue' => $g2Blue,
+                'teams' => $g2Teams,
             ],
-            'teams' => $teams,
+            'teams' => array_merge($g1Teams, $g2Teams),
+            'teams_by_game' => [
+                'game1' => $g1Teams,
+                'game2' => $g2Teams,
+            ],
         ];
     }
 
@@ -645,25 +683,25 @@ class GameStorageService
 
         $game = $this->getGame($gameCode);
 
-        // Find team by ID or by code
+        // Find team by ID or by code strictly within this game
         if (is_numeric($teamIdentifier)) {
-            $team = Team::find((int) $teamIdentifier);
+            $team = Team::where('game_id', $game->id)->find((int) $teamIdentifier);
         } else {
-            $team = Team::where('is_active', true)->where('code', $teamIdentifier)->first();
+            $team = Team::where('game_id', $game->id)->where('is_active', true)->where('code', $teamIdentifier)->first();
             if (!$team) {
                 if ($teamIdentifier === 'red') {
-                    $team = Team::where('is_active', true)->orderBy('sort_order')->first();
+                    $team = Team::where('game_id', $game->id)->where('is_active', true)->orderBy('sort_order')->first();
                 } elseif ($teamIdentifier === 'blue') {
-                    $team = Team::where('is_active', true)->orderBy('sort_order')->skip(1)->first();
+                    $team = Team::where('game_id', $game->id)->where('is_active', true)->orderBy('sort_order')->skip(1)->first();
                 }
             }
             if (!$team) {
-                $team = Team::where('code', $teamIdentifier)->first();
+                $team = Team::where('game_id', $game->id)->where('code', $teamIdentifier)->first();
             }
         }
 
         if (!$team) {
-            return ['success' => false, 'error' => "Team '{$teamIdentifier}' not found."];
+            return ['success' => false, 'error' => "Team '{$teamIdentifier}' not found for game '{$gameCode}'."];
         }
 
         $gameScore = GameScore::firstOrCreate(
@@ -687,7 +725,7 @@ class GameStorageService
             'team_code' => $team->code,
             'new_score' => $newScore,
             'scores' => $state[$gameCode]['scores'],
-            'teams' => $this->getTeamsWithScores(),
+            'teams' => $this->getTeamsWithScores($gameCode),
             'final_scores' => $this->getFinalScores(),
         ];
     }
@@ -713,6 +751,9 @@ class GameStorageService
             $team = Team::where('is_active', true)->find($teamId);
             if (!$team) {
                 return ['success' => false, 'error' => 'Target team not found or inactive.'];
+            }
+            if ((int) $team->game_id !== (int) $round->game_id) {
+                return ['success' => false, 'error' => 'A round cannot award points to a team belonging to another game.'];
             }
         }
 

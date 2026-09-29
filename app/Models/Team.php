@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
@@ -11,6 +12,7 @@ class Team extends Model
     use HasFactory;
 
     protected $fillable = [
+        'game_id',
         'code',
         'name',
         'color',
@@ -21,7 +23,16 @@ class Team extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'game_id' => 'integer',
     ];
+
+    /**
+     * Get the game this team belongs to.
+     */
+    public function game(): BelongsTo
+    {
+        return $this->belongsTo(Game::class);
+    }
 
     /**
      * Default earth-tone color themes for dynamic teams

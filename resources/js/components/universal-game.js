@@ -226,7 +226,7 @@ export function updateTeamCardsVisualState(container, awardedTeamId, points = 0)
 /**
  * Initialize Team Configuration Modal
  */
-export function initTeamConfigModal(initialTeams = []) {
+export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
     const modal = document.getElementById('modal-team-config');
     const openBtn = document.getElementById('btn-open-teams-modal');
     const closeBtn = document.getElementById('btn-close-team-config');
@@ -385,7 +385,9 @@ export function initTeamConfigModal(initialTeams = []) {
                 }
 
                 const res = await postJson('/game/teams/configure', {
+                    game: gameCode,
                     teams: workingTeams.map((t) => ({
+                        id: t.id || null,
                         name: t.name.trim(),
                         color: t.color,
                     })),

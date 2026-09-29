@@ -45,4 +45,12 @@ class Game extends Model
     {
         return $this->hasMany(GameScore::class);
     }
+
+    /**
+     * Get the teams configured for this game.
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class)->orderBy('sort_order');
+    }
 }
