@@ -28,19 +28,27 @@ Route::get('/growth-100', [GameController::class, 'growth100'])->name('game.grow
 Route::get('/final', [GameController::class, 'finalScore'])->name('game.final');
 Route::get('/game/image/{filename}', [GameController::class, 'getImage'])->name('game.image');
 
-// Game State & CRUD Endpoints (Preserved)
+// Public Gameplay State Navigation
 Route::prefix('game')->name('game.')->group(function () {
+    Route::post('/guess-me/state', [GameController::class, 'updateGame1State'])->name('guess-me.state');
+    Route::post('/growth-100/state', [GameController::class, 'updateGame2State'])->name('growth-100.state');
+});
+
+// Protected Game Management Endpoints (Requires Auth & Admin Role)
+Route::middleware(['auth', 'admin'])->prefix('game')->name('game.')->group(function () {
     Route::post('/update-score', [GameController::class, 'updateScore'])->name('update-score');
+    Route::post('/assign-round-points', [GameController::class, 'assignRoundPoints'])->name('assign-round-points');
+    Route::post('/teams/configure', [GameController::class, 'configureTeams'])->name('teams.configure');
     Route::post('/reset', [GameController::class, 'resetGame'])->name('reset');
 
-    // Game 1 — Guess Me!
-    Route::post('/guess-me/state', [GameController::class, 'updateGame1State'])->name('guess-me.state');
+    // Game 1 — Guess Me! Management
     Route::post('/guess-me/round', [GameController::class, 'saveGuessMeRound'])->name('guess-me.save-round');
+    Route::post('/guess-me/batch', [GameController::class, 'saveGuessMeBatchRounds'])->name('guess-me.batch');
     Route::delete('/guess-me/round/{id}', [GameController::class, 'deleteGuessMeRound'])->name('guess-me.delete-round');
 
-    // Game 2 — BYC Growth 100
-    Route::post('/growth-100/state', [GameController::class, 'updateGame2State'])->name('growth-100.state');
+    // Game 2 — BYC Growth 100 Management
     Route::post('/growth-100/round', [GameController::class, 'saveGrowth100Round'])->name('growth-100.save-round');
+    Route::post('/growth-100/batch', [GameController::class, 'saveGrowth100BatchRounds'])->name('growth-100.batch');
     Route::delete('/growth-100/round/{id}', [GameController::class, 'deleteGrowth100Round'])->name('growth-100.delete-round');
 });
 

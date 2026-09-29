@@ -2,17 +2,31 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use App\Services\GameStorageService;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class GameTest extends TestCase
 {
     protected GameStorageService $storage;
+    protected User $adminUser;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->storage = app(GameStorageService::class);
+
+        $this->adminUser = User::firstOrCreate(
+            ['email' => 'admin_byc@gmail.com'],
+            [
+                'name' => 'Admin BYC',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+            ]
+        );
+
+        $this->actingAs($this->adminUser);
     }
 
     /**

@@ -11,8 +11,6 @@
     $roundId = (string) ($currentRound['id'] ?? 1);
     $revealedIndexes = $game2State['revealed'][$roundId] ?? [];
     $currentCrosses = (int) ($game2State['crosses'][$roundId] ?? 0);
-    $redScore = (int) ($game2State['scores']['red'] ?? 0);
-    $blueScore = (int) ($game2State['scores']['blue'] ?? 0);
 
     // Calculate sum of revealed answer points
     $roundRevealedPoints = 0;
@@ -31,7 +29,7 @@
         <a href="{{ route('game.center') }}" class="brand-button" aria-label="Back to Game Center" title="Back to Game Center">
             <x-brand compact="true" />
         </a>
-        <x-score-pair :scores="['red' => $redScore, 'blue' => $blueScore]" :compact="true" />
+        <x-score-pair :teams="$teams" :compact="true" game="game2" />
         <div class="live-pill">
             <span /> Game session
         </div>
@@ -45,14 +43,14 @@
                 <h1>BYC Growth <em>100</em></h1>
             </div>
             <div class="round-total">
-                <span>Total poin ronde</span>
+                <span>Round Points Total</span>
                 <strong>
                     <span id="round-revealed-points">{{ $roundRevealedPoints }}</span>
                     <small>/100</small>
                 </strong>
             </div>
             <div class="round-counter">
-                <span>Ronde</span>
+                <span>Round</span>
                 <strong id="round-indicator">
                     {{ str_pad($currentRoundIndex + 1, 2, '0', STR_PAD_LEFT) }}
                     <em>/ {{ str_pad(count($rounds), 2, '0', STR_PAD_LEFT) }}</em>
@@ -60,14 +58,10 @@
             </div>
         </div>
 
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-            <x-score-pair :scores="['red' => $redScore, 'blue' => $blueScore]" :compact="true" />
-        </div>
-
         @if ($currentRound)
             {{-- Survey Question --}}
             <section class="survey-question">
-                <span>Survei BYC berkata:</span>
+                <span>BYC Survey Says:</span>
                 <h2 id="survey-question-text">{{ $currentRound['question'] }}</h2>
             </section>
 
@@ -79,7 +73,7 @@
                     @endphp
                     <button type="button" class="answer-tile {{ $isOpen ? 'open' : '' }}" data-answer-index="{{ $idx }}">
                         <strong>{{ $idx + 1 }}</strong>
-                        <span class="answer-text-label">{{ $isOpen ? $answer['text'] : 'Klik untuk buka' }}</span>
+                        <span class="answer-text-label">{{ $isOpen ? $answer['text'] : 'Click to reveal' }}</span>
                         <em>{{ $isOpen ? $answer['score'] : '?' }}</em>
                     </button>
                 @endforeach
@@ -88,7 +82,7 @@
             {{-- Controls --}}
             <div class="growth-controls">
                 <div class="cross-control">
-                    <span>Kesempatan salah</span>
+                    <span>Strikes:</span>
                     @for ($i = 1; $i <= 3; $i++)
                         <button type="button" class="btn-cross {{ $currentCrosses >= $i ? 'active' : '' }}" data-cross="{{ $i }}">
                             ×{{ $i }}
@@ -97,11 +91,16 @@
                     <button type="button" class="btn-cross-reset" id="btn-reset-crosses">Reset</button>
                 </div>
                 <div class="reveal-control">
-                    <button type="button" class="button button-secondary" id="btn-reveal-all">Buka semua</button>
-                    <button type="button" class="button button-ghost" id="btn-hide-all">Tutup kembali</button>
-                    <button type="button" class="button button-ghost" id="btn-open-editor">
-                        <x-icon name="edit" /> Edit soal
-                    </button>
+                    <button type="button" class="button button-secondary" id="btn-reveal-all">Reveal All</button>
+                    <button type="button" class="button button-ghost" id="btn-hide-all">Hide All</button>
+                    @if(Auth::check() && Auth::user()->isAdmin())
+                        <button type="button" class="button button-ghost" id="btn-open-teams-modal">
+                            <x-icon name="user" /> Configure Teams
+                        </button>
+                        <button type="button" class="button button-ghost" id="btn-open-editor">
+                            <x-icon name="edit" /> Edit Questions
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -112,25 +111,43 @@
                 </span>
             </div>
 
-            {{-- Quick Score & Navigation Footer --}}
+            {{-- Dynamic Team Award & Navigation Footer --}}
             <div class="growth-footer">
-                <div class="quick-score">
-                    <span>Tambah skor ronde:</span>
-                    <button type="button" class="button button-danger" id="btn-add-total-red" {{ $roundRevealedPoints === 0 ? 'disabled' : '' }}>
-                        Tim Red +<span class="current-total-label">{{ $roundRevealedPoints }}</span>
-                    </button>
-                    <button type="button" class="button button-primary" id="btn-add-total-blue" {{ $roundRevealedPoints === 0 ? 'disabled' : '' }}>
-                        Tim Blue +<span class="current-total-label">{{ $roundRevealedPoints }}</span>
-                    </button>
-                    <div style="margin-left: 10px; display: inline-flex; gap: 4px;">
-                        <button type="button" class="button button-ghost btn-score-action" data-team="red" data-amount="5" title="Tambah 5 ke Red">+5 Red</button>
-                        <button type="button" class="button button-ghost btn-score-action" data-team="blue" data-amount="5" title="Tambah 5 ke Blue">+5 Blue</button>
+                <div class="growth-teams-award-area" id="growth-teams-award-container">
+                    <span class="award-section-title">Award Round Points (<span class="current-total-label">{{ $roundRevealedPoints }}</span> pts):</span>
+                    <div class="growth-teams-grid">
+                        @foreach ($teams as $team)
+                            @php
+                                $isAwarded = ($currentRound && ($currentRound['awarded_team_id'] ?? null) == $team['id']);
+                                $hasOtherAwarded = ($currentRound && ($currentRound['awarded_team_id'] ?? null) && ($currentRound['awarded_team_id'] ?? null) != $team['id']);
+                            @endphp
+                            <div class="growth-team-card host-team-{{ $team['theme'] }} {{ $isAwarded ? 'is-selected' : '' }} {{ $hasOtherAwarded ? 'is-dimmed' : '' }}"
+                                 data-team-id="{{ $team['id'] }}"
+                                 id="growth-team-card-{{ $team['id'] }}">
+                                <div class="growth-team-info">
+                                    <span class="team-dot" style="background: {{ $team['color'] }};"></span>
+                                    <strong class="growth-team-name">{{ $team['name'] }}</strong>
+                                    <span class="growth-team-score" id="growth-team-score-{{ $team['id'] }}">{{ $team['scores']['game2'] ?? 0 }}</span>
+                                </div>
+                                @if(Auth::check() && Auth::user()->isAdmin())
+                                    <div class="growth-team-actions">
+                                        <button type="button" class="button button-ghost btn-score-action" data-team="{{ $team['id'] }}" data-amount="5" title="Add 5 points">+5</button>
+                                        <button type="button" class="button button-ghost btn-score-action" data-team="{{ $team['id'] }}" data-amount="-5" title="Deduct 5 points">−5</button>
+                                        <button type="button" class="button {{ $isAwarded ? 'button-primary' : 'button-secondary' }} btn-award-round"
+                                                data-team="{{ $team['id'] }}"
+                                                id="btn-award-growth-{{ $team['id'] }}">
+                                            {{ $isAwarded ? 'Points Awarded' : 'Award Round' }}
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
                 <div class="round-nav">
                     <button type="button" class="button button-secondary" id="btn-prev-round" {{ $currentRoundIndex === 0 ? 'disabled' : '' }}>
-                        ← Sebelumnya
+                        ← Previous
                     </button>
                     <div class="round-dots" id="round-dots-container">
                         @foreach ($rounds as $idx => $r)
@@ -138,14 +155,16 @@
                         @endforeach
                     </div>
                     <button type="button" class="button button-primary" id="btn-next-round" {{ $currentRoundIndex >= count($rounds) - 1 ? 'disabled' : '' }}>
-                        Berikutnya →
+                        Next →
                     </button>
                 </div>
             </div>
         @else
             <div style="padding: 40px; text-align: center; background: #14223a; border-radius: 20px;">
-                <p>Belum ada soal survei yang tersedia.</p>
-                <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Tambah Soal Survei</button>
+                <p>No survey questions available.</p>
+                @if(Auth::check() && Auth::user()->isAdmin())
+                    <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Add Survey Question</button>
+                @endif
             </div>
         @endif
     </main>
@@ -154,11 +173,16 @@
 {{-- CRUD Editor Modal --}}
 @include('partials.growth-100-editor')
 
+{{-- Team Configuration Modal --}}
+@include('partials.team-config-modal')
+
 <script>
     window.BYC_GAME2 = {
         rounds: @json($rounds),
         state: @json($game2State),
-        currentIndex: {{ $currentRoundIndex }}
+        teams: @json($teams),
+        currentIndex: {{ $currentRoundIndex }},
+        isAdmin: {{ Auth::check() && Auth::user()->isAdmin() ? 'true' : 'false' }}
     };
 </script>
 @endsection

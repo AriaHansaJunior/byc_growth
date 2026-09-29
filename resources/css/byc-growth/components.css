@@ -172,16 +172,19 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .team-score {
-  min-width: 142px;
-  padding: 12px 16px;
+  min-width: 120px;
+  padding: 10px 14px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 28px;
+  gap: 16px;
+  border: 1px solid transparent;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
 .team-score span {
@@ -190,17 +193,44 @@
 }
 
 .team-score strong {
-  font: 800 25px "Manrope", sans-serif;
+  font: 800 24px "Manrope", sans-serif;
 }
 
-.team-red {
+/* Universal Dynamic Team Color Badges (Earth Tone Palette) */
+.score-badge-red, .team-red, .host-team-red {
   background: var(--red-soft);
   color: #87352f;
+  border-color: #e5c4ba;
 }
 
-.team-blue {
+.score-badge-blue, .team-blue, .host-team-blue {
   background: var(--blue-soft);
   color: #244d73;
+  border-color: #bfd5e6;
+}
+
+.score-badge-forest, .team-forest, .host-team-forest {
+  background: #e3eddf;
+  color: #1b3b2b;
+  border-color: #c4dcc0;
+}
+
+.score-badge-gold, .team-gold, .host-team-gold {
+  background: #f8edd2;
+  color: #7a5710;
+  border-color: #edd9a6;
+}
+
+.score-badge-purple, .team-purple, .host-team-purple {
+  background: #ede6f2;
+  color: #4a2f5e;
+  border-color: #d6c6e2;
+}
+
+.score-badge-teal, .team-teal, .host-team-teal {
+  background: #dbefef;
+  color: #174747;
+  border-color: #badede;
 }
 
 .score-divider {
@@ -209,12 +239,63 @@
 }
 
 .score-pair-compact .team-score {
-  min-width: 125px;
-  padding: 8px 12px;
+  min-width: 110px;
+  padding: 6px 10px;
 }
 
 .score-pair-compact .team-score strong {
-  font-size: 21px;
+  font-size: 20px;
+}
+
+/* Score Animation Feedback */
+.floating-score-indicator {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--forest);
+  animation: floatScoreUp 0.95s cubic-bezier(0.18, 0.89, 0.32, 1.1) forwards;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes floatScoreUp {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.15);
+  }
+  75% {
+    opacity: 0.9;
+    transform: translateY(-26px) scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.9);
+  }
+}
+
+.score-pulse {
+  animation: scorePulseAnim 0.5s ease-out;
+}
+
+@keyframes scorePulseAnim {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.08);
+  }
+  70% {
+    transform: scale(0.98);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Live Pill / Status */

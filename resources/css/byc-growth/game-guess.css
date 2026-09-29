@@ -250,44 +250,120 @@
   font-size: 12px;
 }
 
-.host-teams {
+/* Dynamic Host Teams Grid */
+.host-teams-grid {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.host-team {
+.host-team-card {
+  flex: 1 1 200px;
+  min-width: 170px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform .2s ease, opacity .25s ease, border-color .25s ease, box-shadow .25s ease;
+  position: relative;
+}
+
+.host-team-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(32, 48, 41, .08);
+}
+
+.host-team-card.is-selected {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px rgba(40, 78, 59, .2), 0 8px 24px rgba(40, 78, 59, .15);
+  transform: scale(1.02);
+  opacity: 1 !important;
+}
+
+.host-team-card.is-dimmed {
+  opacity: 0.42;
+  filter: grayscale(15%);
+}
+
+.host-team-card.is-dimmed:hover {
+  opacity: 0.85;
+  filter: none;
+}
+
+.host-team-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: 14px;
+  gap: 8px;
 }
 
-.host-team > span {
-  font: 800 14px "Manrope", sans-serif;
-}
-
-.host-team > div {
+.host-team-title-wrap {
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 
-.host-team .button {
-  min-height: 34px;
-  padding: 0 12px;
+.team-color-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.host-team-label {
+  font: 800 14px "Manrope", sans-serif;
+  white-space: nowrap;
+}
+
+.award-status-pill {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  background: var(--forest);
+  color: #ffffff;
+  padding: 3px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.host-team-card-score {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.host-team-game-score {
+  font: 800 24px "Manrope", sans-serif;
+  color: var(--ink);
+}
+
+.host-team-card-score small {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.host-team-card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.host-team-card-actions .button {
+  min-height: 32px;
+  padding: 0 10px;
   font-size: 12px;
 }
 
-.host-red {
-  background: var(--red-soft);
-  color: #87352f;
-}
-
-.host-blue {
-  background: var(--blue-soft);
-  color: #244d73;
+.host-team-card-actions .btn-award-round {
+  flex: 1;
 }
 
 /* Round Navigation */

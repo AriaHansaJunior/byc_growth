@@ -10,8 +10,6 @@
     $currentRound = $rounds[$currentRoundIndex] ?? null;
     $roundId = (string) ($currentRound['id'] ?? 1);
     $isRevealed = (bool) ($game1State['revealed'][$roundId] ?? false);
-    $redScore = (int) ($game1State['scores']['red'] ?? 0);
-    $blueScore = (int) ($game1State['scores']['blue'] ?? 0);
 @endphp
 
 <div class="game-shell">
@@ -20,7 +18,7 @@
         <a href="{{ route('game.center') }}" class="brand-button" aria-label="Back to Game Center" title="Back to Game Center">
             <x-brand compact="true" />
         </a>
-        <x-score-pair :scores="['red' => $redScore, 'blue' => $blueScore]" :compact="true" />
+        <x-score-pair :teams="$teams" :compact="true" game="game1" />
         <div class="live-pill">
             <span /> Game session
         </div>
@@ -34,7 +32,7 @@
                 <h1>Guess Me!</h1>
             </div>
             <div class="round-counter">
-                <span>Ronde</span>
+                <span>Round</span>
                 <strong id="round-indicator">
                     {{ str_pad($currentRoundIndex + 1, 2, '0', STR_PAD_LEFT) }}
                     <em>/ {{ str_pad(count($rounds), 2, '0', STR_PAD_LEFT) }}</em>
@@ -46,31 +44,33 @@
         @if ($currentRound)
             <section class="guess-stage">
                 <div class="guess-image">
-                    <img id="guess-image" src="{{ asset('assets/images/' . $currentRound['image']) }}" alt="Visual petunjuk ronde">
-                    <span>Visual clue</span>
+                    <img id="guess-image" src="{{ asset('assets/images/' . $currentRound['image']) }}" alt="Visual clue for active round">
+                    <span>Visual Clue</span>
                 </div>
                 <div class="guess-content">
-                    <span class="clue-label">Clue untuk tim</span>
+                    <span class="clue-label">Clue for Teams</span>
                     <div class="answer-display {{ $isRevealed ? 'revealed' : '' }}" id="answer-box">
-                        <small id="answer-status-label">{{ $isRevealed ? 'Jawaban benar' : 'Lengkapi karakter berikut' }}</small>
+                        <small id="answer-status-label">{{ $isRevealed ? 'Correct Answer' : 'Complete the characters' }}</small>
                         <strong id="answer-text">{{ $isRevealed ? $currentRound['correct_answer'] : $currentRound['clue'] }}</strong>
                     </div>
                     <p id="answer-description">
-                        {{ $isRevealed ? 'Jawaban telah ditampilkan. Berikan poin kepada tim yang menjawab benar.' : 'Diskusikan bersama tim. Host dapat menampilkan jawaban saat waktunya habis.' }}
+                        {{ $isRevealed ? 'Correct answer revealed. Click a team card below to award the round points.' : 'Teams discuss and submit answers. The host reveals the answer when time is up.' }}
                     </p>
                     <button type="button" class="button {{ $isRevealed ? 'button-secondary' : 'button-primary' }}" id="btn-toggle-reveal">
-                        {{ $isRevealed ? 'Sembunyikan jawaban' : 'Tampilkan jawaban' }}
+                        {{ $isRevealed ? 'Hide Answer' : 'Reveal Answer' }}
                     </button>
                 </div>
                 <div class="point-badge">
                     <strong id="round-score-badge">{{ $currentRound['score'] }}</strong>
-                    <span>Poin</span>
+                    <span>Points</span>
                 </div>
             </section>
         @else
             <div style="padding: 40px; text-align: center; background: white; border-radius: 20px;">
-                <p>Belum ada ronde yang tersedia.</p>
-                <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Tambah Ronde</button>
+                <p>No rounds available.</p>
+                @if(Auth::check() && Auth::user()->isAdmin())
+                    <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Add Round</button>
+                @endif
             </div>
         @endif
 
@@ -78,37 +78,62 @@
         <aside class="host-panel">
             <div class="host-heading">
                 <div>
-                    <span>Host control</span>
-                    <strong>Atur skor ronde</strong>
+                    <span>Host Controls</span>
+                    <strong>Round Point Assignment & Team Scoring</strong>
                 </div>
-                <button type="button" class="button button-ghost" id="btn-open-editor">
-                    <x-icon name="edit" /> Edit ronde
-                </button>
+                <div style="display: flex; gap: 8px;">
+                    @if(Auth::check() && Auth::user()->isAdmin())
+                        <button type="button" class="button button-ghost" id="btn-open-teams-modal">
+                            <x-icon name="user" /> Configure Teams
+                        </button>
+                        <button type="button" class="button button-ghost" id="btn-open-editor">
+                            <x-icon name="edit" /> Edit Rounds
+                        </button>
+                    @endif
+                </div>
             </div>
-            <div class="host-teams">
-                <div class="host-team host-red">
-                    <span>Tim Red</span>
-                    <div>
-                        <button type="button" class="button button-ghost btn-score-action" data-team="red" data-amount="-5">−5</button>
-                        <button type="button" class="button button-ghost btn-score-action" data-team="red" data-amount="5">+5</button>
-                        <button type="button" class="button button-primary btn-score-round" data-team="red">+ Poin ronde</button>
+
+            {{-- Dynamic Host Teams Grid --}}
+            <div class="host-teams-grid" id="host-teams-container">
+                @foreach ($teams as $team)
+                    @php
+                        $isAwarded = ($currentRound && ($currentRound['awarded_team_id'] ?? null) == $team['id']);
+                        $hasOtherAwarded = ($currentRound && ($currentRound['awarded_team_id'] ?? null) && ($currentRound['awarded_team_id'] ?? null) != $team['id']);
+                    @endphp
+                    <div class="host-team-card host-team-{{ $team['theme'] }} {{ $isAwarded ? 'is-selected' : '' }} {{ $hasOtherAwarded ? 'is-dimmed' : '' }}"
+                         data-team-id="{{ $team['id'] }}"
+                         id="host-team-card-{{ $team['id'] }}">
+                        <div class="host-team-card-header">
+                            <div class="host-team-title-wrap">
+                                <span class="team-color-indicator" style="background: {{ $team['color'] }};"></span>
+                                <strong class="host-team-label">{{ $team['name'] }}</strong>
+                            </div>
+                            <span class="award-status-pill" id="award-pill-{{ $team['id'] }}" style="{{ $isAwarded ? '' : 'display: none;' }}">
+                                Recipient (+{{ $currentRound ? $currentRound['score'] : 0 }})
+                            </span>
+                        </div>
+                        <div class="host-team-card-score">
+                            <span class="host-team-game-score" id="host-team-score-{{ $team['id'] }}">{{ $team['scores']['game1'] ?? 0 }}</span>
+                            <small>Total: <span id="host-team-total-{{ $team['id'] }}">{{ $team['total_score'] ?? 0 }}</span></small>
+                        </div>
+                        @if(Auth::check() && Auth::user()->isAdmin())
+                            <div class="host-team-card-actions">
+                                <button type="button" class="button button-ghost btn-score-action" data-team="{{ $team['id'] }}" data-amount="-5" title="Deduct 5 points">−5</button>
+                                <button type="button" class="button button-ghost btn-score-action" data-team="{{ $team['id'] }}" data-amount="5" title="Add 5 points">+5</button>
+                                <button type="button" class="button {{ $isAwarded ? 'button-primary' : 'button-secondary' }} btn-award-round" data-team="{{ $team['id'] }}" id="btn-award-{{ $team['id'] }}">
+                                    {{ $isAwarded ? 'Points Awarded' : 'Award Round' }}
+                                </button>
+                            </div>
+                        @endif
                     </div>
-                </div>
-                <div class="host-team host-blue">
-                    <span>Tim Blue</span>
-                    <div>
-                        <button type="button" class="button button-ghost btn-score-action" data-team="blue" data-amount="-5">−5</button>
-                        <button type="button" class="button button-ghost btn-score-action" data-team="blue" data-amount="5">+5</button>
-                        <button type="button" class="button button-primary btn-score-round" data-team="blue">+ Poin ronde</button>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </aside>
 
         {{-- Round Navigation --}}
         <div class="round-nav">
             <button type="button" class="button button-secondary" id="btn-prev-round" {{ $currentRoundIndex === 0 ? 'disabled' : '' }}>
-                ← Sebelumnya
+                ← Previous
             </button>
             <div class="round-dots" id="round-dots-container">
                 @foreach ($rounds as $idx => $r)
@@ -116,7 +141,7 @@
                 @endforeach
             </div>
             <button type="button" class="button button-primary" id="btn-next-round" {{ $currentRoundIndex >= count($rounds) - 1 ? 'disabled' : '' }}>
-                Berikutnya →
+                Next →
             </button>
         </div>
     </main>
@@ -125,12 +150,17 @@
 {{-- CRUD Editor Modal --}}
 @include('partials.guess-me-editor')
 
+{{-- Team Configuration Modal --}}
+@include('partials.team-config-modal')
+
 <script>
     window.BYC_GAME1 = {
         rounds: @json($rounds),
         state: @json($game1State),
+        teams: @json($teams),
         currentIndex: {{ $currentRoundIndex }},
-        isRevealed: {{ $isRevealed ? 'true' : 'false' }}
+        isRevealed: {{ $isRevealed ? 'true' : 'false' }},
+        isAdmin: {{ Auth::check() && Auth::user()->isAdmin() ? 'true' : 'false' }}
     };
 </script>
 @endsection

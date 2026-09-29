@@ -267,22 +267,103 @@
   margin-top: 14px;
 }
 
-.quick-score {
+/* Dynamic Team Award Section */
+.growth-teams-award-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.award-section-title {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.growth-teams-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.growth-team-card {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: transform .2s ease, opacity .25s ease, border-color .25s ease, box-shadow .2s ease;
+  position: relative;
+}
+
+.growth-team-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(32, 48, 41, .08);
+}
+
+.growth-team-card.is-selected {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px rgba(40, 78, 59, .2), 0 6px 18px rgba(40, 78, 59, .15);
+  transform: scale(1.02);
+  opacity: 1 !important;
+}
+
+.growth-team-card.is-dimmed {
+  opacity: 0.42;
+  filter: grayscale(15%);
+}
+
+.growth-team-card.is-dimmed:hover {
+  opacity: 0.85;
+  filter: none;
+}
+
+.growth-team-info {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.quick-score > span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
+.team-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
-.quick-score .button {
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: 12px;
+.growth-team-name {
+  font: 800 13px "Manrope", sans-serif;
+  white-space: nowrap;
+}
+
+.growth-team-score {
+  font: 800 18px "Manrope", sans-serif;
+  color: var(--ink);
+  margin-left: 4px;
+}
+
+.growth-team-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.growth-team-actions .button {
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.growth-team-actions .btn-award-round {
+  padding: 0 10px;
+  font-size: 11px;
 }
 
 /* Cross Overlay Animation */

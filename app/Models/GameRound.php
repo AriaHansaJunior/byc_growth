@@ -18,8 +18,16 @@ class GameRound extends Model
         'correct_answer',
         'clue',
         'score',
+        'awarded_team_id',
+        'awarded_points',
         'media_file_id',
         'image_path',
+    ];
+
+    protected $casts = [
+        'round_number' => 'integer',
+        'score' => 'integer',
+        'awarded_points' => 'integer',
     ];
 
     /**
@@ -28,6 +36,14 @@ class GameRound extends Model
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
+    }
+
+    /**
+     * Get the team awarded points for this round.
+     */
+    public function awardedTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'awarded_team_id');
     }
 
     /**

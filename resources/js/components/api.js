@@ -20,7 +20,7 @@ export async function postJson(url, data) {
 
     const json = await response.json();
     if (!response.ok) {
-        throw new Error(json.error || 'Terjadi kesalahan saat memproses data.');
+        throw new Error(json.error || 'An error occurred while processing the request.');
     }
     return json;
 }
@@ -37,7 +37,7 @@ export async function postFormData(url, formData) {
 
     const json = await response.json();
     if (!response.ok) {
-        throw new Error(json.error || 'Terjadi kesalahan saat memproses data.');
+        throw new Error(json.error || 'An error occurred while processing the request.');
     }
     return json;
 }
@@ -53,7 +53,7 @@ export async function deleteJson(url) {
 
     const json = await response.json();
     if (!response.ok) {
-        throw new Error(json.error || 'Terjadi kesalahan saat menghapus data.');
+        throw new Error(json.error || 'An error occurred while deleting data.');
     }
     return json;
 }

@@ -44,26 +44,172 @@ class GameStorageService
     /**
      * Get or create Team model by code.
      */
-    protected function getTeam(string $code): Team
+    public function getTeam(string $code): Team
     {
         return Team::firstOrCreate(
             ['code' => $code],
             [
                 'name' => ucfirst($code) . ' Team',
-                'color' => $code === 'red' ? '#bd4c42' : '#315e89',
+                'color' => $code === 'red' ? '#bd4c42' : ($code === 'blue' ? '#315e89' : '#284e3b'),
+                'sort_order' => $code === 'red' ? 0 : ($code === 'blue' ? 1 : 2),
+                'is_active' => true,
             ]
         );
     }
 
     /**
-     * Get persistent game state from MySQL.
+     * Get all active teams ordered by sort_order.
+     */
+    public function getActiveTeams()
+    {
+        // Ensure at least Red and Blue exist as initial default teams
+        if (Team::where('is_active', true)->count() < 2) {
+            $this->getTeam('red');
+            $this->getTeam('blue');
+        }
+
+        return Team::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Get dynamic teams along with their scores in each game and total score.
+     */
+    public function getTeamsWithScores(?string $gameCode = null): array
+    {
+        $game1 = $this->getGame('game1');
+        $game2 = $this->getGame('game2');
+        $teams = $this->getActiveTeams();
+
+        $palette = Team::COLOR_PALETTE;
+        $result = [];
+
+        foreach ($teams as $idx => $team) {
+            $g1Score = GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $team->id], ['score' => 0]);
+            $g2Score = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $team->id], ['score' => 0]);
+
+            $theme = $team->code;
+            if (!in_array($theme, ['red', 'blue', 'forest', 'gold', 'purple', 'teal'])) {
+                $paletteItem = $palette[$idx % count($palette)];
+                $theme = $paletteItem['theme'] ?? 'forest';
+            }
+
+            $result[] = [
+                'id' => (int) $team->id,
+                'code' => $team->code,
+                'name' => $team->name,
+                'color' => $team->color ?: ($palette[$idx % count($palette)]['color'] ?? '#284e3b'),
+                'theme' => $theme,
+                'sort_order' => (int) $team->sort_order,
+                'scores' => [
+                    'game1' => (int) $g1Score->score,
+                    'game2' => (int) $g2Score->score,
+                ],
+                'score' => $gameCode ? (int) ($gameCode === 'game1' ? $g1Score->score : $g2Score->score) : ((int) $g1Score->score + (int) $g2Score->score),
+                'total_score' => (int) $g1Score->score + (int) $g2Score->score,
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Configure dynamic teams (2, 3, 4, or more teams) with persistence in MySQL.
+     */
+    public function configureTeams(array $teamsData): array
+    {
+        if (count($teamsData) < 2) {
+            return ['success' => false, 'error' => 'A minimum of 2 teams is required for gameplay.'];
+        }
+
+        $palette = Team::COLOR_PALETTE;
+        $seenNames = [];
+
+        foreach ($teamsData as $idx => $t) {
+            $name = trim($t['name'] ?? '');
+            if ($name === '') {
+                return ['success' => false, 'error' => "Team " . ($idx + 1) . " name cannot be empty."];
+            }
+            $lower = mb_strtolower($name);
+            if (in_array($lower, $seenNames)) {
+                return ['success' => false, 'error' => "Duplicate team name '{$name}'. Each team must have a unique name."];
+            }
+            $seenNames[] = $lower;
+        }
+
+        $game1 = $this->getGame('game1');
+        $game2 = $this->getGame('game2');
+
+        return DB::transaction(function () use ($teamsData, $palette, $game1, $game2) {
+            $processedIds = [];
+            $existingTeams = Team::orderBy('sort_order')->orderBy('id')->get();
+
+            foreach ($teamsData as $idx => $t) {
+                $id = isset($t['id']) && $t['id'] !== '' ? (int) $t['id'] : null;
+                $name = trim($t['name']);
+                $paletteItem = $palette[$idx % count($palette)];
+                $color = !empty($t['color']) ? $t['color'] : $paletteItem['color'];
+                $defaultCode = $paletteItem['code'];
+
+                // 1. If explicit ID provided and exists
+                $team = $id ? Team::find($id) : null;
+
+                // 2. Otherwise reuse existing team at this sort position to preserve stable identity
+                if (!$team && isset($existingTeams[$idx])) {
+                    $team = $existingTeams[$idx];
+                }
+
+                if ($team) {
+                    $team->update([
+                        'name' => $name,
+                        'color' => $color,
+                        'sort_order' => $idx,
+                        'is_active' => true,
+                    ]);
+                    $processedIds[] = $team->id;
+                } else {
+                    $code = $defaultCode;
+                    if (Team::where('code', $code)->exists()) {
+                        $code = 'team_' . ($idx + 1) . '_' . uniqid();
+                    }
+
+                    $newTeam = Team::create([
+                        'code' => $code,
+                        'name' => $name,
+                        'color' => $color,
+                        'sort_order' => $idx,
+                        'is_active' => true,
+                    ]);
+
+                    GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $newTeam->id], ['score' => 0]);
+                    GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $newTeam->id], ['score' => 0]);
+
+                    $processedIds[] = $newTeam->id;
+                }
+            }
+
+            // Deactivate any teams not in processedIds
+            Team::whereNotIn('id', $processedIds)->update(['is_active' => false]);
+
+            return [
+                'success' => true,
+                'message' => 'Teams configured successfully.',
+                'teams' => $this->getTeamsWithScores(),
+                'final_scores' => $this->getFinalScores(),
+            ];
+        });
+    }
+
+    /**
+     * Get persistent game state from MySQL with dynamic teams.
      */
     public function getGameState(): array
     {
         $game1 = $this->getGame('game1');
         $game2 = $this->getGame('game2');
-        $red = $this->getTeam('red');
-        $blue = $this->getTeam('blue');
+        $teams = $this->getTeamsWithScores();
 
         $g1State = GameState::firstOrCreate(
             ['game_id' => $game1->id],
@@ -75,26 +221,30 @@ class GameStorageService
             ['current_round_index' => 0, 'state_data' => ['crosses' => [], 'revealed' => []]]
         );
 
-        $g1RedScore = GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $red->id], ['score' => 0]);
-        $g1BlueScore = GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $blue->id], ['score' => 0]);
+        $g1Scores = [];
+        $g2Scores = [];
+        foreach ($teams as $t) {
+            $g1Scores[$t['code']] = $t['scores']['game1'];
+            $g2Scores[$t['code']] = $t['scores']['game2'];
+            $g1Scores[(string) $t['id']] = $t['scores']['game1'];
+            $g2Scores[(string) $t['id']] = $t['scores']['game2'];
+        }
 
-        $g2RedScore = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $red->id], ['score' => 0]);
-        $g2BlueScore = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $blue->id], ['score' => 0]);
+        // Backward compatibility fallbacks
+        if (!isset($g1Scores['red'])) $g1Scores['red'] = 0;
+        if (!isset($g1Scores['blue'])) $g1Scores['blue'] = 0;
+        if (!isset($g2Scores['red'])) $g2Scores['red'] = 0;
+        if (!isset($g2Scores['blue'])) $g2Scores['blue'] = 0;
 
         return [
+            'teams' => $teams,
             'game1' => [
-                'scores' => [
-                    'red' => (int) $g1RedScore->score,
-                    'blue' => (int) $g1BlueScore->score,
-                ],
+                'scores' => $g1Scores,
                 'current_round' => (int) $g1State->current_round_index,
                 'revealed' => (array) ($g1State->state_data['revealed'] ?? []),
             ],
             'game2' => [
-                'scores' => [
-                    'red' => (int) $g2RedScore->score,
-                    'blue' => (int) $g2BlueScore->score,
-                ],
+                'scores' => $g2Scores,
                 'current_round' => (int) $g2State->current_round_index,
                 'crosses' => (array) ($g2State->state_data['crosses'] ?? []),
                 'revealed' => (array) ($g2State->state_data['revealed'] ?? []),
@@ -103,7 +253,7 @@ class GameStorageService
     }
 
     /**
-     * Get Guess Me Rounds from MySQL.
+     * Get Guess Me Rounds from MySQL with point assignment.
      */
     public function getGuessMeRounds(): array
     {
@@ -124,12 +274,14 @@ class GameStorageService
                 'correct_answer' => $round->correct_answer,
                 'clue' => $round->clue,
                 'score' => (int) $round->score,
+                'awarded_team_id' => $round->awarded_team_id ? (int) $round->awarded_team_id : null,
+                'awarded_points' => (int) $round->awarded_points,
             ];
         })->toArray();
     }
 
     /**
-     * Get Growth 100 Rounds from MySQL.
+     * Get Growth 100 Rounds from MySQL with point assignment.
      */
     public function getGrowth100Rounds(): array
     {
@@ -147,6 +299,8 @@ class GameStorageService
                 'id' => (int) $round->id,
                 'round_number' => (int) $round->round_number,
                 'question' => $round->question,
+                'awarded_team_id' => $round->awarded_team_id ? (int) $round->awarded_team_id : null,
+                'awarded_points' => (int) $round->awarded_points,
                 'answers' => $round->answers->map(function (GameAnswer $ans) {
                     return [
                         'id' => (int) $ans->id,
@@ -160,29 +314,48 @@ class GameStorageService
     }
 
     /**
-     * Calculate Final Scores from MySQL.
+     * Calculate Final Scores from MySQL with dynamic teams and backward compatibility.
      */
     public function getFinalScores(): array
     {
-        $state = $this->getGameState();
+        $teams = $this->getTeamsWithScores();
 
-        $game1Red = (int) ($state['game1']['scores']['red'] ?? 0);
-        $game1Blue = (int) ($state['game1']['scores']['blue'] ?? 0);
+        $totalRed = 0;
+        $totalBlue = 0;
+        $g1Red = 0;
+        $g1Blue = 0;
+        $g2Red = 0;
+        $g2Blue = 0;
 
-        $game2Red = (int) ($state['game2']['scores']['red'] ?? 0);
-        $game2Blue = (int) ($state['game2']['scores']['blue'] ?? 0);
+        foreach ($teams as $idx => $t) {
+            if ($t['code'] === 'red' || $idx === 0) {
+                if ($totalRed === 0 && $g1Red === 0 && $g2Red === 0) {
+                    $totalRed = $t['total_score'];
+                    $g1Red = $t['scores']['game1'];
+                    $g2Red = $t['scores']['game2'];
+                }
+            }
+            if ($t['code'] === 'blue' || $idx === 1) {
+                if ($totalBlue === 0 && $g1Blue === 0 && $g2Blue === 0) {
+                    $totalBlue = $t['total_score'];
+                    $g1Blue = $t['scores']['game1'];
+                    $g2Blue = $t['scores']['game2'];
+                }
+            }
+        }
 
         return [
-            'final_red' => $game1Red + $game2Red,
-            'final_blue' => $game1Blue + $game2Blue,
+            'final_red' => $totalRed,
+            'final_blue' => $totalBlue,
             'game1' => [
-                'red' => $game1Red,
-                'blue' => $game1Blue,
+                'red' => $g1Red,
+                'blue' => $g1Blue,
             ],
             'game2' => [
-                'red' => $game2Red,
-                'blue' => $game2Blue,
+                'red' => $g2Red,
+                'blue' => $g2Blue,
             ],
+            'teams' => $teams,
         ];
     }
 
@@ -462,16 +635,36 @@ class GameStorageService
     }
 
     /**
-     * Update scores for Game 1 or Game 2 in MySQL.
+     * Update scores for Game 1 or Game 2 in MySQL for any team.
      */
-    public function updateScore(string $gameCode, string $teamCode, int $amount, bool $isAbsolute = false): array
+    public function updateScore(string $gameCode, string|int $teamIdentifier, int $amount, bool $isAbsolute = false): array
     {
-        if (!in_array($gameCode, ['game1', 'game2']) || !in_array($teamCode, ['red', 'blue'])) {
-            return ['success' => false, 'error' => 'Invalid game or team.'];
+        if (!in_array($gameCode, ['game1', 'game2'])) {
+            return ['success' => false, 'error' => 'Invalid game code.'];
         }
 
         $game = $this->getGame($gameCode);
-        $team = $this->getTeam($teamCode);
+
+        // Find team by ID or by code
+        if (is_numeric($teamIdentifier)) {
+            $team = Team::find((int) $teamIdentifier);
+        } else {
+            $team = Team::where('is_active', true)->where('code', $teamIdentifier)->first();
+            if (!$team) {
+                if ($teamIdentifier === 'red') {
+                    $team = Team::where('is_active', true)->orderBy('sort_order')->first();
+                } elseif ($teamIdentifier === 'blue') {
+                    $team = Team::where('is_active', true)->orderBy('sort_order')->skip(1)->first();
+                }
+            }
+            if (!$team) {
+                $team = Team::where('code', $teamIdentifier)->first();
+            }
+        }
+
+        if (!$team) {
+            return ['success' => false, 'error' => "Team '{$teamIdentifier}' not found."];
+        }
 
         $gameScore = GameScore::firstOrCreate(
             ['game_id' => $game->id, 'team_id' => $team->id],
@@ -490,9 +683,274 @@ class GameStorageService
 
         return [
             'success' => true,
+            'team_id' => $team->id,
+            'team_code' => $team->code,
+            'new_score' => $newScore,
             'scores' => $state[$gameCode]['scores'],
+            'teams' => $this->getTeamsWithScores(),
             'final_scores' => $this->getFinalScores(),
         ];
+    }
+
+    /**
+     * Universal round point assignment: Exactly ONE team receives points for a completed round.
+     * Moving recipient transfers points atomically and prevents duplicates.
+     */
+    public function assignRoundPoints(string $gameCode, int $roundId, ?int $teamId, ?int $pointsOverride = null): array
+    {
+        if (!in_array($gameCode, ['game1', 'game2'])) {
+            return ['success' => false, 'error' => 'Invalid game code.'];
+        }
+
+        $game = $this->getGame($gameCode);
+        $round = GameRound::where('game_id', $game->id)->find($roundId);
+
+        if (!$round) {
+            return ['success' => false, 'error' => 'Round not found for this game.'];
+        }
+
+        if ($teamId !== null) {
+            $team = Team::where('is_active', true)->find($teamId);
+            if (!$team) {
+                return ['success' => false, 'error' => 'Target team not found or inactive.'];
+            }
+        }
+
+        // Determine points to award
+        if ($pointsOverride !== null) {
+            $points = max(0, $pointsOverride);
+        } elseif ($gameCode === 'game1') {
+            $points = (int) $round->score;
+        } else {
+            // Growth 100: sum of revealed answers for this round, or round score
+            $state = GameState::where('game_id', $game->id)->first();
+            $revealedIdxs = $state ? ($state->state_data['revealed'][(string) $round->id] ?? []) : [];
+            $sum = 0;
+            foreach ($round->answers as $aIdx => $ans) {
+                if (in_array($aIdx, $revealedIdxs)) {
+                    $sum += (int) $ans->points;
+                }
+            }
+            $points = $sum > 0 ? $sum : (int) $round->score;
+        }
+
+        return DB::transaction(function () use ($game, $round, $teamId, $points) {
+            $prevTeamId = $round->awarded_team_id;
+            $prevPoints = (int) $round->awarded_points;
+
+            // Case A: Clicking the already awarded team -> unassign (toggle off)
+            if ($teamId !== null && $prevTeamId === $teamId) {
+                if ($prevPoints > 0) {
+                    $prevScore = GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $prevTeamId], ['score' => 0]);
+                    $prevScore->update(['score' => max(0, $prevScore->score - $prevPoints)]);
+                }
+                $round->update(['awarded_team_id' => null, 'awarded_points' => 0]);
+                $action = 'unassigned';
+                $awardedTeamId = null;
+                $pointsAwarded = 0;
+            }
+            // Case B: Assigning to a new/different team -> transfer or assign
+            elseif ($teamId !== null) {
+                // If there was a previous recipient, deduct points
+                if ($prevTeamId && $prevPoints > 0) {
+                    $prevScore = GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $prevTeamId], ['score' => 0]);
+                    $prevScore->update(['score' => max(0, $prevScore->score - $prevPoints)]);
+                }
+
+                // Add to new recipient
+                $newScore = GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $teamId], ['score' => 0]);
+                $newScore->update(['score' => $newScore->score + $points]);
+
+                $round->update(['awarded_team_id' => $teamId, 'awarded_points' => $points]);
+                $action = $prevTeamId ? 'transferred' : 'assigned';
+                $awardedTeamId = $teamId;
+                $pointsAwarded = $points;
+            }
+            // Case C: Explicit unassign ($teamId === null)
+            else {
+                if ($prevTeamId && $prevPoints > 0) {
+                    $prevScore = GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $prevTeamId], ['score' => 0]);
+                    $prevScore->update(['score' => max(0, $prevScore->score - $prevPoints)]);
+                }
+                $round->update(['awarded_team_id' => null, 'awarded_points' => 0]);
+                $action = 'unassigned';
+                $awardedTeamId = null;
+                $pointsAwarded = 0;
+            }
+
+            return [
+                'success' => true,
+                'action' => $action,
+                'round_id' => (int) $round->id,
+                'awarded_team_id' => $awardedTeamId,
+                'awarded_points' => $pointsAwarded,
+                'transferred_from_team_id' => ($action === 'transferred') ? $prevTeamId : null,
+                'teams' => $this->getTeamsWithScores(),
+                'final_scores' => $this->getFinalScores(),
+            ];
+        });
+    }
+
+    /**
+     * Batch save multiple Guess Me rounds in a single atomic transaction.
+     */
+    public function saveGuessMeBatchRounds(array $roundsData): array
+    {
+        if (empty($roundsData)) {
+            return ['success' => false, 'error' => 'Rounds list cannot be empty. At least 1 round is required.'];
+        }
+
+        // Pre-validate all rounds before any database modification
+        foreach ($roundsData as $idx => $r) {
+            $answer = trim($r['correct_answer'] ?? '');
+            $clue = trim($r['clue'] ?? '');
+            $score = (int) ($r['score'] ?? 20);
+
+            if ($answer === '') {
+                return ['success' => false, 'error' => "Round " . ($idx + 1) . ": Answer cannot be empty."];
+            }
+            if ($clue === '') {
+                return ['success' => false, 'error' => "Round " . ($idx + 1) . ": Clue cannot be empty."];
+            }
+            if ($score < 1) {
+                return ['success' => false, 'error' => "Round " . ($idx + 1) . ": Score must be at least 1."];
+            }
+
+            $validation = $this->validateClue($answer, $clue);
+            if (!$validation['valid']) {
+                return ['success' => false, 'error' => "Round " . ($idx + 1) . ": " . $validation['error']];
+            }
+        }
+
+        $game1 = $this->getGame('game1');
+
+        return DB::transaction(function () use ($game1, $roundsData) {
+            $keptIds = [];
+
+            foreach ($roundsData as $idx => $r) {
+                $id = isset($r['id']) && $r['id'] !== '' ? (int) $r['id'] : null;
+                $answer = strtoupper(trim($r['correct_answer']));
+                $clue = trim($r['clue']);
+                $score = (int) ($r['score'] ?? 20);
+                $imagePath = $r['image'] ?? 'BYC_Growth.jpg';
+
+                if ($id && $existing = GameRound::where('game_id', $game1->id)->find($id)) {
+                    $existing->update([
+                        'round_number' => $idx + 1,
+                        'correct_answer' => $answer,
+                        'clue' => $clue,
+                        'score' => $score,
+                    ]);
+                    $keptIds[] = $existing->id;
+                } else {
+                    $newRound = GameRound::create([
+                        'game_id' => $game1->id,
+                        'round_number' => $idx + 1,
+                        'correct_answer' => $answer,
+                        'clue' => $clue,
+                        'score' => $score,
+                        'image_path' => $imagePath,
+                    ]);
+                    $keptIds[] = $newRound->id;
+                }
+            }
+
+            // Remove rounds omitted from batch
+            GameRound::where('game_id', $game1->id)->whereNotIn('id', $keptIds)->delete();
+
+            // Adjust active round index if out of range
+            $rounds = $this->getGuessMeRounds();
+            $state = GameState::where('game_id', $game1->id)->first();
+            if ($state && $state->current_round_index >= count($rounds)) {
+                $state->update(['current_round_index' => max(0, count($rounds) - 1)]);
+            }
+
+            return [
+                'success' => true,
+                'message' => 'All rounds saved successfully.',
+                'rounds' => $rounds,
+            ];
+        });
+    }
+
+    /**
+     * Batch save multiple Growth 100 rounds with validation and atomic transaction.
+     */
+    public function saveGrowth100BatchRounds(array $roundsData): array
+    {
+        if (empty($roundsData)) {
+            return ['success' => false, 'error' => 'Rounds list cannot be empty. At least 1 round is required.'];
+        }
+
+        // Validate all rounds before touching database
+        foreach ($roundsData as $idx => $r) {
+            $question = trim($r['question'] ?? '');
+            $answers = $r['answers'] ?? [];
+
+            if ($question === '') {
+                return ['success' => false, 'error' => "Round " . ($idx + 1) . ": Question cannot be empty."];
+            }
+
+            $validation = $this->validateGrowthAnswers($answers);
+            if (!$validation['valid']) {
+                return ['success' => false, 'error' => "Round " . ($idx + 1) . ": " . $validation['error']];
+            }
+        }
+
+        $game2 = $this->getGame('game2');
+
+        return DB::transaction(function () use ($game2, $roundsData) {
+            $keptIds = [];
+
+            foreach ($roundsData as $idx => $r) {
+                $id = isset($r['id']) && $r['id'] !== '' ? (int) $r['id'] : null;
+                $question = trim($r['question']);
+                $validation = $this->validateGrowthAnswers($r['answers'] ?? []);
+
+                if ($id && $round = GameRound::where('game_id', $game2->id)->find($id)) {
+                    $round->update([
+                        'round_number' => $idx + 1,
+                        'question' => $question,
+                    ]);
+                    $round->answers()->delete();
+                    $keptIds[] = $round->id;
+                } else {
+                    $round = GameRound::create([
+                        'game_id' => $game2->id,
+                        'round_number' => $idx + 1,
+                        'question' => $question,
+                        'score' => 100,
+                    ]);
+                    $keptIds[] = $round->id;
+                }
+
+                foreach ($validation['answers'] as $sortIdx => $ans) {
+                    GameAnswer::create([
+                        'game_round_id' => $round->id,
+                        'answer_text' => $ans['text'],
+                        'points' => (int) $ans['score'],
+                        'sort_order' => $sortIdx,
+                        'is_revealed' => (bool) ($ans['revealed'] ?? false),
+                    ]);
+                }
+            }
+
+            // Delete omitted rounds
+            GameRound::where('game_id', $game2->id)->whereNotIn('id', $keptIds)->delete();
+
+            // Adjust active round index if out of range
+            $rounds = $this->getGrowth100Rounds();
+            $state = GameState::where('game_id', $game2->id)->first();
+            if ($state && $state->current_round_index >= count($rounds)) {
+                $state->update(['current_round_index' => max(0, count($rounds) - 1)]);
+            }
+
+            return [
+                'success' => true,
+                'message' => 'All survey rounds saved successfully.',
+                'rounds' => $rounds,
+            ];
+        });
     }
 
     /**
@@ -594,7 +1052,7 @@ class GameStorageService
 
     /**
      * Reset Game State to initial in MySQL.
-     * Scores = 0, revealed = [], crosses = [], current_round_index = 0.
+     * Scores = 0, revealed = [], crosses = [], current_round_index = 0, round awards = null.
      * Questions and image records are PRESERVED.
      */
     public function resetGame(): array
@@ -604,6 +1062,12 @@ class GameStorageService
 
         // Reset all team scores to 0
         GameScore::query()->update(['score' => 0]);
+
+        // Reset point awards on rounds
+        GameRound::query()->update([
+            'awarded_team_id' => null,
+            'awarded_points' => 0,
+        ]);
 
         // Reset game states
         GameState::where('game_id', $game1->id)->update([

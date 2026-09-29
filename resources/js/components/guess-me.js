@@ -1,9 +1,16 @@
 import { postJson, postFormData, deleteJson } from './api';
+import {
+    animateScoreAward,
+    updateScoreboard,
+    setupRoundPointAssignment,
+    updateTeamCardsVisualState,
+    initTeamConfigModal,
+} from './universal-game';
 
 export function initGuessMe() {
     if (!window.BYC_GAME1) return;
 
-    let { rounds, state, currentIndex } = window.BYC_GAME1;
+    let { rounds, state, teams, currentIndex } = window.BYC_GAME1;
     let currentRound = rounds[currentIndex] || rounds[0] || null;
     let roundId = currentRound ? String(currentRound.id) : '1';
     let isRevealed = state && state.revealed ? Boolean(state.revealed[roundId]) : false;
@@ -20,16 +27,28 @@ export function initGuessMe() {
     const btnPrevRound = document.getElementById('btn-prev-round');
     const btnNextRound = document.getElementById('btn-next-round');
     const roundDotsContainer = document.getElementById('round-dots-container');
+    const hostTeamsContainer = document.getElementById('host-teams-container');
 
-    // Score elements in topbar
-    const scoreRedEl = document.querySelector('.team-red strong');
-    const scoreBlueEl = document.querySelector('.team-blue strong');
+    // Initialize Universal Team Configuration Modal
+    initTeamConfigModal(teams || []);
+
+    // Initialize Universal Round Point Assignment (Exclusive Radio Selection & Transfer)
+    setupRoundPointAssignment({
+        gameCode: 'game1',
+        getCurrentRound: () => currentRound,
+        onStateChange: (res) => {
+            if (currentRound) {
+                currentRound.awarded_team_id = res.awarded_team_id;
+                currentRound.awarded_points = res.awarded_points;
+            }
+        },
+    });
 
     function updateRoundUI() {
         if (!rounds.length) return;
         currentRound = rounds[currentIndex];
         roundId = String(currentRound.id);
-        isRevealed = state.revealed && state.revealed[roundId] ? true : false;
+        isRevealed = state && state.revealed && state.revealed[roundId] ? true : false;
 
         // Counter
         if (roundIndicator) {
@@ -45,17 +64,17 @@ export function initGuessMe() {
         if (answerBox) {
             if (isRevealed) {
                 answerBox.classList.add('revealed');
-                answerStatusLabel.textContent = 'Jawaban benar';
+                answerStatusLabel.textContent = 'Correct Answer';
                 answerText.textContent = currentRound.correct_answer;
-                answerDescription.textContent = 'Jawaban telah ditampilkan. Berikan poin kepada tim yang menjawab benar.';
-                btnToggleReveal.textContent = 'Sembunyikan jawaban';
+                answerDescription.textContent = 'Correct answer revealed. Click a team card below to award the round points.';
+                btnToggleReveal.textContent = 'Hide Answer';
                 btnToggleReveal.className = 'button button-secondary';
             } else {
                 answerBox.classList.remove('revealed');
-                answerStatusLabel.textContent = 'Lengkapi karakter berikut';
+                answerStatusLabel.textContent = 'Complete the characters';
                 answerText.textContent = currentRound.clue;
-                answerDescription.textContent = 'Diskusikan bersama tim. Host dapat menampilkan jawaban saat waktunya habis.';
-                btnToggleReveal.textContent = 'Tampilkan jawaban';
+                answerDescription.textContent = 'Teams discuss and submit answers. The host reveals the answer when time is up.';
+                btnToggleReveal.textContent = 'Reveal Answer';
                 btnToggleReveal.className = 'button button-primary';
             }
         }
@@ -63,6 +82,15 @@ export function initGuessMe() {
         // Score Badge
         if (roundScoreBadge) {
             roundScoreBadge.textContent = currentRound.score;
+        }
+
+        // Update Host Team Cards Visual Selection State
+        if (hostTeamsContainer) {
+            updateTeamCardsVisualState(
+                hostTeamsContainer,
+                currentRound.awarded_team_id ?? null,
+                currentRound.score ?? 0
+            );
         }
 
         // Navigation buttons
@@ -115,20 +143,23 @@ export function initGuessMe() {
         }
     }
 
-    async function changeScore(team, amount) {
+    async function changeScore(teamIdentifier, amount) {
         try {
             const res = await postJson('/game/update-score', {
                 game: 'game1',
-                team,
+                team: teamIdentifier,
                 amount,
             });
 
-            if (res.scores) {
-                if (scoreRedEl) scoreRedEl.textContent = res.scores.red;
-                if (scoreBlueEl) scoreBlueEl.textContent = res.scores.blue;
+            if (res.teams) {
+                updateScoreboard(res.teams, 'game1');
+            }
+
+            if (amount > 0 && res.team_id) {
+                animateScoreAward(res.team_id, amount);
             }
         } catch (err) {
-            alert('Gagal mengupdate skor: ' + err.message);
+            alert('Failed to update score: ' + err.message);
         }
     }
 
@@ -145,25 +176,18 @@ export function initGuessMe() {
         btnNextRound.addEventListener('click', () => goToRound(currentIndex + 1));
     }
 
+    // Direct score adjustment buttons (+5, -5)
     document.querySelectorAll('.btn-score-action').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const team = btn.dataset.team;
             const amount = parseInt(btn.dataset.amount, 10);
             changeScore(team, amount);
         });
     });
 
-    document.querySelectorAll('.btn-score-round').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            const team = btn.dataset.team;
-            if (currentRound) {
-                changeScore(team, currentRound.score);
-            }
-        });
-    });
-
     // ==========================================
-    // CRUD Editor Modal Logic
+    // CRUD Editor Modal Logic with Batch Save
     // ==========================================
     const modalEditor = document.getElementById('modal-guess-editor');
     const btnOpenEditor = document.getElementById('btn-open-editor');
@@ -173,6 +197,7 @@ export function initGuessMe() {
     const btnAddRound = document.getElementById('btn-add-guess-round');
     const btnDeleteRound = document.getElementById('btn-delete-guess-round');
     const btnSaveRound = document.getElementById('btn-save-guess-round');
+    const btnSaveBatch = document.getElementById('btn-save-batch-guess');
 
     const form = document.getElementById('form-guess-round');
     const inputId = document.getElementById('guess-round-id');
@@ -185,15 +210,17 @@ export function initGuessMe() {
     const clueHint = document.getElementById('guess-clue-hint');
     const roundsListEl = document.getElementById('guess-round-buttons');
 
-    let editingRoundId = null;
+    let workingRounds = [];
+    let editingRoundIndex = 0;
 
     function openModal() {
         if (!modalEditor) return;
+        workingRounds = JSON.parse(JSON.stringify(rounds));
         modalEditor.style.display = 'grid';
         document.body.style.overflow = 'hidden';
-        renderEditorRoundsList();
-        if (currentRound) {
-            selectEditorRound(currentRound.id);
+
+        if (workingRounds.length > 0) {
+            selectEditorRoundIndex(Math.min(currentIndex, workingRounds.length - 1));
         } else {
             newEditorRound();
         }
@@ -205,55 +232,78 @@ export function initGuessMe() {
         document.body.style.overflow = '';
     }
 
+    function flushActiveFormToWorkingRound() {
+        if (editingRoundIndex < 0 || editingRoundIndex >= workingRounds.length) return;
+        const currentWorking = workingRounds[editingRoundIndex];
+        if (!currentWorking) return;
+
+        currentWorking.correct_answer = (inputAnswer ? inputAnswer.value.trim().toUpperCase() : currentWorking.correct_answer);
+        currentWorking.clue = (inputClue ? inputClue.value.trim() : currentWorking.clue);
+        currentWorking.score = (inputScore ? parseInt(inputScore.value, 10) || 20 : currentWorking.score);
+    }
+
     function renderEditorRoundsList() {
         if (!roundsListEl) return;
         roundsListEl.innerHTML = '';
-        rounds.forEach((r, idx) => {
+        workingRounds.forEach((r, idx) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = r.id === editingRoundId ? 'active' : '';
-            btn.innerHTML = `<strong>Ronde ${idx + 1}</strong><small>${r.score} poin</small>`;
-            btn.addEventListener('click', () => selectEditorRound(r.id));
+            btn.className = idx === editingRoundIndex ? 'active' : '';
+            btn.innerHTML = `<strong>Round ${idx + 1}</strong><small>${r.score || 20} pts</small>`;
+            btn.addEventListener('click', () => {
+                flushActiveFormToWorkingRound();
+                selectEditorRoundIndex(idx);
+            });
             roundsListEl.appendChild(btn);
         });
     }
 
-    function selectEditorRound(id) {
-        editingRoundId = id;
-        const target = rounds.find((r) => r.id === id);
-        if (!target) return;
+    function selectEditorRoundIndex(index) {
+        if (index < 0 || index >= workingRounds.length) return;
+        editingRoundIndex = index;
+        const target = workingRounds[index];
 
-        inputId.value = target.id;
-        inputAnswer.value = target.correct_answer;
-        inputClue.value = target.clue;
-        inputScore.value = target.score;
-        uploadLabel.textContent = `Gambar: ${target.image}`;
-        if (btnDeleteRound) btnDeleteRound.style.display = 'inline-block';
+        inputId.value = target.id || '';
+        inputAnswer.value = target.correct_answer || '';
+        inputClue.value = target.clue || '';
+        inputScore.value = target.score || 20;
+        uploadLabel.textContent = target.image ? `Image: ${target.image}` : 'Click to select round image';
+
+        if (btnDeleteRound) {
+            btnDeleteRound.style.display = workingRounds.length > 1 ? 'inline-block' : 'none';
+        }
 
         validateClueInput();
         renderEditorRoundsList();
     }
 
     function newEditorRound() {
-        editingRoundId = null;
-        form.reset();
-        inputId.value = '';
-        inputScore.value = '20';
-        uploadLabel.textContent = 'Klik untuk pilih gambar ronde';
-        if (btnDeleteRound) btnDeleteRound.style.display = 'none';
-
-        validateClueInput();
-        renderEditorRoundsList();
+        flushActiveFormToWorkingRound();
+        const newRound = {
+            id: null,
+            round_number: workingRounds.length + 1,
+            correct_answer: '',
+            clue: '',
+            score: 20,
+            image: 'BYC_Growth.jpg',
+        };
+        workingRounds.push(newRound);
+        selectEditorRoundIndex(workingRounds.length - 1);
     }
 
-    function validateClueInput() {
-        const answer = inputAnswer.value.trim().toUpperCase();
-        const clue = inputClue.value.trim();
+    function validateSingleRound(round, roundNum) {
+        const answer = (round.correct_answer || '').trim().toUpperCase();
+        const clue = (round.clue || '').trim();
+        const score = parseInt(round.score, 10);
 
-        if (!answer || !clue) {
-            clueHint.innerHTML = 'Gunakan tanda _ untuk huruf tersembunyi.';
-            clueHint.className = 'field-hint';
-            return false;
+        if (!answer) {
+            return { valid: false, error: `Round ${roundNum}: Correct answer cannot be empty.` };
+        }
+        if (!clue) {
+            return { valid: false, error: `Round ${roundNum}: Clue cannot be empty.` };
+        }
+        if (isNaN(score) || score < 1) {
+            return { valid: false, error: `Round ${roundNum}: Round score must be at least 1.` };
         }
 
         const answerChars = answer.split('');
@@ -266,25 +316,45 @@ export function initGuessMe() {
         } else if (clueNoSpaces.length === answerLen) {
             clueTokens = clueNoSpaces;
         } else {
-            clueHint.innerHTML = `<span style="color: var(--red);">✗ Jumlah karakter clue (${clueNoSpaces.length}) harus sama dengan jawaban (${answerLen}).</span>`;
-            clueHint.className = 'field-hint';
-            return false;
+            return {
+                valid: false,
+                error: `Round ${roundNum}: Clue length (${clueNoSpaces.length}) must match answer length (${answerLen}).`,
+            };
         }
 
         for (let i = 0; i < answerLen; i++) {
             const c = clueTokens[i].toUpperCase();
             const a = answerChars[i];
-
             if (c === '_' || c === '-' || c === '.') continue;
-
             if (c !== a) {
-                clueHint.innerHTML = `<span style="color: var(--red);">✗ Karakter posisi ke-${i + 1} ('${c}') berbeda dengan huruf jawaban ('${a}').</span>`;
-                clueHint.className = 'field-hint';
-                return false;
+                return {
+                    valid: false,
+                    error: `Round ${roundNum}: Character at position ${i + 1} ('${c}') differs from answer ('${a}').`,
+                };
             }
         }
 
-        clueHint.innerHTML = `<span class="validation-good">✓ Clue valid · ${answerLen} posisi karakter sesuai</span>`;
+        return { valid: true };
+    }
+
+    function validateClueInput() {
+        const answer = inputAnswer.value.trim().toUpperCase();
+        const clue = inputClue.value.trim();
+
+        if (!answer || !clue) {
+            clueHint.innerHTML = 'Use underscore _ for hidden characters.';
+            clueHint.className = 'field-hint';
+            return false;
+        }
+
+        const res = validateSingleRound({ correct_answer: answer, clue: clue, score: inputScore.value }, editingRoundIndex + 1);
+        if (!res.valid) {
+            clueHint.innerHTML = `<span style="color: var(--red);">✗ ${res.error}</span>`;
+            clueHint.className = 'field-hint';
+            return false;
+        }
+
+        clueHint.innerHTML = `<span class="validation-good">✓ Valid clue · ${answer.length} characters aligned</span>`;
         clueHint.className = 'field-hint good';
         return true;
     }
@@ -307,30 +377,45 @@ export function initGuessMe() {
     if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeModal);
     if (btnAddRound) btnAddRound.addEventListener('click', newEditorRound);
 
+    // Delete single round
     if (btnDeleteRound) {
         btnDeleteRound.addEventListener('click', async () => {
-            if (!editingRoundId) return;
-            if (!confirm('Apakah Anda yakin ingin menghapus ronde ini?')) return;
+            if (workingRounds.length <= 1) {
+                alert('At least 1 round must remain.');
+                return;
+            }
 
-            try {
-                const res = await deleteJson(`/game/guess-me/round/${editingRoundId}`);
-                if (res.success) {
-                    rounds = res.rounds;
-                    window.BYC_GAME1.rounds = rounds;
-                    currentIndex = Math.max(0, Math.min(currentIndex, rounds.length - 1));
-                    updateRoundUI();
-                    closeModal();
+            if (!confirm(`Are you sure you want to delete Round ${editingRoundIndex + 1}?`)) return;
+
+            const targetRound = workingRounds[editingRoundIndex];
+            if (targetRound.id) {
+                try {
+                    const res = await deleteJson(`/game/guess-me/round/${targetRound.id}`);
+                    if (res.success) {
+                        rounds = res.rounds;
+                        window.BYC_GAME1.rounds = rounds;
+                        workingRounds = JSON.parse(JSON.stringify(rounds));
+                        currentIndex = Math.max(0, Math.min(currentIndex, rounds.length - 1));
+                        editingRoundIndex = Math.max(0, Math.min(editingRoundIndex, workingRounds.length - 1));
+                        updateRoundUI();
+                        selectEditorRoundIndex(editingRoundIndex);
+                    }
+                } catch (err) {
+                    alert('Failed to delete round: ' + err.message);
                 }
-            } catch (err) {
-                alert('Gagal menghapus ronde: ' + err.message);
+            } else {
+                workingRounds.splice(editingRoundIndex, 1);
+                editingRoundIndex = Math.max(0, editingRoundIndex - 1);
+                selectEditorRoundIndex(editingRoundIndex);
             }
         });
     }
 
+    // Save active single round (with file upload support)
     if (btnSaveRound) {
         btnSaveRound.addEventListener('click', async () => {
             if (!validateClueInput()) {
-                alert('Mohon perbaiki clue agar sesuai dengan jawaban sebelum menyimpan.');
+                alert('Please resolve clue validation errors before saving.');
                 return;
             }
 
@@ -338,7 +423,7 @@ export function initGuessMe() {
 
             try {
                 btnSaveRound.disabled = true;
-                btnSaveRound.textContent = 'Menyimpan...';
+                btnSaveRound.textContent = 'Saving...';
 
                 const res = await postFormData('/game/guess-me/round', formData);
                 if (res.success) {
@@ -349,10 +434,61 @@ export function initGuessMe() {
                     closeModal();
                 }
             } catch (err) {
-                alert('Gagal menyimpan ronde: ' + err.message);
+                alert('Failed to save round: ' + err.message);
             } finally {
                 btnSaveRound.disabled = false;
-                btnSaveRound.textContent = 'Simpan perubahan';
+                btnSaveRound.textContent = 'Save Round';
+            }
+        });
+    }
+
+    // Batch Save All Rounds in One Operation
+    if (btnSaveBatch) {
+        btnSaveBatch.addEventListener('click', async () => {
+            flushActiveFormToWorkingRound();
+
+            if (workingRounds.length === 0) {
+                alert('At least 1 round is required.');
+                return;
+            }
+
+            // Validate every round in the batch
+            for (let i = 0; i < workingRounds.length; i++) {
+                const validation = validateSingleRound(workingRounds[i], i + 1);
+                if (!validation.valid) {
+                    selectEditorRoundIndex(i);
+                    alert(validation.error);
+                    return;
+                }
+            }
+
+            try {
+                btnSaveBatch.disabled = true;
+                btnSaveBatch.textContent = 'Saving Batch...';
+
+                const payload = {
+                    rounds: workingRounds.map((r, idx) => ({
+                        id: r.id || null,
+                        correct_answer: r.correct_answer.toUpperCase().trim(),
+                        clue: r.clue.trim(),
+                        score: parseInt(r.score, 10) || 20,
+                        image: r.image || 'BYC_Growth.jpg',
+                    })),
+                };
+
+                const res = await postJson('/game/guess-me/batch', payload);
+                if (res.success) {
+                    rounds = res.rounds;
+                    window.BYC_GAME1.rounds = rounds;
+                    currentIndex = Math.max(0, Math.min(currentIndex, rounds.length - 1));
+                    updateRoundUI();
+                    closeModal();
+                }
+            } catch (err) {
+                alert('Batch save failed: ' + err.message);
+            } finally {
+                btnSaveBatch.disabled = false;
+                btnSaveBatch.textContent = 'Save All Rounds (Batch)';
             }
         });
     }

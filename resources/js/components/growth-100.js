@@ -1,9 +1,16 @@
 import { postJson, deleteJson } from './api';
+import {
+    animateScoreAward,
+    updateScoreboard,
+    setupRoundPointAssignment,
+    updateTeamCardsVisualState,
+    initTeamConfigModal,
+} from './universal-game';
 
 export function initGrowth100() {
     if (!window.BYC_GAME2) return;
 
-    let { rounds, state, currentIndex } = window.BYC_GAME2;
+    let { rounds, state, teams, currentIndex } = window.BYC_GAME2;
     let currentRound = rounds[currentIndex] || rounds[0] || null;
     let roundId = currentRound ? String(currentRound.id) : '1';
 
@@ -12,8 +19,6 @@ export function initGrowth100() {
     const surveyQuestionText = document.getElementById('survey-question-text');
     const answersGridContainer = document.getElementById('answers-grid-container');
     const roundRevealedPointsEl = document.getElementById('round-revealed-points');
-    const btnAddTotalRed = document.getElementById('btn-add-total-red');
-    const btnAddTotalBlue = document.getElementById('btn-add-total-blue');
     const btnPrevRound = document.getElementById('btn-prev-round');
     const btnNextRound = document.getElementById('btn-next-round');
     const roundDotsContainer = document.getElementById('round-dots-container');
@@ -23,10 +28,22 @@ export function initGrowth100() {
     const btnResetCrosses = document.getElementById('btn-reset-crosses');
     const crossOverlay = document.getElementById('cross-overlay');
     const crossOverlayContent = document.getElementById('cross-overlay-content');
+    const growthTeamsContainer = document.getElementById('growth-teams-award-container');
 
-    // Score elements in topbar
-    const scoreRedEl = document.querySelector('.team-red strong');
-    const scoreBlueEl = document.querySelector('.team-blue strong');
+    // Initialize Universal Team Configuration Modal
+    initTeamConfigModal(teams || []);
+
+    // Initialize Universal Round Point Assignment (Exclusive Radio Selection & Transfer)
+    setupRoundPointAssignment({
+        gameCode: 'game2',
+        getCurrentRound: () => currentRound,
+        onStateChange: (res) => {
+            if (currentRound) {
+                currentRound.awarded_team_id = res.awarded_team_id;
+                currentRound.awarded_points = res.awarded_points;
+            }
+        },
+    });
 
     function getRevealedList() {
         if (!state.revealed) state.revealed = {};
@@ -74,8 +91,14 @@ export function initGrowth100() {
             el.textContent = total;
         });
 
-        if (btnAddTotalRed) btnAddTotalRed.disabled = total === 0;
-        if (btnAddTotalBlue) btnAddTotalBlue.disabled = total === 0;
+        // Update Host Team Cards Visual Selection State
+        if (growthTeamsContainer) {
+            updateTeamCardsVisualState(
+                growthTeamsContainer,
+                currentRound.awarded_team_id ?? null,
+                total
+            );
+        }
 
         // Render Answers Grid
         if (answersGridContainer && currentRound.answers) {
@@ -88,7 +111,7 @@ export function initGrowth100() {
                 btn.dataset.answerIndex = idx;
                 btn.innerHTML = `
                     <strong>${idx + 1}</strong>
-                    <span class="answer-text-label">${isOpen ? ans.text : 'Klik untuk buka'}</span>
+                    <span class="answer-text-label">${isOpen ? ans.text : 'Click to reveal'}</span>
                     <em>${isOpen ? ans.score : '?'}</em>
                 `;
                 btn.addEventListener('click', () => toggleAnswer(idx));
@@ -164,8 +187,8 @@ export function initGrowth100() {
         if (!state.crosses) state.crosses = {};
         state.crosses[roundId] = count;
 
-        // Show visual overlay with animation
-        if (crossOverlay && crossOverlayContent) {
+        // Visual overlay animation
+        if (crossOverlay && crossOverlayContent && count > 0) {
             crossOverlayContent.innerHTML = Array.from({ length: count }, () => '<b>×</b>').join('');
             crossOverlay.style.display = 'grid';
 
@@ -200,20 +223,23 @@ export function initGrowth100() {
         }
     }
 
-    async function changeScore(team, amount) {
+    async function changeScore(teamIdentifier, amount) {
         try {
             const res = await postJson('/game/update-score', {
                 game: 'game2',
-                team,
+                team: teamIdentifier,
                 amount,
             });
 
-            if (res.scores) {
-                if (scoreRedEl) scoreRedEl.textContent = res.scores.red;
-                if (scoreBlueEl) scoreBlueEl.textContent = res.scores.blue;
+            if (res.teams) {
+                updateScoreboard(res.teams, 'game2');
+            }
+
+            if (amount > 0 && res.team_id) {
+                animateScoreAward(res.team_id, amount);
             }
         } catch (err) {
-            alert('Gagal mengupdate skor: ' + err.message);
+            alert('Failed to update score: ' + err.message);
         }
     }
 
@@ -232,22 +258,10 @@ export function initGrowth100() {
         btnResetCrosses.addEventListener('click', () => setCrosses(0));
     }
 
-    if (btnAddTotalRed) {
-        btnAddTotalRed.addEventListener('click', () => {
-            const total = calculateRoundTotal();
-            if (total > 0) changeScore('red', total);
-        });
-    }
-
-    if (btnAddTotalBlue) {
-        btnAddTotalBlue.addEventListener('click', () => {
-            const total = calculateRoundTotal();
-            if (total > 0) changeScore('blue', total);
-        });
-    }
-
+    // Direct score adjustment buttons (+5, -5)
     document.querySelectorAll('.btn-score-action').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
             const team = btn.dataset.team;
             const amount = parseInt(btn.dataset.amount, 10);
             changeScore(team, amount);
@@ -263,7 +277,7 @@ export function initGrowth100() {
     }
 
     // ==========================================
-    // CRUD Editor Modal Logic
+    // CRUD Editor Modal Logic with Batch Save
     // ==========================================
     const modalEditor = document.getElementById('modal-growth-editor');
     const btnOpenEditor = document.getElementById('btn-open-editor');
@@ -273,6 +287,7 @@ export function initGrowth100() {
     const btnAddRound = document.getElementById('btn-add-growth-round');
     const btnDeleteRound = document.getElementById('btn-delete-growth-round');
     const btnSaveRound = document.getElementById('btn-save-growth-round');
+    const btnSaveBatch = document.getElementById('btn-save-batch-growth');
 
     const form = document.getElementById('form-growth-round');
     const inputId = document.getElementById('growth-round-id');
@@ -282,15 +297,17 @@ export function initGrowth100() {
     const scoreTotalIndicator = document.getElementById('growth-score-total-indicator');
     const roundsListEl = document.getElementById('growth-round-buttons');
 
-    let editingRoundId = null;
+    let workingRounds = [];
+    let editingRoundIndex = 0;
 
     function openModal() {
         if (!modalEditor) return;
+        workingRounds = JSON.parse(JSON.stringify(rounds));
         modalEditor.style.display = 'grid';
         document.body.style.overflow = 'hidden';
-        renderEditorRoundsList();
-        if (currentRound) {
-            selectEditorRound(currentRound.id);
+
+        if (workingRounds.length > 0) {
+            selectEditorRoundIndex(Math.min(currentIndex, workingRounds.length - 1));
         } else {
             newEditorRound();
         }
@@ -302,54 +319,76 @@ export function initGrowth100() {
         document.body.style.overflow = '';
     }
 
+    function flushActiveFormToWorkingRound() {
+        if (editingRoundIndex < 0 || editingRoundIndex >= workingRounds.length) return;
+        const currentWorking = workingRounds[editingRoundIndex];
+        if (!currentWorking) return;
+
+        currentWorking.question = (inputQuestion ? inputQuestion.value.trim() : currentWorking.question);
+
+        if (answersContainer) {
+            const rows = answersContainer.querySelectorAll('.answer-edit-row');
+            currentWorking.answers = Array.from(rows).map((row) => ({
+                text: row.querySelector('.input-ans-text').value.trim(),
+                score: parseInt(row.querySelector('.input-ans-score').value, 10) || 0,
+            }));
+        }
+    }
+
     function renderEditorRoundsList() {
         if (!roundsListEl) return;
         roundsListEl.innerHTML = '';
-        rounds.forEach((r, idx) => {
+        workingRounds.forEach((r, idx) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = r.id === editingRoundId ? 'active' : '';
-            btn.innerHTML = `<strong>Ronde ${idx + 1}</strong><small>${r.answers ? r.answers.length : 0} jawaban</small>`;
-            btn.addEventListener('click', () => selectEditorRound(r.id));
+            btn.className = idx === editingRoundIndex ? 'active' : '';
+            btn.innerHTML = `<strong>Round ${idx + 1}</strong><small>${r.answers ? r.answers.length : 0} answers</small>`;
+            btn.addEventListener('click', () => {
+                flushActiveFormToWorkingRound();
+                selectEditorRoundIndex(idx);
+            });
             roundsListEl.appendChild(btn);
         });
     }
 
-    function selectEditorRound(id) {
-        editingRoundId = id;
-        const target = rounds.find((r) => r.id === id);
-        if (!target) return;
+    function selectEditorRoundIndex(index) {
+        if (index < 0 || index >= workingRounds.length) return;
+        editingRoundIndex = index;
+        const target = workingRounds[index];
 
-        inputId.value = target.id;
-        inputQuestion.value = target.question;
+        inputId.value = target.id || '';
+        inputQuestion.value = target.question || '';
         renderAnswerRows(target.answers || []);
-        if (btnDeleteRound) btnDeleteRound.style.display = 'inline-block';
+
+        if (btnDeleteRound) {
+            btnDeleteRound.style.display = workingRounds.length > 1 ? 'inline-block' : 'none';
+        }
 
         recalculateEditorTotal();
         renderEditorRoundsList();
     }
 
     function newEditorRound() {
-        editingRoundId = null;
-        form.reset();
-        inputId.value = '';
-        inputQuestion.value = '';
-        renderAnswerRows([
-            { text: '', score: 35 },
-            { text: '', score: 25 },
-            { text: '', score: 20 },
-            { text: '', score: 20 },
-        ]);
-        if (btnDeleteRound) btnDeleteRound.style.display = 'none';
-
-        recalculateEditorTotal();
-        renderEditorRoundsList();
+        flushActiveFormToWorkingRound();
+        const newRound = {
+            id: null,
+            round_number: workingRounds.length + 1,
+            question: '',
+            answers: [
+                { text: '', score: 35 },
+                { text: '', score: 25 },
+                { text: '', score: 20 },
+                { text: '', score: 20 },
+            ],
+        };
+        workingRounds.push(newRound);
+        selectEditorRoundIndex(workingRounds.length - 1);
     }
 
     function renderAnswerRows(answers) {
         if (!answersContainer) return;
         answersContainer.innerHTML = '';
-        answers.forEach((ans, idx) => {
+        answers.forEach((ans) => {
             addAnswerRow(ans.text, ans.score);
         });
         updateRowNumbers();
@@ -360,16 +399,16 @@ export function initGrowth100() {
         row.className = 'answer-edit-row';
         row.innerHTML = `
             <span class="row-num">1</span>
-            <input type="text" class="input-ans-text" placeholder="Teks jawaban" value="${text.replace(/"/g, '&quot;')}" required>
+            <input type="text" class="input-ans-text" placeholder="Answer description" value="${text.replace(/"/g, '&quot;')}" required>
             <input type="number" class="input-ans-score" value="${score}" min="1" max="100" required>
-            <button type="button" class="btn-remove-row" aria-label="Hapus jawaban">×</button>
+            <button type="button" class="btn-remove-row" aria-label="Remove answer">×</button>
         `;
 
         row.querySelector('.input-ans-score').addEventListener('input', recalculateEditorTotal);
         row.querySelector('.input-ans-text').addEventListener('input', recalculateEditorTotal);
         row.querySelector('.btn-remove-row').addEventListener('click', () => {
             if (answersContainer.querySelectorAll('.answer-edit-row').length <= 1) {
-                alert('Minimal harus ada 1 jawaban.');
+                alert('At least 1 answer is required.');
                 return;
             }
             row.remove();
@@ -402,10 +441,44 @@ export function initGrowth100() {
             scoreTotalIndicator.className = 'validation-good';
             scoreTotalIndicator.style.color = 'var(--forest)';
         } else {
-            scoreTotalIndicator.textContent = `Total: ${sum} / 100 (Harus tepat 100)`;
+            scoreTotalIndicator.textContent = `Total: ${sum} / 100 (Must equal 100)`;
             scoreTotalIndicator.className = '';
             scoreTotalIndicator.style.color = 'var(--red)';
         }
+    }
+
+    function validateSingleRound(round, roundNum) {
+        const question = (round.question || '').trim();
+        if (!question) {
+            return { valid: false, error: `Round ${roundNum}: Question cannot be empty.` };
+        }
+
+        const answers = round.answers || [];
+        if (answers.length === 0) {
+            return { valid: false, error: `Round ${roundNum}: At least 1 answer is required.` };
+        }
+
+        let total = 0;
+        for (let i = 0; i < answers.length; i++) {
+            const text = (answers[i].text || '').trim();
+            const score = parseInt(answers[i].score, 10) || 0;
+            if (!text) {
+                return { valid: false, error: `Round ${roundNum}: Answer ${i + 1} text cannot be empty.` };
+            }
+            if (score < 1) {
+                return { valid: false, error: `Round ${roundNum}: Answer ${i + 1} score must be at least 1.` };
+            }
+            total += score;
+        }
+
+        if (total !== 100) {
+            return {
+                valid: false,
+                error: `Round ${roundNum}: Total answers score must equal exactly 100 (current: ${total}).`,
+            };
+        }
+
+        return { valid: true };
     }
 
     if (btnAddAnswerRow) {
@@ -418,57 +491,60 @@ export function initGrowth100() {
     if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeModal);
     if (btnAddRound) btnAddRound.addEventListener('click', newEditorRound);
 
+    // Delete single round
     if (btnDeleteRound) {
         btnDeleteRound.addEventListener('click', async () => {
-            if (!editingRoundId) return;
-            if (!confirm('Apakah Anda yakin ingin menghapus soal survei ini?')) return;
+            if (workingRounds.length <= 1) {
+                alert('At least 1 round must remain.');
+                return;
+            }
 
-            try {
-                const res = await deleteJson(`/game/growth-100/round/${editingRoundId}`);
-                if (res.success) {
-                    rounds = res.rounds;
-                    window.BYC_GAME2.rounds = rounds;
-                    currentIndex = Math.max(0, Math.min(currentIndex, rounds.length - 1));
-                    updateRoundUI();
-                    closeModal();
+            if (!confirm(`Are you sure you want to delete Round ${editingRoundIndex + 1}?`)) return;
+
+            const targetRound = workingRounds[editingRoundIndex];
+            if (targetRound.id) {
+                try {
+                    const res = await deleteJson(`/game/growth-100/round/${targetRound.id}`);
+                    if (res.success) {
+                        rounds = res.rounds;
+                        window.BYC_GAME2.rounds = rounds;
+                        workingRounds = JSON.parse(JSON.stringify(rounds));
+                        currentIndex = Math.max(0, Math.min(currentIndex, rounds.length - 1));
+                        editingRoundIndex = Math.max(0, Math.min(editingRoundIndex, workingRounds.length - 1));
+                        updateRoundUI();
+                        selectEditorRoundIndex(editingRoundIndex);
+                    }
+                } catch (err) {
+                    alert('Failed to delete round: ' + err.message);
                 }
-            } catch (err) {
-                alert('Gagal menghapus soal survei: ' + err.message);
+            } else {
+                workingRounds.splice(editingRoundIndex, 1);
+                editingRoundIndex = Math.max(0, editingRoundIndex - 1);
+                selectEditorRoundIndex(editingRoundIndex);
             }
         });
     }
 
+    // Save active single round
     if (btnSaveRound) {
         btnSaveRound.addEventListener('click', async () => {
-            const question = inputQuestion.value.trim();
-            if (!question) {
-                alert('Pertanyaan survei tidak boleh kosong.');
+            flushActiveFormToWorkingRound();
+            const validation = validateSingleRound(workingRounds[editingRoundIndex], editingRoundIndex + 1);
+            if (!validation.valid) {
+                alert(validation.error);
                 return;
             }
 
-            const answers = [];
-            let totalScore = 0;
-
-            answersContainer.querySelectorAll('.answer-edit-row').forEach((row) => {
-                const text = row.querySelector('.input-ans-text').value.trim();
-                const score = parseInt(row.querySelector('.input-ans-score').value, 10) || 0;
-                answers.push({ text, score });
-                totalScore += score;
-            });
-
-            if (totalScore !== 100) {
-                alert(`Total seluruh poin jawaban harus tepat 100. Saat ini berjumlah ${totalScore}.`);
-                return;
-            }
+            const current = workingRounds[editingRoundIndex];
 
             try {
                 btnSaveRound.disabled = true;
-                btnSaveRound.textContent = 'Menyimpan...';
+                btnSaveRound.textContent = 'Saving...';
 
                 const payload = {
-                    id: inputId.value ? parseInt(inputId.value, 10) : null,
-                    question,
-                    answers,
+                    id: current.id || null,
+                    question: current.question,
+                    answers: current.answers,
                 };
 
                 const res = await postJson('/game/growth-100/round', payload);
@@ -480,10 +556,62 @@ export function initGrowth100() {
                     closeModal();
                 }
             } catch (err) {
-                alert('Gagal menyimpan soal survei: ' + err.message);
+                alert('Failed to save round: ' + err.message);
             } finally {
                 btnSaveRound.disabled = false;
-                btnSaveRound.textContent = 'Simpan perubahan';
+                btnSaveRound.textContent = 'Save Round';
+            }
+        });
+    }
+
+    // Batch Save All Questions in One Operation
+    if (btnSaveBatch) {
+        btnSaveBatch.addEventListener('click', async () => {
+            flushActiveFormToWorkingRound();
+
+            if (workingRounds.length === 0) {
+                alert('At least 1 round is required.');
+                return;
+            }
+
+            // Validate every round in the batch
+            for (let i = 0; i < workingRounds.length; i++) {
+                const validation = validateSingleRound(workingRounds[i], i + 1);
+                if (!validation.valid) {
+                    selectEditorRoundIndex(i);
+                    alert(validation.error);
+                    return;
+                }
+            }
+
+            try {
+                btnSaveBatch.disabled = true;
+                btnSaveBatch.textContent = 'Saving Batch...';
+
+                const payload = {
+                    rounds: workingRounds.map((r) => ({
+                        id: r.id || null,
+                        question: r.question.trim(),
+                        answers: r.answers.map((a) => ({
+                            text: a.text.trim(),
+                            score: parseInt(a.score, 10) || 0,
+                        })),
+                    })),
+                };
+
+                const res = await postJson('/game/growth-100/batch', payload);
+                if (res.success) {
+                    rounds = res.rounds;
+                    window.BYC_GAME2.rounds = rounds;
+                    currentIndex = Math.max(0, Math.min(currentIndex, rounds.length - 1));
+                    updateRoundUI();
+                    closeModal();
+                }
+            } catch (err) {
+                alert('Batch save failed: ' + err.message);
+            } finally {
+                btnSaveBatch.disabled = false;
+                btnSaveBatch.textContent = 'Save All Questions (Batch)';
             }
         });
     }

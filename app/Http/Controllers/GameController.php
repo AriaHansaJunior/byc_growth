@@ -38,6 +38,7 @@ class GameController extends Controller
     {
         $scores = $this->storageService->getFinalScores();
         $gameState = $this->storageService->getGameState();
+        $teams = $this->storageService->getTeamsWithScores();
 
         $games = [
             [
@@ -69,6 +70,7 @@ class GameController extends Controller
         return view('pages.game-center', [
             'finalScores' => $scores,
             'gameState' => $gameState,
+            'teams' => $teams,
             'games' => $games,
         ]);
     }
@@ -80,10 +82,12 @@ class GameController extends Controller
     {
         $rounds = $this->storageService->getGuessMeRounds();
         $gameState = $this->storageService->getGameState();
+        $teams = $this->storageService->getTeamsWithScores('game1');
 
         return view('pages.guess-me', [
             'rounds' => $rounds,
             'game1State' => $gameState['game1'],
+            'teams' => $teams,
         ]);
     }
 
@@ -94,10 +98,12 @@ class GameController extends Controller
     {
         $rounds = $this->storageService->getGrowth100Rounds();
         $gameState = $this->storageService->getGameState();
+        $teams = $this->storageService->getTeamsWithScores('game2');
 
         return view('pages.growth-100', [
             'rounds' => $rounds,
             'game2State' => $gameState['game2'],
+            'teams' => $teams,
         ]);
     }
 
@@ -107,20 +113,115 @@ class GameController extends Controller
     public function finalScore()
     {
         $scores = $this->storageService->getFinalScores();
+        $teams = $this->storageService->getTeamsWithScores();
 
         return view('pages.final', [
             'scores' => $scores,
+            'teams' => $teams,
         ]);
     }
 
     /**
-     * Update scores for Game 1 or Game 2
+     * Configure dynamic teams (add, rename, update colors)
+     */
+    public function configureTeams(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'teams' => 'required|array|min:2',
+            'teams.*.id' => 'nullable|integer',
+            'teams.*.name' => 'required|string|max:100',
+            'teams.*.color' => 'nullable|string|max:20',
+        ]);
+
+        $result = $this->storageService->configureTeams($validated['teams']);
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Universal round point assignment: assign round points to one team, transferring from previous.
+     */
+    public function assignRoundPoints(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'game' => 'required|in:game1,game2',
+            'round_id' => 'required|integer',
+            'team_id' => 'nullable|integer',
+            'points_override' => 'nullable|integer|min:0',
+        ]);
+
+        $result = $this->storageService->assignRoundPoints(
+            $validated['game'],
+            (int) $validated['round_id'],
+            isset($validated['team_id']) ? (int) $validated['team_id'] : null,
+            isset($validated['points_override']) ? (int) $validated['points_override'] : null
+        );
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Batch save multiple Guess Me rounds in one atomic transaction
+     */
+    public function saveGuessMeBatchRounds(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'rounds' => 'required|array|min:1',
+            'rounds.*.id' => 'nullable|integer',
+            'rounds.*.correct_answer' => 'required|string',
+            'rounds.*.clue' => 'required|string',
+            'rounds.*.score' => 'required|integer|min:1',
+            'rounds.*.image' => 'nullable|string',
+        ]);
+
+        $result = $this->storageService->saveGuessMeBatchRounds($validated['rounds']);
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Batch save multiple Growth 100 rounds in one atomic transaction
+     */
+    public function saveGrowth100BatchRounds(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'rounds' => 'required|array|min:1',
+            'rounds.*.id' => 'nullable|integer',
+            'rounds.*.question' => 'required|string',
+            'rounds.*.answers' => 'required|array|min:1',
+            'rounds.*.answers.*.text' => 'required|string',
+            'rounds.*.answers.*.score' => 'required|integer|min:1',
+        ]);
+
+        $result = $this->storageService->saveGrowth100BatchRounds($validated['rounds']);
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Update scores for Game 1 or Game 2 for any dynamic team
      */
     public function updateScore(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'game' => 'required|in:game1,game2',
-            'team' => 'required|in:red,blue',
+            'team' => 'required',
             'amount' => 'required|integer',
             'is_absolute' => 'nullable|boolean',
         ]);
@@ -131,6 +232,10 @@ class GameController extends Controller
             (int) $validated['amount'],
             (bool) ($validated['is_absolute'] ?? false)
         );
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
 
         return response()->json($result);
     }
