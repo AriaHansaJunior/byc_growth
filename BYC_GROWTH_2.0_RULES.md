@@ -12,11 +12,13 @@ This document serves as the **single general reference and source of truth** for
 ---
 
 ## 2. Device & Responsiveness Rules
-- **Primary Target**: Desktop and laptop screens are the primary priority.
+- **Primary Optimization Target**: **2560 × 1600** (user's primary laptop resolution).
+- **Target Device Class**: Desktop and laptop displays only for now.
 - **Excluded Devices**: Mobile and tablet responsiveness are **NOT** part of the current scope.
-- **Viewport Adaptation**: Desktop layouts must gracefully adapt to standard desktop and laptop screen viewports (ranging from 1024px up to 1920px+).
-- **No-Scroll Rule for Gameplay**: Gameplay screens (e.g. Guess Me!, BYC Growth 100, and any future gameplay arenas) must be compact and fit within the viewport so the host/game master does not need to scroll during an active game session.
+- **Viewport Adaptation**: Layouts must still adapt reasonably to other standard desktop and laptop screen viewports (e.g. 1024px, 1280px, 1440px, 1920px up to 2560px+).
+- **No-Scroll Rule for Gameplay**: Gameplay screens (e.g. Guess Me!, BYC Growth 100, and any future gameplay arenas) must remain compact and fit within the viewport so the host/game master does not need to scroll during an active game session.
 - **Scroll Allowance for Long Content**: The Homepage, Members page, and Cash Management transaction tables are explicitly permitted to scroll vertically, as their records and content naturally grow in length.
+- **Scope Discipline**: Do not redesign unrelated UI components while maintaining responsiveness.
 
 ---
 

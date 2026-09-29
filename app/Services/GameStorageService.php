@@ -2,233 +2,165 @@
 
 namespace App\Services;
 
+use App\Models\Game;
+use App\Models\GameAnswer;
+use App\Models\GameRound;
+use App\Models\GameScore;
+use App\Models\GameState;
+use App\Models\MediaFile;
+use App\Models\Team;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
 class GameStorageService
 {
-    protected string $storageDir;
-    protected string $imagesDir;
     protected string $publicImagesDir;
-    protected string $gameStatePath;
-    protected string $guessMePath;
-    protected string $growth100Path;
 
     public function __construct()
     {
-        $this->storageDir = storage_path('app/game');
-        $this->imagesDir = storage_path('app/game/images');
         $this->publicImagesDir = public_path('assets/images');
 
-        $this->gameStatePath = $this->storageDir . '/game-state.json';
-        $this->guessMePath = $this->storageDir . '/guess-me.json';
-        $this->growth100Path = $this->storageDir . '/growth-100.json';
-
-        $this->ensureDirectoriesAndFilesExist();
-    }
-
-    /**
-     * Ensure storage directories and JSON files exist with proper permissions.
-     */
-    protected function ensureDirectoriesAndFilesExist(): void
-    {
-        if (!File::isDirectory($this->storageDir)) {
-            File::makeDirectory($this->storageDir, 0755, true);
-        }
-        if (!File::isDirectory($this->imagesDir)) {
-            File::makeDirectory($this->imagesDir, 0755, true);
-        }
         if (!File::isDirectory($this->publicImagesDir)) {
             File::makeDirectory($this->publicImagesDir, 0755, true);
         }
-
-        if (!File::exists($this->gameStatePath)) {
-            $this->saveGameState($this->getDefaultGameState());
-        }
-
-        if (!File::exists($this->guessMePath)) {
-            $this->saveGuessMeRounds($this->getDefaultGuessMeRounds());
-        }
-
-        if (!File::exists($this->growth100Path)) {
-            $this->saveGrowth100Rounds($this->getDefaultGrowth100Rounds());
-        }
     }
 
     /**
-     * Default initial game state (Red: 0, Blue: 0).
+     * Get or create Game model by code.
      */
-    public function getDefaultGameState(): array
+    protected function getGame(string $code): Game
     {
-        return [
-            'game1' => [
-                'scores' => ['red' => 0, 'blue' => 0],
-                'current_round' => 0,
-                'revealed' => [],
-            ],
-            'game2' => [
-                'scores' => ['red' => 0, 'blue' => 0],
-                'current_round' => 0,
-                'crosses' => [],
-                'revealed' => [],
-            ],
-        ];
-    }
-
-    public function getDefaultGuessMeRounds(): array
-    {
-        return [
+        return Game::firstOrCreate(
+            ['code' => $code],
             [
-                'id' => 1,
-                'image' => 'BYC_Growth.jpg',
-                'correct_answer' => 'GROOT',
-                'clue' => 'G _ O _ T',
-                'score' => 20,
-            ],
-            [
-                'id' => 2,
-                'image' => 'Screenshot_2026-09-28_144605.png',
-                'correct_answer' => 'TUMBUH',
-                'clue' => 'T _ M _ U H',
-                'score' => 25,
-            ],
-            [
-                'id' => 3,
-                'image' => 'Screenshot_2026-09-28_145555.png',
-                'correct_answer' => 'KOMPAK',
-                'clue' => 'K O _ P _ K',
-                'score' => 30,
-            ],
-        ];
-    }
-
-    public function getDefaultGrowth100Rounds(): array
-    {
-        return [
-            [
-                'id' => 1,
-                'question' => 'Apa hal yang membuat sebuah tim terus bertumbuh?',
-                'answers' => [
-                    ['text' => 'Komunikasi yang jujur', 'score' => 30, 'revealed' => false],
-                    ['text' => 'Saling percaya', 'score' => 24, 'revealed' => false],
-                    ['text' => 'Tujuan yang sama', 'score' => 18, 'revealed' => false],
-                    ['text' => 'Mau belajar', 'score' => 12, 'revealed' => false],
-                    ['text' => 'Saling mendukung', 'score' => 10, 'revealed' => false],
-                    ['text' => 'Evaluasi rutin', 'score' => 6, 'revealed' => false],
-                ],
-            ],
-            [
-                'id' => 2,
-                'question' => 'Kebiasaan apa yang dilakukan pemimpin yang baik?',
-                'answers' => [
-                    ['text' => 'Mendengarkan tim', 'score' => 28, 'revealed' => false],
-                    ['text' => 'Memberi teladan', 'score' => 23, 'revealed' => false],
-                    ['text' => 'Memberi arahan jelas', 'score' => 19, 'revealed' => false],
-                    ['text' => 'Mengapresiasi', 'score' => 14, 'revealed' => false],
-                    ['text' => 'Menerima masukan', 'score' => 10, 'revealed' => false],
-                    ['text' => 'Konsisten', 'score' => 6, 'revealed' => false],
-                ],
-            ],
-            [
-                'id' => 3,
-                'question' => 'Apa yang membuat suasana kerja terasa menyenangkan?',
-                'answers' => [
-                    ['text' => 'Rekan yang suportif', 'score' => 31, 'revealed' => false],
-                    ['text' => 'Komunikasi terbuka', 'score' => 22, 'revealed' => false],
-                    ['text' => 'Apresiasi', 'score' => 17, 'revealed' => false],
-                    ['text' => 'Lingkungan nyaman', 'score' => 13, 'revealed' => false],
-                    ['text' => 'Pekerjaan bermakna', 'score' => 10, 'revealed' => false],
-                    ['text' => 'Humor yang sehat', 'score' => 7, 'revealed' => false],
-                ],
-            ],
-        ];
+                'title' => $code === 'game1' ? 'Guess Me!' : 'BYC Growth 100',
+                'description' => $code === 'game1' ? 'Guess secret answer from clues' : 'Top survey answers challenge',
+                'is_active' => true,
+            ]
+        );
     }
 
     /**
-     * Read Game State
+     * Get or create Team model by code.
+     */
+    protected function getTeam(string $code): Team
+    {
+        return Team::firstOrCreate(
+            ['code' => $code],
+            [
+                'name' => ucfirst($code) . ' Team',
+                'color' => $code === 'red' ? '#bd4c42' : '#315e89',
+            ]
+        );
+    }
+
+    /**
+     * Get persistent game state from MySQL.
      */
     public function getGameState(): array
     {
-        if (!File::exists($this->gameStatePath)) {
-            $default = $this->getDefaultGameState();
-            $this->saveGameState($default);
-            return $default;
-        }
+        $game1 = $this->getGame('game1');
+        $game2 = $this->getGame('game2');
+        $red = $this->getTeam('red');
+        $blue = $this->getTeam('blue');
 
-        $content = File::get($this->gameStatePath);
-        $data = json_decode($content, true);
+        $g1State = GameState::firstOrCreate(
+            ['game_id' => $game1->id],
+            ['current_round_index' => 0, 'state_data' => ['revealed' => []]]
+        );
 
-        if (!is_array($data) || !isset($data['game1']) || !isset($data['game2'])) {
-            $default = $this->getDefaultGameState();
-            $this->saveGameState($default);
-            return $default;
-        }
+        $g2State = GameState::firstOrCreate(
+            ['game_id' => $game2->id],
+            ['current_round_index' => 0, 'state_data' => ['crosses' => [], 'revealed' => []]]
+        );
 
-        return $data;
+        $g1RedScore = GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $red->id], ['score' => 0]);
+        $g1BlueScore = GameScore::firstOrCreate(['game_id' => $game1->id, 'team_id' => $blue->id], ['score' => 0]);
+
+        $g2RedScore = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $red->id], ['score' => 0]);
+        $g2BlueScore = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $blue->id], ['score' => 0]);
+
+        return [
+            'game1' => [
+                'scores' => [
+                    'red' => (int) $g1RedScore->score,
+                    'blue' => (int) $g1BlueScore->score,
+                ],
+                'current_round' => (int) $g1State->current_round_index,
+                'revealed' => (array) ($g1State->state_data['revealed'] ?? []),
+            ],
+            'game2' => [
+                'scores' => [
+                    'red' => (int) $g2RedScore->score,
+                    'blue' => (int) $g2BlueScore->score,
+                ],
+                'current_round' => (int) $g2State->current_round_index,
+                'crosses' => (array) ($g2State->state_data['crosses'] ?? []),
+                'revealed' => (array) ($g2State->state_data['revealed'] ?? []),
+            ],
+        ];
     }
 
     /**
-     * Save Game State to storage/app/game/game-state.json
-     */
-    public function saveGameState(array $state): void
-    {
-        File::put($this->gameStatePath, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
-
-    /**
-     * Get Guess Me Rounds
+     * Get Guess Me Rounds from MySQL.
      */
     public function getGuessMeRounds(): array
     {
-        if (!File::exists($this->guessMePath)) {
-            $default = $this->getDefaultGuessMeRounds();
-            $this->saveGuessMeRounds($default);
-            return $default;
-        }
+        $game1 = $this->getGame('game1');
 
-        $content = File::get($this->guessMePath);
-        $data = json_decode($content, true);
+        $rounds = GameRound::with('mediaFile')
+            ->where('game_id', $game1->id)
+            ->orderBy('round_number')
+            ->get();
 
-        return is_array($data) ? $data : [];
+        return $rounds->map(function (GameRound $round) {
+            $imageName = $round->image_path ?: ($round->mediaFile ? $round->mediaFile->original_name : 'BYC_Growth.jpg');
+
+            return [
+                'id' => (int) $round->id,
+                'round_number' => (int) $round->round_number,
+                'image' => $imageName,
+                'correct_answer' => $round->correct_answer,
+                'clue' => $round->clue,
+                'score' => (int) $round->score,
+            ];
+        })->toArray();
     }
 
     /**
-     * Save Guess Me Rounds to storage/app/game/guess-me.json
-     */
-    public function saveGuessMeRounds(array $rounds): void
-    {
-        File::put($this->guessMePath, json_encode(array_values($rounds), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
-
-    /**
-     * Get Growth 100 Rounds
+     * Get Growth 100 Rounds from MySQL.
      */
     public function getGrowth100Rounds(): array
     {
-        if (!File::exists($this->growth100Path)) {
-            $default = $this->getDefaultGrowth100Rounds();
-            $this->saveGrowth100Rounds($default);
-            return $default;
-        }
+        $game2 = $this->getGame('game2');
 
-        $content = File::get($this->growth100Path);
-        $data = json_decode($content, true);
+        $rounds = GameRound::with(['answers' => function ($query) {
+            $query->orderByDesc('points')->orderBy('sort_order');
+        }])
+            ->where('game_id', $game2->id)
+            ->orderBy('round_number')
+            ->get();
 
-        return is_array($data) ? $data : [];
+        return $rounds->map(function (GameRound $round) {
+            return [
+                'id' => (int) $round->id,
+                'round_number' => (int) $round->round_number,
+                'question' => $round->question,
+                'answers' => $round->answers->map(function (GameAnswer $ans) {
+                    return [
+                        'id' => (int) $ans->id,
+                        'text' => $ans->answer_text,
+                        'score' => (int) $ans->points,
+                        'revealed' => (bool) $ans->is_revealed,
+                    ];
+                })->toArray(),
+            ];
+        })->toArray();
     }
 
     /**
-     * Save Growth 100 Rounds to storage/app/game/growth-100.json
-     */
-    public function saveGrowth100Rounds(array $rounds): void
-    {
-        File::put($this->growth100Path, json_encode(array_values($rounds), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    }
-
-    /**
-     * Calculate Final Scores
-     * Final Red = Game 1 Red + Game 2 Red
-     * Final Blue = Game 1 Blue + Game 2 Blue
+     * Calculate Final Scores from MySQL.
      */
     public function getFinalScores(): array
     {
@@ -255,9 +187,7 @@ class GameStorageService
     }
 
     /**
-     * Validate Clue vs Answer
-     * - jumlah karakter clue = jumlah karakter jawaban
-     * - posisi huruf yang terlihat harus sama
+     * Validate Clue vs Answer format and character matching.
      */
     public function validateClue(string $answer, string $clue): array
     {
@@ -265,17 +195,15 @@ class GameStorageService
         $trimmedClue = trim($clue);
 
         if ($cleanAnswer === '') {
-            return ['valid' => false, 'error' => 'Jawaban tidak boleh kosong.'];
+            return ['valid' => false, 'error' => 'Answer cannot be empty.'];
         }
         if ($trimmedClue === '') {
-            return ['valid' => false, 'error' => 'Clue tidak boleh kosong.'];
+            return ['valid' => false, 'error' => 'Clue cannot be empty.'];
         }
 
-        // Support both "_ A _ A _" and "_A_A_"
         $answerChars = mb_str_split($cleanAnswer);
         $answerLen = count($answerChars);
 
-        // Check if clue has spaces separating every character/wildcard
         $clueCharsDirect = mb_str_split($trimmedClue);
         $clueNoSpaces = mb_str_split(str_replace(' ', '', $trimmedClue));
 
@@ -284,14 +212,13 @@ class GameStorageService
         } elseif (count($clueNoSpaces) === $answerLen) {
             $clueTokens = $clueNoSpaces;
         } else {
-            // Also check space-split tokens (e.g. "_ A _ A _")
             $tokens = array_values(array_filter(explode(' ', $trimmedClue), fn($c) => $c !== ''));
             if (count($tokens) === $answerLen) {
                 $clueTokens = $tokens;
             } else {
                 return [
                     'valid' => false,
-                    'error' => "Jumlah karakter clue (" . count($clueNoSpaces) . ") harus sama dengan jumlah karakter jawaban ({$answerLen}).",
+                    'error' => "Clue length (" . count($clueNoSpaces) . ") must match answer length ({$answerLen}).",
                 ];
             }
         }
@@ -300,7 +227,6 @@ class GameStorageService
             $c = strtoupper($clueTokens[$i]);
             $a = $answerChars[$i];
 
-            // If clue has wildcard character: _ or - or .
             if ($c === '_' || $c === '-' || $c === '.') {
                 continue;
             }
@@ -308,7 +234,7 @@ class GameStorageService
             if ($c !== $a) {
                 return [
                     'valid' => false,
-                    'error' => "Karakter posisi ke-" . ($i + 1) . " ('{$c}') berbeda dengan huruf pada jawaban ('{$a}').",
+                    'error' => "Character at position " . ($i + 1) . " ('{$c}') does not match letter in answer ('{$a}').",
                 ];
             }
         }
@@ -317,14 +243,12 @@ class GameStorageService
     }
 
     /**
-     * Validate Growth 100 Answers
-     * - Total score must be exactly 100
-     * - Auto-sort descending by score
+     * Validate Growth 100 Answers.
      */
     public function validateGrowthAnswers(array $answers): array
     {
         if (empty($answers)) {
-            return ['valid' => false, 'error' => 'Daftar jawaban tidak boleh kosong.'];
+            return ['valid' => false, 'error' => 'Answer list cannot be empty.'];
         }
 
         $totalScore = 0;
@@ -332,13 +256,13 @@ class GameStorageService
 
         foreach ($answers as $index => $ans) {
             $text = trim($ans['text'] ?? '');
-            $score = (int) ($ans['score'] ?? 0);
+            $score = (int) ($ans['score'] ?? $ans['points'] ?? 0);
 
             if ($text === '') {
-                return ['valid' => false, 'error' => "Jawaban nomor " . ($index + 1) . " tidak boleh kosong."];
+                return ['valid' => false, 'error' => "Answer number " . ($index + 1) . " cannot be empty."];
             }
             if ($score < 1) {
-                return ['valid' => false, 'error' => "Poin untuk jawaban '{$text}' harus minimal 1."];
+                return ['valid' => false, 'error' => "Points for answer '{$text}' must be at least 1."];
             }
 
             $totalScore += $score;
@@ -352,18 +276,17 @@ class GameStorageService
         if ($totalScore !== 100) {
             return [
                 'valid' => false,
-                'error' => "Total score seluruh jawaban harus tepat 100. Saat ini berjumlah {$totalScore}.",
+                'error' => "Total score of all answers must equal exactly 100. Current sum is {$totalScore}.",
             ];
         }
 
-        // Auto sort ranking: highest score -> rank 1
         usort($sanitized, fn($a, $b) => $b['score'] <=> $a['score']);
 
         return ['valid' => true, 'answers' => $sanitized, 'error' => null];
     }
 
     /**
-     * Add or update Guess Me round
+     * Add or update Guess Me round in MySQL.
      */
     public function saveGuessMeRound(array $data, ?UploadedFile $imageFile = null): array
     {
@@ -377,17 +300,15 @@ class GameStorageService
             return ['success' => false, 'error' => $validation['error']];
         }
 
-        $rounds = $this->getGuessMeRounds();
-        $targetIndex = null;
+        $game1 = $this->getGame('game1');
         $existingImage = 'BYC_Growth.jpg';
+        $mediaFileId = null;
 
         if ($id !== null) {
-            foreach ($rounds as $idx => $round) {
-                if ((int) $round['id'] === $id) {
-                    $targetIndex = $idx;
-                    $existingImage = $round['image'] ?? 'BYC_Growth.jpg';
-                    break;
-                }
+            $existingRound = GameRound::where('game_id', $game1->id)->find($id);
+            if ($existingRound) {
+                $existingImage = $existingRound->image_path ?: 'BYC_Growth.jpg';
+                $mediaFileId = $existingRound->media_file_id;
             }
         }
 
@@ -396,61 +317,73 @@ class GameStorageService
         if ($imageFile instanceof UploadedFile && $imageFile->isValid()) {
             $extension = $imageFile->getClientOriginalExtension();
             $imageName = 'guess_' . time() . '_' . uniqid() . '.' . $extension;
-            $imageFile->move($this->imagesDir, $imageName);
-            // Also copy to public directory for immediate serving
-            File::copy($this->imagesDir . '/' . $imageName, $this->publicImagesDir . '/' . $imageName);
+            $imageFile->move($this->publicImagesDir, $imageName);
+
+            $media = MediaFile::create([
+                'disk' => 'public',
+                'file_path' => 'assets/images/' . $imageName,
+                'original_name' => $imageFile->getClientOriginalName(),
+                'mime_type' => $imageFile->getClientMimeType() ?: 'image/jpeg',
+                'file_size' => File::size($this->publicImagesDir . '/' . $imageName),
+            ]);
+            $mediaFileId = $media->id;
         }
 
-        if ($targetIndex !== null) {
-            $rounds[$targetIndex] = [
-                'id' => $id,
-                'image' => $imageName,
+        if ($id !== null && $existingRound = GameRound::where('game_id', $game1->id)->find($id)) {
+            $existingRound->update([
                 'correct_answer' => strtoupper($answer),
                 'clue' => $clue,
                 'score' => $score,
-            ];
+                'image_path' => $imageName,
+                'media_file_id' => $mediaFileId,
+            ]);
         } else {
-            $newId = empty($rounds) ? 1 : (max(array_column($rounds, 'id')) + 1);
-            $rounds[] = [
-                'id' => $newId,
-                'image' => $imageName,
+            $maxRound = (int) GameRound::where('game_id', $game1->id)->max('round_number');
+            GameRound::create([
+                'game_id' => $game1->id,
+                'round_number' => $maxRound + 1,
                 'correct_answer' => strtoupper($answer),
                 'clue' => $clue,
                 'score' => $score,
-            ];
+                'image_path' => $imageName,
+                'media_file_id' => $mediaFileId,
+            ]);
         }
 
-        $this->saveGuessMeRounds($rounds);
-
-        return ['success' => true, 'rounds' => $rounds];
+        return ['success' => true, 'rounds' => $this->getGuessMeRounds()];
     }
 
     /**
-     * Delete Guess Me round
+     * Delete Guess Me round from MySQL.
      */
     public function deleteGuessMeRound(int $id): array
     {
-        $rounds = $this->getGuessMeRounds();
-        $rounds = array_values(array_filter($rounds, fn($r) => (int) $r['id'] !== $id));
+        $game1 = $this->getGame('game1');
+        $round = GameRound::where('game_id', $game1->id)->find($id);
 
-        if (empty($rounds)) {
-            return ['success' => false, 'error' => 'Minimal harus menyisakan 1 ronde.'];
+        if (!$round) {
+            return ['success' => false, 'error' => 'Round not found.'];
         }
 
-        $this->saveGuessMeRounds($rounds);
+        $totalCount = GameRound::where('game_id', $game1->id)->count();
+        if ($totalCount <= 1) {
+            return ['success' => false, 'error' => 'At least 1 round must remain.'];
+        }
+
+        $round->delete();
 
         // Adjust state if current_round is out of bounds
-        $state = $this->getGameState();
-        if ($state['game1']['current_round'] >= count($rounds)) {
-            $state['game1']['current_round'] = max(0, count($rounds) - 1);
-            $this->saveGameState($state);
+        $rounds = $this->getGuessMeRounds();
+        $state = GameState::where('game_id', $game1->id)->first();
+        if ($state && $state->current_round_index >= count($rounds)) {
+            $state->update(['current_round_index' => max(0, count($rounds) - 1)]);
         }
 
         return ['success' => true, 'rounds' => $rounds];
     }
 
     /**
-     * Add or update Growth 100 round
+     * Add or update Growth 100 round in MySQL.
      */
     public function saveGrowth100Round(array $data): array
     {
@@ -459,7 +392,7 @@ class GameStorageService
         $id = isset($data['id']) && $data['id'] !== '' ? (int) $data['id'] : null;
 
         if ($question === '') {
-            return ['success' => false, 'error' => 'Pertanyaan tidak boleh kosong.'];
+            return ['success' => false, 'error' => 'Question cannot be empty.'];
         }
 
         $validation = $this->validateGrowthAnswers($answers);
@@ -467,183 +400,226 @@ class GameStorageService
             return ['success' => false, 'error' => $validation['error']];
         }
 
-        $rounds = $this->getGrowth100Rounds();
-        $targetIndex = null;
+        $game2 = $this->getGame('game2');
 
-        if ($id !== null) {
-            foreach ($rounds as $idx => $round) {
-                if ((int) $round['id'] === $id) {
-                    $targetIndex = $idx;
-                    break;
-                }
+        return DB::transaction(function () use ($game2, $id, $question, $validation) {
+            if ($id !== null && $round = GameRound::where('game_id', $game2->id)->find($id)) {
+                $round->update([
+                    'question' => $question,
+                ]);
+                $round->answers()->delete();
+            } else {
+                $maxRound = (int) GameRound::where('game_id', $game2->id)->max('round_number');
+                $round = GameRound::create([
+                    'game_id' => $game2->id,
+                    'round_number' => $maxRound + 1,
+                    'question' => $question,
+                    'score' => 100,
+                ]);
             }
-        }
 
-        if ($targetIndex !== null) {
-            $rounds[$targetIndex] = [
-                'id' => $id,
-                'question' => $question,
-                'answers' => $validation['answers'],
-            ];
-        } else {
-            $newId = empty($rounds) ? 1 : (max(array_column($rounds, 'id')) + 1);
-            $rounds[] = [
-                'id' => $newId,
-                'question' => $question,
-                'answers' => $validation['answers'],
-            ];
-        }
+            foreach ($validation['answers'] as $sortIdx => $ans) {
+                GameAnswer::create([
+                    'game_round_id' => $round->id,
+                    'answer_text' => $ans['text'],
+                    'points' => (int) $ans['score'],
+                    'sort_order' => $sortIdx,
+                    'is_revealed' => (bool) ($ans['revealed'] ?? false),
+                ]);
+            }
 
-        $this->saveGrowth100Rounds($rounds);
-
-        return ['success' => true, 'rounds' => $rounds];
+            return ['success' => true, 'rounds' => $this->getGrowth100Rounds()];
+        });
     }
 
     /**
-     * Delete Growth 100 round
+     * Delete Growth 100 round from MySQL.
      */
     public function deleteGrowth100Round(int $id): array
     {
-        $rounds = $this->getGrowth100Rounds();
-        $rounds = array_values(array_filter($rounds, fn($r) => (int) $r['id'] !== $id));
+        $game2 = $this->getGame('game2');
+        $round = GameRound::where('game_id', $game2->id)->find($id);
 
-        if (empty($rounds)) {
-            return ['success' => false, 'error' => 'Minimal harus menyisakan 1 ronde.'];
+        if (!$round) {
+            return ['success' => false, 'error' => 'Round not found.'];
         }
 
-        $this->saveGrowth100Rounds($rounds);
+        $totalCount = GameRound::where('game_id', $game2->id)->count();
+        if ($totalCount <= 1) {
+            return ['success' => false, 'error' => 'At least 1 round must remain.'];
+        }
+
+        $round->delete();
 
         // Adjust state if current_round is out of bounds
-        $state = $this->getGameState();
-        if ($state['game2']['current_round'] >= count($rounds)) {
-            $state['game2']['current_round'] = max(0, count($rounds) - 1);
-            $this->saveGameState($state);
+        $rounds = $this->getGrowth100Rounds();
+        $state = GameState::where('game_id', $game2->id)->first();
+        if ($state && $state->current_round_index >= count($rounds)) {
+            $state->update(['current_round_index' => max(0, count($rounds) - 1)]);
         }
 
         return ['success' => true, 'rounds' => $rounds];
     }
 
     /**
-     * Update scores for Game 1 or Game 2
+     * Update scores for Game 1 or Game 2 in MySQL.
      */
-    public function updateScore(string $game, string $team, int $amount, bool $isAbsolute = false): array
+    public function updateScore(string $gameCode, string $teamCode, int $amount, bool $isAbsolute = false): array
     {
-        if (!in_array($game, ['game1', 'game2']) || !in_array($team, ['red', 'blue'])) {
+        if (!in_array($gameCode, ['game1', 'game2']) || !in_array($teamCode, ['red', 'blue'])) {
             return ['success' => false, 'error' => 'Invalid game or team.'];
         }
 
-        $state = $this->getGameState();
-        $currentScore = (int) ($state[$game]['scores'][$team] ?? 0);
+        $game = $this->getGame($gameCode);
+        $team = $this->getTeam($teamCode);
+
+        $gameScore = GameScore::firstOrCreate(
+            ['game_id' => $game->id, 'team_id' => $team->id],
+            ['score' => 0]
+        );
 
         if ($isAbsolute) {
             $newScore = max(0, $amount);
         } else {
-            $newScore = max(0, $currentScore + $amount);
+            $newScore = max(0, (int) $gameScore->score + $amount);
         }
 
-        $state[$game]['scores'][$team] = $newScore;
-        $this->saveGameState($state);
+        $gameScore->update(['score' => $newScore]);
+
+        $state = $this->getGameState();
 
         return [
             'success' => true,
-            'scores' => $state[$game]['scores'],
+            'scores' => $state[$gameCode]['scores'],
             'final_scores' => $this->getFinalScores(),
         ];
     }
 
     /**
-     * Update Game 1 active round or reveal state
+     * Update Game 1 active round or reveal state in MySQL.
      */
     public function updateGame1State(int $roundIndex, ?bool $revealed = null): array
     {
-        $state = $this->getGameState();
+        $game1 = $this->getGame('game1');
         $rounds = $this->getGuessMeRounds();
 
-        $roundIndex = max(0, min(count($rounds) - 1, $roundIndex));
-        $state['game1']['current_round'] = $roundIndex;
-
+        $roundIndex = max(0, min(max(0, count($rounds) - 1), $roundIndex));
         $roundId = (string) ($rounds[$roundIndex]['id'] ?? ($roundIndex + 1));
 
+        $state = GameState::firstOrCreate(
+            ['game_id' => $game1->id],
+            ['current_round_index' => 0, 'state_data' => ['revealed' => []]]
+        );
+
+        $data = $state->state_data ?: [];
+        $data['revealed'] = $data['revealed'] ?? [];
+
         if ($revealed !== null) {
-            $state['game1']['revealed'][$roundId] = $revealed;
+            $data['revealed'][$roundId] = $revealed;
         }
 
-        $this->saveGameState($state);
+        $state->update([
+            'current_round_index' => $roundIndex,
+            'state_data' => $data,
+        ]);
 
         return [
             'success' => true,
-            'state' => $state['game1'],
+            'state' => $this->getGameState()['game1'],
         ];
     }
 
     /**
-     * Update Game 2 active round, revealed answers, or crosses
+     * Update Game 2 active round, revealed answers, or crosses in MySQL.
      */
     public function updateGame2State(int $roundIndex, ?int $answerIndex = null, ?bool $revealed = null, ?int $crosses = null, ?bool $revealAll = null): array
     {
-        $state = $this->getGameState();
+        $game2 = $this->getGame('game2');
         $rounds = $this->getGrowth100Rounds();
 
-        $roundIndex = max(0, min(count($rounds) - 1, $roundIndex));
-        $state['game2']['current_round'] = $roundIndex;
-
+        $roundIndex = max(0, min(max(0, count($rounds) - 1), $roundIndex));
         $roundId = (string) ($rounds[$roundIndex]['id'] ?? ($roundIndex + 1));
 
-        if (!isset($state['game2']['revealed'][$roundId])) {
-            $state['game2']['revealed'][$roundId] = [];
+        $state = GameState::firstOrCreate(
+            ['game_id' => $game2->id],
+            ['current_round_index' => 0, 'state_data' => ['crosses' => [], 'revealed' => []]]
+        );
+
+        $data = $state->state_data ?: [];
+        $data['revealed'] = $data['revealed'] ?? [];
+        $data['crosses'] = $data['crosses'] ?? [];
+
+        if (!isset($data['revealed'][$roundId])) {
+            $data['revealed'][$roundId] = [];
         }
-        if (!isset($state['game2']['crosses'][$roundId])) {
-            $state['game2']['crosses'][$roundId] = 0;
+        if (!isset($data['crosses'][$roundId])) {
+            $data['crosses'][$roundId] = 0;
         }
 
         if ($crosses !== null) {
-            $state['game2']['crosses'][$roundId] = max(0, min(3, $crosses));
+            $data['crosses'][$roundId] = max(0, min(3, $crosses));
         }
 
         if ($revealAll === true) {
             $totalAnswers = count($rounds[$roundIndex]['answers'] ?? []);
-            $state['game2']['revealed'][$roundId] = range(0, max(0, $totalAnswers - 1));
+            $data['revealed'][$roundId] = range(0, max(0, $totalAnswers - 1));
         } elseif ($revealAll === false) {
-            $state['game2']['revealed'][$roundId] = [];
+            $data['revealed'][$roundId] = [];
         } elseif ($answerIndex !== null) {
-            $currentRevealed = $state['game2']['revealed'][$roundId] ?? [];
+            $currentRevealed = $data['revealed'][$roundId] ?? [];
             if ($revealed === true && !in_array($answerIndex, $currentRevealed)) {
                 $currentRevealed[] = $answerIndex;
             } elseif ($revealed === false) {
                 $currentRevealed = array_values(array_filter($currentRevealed, fn($idx) => $idx !== $answerIndex));
             } elseif ($revealed === null) {
-                // Toggle
                 if (in_array($answerIndex, $currentRevealed)) {
                     $currentRevealed = array_values(array_filter($currentRevealed, fn($idx) => $idx !== $answerIndex));
                 } else {
                     $currentRevealed[] = $answerIndex;
                 }
             }
-            $state['game2']['revealed'][$roundId] = array_values(array_unique($currentRevealed));
+            $data['revealed'][$roundId] = array_values(array_unique($currentRevealed));
         }
 
-        $this->saveGameState($state);
+        $state->update([
+            'current_round_index' => $roundIndex,
+            'state_data' => $data,
+        ]);
 
         return [
             'success' => true,
-            'state' => $state['game2'],
+            'state' => $this->getGameState()['game2'],
         ];
     }
 
     /**
-     * Reset Game State to initial
-     * Scores = 0, revealed = false, crosses = 0, current_round = 0
-     * Questions and images are NOT deleted!
+     * Reset Game State to initial in MySQL.
+     * Scores = 0, revealed = [], crosses = [], current_round_index = 0.
+     * Questions and image records are PRESERVED.
      */
     public function resetGame(): array
     {
-        $defaultState = $this->getDefaultGameState();
-        $this->saveGameState($defaultState);
+        $game1 = $this->getGame('game1');
+        $game2 = $this->getGame('game2');
+
+        // Reset all team scores to 0
+        GameScore::query()->update(['score' => 0]);
+
+        // Reset game states
+        GameState::where('game_id', $game1->id)->update([
+            'current_round_index' => 0,
+            'state_data' => ['revealed' => []],
+        ]);
+
+        GameState::where('game_id', $game2->id)->update([
+            'current_round_index' => 0,
+            'state_data' => ['crosses' => [], 'revealed' => []],
+        ]);
 
         return [
             'success' => true,
-            'message' => 'Game state berhasil di-reset ke kondisi awal.',
-            'state' => $defaultState,
+            'message' => 'Game state reset successfully in MySQL.',
+            'state' => $this->getGameState(),
             'final_scores' => $this->getFinalScores(),
         ];
     }
