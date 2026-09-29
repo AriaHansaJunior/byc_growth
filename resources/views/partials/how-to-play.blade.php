@@ -1,11 +1,11 @@
 <div class="modal-backdrop" id="modal-how-to-play" style="display: none;">
-    <section aria-label="Cara bermain" class="info-modal">
+    <section aria-label="How to play guide" class="info-modal">
         <div class="modal-heading">
             <div>
-                <span class="eyebrow">Panduan Resmi Permainan</span>
-                <h2>Cara Bermain</h2>
+                <span class="eyebrow">Official Game Guide</span>
+                <h2>How to Play</h2>
             </div>
-            <button type="button" aria-label="Tutup panduan" class="icon-button" id="btn-close-how-to-play">
+            <button type="button" aria-label="Close guide" class="icon-button" id="btn-close-how-to-play">
                 <x-icon name="x" />
             </button>
         </div>
@@ -13,10 +13,10 @@
         {{-- Tab Switcher --}}
         <div class="how-tabs-nav" style="padding: 20px 30px 0; display: flex; gap: 10px;">
             <button type="button" class="how-tab-btn active" id="tab-btn-guess" data-tab="guess">
-                <span class="tab-badge">01</span> Cara Bermain — Guess Me!
+                <span class="tab-badge">01</span> How to Play — Guess Me!
             </button>
             <button type="button" class="how-tab-btn" id="tab-btn-growth" data-tab="growth">
-                <span class="tab-badge">02</span> Cara Bermain — BYC Growth 100
+                <span class="tab-badge">02</span> How to Play — BYC Growth 100
             </button>
         </div>
 
@@ -26,18 +26,18 @@
                 <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
                     <span style="width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--lime); color: var(--forest-dark); font: 800 18px 'Manrope', sans-serif;">01</span>
                     <div>
-                        <h3 style="margin: 0; font: 800 22px 'Manrope', sans-serif; color: var(--forest-dark);">Guess Me! — Rules Permainan</h3>
-                        <small style="color: var(--muted); font-size: 13px;">Uji ketepatan dan kecepatan menebak kata kunci rahasia</small>
+                        <h3 style="margin: 0; font: 800 22px 'Manrope', sans-serif; color: var(--forest-dark);">Guess Me! — Game Rules</h3>
+                        <small style="color: var(--muted); font-size: 13px;">Test precision and speed in guessing secret keywords</small>
                     </div>
                 </div>
                 <ol style="padding-left: 20px; margin: 0; color: var(--ink); line-height: 1.85; font-size: 15px;">
-                    <li>Peserta dibagi menjadi <strong>Tim Red</strong> dan <strong>Tim Blue</strong>.</li>
-                    <li>Host menampilkan gambar dan clue kepada kedua tim secara bersamaan.</li>
-                    <li>Kedua tim berdiskusi dan menuliskan jawaban masing-masing pada secarik kertas.</li>
-                    <li>Setelah jawaban dikumpulkan, host menekan tombol untuk menampilkan jawaban yang benar.</li>
-                    <li>Tim yang menjawab benar memperoleh poin sesuai nominal skor ronde tersebut.</li>
-                    <li>Jika kedua tim menjawab dengan benar, kedua tim sama-sama memperoleh poin ronde yang sama.</li>
-                    <li>Host melanjutkan permainan ke ronde berikutnya dengan menekan tombol navigasi berikutnya.</li>
+                    <li>Participants are divided into <strong>Red Team</strong> and <strong>Blue Team</strong>.</li>
+                    <li>The host displays the clue image and letter slots to both teams simultaneously.</li>
+                    <li>Both teams discuss and write down their answers on paper slips.</li>
+                    <li>Once answers are collected, the host reveals the correct secret word.</li>
+                    <li>Teams that answer correctly are awarded the round's designated points.</li>
+                    <li>If both teams answer correctly, both receive the full round points.</li>
+                    <li>The host proceeds to the next round using the round navigation buttons.</li>
                 </ol>
             </article>
         </div>
@@ -48,40 +48,40 @@
                 <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
                     <span style="width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--gold); color: var(--forest-dark); font: 800 18px 'Manrope', sans-serif;">02</span>
                     <div>
-                        <h3 style="margin: 0; font: 800 22px 'Manrope', sans-serif; color: var(--forest-dark);">BYC GROWTH 100 — Rules Permainan</h3>
-                        <small style="color: var(--muted); font-size: 13px;">Temukan jawaban survei teratas dan kumpulkan hingga 100 poin</small>
+                        <h3 style="margin: 0; font: 800 22px 'Manrope', sans-serif; color: var(--forest-dark);">BYC GROWTH 100 — Game Rules</h3>
+                        <small style="color: var(--muted); font-size: 13px;">Find top survey answers and collect up to 100 points</small>
                     </div>
                 </div>
                 <ol style="padding-left: 20px; margin: 0; color: var(--ink); line-height: 1.8; font-size: 14px;">
-                    <li>Peserta dibagi menjadi <strong>Tim Red</strong> dan <strong>Tim Blue</strong>.</li>
-                    <li>Perwakilan kedua tim maju ke depan untuk menentukan tim yang bermain terlebih dahulu.</li>
-                    <li>Host membacakan pertanyaan survei kepada kedua perwakilan.</li>
-                    <li>Perwakilan yang lebih dahulu mengangkat tangan mendapat kesempatan pertama menjawab.</li>
-                    <li>Jawaban dibandingkan dengan hasil survey yang ada di papan game.</li>
-                    <li>Tim dengan jawaban yang memiliki ranking lebih tinggi mendapat kesempatan bermain utama.</li>
-                    <li>Pertanyaan yang sama diberikan kepada anggota tim secara bergantian.</li>
-                    <li>Jawaban yang tersedia pada survey akan dibuka oleh host dengan mengklik tile jawaban.</li>
-                    <li>Jawaban yang tidak tersedia menghasilkan satu tanda silang (<span style="color: var(--red); font-weight: 800;">×</span>).</li>
-                    <li>Permainan berlanjut hingga seluruh anggota tim mendapat giliran.</li>
-                    <li>Jika masih ada jawaban yang belum terbuka, pertanyaan kembali diberikan kepada ketua tim.</li>
-                    <li>Jika seluruh jawaban berhasil ditemukan, seluruh akumulasi poin ronde diberikan kepada tim tersebut.</li>
-                    <li>Jika tim melakukan <strong>tiga kesalahan (3× cross)</strong>, kesempatan mencuri poin (steal) diberikan kepada tim lawan.</li>
-                    <li>Tim lawan hanya memiliki <strong>satu kesempatan menjawab</strong>.</li>
-                    <li>Jika jawaban tim lawan tersedia di survey, seluruh poin ronde diberikan kepada tim lawan.</li>
-                    <li>Jika jawaban tim lawan tidak tersedia, poin tetap diberikan kepada tim sebelumnya.</li>
-                    <li>Setelah ronde selesai, sisa jawaban yang belum terbuka dapat dibuka oleh host.</li>
-                    <li>Host memberikan poin ke tim pemenang dan melanjutkan ke ronde berikutnya.</li>
+                    <li>Participants are divided into <strong>Red Team</strong> and <strong>Blue Team</strong>.</li>
+                    <li>Representatives from both teams come forward for a face-off to determine who plays first.</li>
+                    <li>The host reads the survey question to both representatives.</li>
+                    <li>The representative who raises their hand first gets the first opportunity to answer.</li>
+                    <li>The answer is checked against the survey results on the board.</li>
+                    <li>The team with the higher-ranked answer gains control of the round.</li>
+                    <li>The same question is posed to team members in turn.</li>
+                    <li>Answers present on the survey board are revealed by the host by clicking the card tile.</li>
+                    <li>Answers not on the board result in a strike (<span style="color: var(--red); font-weight: 800;">×</span>).</li>
+                    <li>Play continues until all team members have had their turn or all answers are found.</li>
+                    <li>If unrevealed answers remain, the question returns to the team captain.</li>
+                    <li>If all answers are successfully uncovered, all accumulated round points go to that team.</li>
+                    <li>If a team accumulates <strong>three strikes (3× cross)</strong>, the opposing team gets a chance to steal.</li>
+                    <li>The opposing team gets only <strong>one single guess</strong> to steal.</li>
+                    <li>If their answer is on the board, all accumulated points are stolen by the opposing team.</li>
+                    <li>If their answer is not on the board, points remain with the original team.</li>
+                    <li>After the round concludes, any remaining unrevealed answers can be uncovered by the host.</li>
+                    <li>The host awards points to the winning team and advances to the next round.</li>
                 </ol>
             </article>
         </div>
 
         <div class="tip" style="margin: 10px 30px 20px;">
-            <strong>Tips untuk host</strong>
-            <p>Gunakan mode layar penuh (F11) agar seluruh peserta dapat melihat jalannya permainan dengan jelas. Pastikan skor diberikan secara teliti sesuai aturan masing-masing game.</p>
+            <strong>Tips for the Host</strong>
+            <p>Use full-screen mode (F11) so all participants can clearly view the game. Ensure points are awarded accurately according to each game's rules.</p>
         </div>
 
         <button type="button" class="button button-primary" id="btn-start-playing" style="margin: 0 30px 26px; width: calc(100% - 60px);">
-            Siap, mulai bermain
+            Ready, Let's Play
         </button>
     </section>
 </div>

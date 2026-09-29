@@ -13,15 +13,15 @@
 
     {{-- Game Center Hero --}}
     <section class="game-center-hero">
-        <div>
+        <div class="game-center-hero-content">
             <span class="eyebrow">Interactive Gaming Arena</span>
             <h1>BYC Game Center</h1>
             <p>
-                Two games, one team spirit. Test teamwork, solve visual clues, discover top survey answers, and celebrate every growth milestone together.
+                The central arena for BYC Growth fellowship games. Choose a challenge below to launch an active session, test team synergy, and celebrate every growth milestone together.
             </p>
             <div class="game-center-hero-actions">
-                <a href="{{ route('game.guess-me') }}" class="button button-primary">
-                    Play Now <x-icon name="arrow" />
+                <a href="#game-selection" class="button button-primary">
+                    Choose a Game <x-icon name="arrow" />
                 </a>
                 <button type="button" class="button button-secondary" id="btn-how-to-play">
                     <x-icon name="book" /> Rules & How to Play
@@ -34,51 +34,75 @@
 
         <div class="game-center-art-frame">
             <img src="{{ asset('assets/images/BYC_Growth.jpg') }}" alt="BYC Growth Team Games">
+            <div class="game-center-art-badge">
+                <span class="live-dot" aria-hidden="true"></span> 2 Games Active
+            </div>
         </div>
     </section>
 
     {{-- Game Cards Grid --}}
-    <section class="game-center-selection">
-        <div class="destinations-heading" style="margin-bottom: 28px;">
+    <section class="game-center-selection" id="game-selection">
+        <div class="destinations-heading" style="margin-bottom: 32px;">
             <div>
                 <span class="eyebrow" style="color: var(--forest);">Game Selection</span>
                 <h2 style="color: var(--ink);">Choose Your Challenge</h2>
             </div>
-            <p style="color: var(--muted);">Start by guessing pictures or rack up survey points with your team.</p>
+            <p style="color: var(--muted);">Select a game below to launch. Each game is hosted live with real-time scoring and team competition.</p>
         </div>
 
         <div class="game-center-grid">
-            <a href="{{ route('game.guess-me') }}" class="gc-card gc-guess">
-                <span class="gc-icon">?</span>
-                <div class="gc-copy">
-                    <small>Game 01</small>
-                    <strong>Guess Me!</strong>
-                    <em>Decode secret words from visual clues and character slots.</em>
-                </div>
-                <div class="gc-arrow">
-                    <x-icon name="arrow" />
-                </div>
-            </a>
+            @foreach($games as $game)
+                @php
+                    $routeExists = !empty($game['route']) && \Illuminate\Support\Facades\Route::has($game['route']);
+                    $isAvailable = ($game['status'] ?? 'available') === 'available' && $routeExists;
+                    $playUrl = $isAvailable ? route($game['route']) : '#';
+                @endphp
+                <article class="gc-card gc-card--{{ $game['theme'] ?? 'forest' }} {{ !$isAvailable ? 'gc-card--disabled' : '' }}" id="game-card-{{ $game['id'] }}">
+                    <div class="gc-card-header">
+                        <div class="gc-meta-tags">
+                            <span class="gc-order-badge">Game {{ $game['order'] }}</span>
+                            <span class="gc-category-tag">{{ $game['tag'] }}</span>
+                        </div>
+                        <div class="gc-icon-badge" aria-hidden="true">
+                            {{ $game['icon'] }}
+                        </div>
+                    </div>
 
-            <a href="{{ route('game.growth-100') }}" class="gc-card gc-growth">
-                <span class="gc-icon">100</span>
-                <div class="gc-copy">
-                    <small>Game 02</small>
-                    <strong>BYC Growth 100</strong>
-                    <em>Discover top survey answers and collect up to 100 points per round.</em>
-                </div>
-                <div class="gc-arrow">
-                    <x-icon name="arrow" />
-                </div>
-            </a>
+                    <div class="gc-card-body">
+                        <h3 class="gc-card-title">{{ $game['title'] }}</h3>
+                        <p class="gc-card-desc">{{ $game['description'] }}</p>
+
+                        @if(!empty($game['features']))
+                            <ul class="gc-features-list" aria-label="Key features">
+                                @foreach($game['features'] as $feature)
+                                    <li><x-icon name="check" /> {{ $feature }}</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+
+                    <div class="gc-card-footer">
+                        @if($isAvailable)
+                            <a href="{{ $playUrl }}" class="button button-primary gc-play-btn" id="btn-play-{{ $game['id'] }}">
+                                Play Now <x-icon name="arrow" />
+                            </a>
+                        @else
+                            <button type="button" class="button button-ghost gc-play-btn" disabled>
+                                Coming Soon
+                            </button>
+                        @endif
+                    </div>
+                </article>
+            @endforeach
         </div>
     </section>
 
     {{-- Overall Scoreboard --}}
     <section class="gc-scoreboard">
-        <div>
+        <div class="gc-scoreboard-info">
             <span class="eyebrow">Overall Standings</span>
             <h2 style="margin: 0; font: 800 28px 'Manrope', sans-serif;">Team Scoreboard</h2>
+            <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">Combined cumulative scores across all games.</p>
         </div>
         <x-score-pair :scores="['red' => $finalScores['final_red'] ?? 0, 'blue' => $finalScores['final_blue'] ?? 0]" />
         <a href="{{ route('game.final') }}" class="button button-ghost">

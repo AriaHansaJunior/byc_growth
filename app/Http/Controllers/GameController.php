@@ -39,9 +39,37 @@ class GameController extends Controller
         $scores = $this->storageService->getFinalScores();
         $gameState = $this->storageService->getGameState();
 
+        $games = [
+            [
+                'id' => 'guess-me',
+                'order' => '01',
+                'title' => 'Guess Me!',
+                'tag' => 'Visual Word Clues',
+                'description' => 'Test your team speed and intuition by decoding secret words from custom visual clues and letter slot hints.',
+                'icon' => '?',
+                'route' => 'game.guess-me',
+                'theme' => 'forest',
+                'status' => 'available',
+                'features' => ['Picture Clues', 'Letter Slots', 'Team vs Team'],
+            ],
+            [
+                'id' => 'growth-100',
+                'order' => '02',
+                'title' => 'BYC GROWTH 100',
+                'tag' => 'Survey Trivia',
+                'description' => 'Discover the top survey answers, rack up to 100 points per round, and steal points when the opposing team strikes out.',
+                'icon' => '100',
+                'route' => 'game.growth-100',
+                'theme' => 'cream',
+                'status' => 'available',
+                'features' => ['Top Survey Answers', 'Card Reveal', '3-Strike Steal'],
+            ],
+        ];
+
         return view('pages.game-center', [
             'finalScores' => $scores,
             'gameState' => $gameState,
+            'games' => $games,
         ]);
     }
 
