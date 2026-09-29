@@ -33,11 +33,13 @@ class CashManagementController extends Controller
             ? (int) $request->input('per_page')
             : 10;
 
-        $query = CashTransaction::with(['member', 'proof', 'user'])->orderBy('created_at', 'desc');
+        $query = CashTransaction::with(['member', 'proof', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc');
 
         // Filter: Name
         if ($request->filled('name')) {
-            $name = $request->input('name');
+            $name = trim($request->input('name'));
             $query->where(function ($q) use ($name) {
                 $q->where('contributor_name', 'like', "%{$name}%")
                   ->orWhereHas('member', function ($mq) use ($name) {
@@ -48,20 +50,32 @@ class CashManagementController extends Controller
 
         // Filter: Account Type
         if ($request->filled('account_type')) {
-            $query->where('account_type', $request->input('account_type'));
+            $query->where('account_type', trim($request->input('account_type')));
         }
 
-        // Filter: Amount
+        // Filter: Amount (safe numeric validation)
         if ($request->filled('amount')) {
-            $query->where('amount', $request->input('amount'));
+            $amount = $request->input('amount');
+            if (is_numeric($amount) && (float) $amount > 0) {
+                $query->where('amount', (float) $amount);
+            }
         }
 
-        // Filter: Input Date
+        // Filter: Input Date (safe Carbon parse checking server timestamp and date)
         if ($request->filled('date')) {
-            $query->whereDate('transaction_date', $request->input('date'));
+            $date = $request->input('date');
+            try {
+                $parsedDate = Carbon::parse($date)->toDateString();
+                $query->where(function ($dq) use ($parsedDate) {
+                    $dq->whereDate('created_at', $parsedDate)
+                       ->orWhereDate('transaction_date', $parsedDate);
+                });
+            } catch (\Throwable $e) {
+                // Invalid date format ignored safely
+            }
         }
 
-        // Calculate total cash for filtered query
+        // Calculate total cash for filtered query across all matching records (not just current page)
         $totalCash = (clone $query)->sum('amount');
 
         $transactions = $query->paginate($perPage)->withQueryString();
@@ -86,7 +100,9 @@ class CashManagementController extends Controller
 
         // Distinct account types for filter dropdown
         $accountTypes = CashTransaction::whereNotNull('account_type')
+            ->where('account_type', '!=', '')
             ->distinct()
+            ->orderBy('account_type', 'asc')
             ->pluck('account_type');
 
         return view('pages.cash-management', [

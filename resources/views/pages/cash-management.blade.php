@@ -252,12 +252,12 @@
         <table style="width: 100%; border-collapse: collapse; text-align: left;" id="cash-transactions-table">
             <thead>
                 <tr style="border-bottom: 2px solid var(--line);">
-                    <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">#</th>
+                    <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">No</th>
                     <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Name</th>
                     <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Account Type</th>
-                    <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Transfer Amount</th>
+                    <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Amount</th>
                     <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; text-align: center;">Proof</th>
-                    <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">System Input Time</th>
+                    <th style="padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase;">Input Time</th>
                 </tr>
             </thead>
             <tbody>
@@ -267,7 +267,7 @@
                             {{ $transactions->firstItem() + $index }}
                         </td>
                         <td style="padding: 14px; font-weight: 700; color: var(--ink);">
-                            {{ $tx->contributor_name }}
+                            {{ $tx->member ? $tx->member->full_name : $tx->contributor_name }}
                         </td>
                         <td style="padding: 14px; color: var(--muted);">
                             <span style="display: inline-block; padding: 3px 10px; border-radius: 12px; background: var(--paper); border: 1px solid var(--line); font-size: 12px; font-weight: 600;">
@@ -278,29 +278,29 @@
                             Rp {{ number_format($tx->amount, 0, ',', '.') }}
                         </td>
                         <td style="padding: 14px; text-align: center;">
-                            @if($tx->proof)
+                            @if($tx->proof && $tx->proof->getUrl())
                                 <button
                                     type="button"
                                     class="button button-ghost button-sm btn-view-proof"
                                     data-url="{{ $tx->proof->getUrl() }}"
-                                    data-title="Proof: {{ $tx->contributor_name }}"
-                                    style="padding: 4px 8px; font-size: 12px; border-radius: 8px;"
+                                    data-title="Proof: {{ $tx->member ? $tx->member->full_name : $tx->contributor_name }}"
+                                    style="padding: 4px 10px; font-size: 12px; border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;"
                                     title="View Proof Image"
                                 >
                                     🖼️ View
                                 </button>
                             @else
-                                <span style="color: var(--muted); font-size: 12px;">No proof</span>
+                                <span style="color: var(--muted); font-size: 12px; font-style: italic;">No proof</span>
                             @endif
                         </td>
                         <td style="padding: 14px; font-size: 13px; color: var(--muted);">
-                            {{ $tx->created_at ? $tx->created_at->format('M d, Y H:i:s') : $tx->transaction_date->format('M d, Y') }}
+                            {{ $tx->created_at ? $tx->created_at->format('M d, Y H:i:s') : ($tx->transaction_date ? $tx->transaction_date->format('M d, Y') : '-') }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="padding: 36px; text-align: center; color: var(--muted);">
-                            No transactions recorded matching the selected criteria.
+                        <td colspan="6" style="padding: 36px; text-align: center; color: var(--muted); font-size: 14px;">
+                            No cash transactions found.
                         </td>
                     </tr>
                 @endforelse
@@ -308,7 +308,7 @@
             <tfoot>
                 <tr style="border-top: 2px solid var(--ink); background: var(--paper);">
                     <td colspan="3" style="padding: 16px; font-weight: 800; font-family: 'Manrope', sans-serif; font-size: 16px; color: var(--ink);">
-                        Total Cash Inflow:
+                        Total Cash Contribution: <span style="font-size: 13px; font-weight: 600; color: var(--muted);">(Total Cash Inflow:)</span>
                     </td>
                     <td colspan="3" style="padding: 16px; font-weight: 800; font-family: 'Manrope', sans-serif; font-size: 20px; color: var(--forest);" id="total-cash-display">
                         Rp {{ number_format($totalCash, 0, ',', '.') }}
@@ -585,20 +585,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const proofTitle = document.getElementById('modal-proof-title');
     const closeProofBtn = document.getElementById('btn-close-proof');
 
-    if (closeProofBtn && proofModal) {
-        closeProofBtn.addEventListener('click', () => {
+    function closeProofModal() {
+        if (proofModal) {
             proofModal.style.display = 'none';
+            if (proofImg) proofImg.src = '';
+        }
+    }
+
+    if (closeProofBtn) {
+        closeProofBtn.addEventListener('click', closeProofModal);
+    }
+
+    if (proofModal) {
+        proofModal.addEventListener('click', (e) => {
+            if (e.target === proofModal) {
+                closeProofModal();
+            }
         });
     }
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && proofModal && proofModal.style.display !== 'none') {
+            closeProofModal();
+        }
+    });
 
     document.querySelectorAll('.btn-view-proof').forEach(btn => {
         btn.addEventListener('click', () => {
             const url = btn.dataset.url;
             const title = btn.dataset.title;
 
-            proofImg.src = url;
-            proofTitle.textContent = title;
-            proofModal.style.display = 'flex';
+            if (proofImg && url) {
+                proofImg.src = url;
+            }
+            if (proofTitle && title) {
+                proofTitle.textContent = title;
+            }
+            if (proofModal) {
+                proofModal.style.display = 'flex';
+            }
         });
     });
 });

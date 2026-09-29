@@ -176,6 +176,7 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Shortcut Flexibility**: Member payment shortcuts (auto-filling previous account type and amount) must always leave fields completely editable by the administrator.
 - **Proof Freshness & Shortcut Isolation**: Member payment shortcuts populate ONLY the previous account type and amount. Shortcuts must NEVER auto-fill, reuse, or copy previous transfer proof images. Every new cash transaction strictly requires a fresh proof image upload.
 - **Searchable Member Roster**: The transaction input provides a real-time searchable member selector filtering by member full name without exposing confidential financial history.
+- **Authoritative Ledger & Dataset Aggregation**: Total cash contribution calculations must reflect the entire active filtered dataset from the database server, never restricted to the current paginated view slice. Filter changes must reset pagination to page 1 while preserving active page sizes (5, 10, 25, 50).
 
 
 
