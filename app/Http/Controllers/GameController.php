@@ -17,19 +17,6 @@ class GameController extends Controller
         $this->storageService = $storageService;
     }
 
-    /**
-     * Homepage (/) — Legacy / redirected to information hub
-     */
-    public function home()
-    {
-        $scores = $this->storageService->getFinalScores();
-        $gameState = $this->storageService->getGameState();
-
-        return view('welcome', [
-            'finalScores' => $scores,
-            'gameState' => $gameState,
-        ]);
-    }
 
     /**
      * Game Center (/game-center) — Hub for interactive games, scoreboards, and rules

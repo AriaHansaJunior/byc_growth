@@ -181,6 +181,9 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Searchable Member Roster**: The transaction input provides a real-time searchable member selector filtering by member full name without exposing confidential financial history.
 - **Authoritative Ledger & Dataset Aggregation**: Total cash contribution calculations must reflect the entire active filtered dataset from the database server, never restricted to the current paginated view slice. Filter changes must reset pagination to page 1 while preserving active page sizes (5, 10, 25, 50).
 
+---
 
-
-
+## 17. Relational Persistence & Legacy Elimination
+- **MySQL/Eloquent as Single Source of Truth**: All game states, rounds, survey answers, scores, teams, member profiles, cash transactions, activities, and birthday letters are strictly persisted in the relational MySQL database via Eloquent models.
+- **No JSON Persistence**: Filesystem storage must never be used for authoritative application data, round definitions, or game state. Filesystem directories (`storage/app/game/images/`, `public/assets/images/uploads/`) exist exclusively for uploaded binary media assets.
+- **Dead & Legacy Code Elimination**: Obsolete endpoints, dead controller actions, unrendered legacy templates, and old JSON persistence remnants must remain completely eliminated from the codebase.
