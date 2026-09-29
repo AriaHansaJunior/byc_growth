@@ -758,12 +758,8 @@ class GameStorageService
         }
 
         // Determine points to award
-        if ($pointsOverride !== null) {
-            $points = max(0, $pointsOverride);
-        } elseif ($gameCode === 'game1') {
-            $points = (int) $round->score;
-        } else {
-            // Growth 100: sum of revealed answers for this round, or round score
+        if ($gameCode === 'game2') {
+            // Growth 100: points strictly derived from revealed survey answers
             $state = GameState::where('game_id', $game->id)->first();
             $revealedIdxs = $state ? ($state->state_data['revealed'][(string) $round->id] ?? []) : [];
             $sum = 0;
@@ -772,7 +768,20 @@ class GameStorageService
                     $sum += (int) $ans->points;
                 }
             }
-            $points = $sum > 0 ? $sum : (int) $round->score;
+
+            // Security: arbitrary client-provided score cannot bypass revealed-answer scoring
+            if ($pointsOverride !== null && (int) $pointsOverride !== $sum) {
+                return [
+                    'success' => false,
+                    'error' => 'Arbitrary scores cannot bypass revealed survey answer scoring in Growth 100.',
+                ];
+            }
+
+            $points = $sum;
+        } elseif ($pointsOverride !== null) {
+            $points = max(0, $pointsOverride);
+        } else {
+            $points = (int) $round->score;
         }
 
         return DB::transaction(function () use ($game, $round, $teamId, $points) {
@@ -1084,6 +1093,25 @@ class GameStorageService
             'current_round_index' => $roundIndex,
             'state_data' => $data,
         ]);
+
+        // If an answer was revealed or hidden and this round was already awarded to a team, sync awarded points
+        $dbRound = GameRound::where('game_id', $game2->id)->find($roundId);
+        if (($answerIndex !== null || $revealAll !== null) && $dbRound && $dbRound->awarded_team_id) {
+            $newPoints = 0;
+            $activeRevealed = $data['revealed'][$roundId] ?? [];
+            foreach ($dbRound->answers as $aIdx => $ans) {
+                if (in_array($aIdx, $activeRevealed)) {
+                    $newPoints += (int) $ans->points;
+                }
+            }
+            $prevAwarded = (int) $dbRound->awarded_points;
+            $diff = $newPoints - $prevAwarded;
+            if ($diff !== 0) {
+                $score = GameScore::firstOrCreate(['game_id' => $game2->id, 'team_id' => $dbRound->awarded_team_id], ['score' => 0]);
+                $score->update(['score' => max(0, (int) $score->score + $diff)]);
+                $dbRound->update(['awarded_points' => $newPoints]);
+            }
+        }
 
         return [
             'success' => true,

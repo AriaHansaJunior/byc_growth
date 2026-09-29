@@ -162,18 +162,22 @@ class AuthTest extends TestCase
         $publicRoutes = [
             '/',
             '/about',
+            '/activity',
             '/members',
             '/game-center',
             '/guess-me',
             '/growth-100',
-            '/contact',
         ];
 
         foreach ($publicRoutes as $route) {
             $response = $this->get($route);
             $response->assertStatus(200);
         }
+
+        // Old contact route redirects safely to combined about page without 404
+        $this->get('/contact')->assertRedirect('/about');
     }
+
 
     /**
      * Test logout invalidates the authenticated session

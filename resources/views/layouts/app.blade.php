@@ -32,6 +32,8 @@
         @endunless
     </div>
 
+    @include('components.birthday-popup')
+
     @stack('scripts')
 </body>
 </html>

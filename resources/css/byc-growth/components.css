@@ -316,3 +316,25 @@
   border-radius: 50%;
   box-shadow: 0 0 0 4px rgba(186, 210, 89, .2);
 }
+
+.nav-badge-link {
+  background: var(--forest);
+  color: var(--white);
+  font: 800 11px "Manrope", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 6px 14px;
+  border-radius: 99px;
+  text-decoration: none;
+  transition: all .2s ease;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, .15);
+}
+
+.nav-badge-link:hover {
+  background: var(--forest-dark);
+  transform: translateY(-1px);
+  color: var(--white);
+}
+

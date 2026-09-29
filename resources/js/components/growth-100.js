@@ -1,7 +1,5 @@
 import { postJson, deleteJson } from './api';
 import {
-    animateScoreAward,
-    updateScoreboard,
     setupRoundPointAssignment,
     updateTeamCardsVisualState,
     initTeamConfigModal,
@@ -19,6 +17,8 @@ export function initGrowth100() {
     const surveyQuestionText = document.getElementById('survey-question-text');
     const answersGridContainer = document.getElementById('answers-grid-container');
     const roundRevealedPointsEl = document.getElementById('round-revealed-points');
+    const roundProgressPercent = document.getElementById('round-progress-percent');
+    const roundProgressBar = document.getElementById('round-progress-bar');
     const btnPrevRound = document.getElementById('btn-prev-round');
     const btnNextRound = document.getElementById('btn-next-round');
     const roundDotsContainer = document.getElementById('round-dots-container');
@@ -29,6 +29,8 @@ export function initGrowth100() {
     const crossOverlay = document.getElementById('cross-overlay');
     const crossOverlayContent = document.getElementById('cross-overlay-content');
     const growthTeamsContainer = document.getElementById('growth-teams-award-container');
+
+    let crossOverlayTimeout = null;
 
     // Initialize Universal Team Configuration Modal for Game 2
     initTeamConfigModal(teams || [], 'game2');
@@ -82,9 +84,24 @@ export function initGrowth100() {
             surveyQuestionText.textContent = currentRound.question;
         }
 
-        // Total Points
+        // Total Points and Progress (0/100)
         if (roundRevealedPointsEl) {
             roundRevealedPointsEl.textContent = total;
+        }
+
+        if (roundProgressPercent) {
+            roundProgressPercent.textContent = `${total}%`;
+        }
+
+        if (roundProgressBar) {
+            const clamped = Math.min(100, Math.max(0, total));
+            roundProgressBar.style.width = `${clamped}%`;
+            roundProgressBar.setAttribute('aria-valuenow', clamped);
+            if (clamped === 100) {
+                roundProgressBar.classList.add('is-complete');
+            } else {
+                roundProgressBar.classList.remove('is-complete');
+            }
         }
 
         document.querySelectorAll('.current-total-label').forEach((el) => {
@@ -119,15 +136,22 @@ export function initGrowth100() {
             });
         }
 
-        // Cross Buttons
+        // Cross / Strikes Buttons
         document.querySelectorAll('.btn-cross').forEach((btn) => {
             const count = parseInt(btn.dataset.cross, 10);
             if (crosses >= count) {
                 btn.classList.add('active');
+                btn.setAttribute('aria-pressed', 'true');
             } else {
                 btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
             }
         });
+
+        // Reset Strikes Button State
+        if (btnResetCrosses) {
+            btnResetCrosses.disabled = crosses === 0;
+        }
 
         // Navigation buttons
         if (btnPrevRound) btnPrevRound.disabled = currentIndex === 0;
@@ -184,17 +208,28 @@ export function initGrowth100() {
     }
 
     async function setCrosses(count) {
+        const validCount = Math.max(0, Math.min(3, count));
         if (!state.crosses) state.crosses = {};
-        state.crosses[roundId] = count;
+        state.crosses[roundId] = validCount;
 
-        // Visual overlay animation
-        if (crossOverlay && crossOverlayContent && count > 0) {
-            crossOverlayContent.innerHTML = Array.from({ length: count }, () => '<b>×</b>').join('');
-            crossOverlay.style.display = 'grid';
+        if (crossOverlayTimeout) {
+            clearTimeout(crossOverlayTimeout);
+            crossOverlayTimeout = null;
+        }
 
-            setTimeout(() => {
+        // Visual overlay animation for wrong answers
+        if (crossOverlay && crossOverlayContent) {
+            if (validCount > 0) {
+                crossOverlayContent.innerHTML = Array.from({ length: validCount }, () => '<b>✕</b>').join('');
+                crossOverlay.style.display = 'grid';
+
+                crossOverlayTimeout = setTimeout(() => {
+                    crossOverlay.style.display = 'none';
+                    crossOverlayTimeout = null;
+                }, 1200);
+            } else {
                 crossOverlay.style.display = 'none';
-            }, 1200);
+            }
         }
 
         updateRoundUI();
@@ -202,7 +237,7 @@ export function initGrowth100() {
         try {
             await postJson('/game/growth-100/state', {
                 round_index: currentIndex,
-                crosses: count,
+                crosses: validCount,
             });
         } catch (err) {
             console.error('Failed to set crosses:', err);
@@ -223,26 +258,6 @@ export function initGrowth100() {
         }
     }
 
-    async function changeScore(teamIdentifier, amount) {
-        try {
-            const res = await postJson('/game/update-score', {
-                game: 'game2',
-                team: teamIdentifier,
-                amount,
-            });
-
-            if (res.teams) {
-                updateScoreboard(res.teams, 'game2');
-            }
-
-            if (amount > 0 && res.team_id) {
-                animateScoreAward(res.team_id, amount);
-            }
-        } catch (err) {
-            alert('Failed to update score: ' + err.message);
-        }
-    }
-
     // Attach listeners
     if (btnRevealAll) btnRevealAll.addEventListener('click', () => revealAll(true));
     if (btnHideAll) btnHideAll.addEventListener('click', () => revealAll(false));
@@ -250,23 +265,19 @@ export function initGrowth100() {
     document.querySelectorAll('.btn-cross').forEach((btn) => {
         btn.addEventListener('click', () => {
             const count = parseInt(btn.dataset.cross, 10);
-            setCrosses(count);
+            const current = getCrosses();
+            if (current === count) {
+                // Clicking active strike steps down
+                setCrosses(count - 1);
+            } else {
+                setCrosses(count);
+            }
         });
     });
 
     if (btnResetCrosses) {
         btnResetCrosses.addEventListener('click', () => setCrosses(0));
     }
-
-    // Direct score adjustment buttons (+5, -5)
-    document.querySelectorAll('.btn-score-action').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const team = btn.dataset.team;
-            const amount = parseInt(btn.dataset.amount, 10);
-            changeScore(team, amount);
-        });
-    });
 
     if (btnPrevRound) {
         btnPrevRound.addEventListener('click', () => goToRound(currentIndex - 1));
@@ -283,13 +294,11 @@ export function initGrowth100() {
     const btnOpenEditor = document.getElementById('btn-open-editor');
     const btnOpenEditorEmpty = document.getElementById('btn-open-editor-empty');
     const btnCloseEditor = document.getElementById('btn-close-growth-editor');
-    const btnCancelEditor = document.getElementById('btn-cancel-growth-editor');
     const btnAddRound = document.getElementById('btn-add-growth-round');
     const btnDeleteRound = document.getElementById('btn-delete-growth-round');
     const btnSaveRound = document.getElementById('btn-save-growth-round');
     const btnSaveBatch = document.getElementById('btn-save-batch-growth');
 
-    const form = document.getElementById('form-growth-round');
     const inputId = document.getElementById('growth-round-id');
     const inputQuestion = document.getElementById('growth-round-question');
     const answersContainer = document.getElementById('growth-answers-container');
@@ -341,7 +350,9 @@ export function initGrowth100() {
         workingRounds.forEach((r, idx) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = idx === editingRoundIndex ? 'active' : '';
+            btn.id = `growth-round-btn-${idx}`;
+            btn.className = idx === editingRoundIndex ? 'active is-selected' : '';
+            btn.setAttribute('aria-selected', idx === editingRoundIndex ? 'true' : 'false');
             btn.innerHTML = `<strong>Round ${idx + 1}</strong><small>${r.answers ? r.answers.length : 0} answers</small>`;
             btn.addEventListener('click', () => {
                 flushActiveFormToWorkingRound();
@@ -488,8 +499,19 @@ export function initGrowth100() {
     if (btnOpenEditor) btnOpenEditor.addEventListener('click', openModal);
     if (btnOpenEditorEmpty) btnOpenEditorEmpty.addEventListener('click', openModal);
     if (btnCloseEditor) btnCloseEditor.addEventListener('click', closeModal);
-    if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeModal);
     if (btnAddRound) btnAddRound.addEventListener('click', newEditorRound);
+
+    // Close on backdrop click or ESC key
+    if (modalEditor) {
+        modalEditor.addEventListener('click', (e) => {
+            if (e.target === modalEditor) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalEditor.style.display !== 'none') {
+                closeModal();
+            }
+        });
+    }
 
     // Delete single round
     if (btnDeleteRound) {

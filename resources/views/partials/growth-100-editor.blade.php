@@ -50,7 +50,6 @@
         <div class="modal-footer">
             <button type="button" class="button button-danger" id="btn-delete-growth-round">Delete Round</button>
             <div style="display: flex; gap: 8px;">
-                <button type="button" class="button button-secondary" id="btn-cancel-growth-editor">Cancel</button>
                 <button type="button" class="button button-secondary" id="btn-save-growth-round">Save Round</button>
                 <button type="button" class="button button-primary" id="btn-save-batch-growth">Save All Questions (Batch)</button>
             </div>

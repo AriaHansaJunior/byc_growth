@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Member;
 use App\Services\GameStorageService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class PageController extends Controller
@@ -27,7 +29,7 @@ class PageController extends Controller
     }
 
     /**
-     * About Page (/about)
+     * Combined About + Contact Page (/about)
      */
     public function about(): View
     {
@@ -35,26 +37,26 @@ class PageController extends Controller
     }
 
     /**
-     * Members Directory Foundation (/members)
+     * Members Public Directory (/members)
+     * All members are equal: displays ONLY photo and full name.
      */
     public function members(): View
     {
-        return view('pages.members');
+        $members = Member::with('photo')
+            ->where('is_active', true)
+            ->orderBy('full_name', 'asc')
+            ->get();
+
+        return view('pages.members', [
+            'members' => $members,
+        ]);
     }
 
     /**
-     * Cash Management Foundation (/cash-management)
+     * Contact Us route redirects to the combined About & Contact page
      */
-    public function cashManagement(): View
+    public function contact(): RedirectResponse
     {
-        return view('pages.cash-management');
-    }
-
-    /**
-     * Contact Us (/contact)
-     */
-    public function contact(): View
-    {
-        return view('pages.contact');
+        return redirect()->route('about', [], 301);
     }
 }

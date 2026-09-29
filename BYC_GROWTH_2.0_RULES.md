@@ -139,4 +139,42 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
   - Normalization must occur on the frontend in real-time for immediate visual feedback.
   - Normalization must also be enforced at the backend service layer and Eloquent model mutators before database persistence.
 
+---
+
+## 13. Game Scoreboard & Survey Scoring Discipline
+- **Single Source of Truth for Scoreboards**:
+  - The Universal Game System topbar scoreboard is the single authoritative source of truth for team scores.
+  - Individual games must NOT implement duplicate, redundant scoreboards or team score badges on gameplay action cards.
+- **Authoritative Survey-Based Scoring**:
+  - Growth 100 scoring is strictly derived from revealed survey answers: `sum(points of revealed answers)`.
+  - Manual score adjustment buttons (+5, -5, or arbitrary score inputs) are forbidden in the Growth 100 host interface.
+  - Backend validation must reject client attempts to submit arbitrary score overrides that do not match the server-calculated revealed answers sum.
+- **Strike & Cross State Isolation**:
+  - Wrong-answer/cross state is purely an indicator mechanism.
+  - Adding, changing, or resetting strikes must never mutate revealed survey answers, alter team scores, or switch the active round.
+
+---
+
+## 14. Community Member Equality & Privacy Rules
+- **Absolute Member Equality on Public Directory**: All fellowship members are equal. The public Members page must display ONLY member photo and full name. It is strictly forbidden to publicly display or imply member hierarchy, position, role, rank, status, or date of birth.
+- **Internal Date of Birth Confidentiality**: Member `date_of_birth` is strictly internal application data used exclusively for the automated Birthday Popup system. It must never be exposed on public interfaces, member cards, or directory rosters.
+
+---
+
+## 15. Birthday Popup & 10-Second Lock Discipline
+- **Local Timezone Authority**: Birthday calculations are determined by the application server based on Surabaya, Indonesia (`Asia/Jakarta`). Matching is performed by comparing `month + day`, ignoring the birth year.
+- **10-Second Unclosable Modal Lock**: When a birthday popup appears, it MUST NOT be closable for the first 10 seconds. Close buttons, backdrop dismissal, and the ESC key must be strictly locked during this window. Clear countdown feedback must be communicated. After 10 seconds, `Write a Letter` and `Close` actions are unlocked.
+- **Stateless Reappearance**: The birthday popup must never set a permanent "seen" flag or database column. Re-visiting or refreshing the website on the birthday will display the greeting again.
+- **Multi-Member Non-Overlapping Presentation**: When multiple members celebrate birthdays on the same day, greetings must be navigated sequentially within a single modal without overlapping windows.
+
+---
+
+## 16. Cash Management & Financial Privacy Discipline
+- **Strict Administrator Boundary**: Cash Management is accessible only to authenticated users with the `admin` role. Public visitors and standard users must never access financial ledgers or treasury statistics.
+- **Internal Contribution Amount Confidentiality**: The internal fellowship monthly contribution amount (30k / 30,000) must NEVER be exposed or mentioned on any public-facing page or component. Public homepage cash cards must remain disabled with the English message: `Contact the admin to view your cash contribution.`.
+- **Image Proof Integrity**: Payment proof uploads must be strictly validated as image formats (JPEG, PNG, JPG, WEBP). Non-image files (PDF, DOC, ZIP, etc.) must be rejected at the backend level.
+- **Shortcut Flexibility**: Member payment shortcuts (auto-filling previous account type and amount) must always leave fields completely editable by the administrator.
+
+
+
 

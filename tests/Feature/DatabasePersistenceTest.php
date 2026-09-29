@@ -34,11 +34,14 @@ class DatabasePersistenceTest extends TestCase
             'game_scores',
             'members',
             'cash_transactions',
+            'activities',
+            'birthday_letters',
         ];
 
         foreach ($tables as $table) {
             $this->assertTrue(Schema::hasTable($table), "Database table '{$table}' must exist in MySQL.");
         }
+
     }
 
     /**

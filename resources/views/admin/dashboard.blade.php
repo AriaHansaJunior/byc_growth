@@ -42,7 +42,7 @@
                 <span class="eyebrow" style="color: var(--lime);">Authentication & Authorization Active</span>
                 <h1>Welcome back, {{ $admin->name }}</h1>
                 <p>
-                    You are securely authenticated as an administrator. Scope 2 authentication and backend authorization are active.
+                    You are securely authenticated as an administrator. All Scope 8 management modules are active and protected.
                 </p>
             </div>
             <div class="admin-stamp">
@@ -50,42 +50,62 @@
             </div>
         </div>
 
-        {{-- Upcoming Protected Modules Overview --}}
+        {{-- Protected Modules Overview --}}
         <div class="admin-section-heading">
             <h2>Protected Management Modules</h2>
-            <p>Future management interfaces will be placed under the current administrator authorization shield.</p>
+            <p>Access your administrator management tools and community record portals.</p>
         </div>
 
         <div class="feature-grid-3">
-            {{-- Game Management --}}
-            <div class="feature-box">
+            {{-- Role & Account Management --}}
+            <a href="{{ route('admin.roles') }}" class="feature-box" style="text-decoration: none; color: inherit; display: block;">
                 <div class="feature-box-icon">
-                    <x-icon name="gamepad" />
+                    <x-icon name="users" />
                 </div>
-                <h3>Game Management</h3>
-                <p>Question editor, clue management, image uploads, and round configurations.</p>
-                <span class="module-status-badge">Protected &bull; Coming in Later Scope</span>
-            </div>
+                <h3>Role & Accounts</h3>
+                <p>Manage user and admin accounts, system credentials, and access roles.</p>
+                <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Manage Accounts &rarr;</span>
+            </a>
 
             {{-- Cash Management --}}
-            <div class="feature-box">
+            <a href="{{ route('cash-management') }}" class="feature-box" style="text-decoration: none; color: inherit; display: block;">
                 <div class="feature-box-icon">
                     <x-icon name="cash" />
                 </div>
                 <h3>Cash Management</h3>
-                <p>Ledger entries, transaction approvals, financial statements, and balance tracking.</p>
-                <span class="module-status-badge">Protected &bull; Coming in Later Scope</span>
-            </div>
+                <p>Transaction ledger, member shortcuts, transfer proof review, and treasury total.</p>
+                <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Open Ledger &rarr;</span>
+            </a>
 
             {{-- Members Management --}}
-            <div class="feature-box">
+            <a href="{{ route('members') }}" class="feature-box" style="text-decoration: none; color: inherit; display: block;">
                 <div class="feature-box-icon">
                     <x-icon name="users" />
                 </div>
                 <h3>Members Management</h3>
-                <p>Member profile CRUD, cell group allocations, and contact records.</p>
-                <span class="module-status-badge">Protected &bull; Coming in Later Scope</span>
-            </div>
+                <p>Add/edit member profiles, upload photos, and maintain internal birthday records.</p>
+                <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; View Roster &rarr;</span>
+            </a>
+
+            {{-- Activity Management --}}
+            <a href="{{ route('activity') }}" class="feature-box" style="text-decoration: none; color: inherit; display: block;">
+                <div class="feature-box-icon">
+                    <x-icon name="sparkles" />
+                </div>
+                <h3>Activity & Events</h3>
+                <p>Record community events, publish fellowship recaps, and upload photo galleries.</p>
+                <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Manage Activities &rarr;</span>
+            </a>
+
+            {{-- Game Management --}}
+            <a href="{{ route('game.center') }}" class="feature-box" style="text-decoration: none; color: inherit; display: block;">
+                <div class="feature-box-icon">
+                    <x-icon name="gamepad" />
+                </div>
+                <h3>Game Center</h3>
+                <p>Host tools for Guess Me! and BYC Growth 100, team configs, and score controls.</p>
+                <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Open Games &rarr;</span>
+            </a>
         </div>
     </main>
 </div>

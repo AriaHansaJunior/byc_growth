@@ -42,12 +42,18 @@
                 <span class="eyebrow">Game 02</span>
                 <h1>BYC Growth <em>100</em></h1>
             </div>
-            <div class="round-total">
-                <span>Round Points Total</span>
-                <strong>
-                    <span id="round-revealed-points">{{ $roundRevealedPoints }}</span>
-                    <small>/100</small>
-                </strong>
+            <div class="round-total" id="round-total-container" aria-label="Round Points Progress">
+                <div class="round-total-meta">
+                    <span class="round-total-label">Round Progress</span>
+                    <span class="round-total-pill" id="round-progress-percent">{{ $roundRevealedPoints }}%</span>
+                </div>
+                <div class="round-total-number">
+                    <strong id="round-revealed-points">{{ $roundRevealedPoints }}</strong>
+                    <span class="denom">/ 100 PTS</span>
+                </div>
+                <div class="round-progress-track" role="progressbar" aria-valuenow="{{ $roundRevealedPoints }}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="round-progress-fill {{ $roundRevealedPoints === 100 ? 'is-complete' : '' }}" id="round-progress-bar" style="width: {{ $roundRevealedPoints }}%;"></div>
+                </div>
             </div>
             <div class="round-counter">
                 <span>Round</span>
@@ -81,14 +87,23 @@
 
             {{-- Controls --}}
             <div class="growth-controls">
-                <div class="cross-control">
-                    <span>Strikes:</span>
-                    @for ($i = 1; $i <= 3; $i++)
-                        <button type="button" class="btn-cross {{ $currentCrosses >= $i ? 'active' : '' }}" data-cross="{{ $i }}">
-                            ×{{ $i }}
-                        </button>
-                    @endfor
-                    <button type="button" class="btn-cross-reset" id="btn-reset-crosses">Reset</button>
+                <div class="cross-control" id="cross-control-panel">
+                    <span class="cross-control-label">Strikes:</span>
+                    <div class="cross-slots" id="cross-slots-container">
+                        @for ($i = 1; $i <= 3; $i++)
+                            <button type="button"
+                                    class="btn-cross {{ $currentCrosses >= $i ? 'active' : '' }}"
+                                    data-cross="{{ $i }}"
+                                    id="btn-cross-{{ $i }}"
+                                    title="Strike {{ $i }}"
+                                    aria-label="Strike {{ $i }}">
+                                ✕
+                            </button>
+                        @endfor
+                    </div>
+                    <button type="button" class="btn-cross-reset" id="btn-reset-crosses" title="Reset all strikes for this round" {{ $currentCrosses === 0 ? 'disabled' : '' }}>
+                        <x-icon name="rotate-ccw" /> Reset Strikes
+                    </button>
                 </div>
                 <div class="reveal-control">
                     <button type="button" class="button button-secondary" id="btn-reveal-all">Reveal All</button>
@@ -127,12 +142,9 @@
                                 <div class="growth-team-info">
                                     <span class="team-dot" style="background: {{ $team['color'] }};"></span>
                                     <strong class="growth-team-name">{{ $team['name'] }}</strong>
-                                    <span class="growth-team-score" id="growth-team-score-{{ $team['id'] }}">{{ $team['scores']['game2'] ?? 0 }}</span>
                                 </div>
                                 @if(Auth::check() && Auth::user()->isAdmin())
                                     <div class="growth-team-actions">
-                                        <button type="button" class="button button-ghost btn-score-action" data-team="{{ $team['id'] }}" data-amount="5" title="Add 5 points">+5</button>
-                                        <button type="button" class="button button-ghost btn-score-action" data-team="{{ $team['id'] }}" data-amount="-5" title="Deduct 5 points">−5</button>
                                         <button type="button" class="button {{ $isAwarded ? 'button-primary' : 'button-secondary' }} btn-award-round"
                                                 data-team="{{ $team['id'] }}"
                                                 id="btn-award-growth-{{ $team['id'] }}">

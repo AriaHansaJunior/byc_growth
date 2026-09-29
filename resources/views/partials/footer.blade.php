@@ -9,7 +9,7 @@
                     Whether you are taking your first steps in faith or looking for a vibrant fellowship to grow with, BYC is here for you. Join our weekly gatherings and experience real community.
                 </p>
                 <div class="footer-cta-action">
-                    <a href="{{ route('contact') }}" class="button button-primary">
+                    <a href="{{ route('about') }}" class="button button-primary">
                         Connect With Us <x-icon name="arrow" />
                     </a>
                 </div>
@@ -47,10 +47,13 @@
                     <ul class="footer-nav-list">
                         <li><a href="{{ route('home') }}" class="footer-link">Home</a></li>
                         <li><a href="{{ route('about') }}" class="footer-link">About Us</a></li>
+                        <li><a href="{{ route('activity') }}" class="footer-link">Activity</a></li>
                         <li><a href="{{ route('members') }}" class="footer-link">Members</a></li>
                         <li><a href="{{ route('game.center') }}" class="footer-link">Game Center</a></li>
-                        <li><a href="{{ route('cash-management') }}" class="footer-link">Cash Management</a></li>
-                        <li><a href="{{ route('contact') }}" class="footer-link">Contact</a></li>
+                        @if(auth()->check() && auth()->user()->isAdmin())
+                            <li><a href="{{ route('cash-management') }}" class="footer-link">Cash Management</a></li>
+                            <li><a href="{{ route('admin.roles') }}" class="footer-link">Role</a></li>
+                        @endif
                     </ul>
                 </div>
             </div>

@@ -40,33 +40,82 @@
 }
 
 .round-total {
-  padding: 10px 24px;
-  border: 1px solid var(--line);
+  padding: 10px 20px;
+  border: 1.5px solid var(--line);
   background: var(--white);
-  border-radius: 14px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(32, 48, 41, .04);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(32, 48, 41, .05);
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.round-total span {
-  display: block;
+.round-total-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.round-total-label {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .1em;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.round-total strong {
-  display: block;
+.round-total-pill {
+  font: 800 11px/1 "Manrope", sans-serif;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef3e2;
   color: var(--forest);
-  font: 800 28px/1.1 "Manrope", sans-serif;
+  border: 1px solid #d8e3c5;
+  letter-spacing: .02em;
 }
 
-.round-total small {
+.round-total-number {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+}
+
+.round-total-number strong {
+  color: var(--forest);
+  font: 800 32px/1 "Manrope", sans-serif;
+  letter-spacing: -.03em;
+}
+
+.round-total-number .denom {
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
+  font: 700 13px/1 "Manrope", sans-serif;
+  letter-spacing: .04em;
+}
+
+.round-progress-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--cream);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  position: relative;
+}
+
+.round-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--forest) 0%, var(--lime) 100%);
+  border-radius: 999px;
+  transition: width .35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.round-progress-fill.is-complete {
+  background: linear-gradient(90deg, #1f4e38 0%, #2f7a55 50%, #bad259 100%);
+  box-shadow: 0 0 10px rgba(186, 210, 89, .6);
 }
 
 /* Survey Question Box */
@@ -213,44 +262,91 @@
   align-items: center;
 }
 
-.cross-control,
+.cross-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .reveal-control {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.cross-control > span {
+.cross-control-label {
   color: var(--muted);
   text-transform: uppercase;
   font-size: 11px;
   font-weight: 800;
-  margin-right: 6px;
   letter-spacing: .08em;
 }
 
-.cross-control button {
-  height: 36px;
-  border: 1px solid var(--line);
+.cross-slots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cross-slots .btn-cross {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
   color: var(--muted);
   background: var(--paper);
   border-radius: 10px;
-  padding: 0 14px;
   cursor: pointer;
-  font: 800 13px "Manrope", sans-serif;
+  font: 800 18px/1 "Manrope", sans-serif;
   transition: all .2s ease;
 }
 
-.cross-control button:hover {
+.cross-slots .btn-cross:hover {
   background: var(--cream);
   color: var(--ink);
+  border-color: #d1dac5;
 }
 
-.cross-control button.active {
+.cross-slots .btn-cross.active {
   background: var(--red);
   border-color: var(--red);
   color: #ffffff;
-  box-shadow: 0 4px 14px rgba(189, 76, 66, .35);
+  box-shadow: 0 4px 14px rgba(189, 76, 66, .4);
+  transform: scale(1.06);
+}
+
+.btn-cross-reset {
+  height: 38px;
+  border: 1.5px solid var(--line);
+  color: var(--muted);
+  background: var(--white);
+  border-radius: 10px;
+  padding: 0 14px;
+  cursor: pointer;
+  font: 700 12px "Manrope", sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s ease;
+}
+
+.btn-cross-reset:hover:not(:disabled) {
+  background: var(--cream);
+  color: var(--ink);
+  border-color: var(--forest);
+}
+
+.btn-cross-reset:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--line);
+}
+
+.btn-cross-reset svg {
+  width: 14px;
+  height: 14px;
 }
 
 .reveal-control .button {
@@ -343,26 +439,14 @@
   white-space: nowrap;
 }
 
-.growth-team-score {
-  font: 800 18px "Manrope", sans-serif;
-  color: var(--ink);
-  margin-left: 4px;
-}
-
 .growth-team-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.growth-team-actions .button {
-  min-height: 30px;
-  padding: 0 8px;
-  font-size: 11px;
 }
 
 .growth-team-actions .btn-award-round {
-  padding: 0 10px;
+  min-height: 32px;
+  padding: 0 12px;
   font-size: 11px;
 }
 

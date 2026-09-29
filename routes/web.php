@@ -1,7 +1,12 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\CashManagementController;
+use App\Http\Controllers\Admin\MemberController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\BirthdayController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
@@ -18,9 +23,16 @@ use Illuminate\Support\Facades\Route;
 // Public Website Architecture (Direct Access Without Login)
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/activity', [ActivityController::class, 'index'])->name('activity');
 Route::get('/members', [PageController::class, 'members'])->name('members');
 Route::get('/game-center', [GameController::class, 'gameCenter'])->name('game.center');
+
+// Legacy Contact Route — Redirects Safely to Combined About & Contact Page
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+
+// Birthday System Public Endpoints
+Route::get('/birthday/today', [BirthdayController::class, 'today'])->name('birthday.today');
+Route::post('/birthday/letter', [BirthdayController::class, 'submitLetter'])->name('birthday.letter');
 
 // Interactive Games (Public Access Preserved)
 Route::get('/guess-me', [GameController::class, 'guessMe'])->name('game.guess-me');
@@ -67,8 +79,28 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', fn () => redirect()->route('admin.dashboard'));
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+        // Member Management CRUD
+        Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+        Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->name('members.update');
+        Route::delete('/members/{id}', [MemberController::class, 'destroy'])->name('members.destroy');
+
+        // Activity Management CRUD
+        Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
+        Route::match(['put', 'post'], '/activities/{id}', [ActivityController::class, 'update'])->name('activities.update');
+        Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+
+        // Role & Account Management
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::match(['put', 'post'], '/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+        // Cash Management Mutations & Shortcuts
+        Route::post('/cash-management', [CashManagementController::class, 'store'])->name('cash.store');
+        Route::get('/cash-management/shortcut/{memberId}', [CashManagementController::class, 'shortcut'])->name('cash.shortcut');
     });
 
     // Cash Management Portal (Protected at Backend Level)
-    Route::get('/cash-management', [PageController::class, 'cashManagement'])->name('cash-management');
+    Route::get('/cash-management', [CashManagementController::class, 'index'])->name('cash-management');
 });

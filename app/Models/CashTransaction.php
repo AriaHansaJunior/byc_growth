@@ -12,8 +12,10 @@ class CashTransaction extends Model
 
     protected $fillable = [
         'user_id',
+        'member_id',
         'contributor_name',
         'amount',
+        'account_type',
         'type',
         'description',
         'proof_file_id',
@@ -31,6 +33,14 @@ class CashTransaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the associated member if linked.
+     */
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
     }
 
     /**
