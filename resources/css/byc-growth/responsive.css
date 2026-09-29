@@ -1,0 +1,48 @@
+/* Responsive & Height Adaptation */
+
+@media (max-height: 800px) {
+  .growth-content {
+    padding-top: 18px;
+  }
+  .growth-title {
+    margin-bottom: 16px;
+  }
+  .answer-tile {
+    height: 65px;
+  }
+  .survey-question {
+    padding: 15px 24px;
+  }
+  .survey-question h2 {
+    font-size: 21px;
+  }
+  .home-hero {
+    min-height: 520px;
+    padding: 50px max(7vw, 72px) 50px;
+  }
+}
+
+@media (max-width: 1024px) {
+  body {
+    min-width: 100%;
+  }
+  .home-hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+  .home-actions {
+    justify-content: center;
+  }
+  .game-grid {
+    grid-template-columns: 1fr;
+  }
+  .overall {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  .guess-stage {
+    grid-template-columns: 1fr;
+  }
+}

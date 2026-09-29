@@ -1,0 +1,330 @@
+/* Game 02 — BYC Growth 100 Styles (Unified Cream / Forest Theme) */
+
+.game-shell {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.growth-content {
+  width: min(1140px, calc(100% - 60px));
+  padding-top: 28px;
+  padding-bottom: 50px;
+  position: relative;
+  margin: auto;
+}
+
+.growth-title {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 28px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.growth-title .eyebrow {
+  color: var(--forest);
+  margin-bottom: 6px;
+}
+
+.growth-title h1 {
+  margin: 0;
+  font: 800 38px "Manrope", sans-serif;
+  letter-spacing: -.04em;
+  color: var(--ink);
+}
+
+.growth-title h1 em {
+  color: var(--forest);
+  font-style: normal;
+}
+
+.round-total {
+  padding: 10px 24px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(32, 48, 41, .04);
+}
+
+.round-total span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 700;
+}
+
+.round-total strong {
+  display: block;
+  color: var(--forest);
+  font: 800 28px/1.1 "Manrope", sans-serif;
+}
+
+.round-total small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Survey Question Box */
+.survey-question {
+  padding: 24px 32px;
+  text-align: center;
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.survey-question::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--forest) 0%, var(--lime) 50%, var(--gold) 100%);
+}
+
+.survey-question span {
+  color: var(--forest);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.survey-question h2 {
+  margin: 8px 0 0;
+  font: 800 26px "Manrope", sans-serif;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+
+/* Answers Grid */
+.answers-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.answer-tile {
+  height: 78px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  border-radius: 16px;
+  padding: 10px 18px;
+  display: grid;
+  grid-template-columns: 44px 1fr 50px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, background .25s ease;
+  box-shadow: 0 3px 12px rgba(32, 48, 41, .03);
+}
+
+.answer-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--lime);
+  box-shadow: 0 8px 24px rgba(40, 78, 59, .09);
+}
+
+.answer-tile > strong {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--cream);
+  color: var(--forest);
+  font: 800 18px "Manrope", sans-serif;
+}
+
+.answer-tile > span {
+  text-align: center;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 10px;
+}
+
+.answer-tile > em {
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 800 18px "Manrope", sans-serif;
+  font-style: normal;
+  border: 1px solid var(--line);
+}
+
+/* Open Tile State (Theme-consistent Cream & Lime) */
+.answer-tile.open {
+  background: #f4f8e6;
+  border-color: var(--lime);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(186, 210, 89, .22);
+}
+
+.answer-tile.open > strong {
+  background: var(--forest);
+  color: #ffffff;
+}
+
+.answer-tile.open > span {
+  color: var(--forest-dark);
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.answer-tile.open > em {
+  background: var(--lime);
+  color: var(--forest-dark);
+  border-color: transparent;
+  font-size: 20px;
+  box-shadow: 0 3px 10px rgba(186, 210, 89, .4);
+}
+
+/* Growth Controls Bar */
+.growth-controls {
+  margin-top: 20px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 18px rgba(32, 48, 41, .04);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cross-control,
+.reveal-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cross-control > span {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 800;
+  margin-right: 6px;
+  letter-spacing: .08em;
+}
+
+.cross-control button {
+  height: 36px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--paper);
+  border-radius: 10px;
+  padding: 0 14px;
+  cursor: pointer;
+  font: 800 13px "Manrope", sans-serif;
+  transition: all .2s ease;
+}
+
+.cross-control button:hover {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.cross-control button.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(189, 76, 66, .35);
+}
+
+.reveal-control .button {
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+/* Footer Section */
+.growth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.quick-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-score > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quick-score .button {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+/* Cross Overlay Animation */
+.cross-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: rgba(23, 52, 38, .45);
+  backdrop-filter: blur(5px);
+  animation: fadeCross 1.2s both;
+}
+
+.cross-overlay span {
+  padding: 32px 50px;
+  border: 4px solid var(--red);
+  background: var(--white);
+  border-radius: 26px;
+  box-shadow: 0 20px 70px rgba(189, 76, 66, .35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cross-overlay b {
+  color: var(--red);
+  font: 800 100px/1 "Manrope", sans-serif;
+  margin: 0;
+}
+
+@keyframes fadeCross {
+  0% {
+    opacity: 0;
+    transform: scale(.8);
+  }
+  15%, 70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+  }
+}

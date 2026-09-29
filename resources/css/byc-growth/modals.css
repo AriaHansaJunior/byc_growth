@@ -1,0 +1,338 @@
+/* Modals & Dialogs (Cara Bermain & Editor) */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(18, 30, 24, .72);
+  display: grid;
+  place-items: center;
+  padding: 34px;
+  backdrop-filter: blur(7px);
+}
+
+.info-modal,
+.editor-panel {
+  width: min(850px, 90vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: var(--paper);
+  border-radius: 26px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+}
+
+.modal-heading {
+  padding: 26px 30px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-heading .eyebrow {
+  margin-bottom: 4px;
+}
+
+.modal-heading h2 {
+  margin: 0;
+  font: 800 30px "Manrope", sans-serif;
+}
+
+.icon-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--white);
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease;
+}
+
+.icon-button:hover {
+  transform: scale(1.05);
+  background: var(--cream);
+}
+
+/* Cara Bermain Tabs */
+.how-tabs-nav {
+  padding: 18px 30px 0;
+  display: flex;
+  gap: 12px;
+}
+
+.how-tab-btn {
+  flex: 1;
+  padding: 13px 18px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  font: 700 14px "Manrope", sans-serif;
+  color: var(--muted);
+  transition: all .2s ease;
+}
+
+.how-tab-btn:hover {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.how-tab-btn.active {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(40, 78, 59, .2);
+}
+
+.how-tab-btn.active .tab-badge {
+  background: var(--lime);
+  color: var(--forest-dark);
+}
+
+.tab-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--cream);
+  color: var(--forest);
+  font: 800 11px "Manrope", sans-serif;
+  transition: all .2s ease;
+}
+
+/* Cara Bermain Modal */
+.how-grid {
+  padding: 28px 30px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.how-grid article {
+  padding: 24px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+}
+
+.how-grid article > span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--lime);
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.how-grid h3 {
+  margin: 0 0 12px;
+  font: 800 22px "Manrope", sans-serif;
+}
+
+.how-grid ol {
+  padding-left: 20px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.tip {
+  margin: 0 30px 20px;
+  padding: 16px 20px;
+  background: var(--cream);
+  border-radius: 14px;
+}
+
+.tip strong {
+  font-weight: 700;
+  color: var(--forest-dark);
+}
+
+.tip p {
+  color: var(--muted);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+.info-modal > .button {
+  margin: 0 30px 28px;
+  width: calc(100% - 60px);
+}
+
+/* Editor Panel */
+.editor-panel {
+  width: min(1000px, 92vw);
+}
+
+.editor-body {
+  min-height: 480px;
+  display: grid;
+  grid-template-columns: 230px 1fr;
+}
+
+.round-list {
+  border-right: 1px solid var(--line);
+  padding: 22px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.round-list > span {
+  padding: 0 8px 7px;
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-weight: 800;
+}
+
+.round-list > button:not(.button) {
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  transition: background .2s ease;
+}
+
+.round-list > button.active {
+  color: var(--forest);
+  background: #e5ead9;
+  font-weight: 700;
+}
+
+.round-list small {
+  color: var(--muted);
+}
+
+.form-area {
+  padding: 28px;
+  overflow: auto;
+}
+
+.form-area label {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.form-area input,
+.form-area textarea {
+  width: 100%;
+  margin-top: 7px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px 14px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.form-area input:focus,
+.form-area textarea:focus {
+  border-color: var(--forest);
+  box-shadow: 0 0 0 3px rgba(40, 78, 59, .1);
+}
+
+.form-area textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1.5fr .5fr;
+  gap: 14px;
+}
+
+.upload-box {
+  margin-top: 7px;
+  min-height: 100px;
+  border: 1px dashed #aaa994;
+  background: var(--white);
+  border-radius: 12px;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  color: var(--muted);
+}
+
+.upload-box small {
+  display: block;
+  margin-top: 4px;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.field-hint.good,
+.validation-good {
+  color: var(--forest);
+}
+
+.answer-editor-heading {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0 12px;
+}
+
+.answer-edit-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 80px 34px;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.answer-edit-row input {
+  margin: 0;
+}
+
+.answer-edit-row > span {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: var(--cream);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.answer-edit-row > button {
+  border: 0;
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-footer > div {
+  display: flex;
+  gap: 8px;
+}

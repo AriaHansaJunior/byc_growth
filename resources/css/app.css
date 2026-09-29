@@ -1,0 +1,10 @@
+/* BYC GROWTH — Design System Stylesheet */
+
+@import './byc-growth/variables.css';
+@import './byc-growth/components.css';
+@import './byc-growth/home.css';
+@import './byc-growth/game-guess.css';
+@import './byc-growth/game-growth.css';
+@import './byc-growth/modals.css';
+@import './byc-growth/final.css';
+@import './byc-growth/responsive.css';

@@ -1,0 +1,237 @@
+/* Core UI Components & Elements */
+
+.icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+
+/* Button Component */
+.button {
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(32, 48, 41, .14);
+}
+
+.button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.button-primary {
+  background: var(--forest);
+  color: #ffffff;
+}
+
+.button-primary:hover:not(:disabled) {
+  background: var(--forest-dark);
+}
+
+.button-secondary {
+  border-color: var(--line);
+  background: var(--white);
+  color: var(--ink);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: var(--cream);
+}
+
+.button-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.button-ghost:hover:not(:disabled) {
+  background: rgba(40, 78, 59, .06);
+}
+
+.button-danger {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #eccdc3;
+}
+
+/* Brand Component */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-logo {
+  height: 60px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  transition: transform .2s ease;
+}
+
+.brand-mark {
+  width: 76px;
+  height: 76px;
+  border: 2px solid var(--forest);
+  border-radius: 24px 10px 24px 10px;
+  display: grid;
+  place-items: center;
+  font: 800 24px "Manrope", sans-serif;
+  color: var(--forest);
+  flex-shrink: 0;
+}
+
+.brand strong {
+  display: block;
+  font: 800 48px/0.92 "Manrope", sans-serif;
+  letter-spacing: -.05em;
+  color: var(--forest);
+}
+
+.brand span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.brand-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-compact .brand-logo {
+  height: 38px;
+}
+
+.brand-compact .brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px 7px;
+  font-size: 14px;
+}
+
+.brand-compact strong {
+  font-size: 23px;
+}
+
+.brand-compact span {
+  display: none;
+}
+
+.brand-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand-button:hover .brand-logo {
+  transform: scale(1.04);
+}
+
+/* Typography Helpers */
+.eyebrow {
+  display: block;
+  color: var(--forest);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* Score Pair Component */
+.score-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.team-score {
+  min-width: 142px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.team-score span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.team-score strong {
+  font: 800 25px "Manrope", sans-serif;
+}
+
+.team-red {
+  background: var(--red-soft);
+  color: #87352f;
+}
+
+.team-blue {
+  background: var(--blue-soft);
+  color: #244d73;
+}
+
+.score-divider {
+  font: 800 10px "Manrope", sans-serif;
+  color: var(--muted);
+}
+
+.score-pair-compact .team-score {
+  min-width: 125px;
+  padding: 8px 12px;
+}
+
+.score-pair-compact .team-score strong {
+  font-size: 21px;
+}
+
+/* Live Pill / Status */
+.live-pill {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-pill span {
+  width: 8px;
+  height: 8px;
+  background: var(--lime);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(186, 210, 89, .2);
+}

@@ -1,0 +1,244 @@
+/* Final Screen & Winner Summary */
+
+.final-screen {
+  min-height: 100vh;
+  padding: 32px 8vw 60px;
+  background: radial-gradient(circle at 50% 10%, #204030 0%, var(--forest-dark) 70%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.final-screen > .brand-button {
+  align-self: flex-start;
+}
+
+.final-screen .brand {
+  background: rgba(255, 255, 255, 0.94);
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: transform .2s ease, background .2s ease;
+}
+
+.final-screen .brand:hover {
+  background: #ffffff;
+}
+
+.final-screen .brand-mark {
+  border-color: var(--lime);
+  color: var(--lime);
+}
+
+.final-screen .brand strong {
+  color: #ffffff;
+}
+
+.winner {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.winner .eyebrow {
+  color: var(--lime);
+  margin: 18px 0 8px;
+}
+
+.trophy {
+  width: 90px;
+  height: 90px;
+  margin: auto;
+  border-radius: 30px 14px;
+  color: var(--forest-dark);
+  background: var(--gold);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 0 12px rgba(231, 189, 82, .18), 0 12px 35px rgba(0, 0, 0, .3);
+  animation: trophyBounce 3s ease-in-out infinite;
+}
+
+.trophy .icon {
+  width: 48px;
+  height: 48px;
+}
+
+.winner h1 {
+  margin: 0;
+  font: 800 62px/1.05 "Manrope", sans-serif;
+  letter-spacing: -.05em;
+  background: linear-gradient(180deg, #ffffff 0%, #e0e9e3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.winner p {
+  color: #b9c8c1;
+  font-size: 17px;
+  max-width: 520px;
+  margin: 12px auto 0;
+  line-height: 1.6;
+}
+
+.final-board {
+  width: min(860px, 90vw);
+  margin: 36px 0;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  background: #213e30;
+  border: 1px solid #446351;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+  position: relative;
+}
+
+.final-team {
+  padding: 38px 24px;
+  text-align: center;
+  position: relative;
+  transition: transform .3s ease;
+}
+
+.final-team > span {
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .12em;
+  font-size: 13px;
+  display: block;
+}
+
+.final-team > strong {
+  display: block;
+  font: 800 68px/1 "Manrope", sans-serif;
+  margin: 10px 0;
+}
+
+.final-team small {
+  color: #bac8c1;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+}
+
+.final-team.is-winner {
+  box-shadow: inset 0 0 0 3px var(--lime);
+}
+
+.winner-crown {
+  display: inline-block;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.final-red {
+  background: #6e302f;
+}
+
+.final-red.is-winner {
+  background: #803736;
+}
+
+.final-blue {
+  background: #24496b;
+}
+
+.final-blue.is-winner {
+  background: #2c567e;
+}
+
+.final-details {
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(18, 38, 29, .75);
+}
+
+.final-details div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #c1cec7;
+  font-size: 13px;
+}
+
+.final-details div strong {
+  color: #ffffff;
+  font-size: 15px;
+  font-family: "Manrope", sans-serif;
+}
+
+.final-details em {
+  padding-top: 14px;
+  border-top: 1px solid #456151;
+  color: var(--lime);
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: .16em;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+/* Animations */
+@keyframes trophyBounce {
+  0%, 100% {
+    transform: translateY(0);
+    box-shadow: 0 0 0 12px rgba(231, 189, 82, .18), 0 12px 35px rgba(0, 0, 0, .3);
+  }
+  50% {
+    transform: translateY(-8px);
+    box-shadow: 0 0 0 20px rgba(231, 189, 82, .25), 0 20px 45px rgba(0, 0, 0, .4);
+  }
+}
+
+.confetti {
+  position: absolute;
+  width: 12px;
+  height: 38px;
+  background: var(--gold);
+  animation: float 4s infinite ease-in-out;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.confetti-one {
+  left: 12%;
+  top: 18%;
+  transform: rotate(20deg);
+}
+
+.confetti-two {
+  right: 14%;
+  top: 25%;
+  background: var(--lime);
+  animation-delay: .8s;
+}
+
+.confetti-three {
+  left: 20%;
+  top: 60%;
+  background: var(--red);
+  animation-delay: 1.4s;
+}
+
+.confetti-four {
+  right: 22%;
+  top: 65%;
+  background: var(--gold);
+  animation-delay: 2.1s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(22px) rotate(80deg);
+  }
+}

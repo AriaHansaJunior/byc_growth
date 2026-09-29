@@ -1,0 +1,321 @@
+/* Game 01 — Guess Me! Styles (Unified Cream / Forest Theme) */
+
+.game-shell {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.topbar {
+  height: 72px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 0 max(4vw, 46px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.game-content {
+  width: min(1140px, calc(100% - 60px));
+  margin: auto;
+  padding: 34px 0 50px;
+}
+
+.game-titlebar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.game-titlebar h1 {
+  margin: 0;
+  font: 800 40px "Manrope", sans-serif;
+  letter-spacing: -.04em;
+  color: var(--ink);
+}
+
+.game-titlebar .eyebrow {
+  margin-bottom: 4px;
+}
+
+.round-counter {
+  border-left: 1px solid var(--line);
+  padding-left: 24px;
+}
+
+.round-counter span {
+  display: block;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.round-counter strong {
+  font: 800 26px "Manrope", sans-serif;
+  color: var(--forest);
+}
+
+.round-counter em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 16px;
+}
+
+/* Guess Stage — Focus on Visual & Clue */
+.guess-stage {
+  min-height: 420px;
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+.guess-image {
+  position: relative;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.guess-image img {
+  width: 100%;
+  height: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(32, 48, 41, .08);
+}
+
+.guess-image span {
+  position: absolute;
+  left: 32px;
+  bottom: 32px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 254, 249, .95);
+  color: var(--forest-dark);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 800;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, .08);
+}
+
+.guess-content {
+  padding: 44px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.clue-label {
+  color: var(--forest);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.answer-display {
+  margin: 14px 0 18px;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: var(--paper);
+  border: 2px dashed #b7b9ab;
+  transition: all .25s ease;
+}
+
+.answer-display small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.answer-display strong {
+  display: block;
+  font: 800 42px/1.1 "Manrope", sans-serif;
+  letter-spacing: .2em;
+  color: var(--ink);
+  word-break: break-all;
+}
+
+.answer-display.revealed {
+  background: #f0f7db;
+  border: 2px solid var(--lime);
+}
+
+.answer-display.revealed strong {
+  color: var(--forest);
+}
+
+.guess-content p {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 24px;
+  font-size: 15px;
+}
+
+.guess-content .button {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 0 24px;
+  font-size: 15px;
+}
+
+.point-badge {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--forest-dark);
+  display: grid;
+  place-content: center;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(231, 189, 82, .35);
+  border: 4px solid var(--paper);
+}
+
+.point-badge strong {
+  font: 800 26px/1 "Manrope", sans-serif;
+}
+
+.point-badge span {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+/* Host Panel — Clean & Seamless Integration */
+.host-panel {
+  margin-top: 20px;
+  padding: 16px 24px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(32, 48, 41, .04);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.host-heading {
+  min-width: 220px;
+  padding-right: 22px;
+  border-right: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.host-heading span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 800;
+}
+
+.host-heading strong {
+  font: 800 15px "Manrope", sans-serif;
+  color: var(--ink);
+}
+
+.host-heading .button {
+  padding: 0 12px;
+  min-height: 36px;
+  font-size: 12px;
+}
+
+.host-teams {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.host-team {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 14px;
+}
+
+.host-team > span {
+  font: 800 14px "Manrope", sans-serif;
+}
+
+.host-team > div {
+  display: flex;
+  gap: 6px;
+}
+
+.host-team .button {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+}
+
+.host-red {
+  background: var(--red-soft);
+  color: #87352f;
+}
+
+.host-blue {
+  background: var(--blue-soft);
+  color: #244d73;
+}
+
+/* Round Navigation */
+.round-nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.round-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.round-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  cursor: pointer;
+  transition: all .25s ease;
+}
+
+.round-dots span.active {
+  width: 24px;
+  border-radius: 10px;
+  background: var(--forest);
+}
