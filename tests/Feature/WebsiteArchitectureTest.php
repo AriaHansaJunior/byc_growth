@@ -34,6 +34,7 @@ class WebsiteArchitectureTest extends TestCase
         $response->assertSee('What do you want to go through?');
         $response->assertSee('Game Center');
         $response->assertSee('Cash Management');
+        $response->assertSee('Contact the admin to view your cash contribution.');
         $response->assertSee('Members');
 
         // Global Footer
@@ -83,11 +84,21 @@ class WebsiteArchitectureTest extends TestCase
     }
 
     /**
-     * Test Cash Management structural page renders with back navigation
+     * Test Cash Management structural page requires admin authorization
      */
     public function test_cash_management_page_renders_with_back_nav(): void
     {
-        $response = $this->get('/cash-management');
+        // Unauthenticated access must redirect to login
+        $unauthRes = $this->get('/cash-management');
+        $unauthRes->assertRedirect('/admin/login');
+
+        // Authenticated admin can view structural page
+        $admin = \App\Models\User::firstOrCreate(
+            ['email' => 'admin_byc@gmail.com'],
+            ['name' => 'Admin BYC', 'password' => \Illuminate\Support\Facades\Hash::make('password123'), 'role' => 'admin']
+        );
+
+        $response = $this->actingAs($admin)->get('/cash-management');
         $response->assertStatus(200);
         $response->assertSee('Cash Management');
         $response->assertSee('Back to Home');

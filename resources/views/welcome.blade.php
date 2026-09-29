@@ -97,28 +97,51 @@
                 </div>
             </a>
 
-            {{-- 2. Cash Management --}}
-            <a href="{{ route('cash-management') }}" class="destination-card dest-cash">
-                <div class="destination-card-top">
-                    <div class="destination-icon-box">
-                        <x-icon name="cash" />
+            {{-- 2. Cash Management (Protected for Public Users) --}}
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('cash-management') }}" class="destination-card dest-cash">
+                    <div class="destination-card-top">
+                        <div class="destination-icon-box">
+                            <x-icon name="cash" />
+                        </div>
+                        <span class="dest-number">02</span>
                     </div>
-                    <span class="dest-number">02</span>
+                    <div class="destination-card-body">
+                        <span class="destination-badge">Treasury Portal</span>
+                        <h3>Cash Management</h3>
+                        <p>
+                            View transparent community financial accounts, transaction ledgers, and stewardship overviews for the fellowship.
+                        </p>
+                    </div>
+                    <div class="destination-card-footer">
+                        <span class="dest-action-label">Open Treasury</span>
+                        <span class="dest-arrow-btn">
+                            <x-icon name="arrow" />
+                        </span>
+                    </div>
+                </a>
+            @else
+                <div class="destination-card dest-cash destination-card-disabled" aria-disabled="true" title="Contact the admin to view your cash contribution.">
+                    <div class="destination-card-top">
+                        <div class="destination-icon-box" style="opacity: 0.75;">
+                            <x-icon name="cash" />
+                        </div>
+                        <span class="dest-number">02</span>
+                    </div>
+                    <div class="destination-card-body">
+                        <span class="destination-badge" style="color: var(--gold);">Restricted &bull; Admin Access</span>
+                        <h3>Cash Management</h3>
+                        <p class="cash-restricted-msg">
+                            Contact the admin to view your cash contribution.
+                        </p>
+                    </div>
+                    <div class="destination-card-footer">
+                        <span class="dest-action-label" style="opacity: 0.65; font-size: 13px;">
+                            Access Restricted &bull; Contact Admin
+                        </span>
+                    </div>
                 </div>
-                <div class="destination-card-body">
-                    <span class="destination-badge">Treasury Portal</span>
-                    <h3>Cash Management</h3>
-                    <p>
-                        View transparent community financial accounts, transaction ledgers, and stewardship overviews for the fellowship.
-                    </p>
-                </div>
-                <div class="destination-card-footer">
-                    <span class="dest-action-label">Open Treasury</span>
-                    <span class="dest-arrow-btn">
-                        <x-icon name="arrow" />
-                    </span>
-                </div>
-            </a>
+            @endif
 
             {{-- 3. Members --}}
             <a href="{{ route('members') }}" class="destination-card dest-members">
