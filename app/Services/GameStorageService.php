@@ -403,7 +403,7 @@ class GameStorageService
     public function validateClue(string $answer, string $clue): array
     {
         $cleanAnswer = strtoupper(trim($answer));
-        $trimmedClue = trim($clue);
+        $trimmedClue = strtoupper(trim($clue));
 
         if ($cleanAnswer === '') {
             return ['valid' => false, 'error' => 'Answer cannot be empty.'];
@@ -501,8 +501,8 @@ class GameStorageService
      */
     public function saveGuessMeRound(array $data, ?UploadedFile $imageFile = null): array
     {
-        $answer = trim($data['correct_answer'] ?? '');
-        $clue = trim($data['clue'] ?? '');
+        $answer = strtoupper(trim($data['correct_answer'] ?? ''));
+        $clue = strtoupper(trim($data['clue'] ?? ''));
         $score = (int) ($data['score'] ?? 20);
         $id = isset($data['id']) && $data['id'] !== '' ? (int) $data['id'] : null;
 
@@ -542,7 +542,7 @@ class GameStorageService
 
         if ($id !== null && $existingRound = GameRound::where('game_id', $game1->id)->find($id)) {
             $existingRound->update([
-                'correct_answer' => strtoupper($answer),
+                'correct_answer' => $answer,
                 'clue' => $clue,
                 'score' => $score,
                 'image_path' => $imageName,
@@ -553,7 +553,7 @@ class GameStorageService
             GameRound::create([
                 'game_id' => $game1->id,
                 'round_number' => $maxRound + 1,
-                'correct_answer' => strtoupper($answer),
+                'correct_answer' => $answer,
                 'clue' => $clue,
                 'score' => $score,
                 'image_path' => $imageName,
@@ -843,8 +843,8 @@ class GameStorageService
 
         // Pre-validate all rounds before any database modification
         foreach ($roundsData as $idx => $r) {
-            $answer = trim($r['correct_answer'] ?? '');
-            $clue = trim($r['clue'] ?? '');
+            $answer = strtoupper(trim($r['correct_answer'] ?? ''));
+            $clue = strtoupper(trim($r['clue'] ?? ''));
             $score = (int) ($r['score'] ?? 20);
 
             if ($answer === '') {
@@ -870,8 +870,8 @@ class GameStorageService
 
             foreach ($roundsData as $idx => $r) {
                 $id = isset($r['id']) && $r['id'] !== '' ? (int) $r['id'] : null;
-                $answer = strtoupper(trim($r['correct_answer']));
-                $clue = trim($r['clue']);
+                $answer = strtoupper(trim($r['correct_answer'] ?? ''));
+                $clue = strtoupper(trim($r['clue'] ?? ''));
                 $score = (int) ($r['score'] ?? 20);
                 $imagePath = $r['image'] ?? 'BYC_Growth.jpg';
 

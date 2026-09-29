@@ -130,3 +130,13 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
   - Team scores in `game_scores` belong to a specific `game_id` and `team_id` pair.
 - **Dynamic Team Sizing**: Both games support 2, 3, 4, or more teams dynamically with persistent names, assigned colors/themes, and stable identities.
 
+---
+
+## 12. Modal Dialog Discipline & Text Normalization
+- **Single Close/Cancel Control**: Host tools and dialog modals must provide exactly ONE clear close/dismiss control to avoid redundant controls (e.g. avoid having both a top-right 'X' button and a separate 'Cancel' button when they perform the exact same action).
+- **Guess Me Text Normalization**:
+  - Clues and correct answers must always be uppercase.
+  - Normalization must occur on the frontend in real-time for immediate visual feedback.
+  - Normalization must also be enforced at the backend service layer and Eloquent model mutators before database persistence.
+
+

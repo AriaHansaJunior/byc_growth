@@ -77,4 +77,21 @@ class GameRound extends Model
 
         return asset('assets/images/BYC_Growth.jpg');
     }
+
+    /**
+     * Mutator: normalize correct_answer to uppercase before persistence.
+     */
+    public function setCorrectAnswerAttribute($value): void
+    {
+        $this->attributes['correct_answer'] = $value !== null ? strtoupper(trim((string) $value)) : null;
+    }
+
+    /**
+     * Mutator: normalize clue to uppercase before persistence.
+     */
+    public function setClueAttribute($value): void
+    {
+        $this->attributes['clue'] = $value !== null ? strtoupper(trim((string) $value)) : null;
+    }
 }
+

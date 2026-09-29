@@ -237,8 +237,8 @@ export function initGuessMe() {
         const currentWorking = workingRounds[editingRoundIndex];
         if (!currentWorking) return;
 
-        currentWorking.correct_answer = (inputAnswer ? inputAnswer.value.trim().toUpperCase() : currentWorking.correct_answer);
-        currentWorking.clue = (inputClue ? inputClue.value.trim() : currentWorking.clue);
+        currentWorking.correct_answer = (inputAnswer ? inputAnswer.value.trim().toUpperCase() : (currentWorking.correct_answer || '').toUpperCase());
+        currentWorking.clue = (inputClue ? inputClue.value.trim().toUpperCase() : (currentWorking.clue || '').toUpperCase());
         currentWorking.score = (inputScore ? parseInt(inputScore.value, 10) || 20 : currentWorking.score);
     }
 
@@ -248,7 +248,10 @@ export function initGuessMe() {
         workingRounds.forEach((r, idx) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = idx === editingRoundIndex ? 'active' : '';
+            btn.id = `guess-round-btn-${idx}`;
+            btn.className = idx === editingRoundIndex ? 'active is-selected' : '';
+            btn.setAttribute('aria-selected', idx === editingRoundIndex ? 'true' : 'false');
+            btn.setAttribute('role', 'tab');
             btn.innerHTML = `<strong>Round ${idx + 1}</strong><small>${r.score || 20} pts</small>`;
             btn.addEventListener('click', () => {
                 flushActiveFormToWorkingRound();
@@ -264,8 +267,8 @@ export function initGuessMe() {
         const target = workingRounds[index];
 
         inputId.value = target.id || '';
-        inputAnswer.value = target.correct_answer || '';
-        inputClue.value = target.clue || '';
+        inputAnswer.value = (target.correct_answer || '').toUpperCase();
+        inputClue.value = (target.clue || '').toUpperCase();
         inputScore.value = target.score || 20;
         uploadLabel.textContent = target.image ? `Image: ${target.image}` : 'Click to select round image';
 
@@ -293,7 +296,7 @@ export function initGuessMe() {
 
     function validateSingleRound(round, roundNum) {
         const answer = (round.correct_answer || '').trim().toUpperCase();
-        const clue = (round.clue || '').trim();
+        const clue = (round.clue || '').trim().toUpperCase();
         const score = parseInt(round.score, 10);
 
         if (!answer) {
@@ -339,7 +342,7 @@ export function initGuessMe() {
 
     function validateClueInput() {
         const answer = inputAnswer.value.trim().toUpperCase();
-        const clue = inputClue.value.trim();
+        const clue = inputClue.value.trim().toUpperCase();
 
         if (!answer || !clue) {
             clueHint.innerHTML = 'Use underscore _ for hidden characters.';
@@ -359,8 +362,38 @@ export function initGuessMe() {
         return true;
     }
 
-    if (inputAnswer) inputAnswer.addEventListener('input', validateClueInput);
-    if (inputClue) inputClue.addEventListener('input', validateClueInput);
+    // Auto-uppercase on user input with cursor preservation
+    if (inputAnswer) {
+        inputAnswer.addEventListener('input', () => {
+            const start = inputAnswer.selectionStart;
+            const end = inputAnswer.selectionEnd;
+            const upper = inputAnswer.value.toUpperCase();
+            if (inputAnswer.value !== upper) {
+                inputAnswer.value = upper;
+                if (start !== null && end !== null) {
+                    inputAnswer.setSelectionRange(start, end);
+                }
+            }
+            flushActiveFormToWorkingRound();
+            validateClueInput();
+        });
+    }
+
+    if (inputClue) {
+        inputClue.addEventListener('input', () => {
+            const start = inputClue.selectionStart;
+            const end = inputClue.selectionEnd;
+            const upper = inputClue.value.toUpperCase();
+            if (inputClue.value !== upper) {
+                inputClue.value = upper;
+                if (start !== null && end !== null) {
+                    inputClue.setSelectionRange(start, end);
+                }
+            }
+            flushActiveFormToWorkingRound();
+            validateClueInput();
+        });
+    }
 
     if (uploadBox && inputFile) {
         uploadBox.addEventListener('click', () => inputFile.click());
@@ -376,6 +409,18 @@ export function initGuessMe() {
     if (btnCloseEditor) btnCloseEditor.addEventListener('click', closeModal);
     if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeModal);
     if (btnAddRound) btnAddRound.addEventListener('click', newEditorRound);
+
+    // Close on backdrop click or ESC key
+    if (modalEditor) {
+        modalEditor.addEventListener('click', (e) => {
+            if (e.target === modalEditor) closeModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalEditor.style.display !== 'none') {
+                closeModal();
+            }
+        });
+    }
 
     // Delete single round
     if (btnDeleteRound) {
@@ -418,6 +463,10 @@ export function initGuessMe() {
                 alert('Please resolve clue validation errors before saving.');
                 return;
             }
+
+            // Ensure field values are uppercase before submit
+            if (inputAnswer) inputAnswer.value = inputAnswer.value.trim().toUpperCase();
+            if (inputClue) inputClue.value = inputClue.value.trim().toUpperCase();
 
             const formData = new FormData(form);
 
@@ -469,8 +518,8 @@ export function initGuessMe() {
                 const payload = {
                     rounds: workingRounds.map((r, idx) => ({
                         id: r.id || null,
-                        correct_answer: r.correct_answer.toUpperCase().trim(),
-                        clue: r.clue.trim(),
+                        correct_answer: (r.correct_answer || '').trim().toUpperCase(),
+                        clue: (r.clue || '').trim().toUpperCase(),
                         score: parseInt(r.score, 10) || 20,
                         image: r.image || 'BYC_Growth.jpg',
                     })),

@@ -194,26 +194,82 @@
   font-weight: 800;
 }
 
-.round-list > button:not(.button) {
-  padding: 12px;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
+#guess-round-buttons,
+#growth-round-buttons {
   display: flex;
-  justify-content: space-between;
-  cursor: pointer;
-  text-align: left;
-  transition: background .2s ease;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 400px;
+  padding-right: 2px;
 }
 
-.round-list > button.active {
+.round-list button:not(.button),
+#guess-round-buttons button,
+#growth-round-buttons button {
+  padding: 12px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: var(--paper);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+  transition: all .2s ease;
+  font-family: inherit;
+  color: var(--ink);
+  width: 100%;
+}
+
+.round-list button:not(.button):hover,
+#guess-round-buttons button:hover,
+#growth-round-buttons button:hover {
+  background: var(--cream);
+  border-color: var(--line);
+}
+
+.round-list button.active,
+.round-list button.is-selected,
+#guess-round-buttons button.active,
+#guess-round-buttons button.is-selected,
+#growth-round-buttons button.active,
+#growth-round-buttons button.is-selected {
   color: var(--forest);
   background: #e5ead9;
+  border: 1px solid #c8d4b8;
+  border-left: 4px solid var(--forest);
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(40, 78, 59, 0.12);
+  transform: translateX(2px);
+}
+
+.round-list button.active strong,
+#guess-round-buttons button.active strong,
+#growth-round-buttons button.active strong {
+  color: var(--forest);
+}
+
+.round-list button.active small,
+#guess-round-buttons button.active small,
+#growth-round-buttons button.active small {
+  background: rgba(40, 78, 59, 0.14);
+  color: var(--forest);
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
 .round-list small {
   color: var(--muted);
+  font-size: 12px;
+}
+
+#guess-round-answer,
+#guess-round-clue {
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 600;
 }
 
 .form-area {

@@ -57,7 +57,6 @@
         <div class="modal-footer">
             <button type="button" class="button button-danger" id="btn-delete-guess-round">Delete Round</button>
             <div style="display: flex; gap: 8px;">
-                <button type="button" class="button button-secondary" id="btn-cancel-guess-editor">Cancel</button>
                 <button type="button" class="button button-secondary" id="btn-save-guess-round">Save Round</button>
                 <button type="button" class="button button-primary" id="btn-save-batch-guess">Save All Rounds (Batch)</button>
             </div>
