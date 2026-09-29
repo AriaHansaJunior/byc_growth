@@ -72,7 +72,10 @@ class CashManagementController extends Controller
         // Build member shortcuts map: member_id => ['account_type' => ..., 'amount' => ...]
         $shortcuts = [];
         foreach ($members as $member) {
-            $lastTx = CashTransaction::where('member_id', $member->id)->latest('id')->first();
+            $lastTx = CashTransaction::where('member_id', $member->id)
+                ->orderBy('created_at', 'desc')
+                ->orderBy('id', 'desc')
+                ->first();
             if ($lastTx) {
                 $shortcuts[$member->id] = [
                     'account_type' => $lastTx->account_type,
@@ -166,11 +169,24 @@ class CashManagementController extends Controller
      */
     public function shortcut(int $memberId): JsonResponse
     {
-        $lastTx = CashTransaction::where('member_id', $memberId)->latest('id')->first();
+        $member = Member::find($memberId);
+        if (!$member) {
+            return response()->json([
+                'has_shortcut' => false,
+                'message' => 'Member not found.',
+            ], 404);
+        }
+
+        $lastTx = CashTransaction::where('member_id', $member->id)
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->first();
 
         if (!$lastTx) {
             return response()->json([
                 'has_shortcut' => false,
+                'account_type' => null,
+                'amount' => null,
             ]);
         }
 

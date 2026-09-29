@@ -99,6 +99,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         // Cash Management Mutations & Shortcuts
         Route::post('/cash-management', [CashManagementController::class, 'store'])->name('cash.store');
         Route::get('/cash-management/shortcut/{memberId}', [CashManagementController::class, 'shortcut'])->name('cash.shortcut');
+        Route::get('/cash-management/member/{memberId}/shortcut', [CashManagementController::class, 'shortcut'])->name('cash.member.shortcut');
     });
 
     // Cash Management Portal (Protected at Backend Level)

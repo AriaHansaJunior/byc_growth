@@ -174,6 +174,8 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Internal Contribution Amount Confidentiality**: The internal fellowship monthly contribution amount (30k / 30,000) must NEVER be exposed or mentioned on any public-facing page or component. Public homepage cash cards must remain disabled with the English message: `Contact the admin to view your cash contribution.`.
 - **Image Proof Integrity**: Payment proof uploads must be strictly validated as image formats (JPEG, PNG, JPG, WEBP). Non-image files (PDF, DOC, ZIP, etc.) must be rejected at the backend level.
 - **Shortcut Flexibility**: Member payment shortcuts (auto-filling previous account type and amount) must always leave fields completely editable by the administrator.
+- **Proof Freshness & Shortcut Isolation**: Member payment shortcuts populate ONLY the previous account type and amount. Shortcuts must NEVER auto-fill, reuse, or copy previous transfer proof images. Every new cash transaction strictly requires a fresh proof image upload.
+- **Searchable Member Roster**: The transaction input provides a real-time searchable member selector filtering by member full name without exposing confidential financial history.
 
 
 
