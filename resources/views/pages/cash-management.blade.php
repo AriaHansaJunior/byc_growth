@@ -118,7 +118,17 @@
                     >
                     <small style="color: var(--muted); font-size: 11px;">Image only (JPG, PNG, WEBP). Rejects PDF/docs.</small>
                 </div>
+
+                {{-- 5. System Input Time (Server Timestamp) --}}
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">System Input Time</label>
+                    <div style="padding: 10px 14px; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px;">
+                        <span>⏱️</span>
+                        <span>Auto-recorded on server submission (Asia/Jakarta)</span>
+                    </div>
+                </div>
             </div>
+
 
             <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
                 <button type="submit" class="button button-primary">

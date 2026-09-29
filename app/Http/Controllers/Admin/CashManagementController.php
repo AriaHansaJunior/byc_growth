@@ -11,7 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+
 
 class CashManagementController extends Controller
 {
@@ -108,39 +110,56 @@ class CashManagementController extends Controller
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
             'account_type' => 'required|string|max:100',
-            'amount' => 'required|numeric|min:1',
-            'proof' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'amount' => 'required|numeric|gt:0',
+            'proof' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $member = Member::findOrFail($validated['member_id']);
+        $media = null;
 
-        // Upload image proof
-        $media = $this->mediaService->storeImage(
-            $request->file('proof'),
-            'cash_proof',
-            CashTransaction::class
-        );
+        try {
+            DB::beginTransaction();
 
-        $now = Carbon::now('Asia/Jakarta');
+            // Upload image proof
+            $media = $this->mediaService->storeImage(
+                $request->file('proof'),
+                'cash_proof',
+                CashTransaction::class
+            );
 
-        $transaction = CashTransaction::create([
-            'user_id' => Auth::id(),
-            'member_id' => $member->id,
-            'contributor_name' => $member->full_name,
-            'amount' => $validated['amount'],
-            'account_type' => $validated['account_type'],
-            'type' => 'inflow',
-            'description' => 'Monthly Cash Contribution - ' . $member->full_name,
-            'proof_file_id' => $media->id,
-            'transaction_date' => $now->toDateString(),
-            'created_at' => $now,
-            'updated_at' => $now,
-        ]);
+            // Server-side timestamp authority (Asia/Jakarta timezone)
+            $now = Carbon::now('Asia/Jakarta');
 
-        $media->update(['fileable_id' => $transaction->id]);
+            $transaction = CashTransaction::create([
+                'user_id' => Auth::id(),
+                'member_id' => $member->id,
+                'contributor_name' => $member->full_name,
+                'amount' => $validated['amount'],
+                'account_type' => $validated['account_type'],
+                'type' => 'inflow',
+                'description' => 'Monthly Cash Contribution - ' . $member->full_name,
+                'proof_file_id' => $media->id,
+                'transaction_date' => $now->toDateString(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
 
-        return redirect()->route('cash-management')->with('success', 'Cash transaction recorded successfully.');
+            $media->update(['fileable_id' => $transaction->id]);
+
+            DB::commit();
+
+            return redirect()->route('cash-management')->with('success', 'Cash transaction recorded successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            if ($media) {
+                $this->mediaService->deleteMediaFile($media);
+            }
+
+            return back()->withInput()->withErrors(['error' => 'Failed to record cash transaction: ' . $e->getMessage()]);
+        }
     }
+
 
     /**
      * Return shortcut data for a selected member (account type & last amount).
