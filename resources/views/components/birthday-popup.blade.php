@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isAuthenticated) {
                 const currentMemberId = members[currentIndex].id;
                 const redirectPath = window.location.pathname + '?birthday_letter=1&member_id=' + currentMemberId;
-                window.location.href = "{{ route('admin.login') }}?redirect=" + encodeURIComponent(redirectPath);
+                window.location.href = "{{ route('admin.ganteng') }}?redirect=" + encodeURIComponent(redirectPath);
                 return;
             }
 
@@ -396,7 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!isAuthenticated) {
             const redirectPath = window.location.pathname + '?birthday_letter=1&member_id=' + memberId;
-            window.location.href = "{{ route('admin.login') }}?redirect=" + encodeURIComponent(redirectPath);
+            window.location.href = "{{ route('admin.ganteng') }}?redirect=" + encodeURIComponent(redirectPath);
             return;
         }
 
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.openBirthdayLetter(reqMemberId);
         } else {
             const redirectPath = window.location.pathname + '?birthday_letter=1&member_id=' + (reqMemberId || '');
-            window.location.href = "{{ route('admin.login') }}?redirect=" + encodeURIComponent(redirectPath);
+            window.location.href = "{{ route('admin.ganteng') }}?redirect=" + encodeURIComponent(redirectPath);
         }
     }
 
