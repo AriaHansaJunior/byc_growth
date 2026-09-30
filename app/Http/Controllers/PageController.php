@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HomepageSlide;
 use App\Models\Member;
 use App\Services\GameStorageService;
 use Illuminate\Http\RedirectResponse;
@@ -22,9 +23,14 @@ class PageController extends Controller
     public function home(): View
     {
         $finalScores = $this->storageService->getFinalScores();
+        $slides = HomepageSlide::with('media')
+            ->active()
+            ->ordered()
+            ->get();
 
         return view('welcome', [
             'finalScores' => $finalScores,
+            'slides' => $slides,
         ]);
     }
 

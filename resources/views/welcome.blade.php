@@ -13,37 +13,45 @@
             </p>
         </div>
 
-        {{-- Large Group Photo Area (3-Photo Slideshow with 5s Interval) --}}
+        {{-- Large Group Photo Area (Database-Backed Slideshow with Fallback) --}}
         <div class="hero-photo-wrap">
             <div class="hero-photo-frame" id="hero-photo-slideshow" data-fallback="{{ asset('assets/images/group-photo-dummy.svg') }}">
                 <div class="hero-slides-track">
-                    <img
-                        id="hero-group-photo"
-                        src="{{ asset('assets/images/hero-slide-1.jpg') }}"
-                        alt="BYC Growth Fellowship Group Photo 1"
-                        class="hero-group-photo hero-slide active"
-                        data-slide-index="0"
-                    >
-                    <img
-                        src="{{ asset('assets/images/hero-slide-2.jpg') }}"
-                        alt="BYC Growth Fellowship Group Photo 2"
-                        class="hero-group-photo hero-slide"
-                        data-slide-index="1"
-                    >
-                    <img
-                        src="{{ asset('assets/images/hero-slide-3.jpg') }}"
-                        alt="BYC Growth Fellowship Group Photo 3"
-                        class="hero-group-photo hero-slide"
-                        data-slide-index="2"
-                    >
+                    @if(isset($slides) && $slides->isNotEmpty())
+                        @foreach($slides as $index => $slide)
+                            <img
+                                @if($index === 0) id="hero-group-photo" @endif
+                                src="{{ $slide->image_url }}"
+                                alt="{{ $slide->title ?: 'BYC Growth Fellowship Slide ' . ($index + 1) }}"
+                                class="hero-group-photo hero-slide {{ $index === 0 ? 'active' : '' }}"
+                                data-slide-index="{{ $index }}"
+                            >
+                        @endforeach
+                    @else
+                        <img
+                            id="hero-group-photo"
+                            src="{{ asset('assets/images/hero-slide-1.jpg') }}"
+                            alt="BYC Growth Fellowship Group Photo 1"
+                            class="hero-group-photo hero-slide active"
+                            data-slide-index="0"
+                        >
+                    @endif
                 </div>
 
                 {{-- Interactive Slide Indicators --}}
-                <div class="hero-slide-indicators" aria-label="Slideshow Indicators">
-                    <button type="button" class="slide-dot active" data-slide-to="0" aria-label="Slide 1"></button>
-                    <button type="button" class="slide-dot" data-slide-to="1" aria-label="Slide 2"></button>
-                    <button type="button" class="slide-dot" data-slide-to="2" aria-label="Slide 3"></button>
-                </div>
+                @if(isset($slides) && $slides->count() > 1)
+                    <div class="hero-slide-indicators" aria-label="Slideshow Indicators">
+                        @foreach($slides as $index => $slide)
+                            <button type="button" class="slide-dot {{ $index === 0 ? 'active' : '' }}" data-slide-to="{{ $index }}" aria-label="Slide {{ $index + 1 }}"></button>
+                        @endforeach
+                    </div>
+                @elseif(!isset($slides) || $slides->isEmpty())
+                    <div class="hero-slide-indicators" aria-label="Slideshow Indicators">
+                        <button type="button" class="slide-dot active" data-slide-to="0" aria-label="Slide 1"></button>
+                        <button type="button" class="slide-dot" data-slide-to="1" aria-label="Slide 2"></button>
+                        <button type="button" class="slide-dot" data-slide-to="2" aria-label="Slide 3"></button>
+                    </div>
+                @endif
             </div>
         </div>
     </section>

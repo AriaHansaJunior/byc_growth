@@ -90,8 +90,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-        // Homepage Data Management
+        // Homepage Data & Slideshow Management
         Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage');
+        Route::post('/homepage/slides', [HomepageController::class, 'storeSlide'])->name('homepage.slides.store');
+        Route::delete('/homepage/slides/{id}', [HomepageController::class, 'destroySlide'])->name('homepage.slides.destroy');
+        Route::post('/homepage/slides/reorder', [HomepageController::class, 'reorderSlides'])->name('homepage.slides.reorder');
+        Route::post('/homepage/slides/{id}/move-up', [HomepageController::class, 'moveSlideUp'])->name('homepage.slides.move-up');
+        Route::post('/homepage/slides/{id}/move-down', [HomepageController::class, 'moveSlideDown'])->name('homepage.slides.move-down');
 
         // Member Management CRUD
         Route::get('/members', [MemberController::class, 'index'])->name('members');

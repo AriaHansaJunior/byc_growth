@@ -7,6 +7,7 @@ use App\Models\GameAnswer;
 use App\Models\GameRound;
 use App\Models\GameScore;
 use App\Models\GameState;
+use App\Models\HomepageSlide;
 use App\Models\MediaFile;
 use App\Models\Team;
 use App\Models\User;
@@ -173,6 +174,63 @@ class DatabaseSeeder extends Seeder
 
         // 7. Migrate Existing JSON Data
         $this->migrateExistingJsonData($game1, $game2, $g1TeamRed, $g1TeamBlue, $g2TeamRed, $g2TeamBlue, $mediaMap);
+
+        // 8. Seed Default Homepage Slides if empty
+        if (HomepageSlide::count() === 0) {
+            $defaultSlides = [
+                [
+                    'file' => 'assets/images/hero-slide-1.jpg',
+                    'title' => 'Growing in Faith & Fellowship',
+                    'caption' => 'A vibrant youth fellowship rooted in faith, love, and spiritual unity.',
+                    'sort_order' => 1,
+                ],
+                [
+                    'file' => 'assets/images/hero-slide-2.jpg',
+                    'title' => 'Sunday Service & Worship',
+                    'caption' => 'Connecting hearts through passionate worship, prayer, and God\'s Word.',
+                    'sort_order' => 2,
+                ],
+                [
+                    'file' => 'assets/images/hero-slide-3.jpg',
+                    'title' => 'Community Outreach & Service',
+                    'caption' => 'Sharing Christ\'s love through active service and genuine community care.',
+                    'sort_order' => 3,
+                ],
+            ];
+
+            foreach ($defaultSlides as $item) {
+                $fullPath = public_path($item['file']);
+                $mediaId = null;
+
+                if (File::exists($fullPath)) {
+                    $media = MediaFile::firstOrCreate(
+                        ['file_path' => $item['file']],
+                        [
+                            'disk' => 'public',
+                            'original_name' => basename($item['file']),
+                            'mime_type' => 'image/jpeg',
+                            'file_size' => File::size($fullPath),
+                        ]
+                    );
+                    $mediaId = $media->id;
+                }
+
+                $slide = HomepageSlide::create([
+                    'media_file_id' => $mediaId,
+                    'title' => $item['title'],
+                    'caption' => $item['caption'],
+                    'sort_order' => $item['sort_order'],
+                    'is_active' => true,
+                ]);
+
+                if ($mediaId) {
+                    MediaFile::where('id', $mediaId)->update([
+                        'fileable_type' => HomepageSlide::class,
+                        'fileable_id' => $slide->id,
+                    ]);
+                }
+            }
+        }
     }
 
     /**
