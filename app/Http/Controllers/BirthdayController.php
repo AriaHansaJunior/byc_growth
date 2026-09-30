@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BirthdayLetter;
 use App\Models\Member;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -55,6 +56,7 @@ class BirthdayController extends Controller
             return redirect()->route('admin.login')->with('error', 'Please sign in to send a birthday letter.');
         }
 
+        /** @var User $user */
         $user = Auth::user();
 
         // 2. Validate input payload
@@ -138,6 +140,7 @@ class BirthdayController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        /** @var User $user */
         $user = Auth::user();
         $letter = BirthdayLetter::with('member')->findOrFail($id);
 
@@ -194,6 +197,7 @@ class BirthdayController extends Controller
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        /** @var User $user */
         $user = Auth::user();
         $letter = BirthdayLetter::with(['member', 'user.member'])->findOrFail($id);
 
@@ -248,6 +252,7 @@ class BirthdayController extends Controller
             ])->with('error', 'Please sign in to access Birthday Wishes.');
         }
 
+        /** @var User $user */
         $user = Auth::user();
         $today = Carbon::now('Asia/Jakarta');
         $currentYear = (int) $today->year;

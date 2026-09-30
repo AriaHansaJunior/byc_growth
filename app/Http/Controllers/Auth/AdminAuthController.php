@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,9 @@ class AdminAuthController extends Controller
                 return redirect($request->input('redirect'));
             }
 
-            if (Auth::user()->isAdmin()) {
+            /** @var User $user */
+            $user = Auth::user();
+            if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             }
 
@@ -51,7 +54,9 @@ class AdminAuthController extends Controller
                 return redirect($request->input('redirect'));
             }
 
-            if (Auth::user()->isAdmin()) {
+            /** @var User $user */
+            $user = Auth::user();
+            if ($user->isAdmin()) {
                 return redirect()->intended(route('admin.dashboard'));
             }
 

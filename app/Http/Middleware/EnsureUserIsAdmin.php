@@ -26,7 +26,9 @@ class EnsureUserIsAdmin
             return redirect()->route('admin.login')->with('error', 'Please sign in to access the administrator portal.');
         }
 
-        if (!Auth::user()->isAdmin()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Forbidden. Administrator role required.'], 403);
             }
