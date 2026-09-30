@@ -148,10 +148,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/cash-management/shortcut/{memberId}', [CashManagementController::class, 'shortcut'])->name('cash.shortcut');
         Route::get('/cash-management/member/{memberId}/shortcut', [CashManagementController::class, 'shortcut'])->name('cash.member.shortcut');
 
-        // Role & Account Management
+        // Role & Account Management (Scope 6)
         Route::get('/roles', [RoleController::class, 'index'])->name('roles');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-        Route::match(['put', 'post'], '/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
+        Route::get('/roles/{id}', [RoleController::class, 'show'])->name('roles.show');
+        Route::match(['put', 'patch', 'post'], '/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
         Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
     });
 

@@ -8,7 +8,6 @@ use App\Models\MediaFile;
 use App\Models\Member;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -16,8 +15,6 @@ use Tests\TestCase;
 
 class Scope5BirthdayWishesCashManagementTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected User $adminUser;
     protected User $regularUser;
     protected User $recipientUser;
@@ -50,30 +47,43 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
 
         // Active members
         $today = Carbon::now('Asia/Jakarta');
-        $this->celebrantMember = Member::create([
-            'full_name' => 'Celebrant S5 Member',
-            'date_of_birth' => $today->copy()->subYears(25)->toDateString(),
-            'is_active' => true,
-        ]);
+        $this->celebrantMember = Member::firstOrCreate(
+            ['full_name' => 'Celebrant S5 Member'],
+            [
+                'date_of_birth' => $today->copy()->subYears(25)->toDateString(),
+                'is_active' => true,
+            ]
+        );
 
-        $this->regularMember = Member::create([
-            'full_name' => 'Regular S5 Contributor',
-            'date_of_birth' => '1998-05-15',
-            'is_active' => true,
-        ]);
+        $this->regularMember = Member::firstOrCreate(
+            ['full_name' => 'Regular S5 Contributor'],
+            [
+                'date_of_birth' => '1998-05-15',
+                'is_active' => true,
+            ]
+        );
 
         // Link regular user to member
         $this->regularUser->update(['member_id' => $this->regularMember->id]);
 
         // Recipient user linked to celebrant member
-        $this->recipientUser = User::create([
-            'name' => 'Recipient S5 User',
-            'username' => 'recipient_s5',
-            'email' => 'recipient_s5@bycgrowth.org',
-            'password' => Hash::make('password123'),
-            'role' => 'user',
-            'member_id' => $this->celebrantMember->id,
-        ]);
+        $this->recipientUser = User::firstOrCreate(
+            ['email' => 'recipient_s5@bycgrowth.org'],
+            [
+                'name' => 'Recipient S5 User',
+                'username' => 'recipient_s5',
+                'password' => Hash::make('password123'),
+                'role' => 'user',
+                'member_id' => $this->celebrantMember->id,
+            ]
+        );
+    }
+
+    protected function tearDown(): void
+    {
+        BirthdayLetter::whereIn('user_id', [$this->adminUser->id, $this->regularUser->id, $this->recipientUser->id])->delete();
+        CashTransaction::whereIn('user_id', [$this->adminUser->id, $this->regularUser->id])->delete();
+        parent::tearDown();
     }
 
     // =========================================================================
@@ -561,8 +571,9 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
     {
         $this->actingAs($this->adminUser);
 
+        $uniqueName = 'Temporary Contributor ' . uniqid();
         $tempMember = Member::create([
-            'full_name' => 'Temporary Contributor',
+            'full_name' => $uniqueName,
             'is_active' => true,
         ]);
 
@@ -574,7 +585,7 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
             'proof' => $proof,
         ]);
 
-        $tx = CashTransaction::where('contributor_name', 'Temporary Contributor')->firstOrFail();
+        $tx = CashTransaction::where('contributor_name', $uniqueName)->firstOrFail();
         $this->assertEquals($tempMember->id, $tx->member_id);
 
         // Delete the member
@@ -583,7 +594,7 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
         // Transaction record still exists in MySQL with contributor_name intact, and member_id nulled
         $tx->refresh();
         $this->assertNull($tx->member_id);
-        $this->assertEquals('Temporary Contributor', $tx->contributor_name);
+        $this->assertEquals($uniqueName, $tx->contributor_name);
         $this->assertEquals(35000, (float) $tx->amount);
     }
 

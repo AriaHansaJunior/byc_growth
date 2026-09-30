@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 @auth
                     window.location.href = '/members?birthday_letter=1&member_id=' + memberId;
                 @else
-                    window.location.href = "{{ route('admin.ganteng') }}?redirect=" + encodeURIComponent('/members?birthday_letter=1&member_id=' + memberId);
+                    window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent('/members?birthday_letter=1&member_id=' + memberId);
                 @endauth
             }
         });
