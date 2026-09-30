@@ -58,4 +58,12 @@ class CashTransaction extends Model
     {
         return $this->proof && $this->proof->isImage();
     }
+
+    /**
+     * Get proof file URL accessor.
+     */
+    public function getProofFileUrlAttribute(): ?string
+    {
+        return $this->proof ? $this->proof->getUrl() : null;
+    }
 }

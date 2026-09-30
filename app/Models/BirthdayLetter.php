@@ -33,6 +33,14 @@ class BirthdayLetter extends Model
     }
 
     /**
+     * Alias for member relationship (the birthday recipient).
+     */
+    public function recipient(): BelongsTo
+    {
+        return $this->member();
+    }
+
+    /**
      * Get the authenticated sender user account.
      */
     public function user(): BelongsTo

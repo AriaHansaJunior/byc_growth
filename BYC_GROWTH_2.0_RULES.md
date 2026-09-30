@@ -233,3 +233,30 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
   - Admin God Mode provides comprehensive control over website **DATA and CONTENT** (slideshow images, members, activities, games, questions, cash records, accounts).
   - Administrators are strictly forbidden from modifying the underlying website **UI design system** (typography, color tokens, layout grids, CSS variables, animation systems, component spacing, or responsiveness).
 
+---
+
+## 21. Admin Shell & Page-Based Management Architecture
+- **Reusable Admin Shell (`layouts/admin.blade.php`)**:
+  - All admin management pages must extend the unified Admin Shell layout.
+  - The shell provides a standardized topbar header, brand link to public website (`View Site`), admin identity display (`name`, `username`, `email`, role badge), `Sign Out` action, page header area (title, eyebrow, description, and action controls), consistent content container (`.admin-container`), feedback alerts (success, error, validation), and reusable confirmation dialog foundation (`#admin-confirm-modal`).
+  - Admin header/navigation markup must never be duplicated across individual admin views.
+- **Admin-Only Navigation Architecture**:
+  - The Admin Topbar provides direct navigation across all 8 core management domains:
+    1. Dashboard (`/admin/dashboard`)
+    2. Homepage (`/admin/homepage`)
+    3. Members (`/admin/members`)
+    4. Activities (`/admin/activities`)
+    5. Games (`/admin/games`)
+    6. Birthday Wishes (`/admin/birthday-wishes`)
+    7. Cash Management (`/admin/cash-management`)
+    8. Roles / Accounts (`/admin/roles`)
+  - These management links must NEVER be exposed in public/user navigation.
+- **Page-Based Management Discipline**:
+  - Admin management follows the actual website pages and domains, providing administrators with direct context for managing website data.
+  - Management actions adhere to standard visual patterns (`[ + Add ]`, `[ ✎ Edit ]`, `[ Delete ]`, `[ Manage ]`, `[ View ]`) rendered using the existing BYC Growth earth-tone visual system.
+- **Destructive Action Confirmation**:
+  - All destructive actions (e.g. member deletion, account removal, activity deletion) must require explicit confirmation through the reusable Admin Confirmation Modal (`#admin-confirm-modal`) with server-side validation and CSRF protection.
+- **Strict Separation of Public UI & Admin Controls**:
+  - The public user-facing website must remain a pure user experience. Visiting public pages via "View Site" does not inject or display admin editing controls.
+  - Admin controls are rendered strictly within authorized `/admin/*` routes protected by the `EnsureUserIsAdmin` middleware.
+

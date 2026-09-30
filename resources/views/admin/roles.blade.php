@@ -1,50 +1,25 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Role & Account Management — BYC GROWTH')
 
-@section('content')
-<div class="page-shell">
-    {{-- Back Navigation & Admin Action --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('admin.dashboard') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Dashboard
-        </a>
-
-        <button type="button" class="button button-primary button-sm" id="btn-open-add-user" style="margin-left: auto;">
-            <x-icon name="users" /> Create Account
-        </button>
-    </nav>
-
-    {{-- Page Header --}}
-    <header class="page-header">
+@section('page-header')
+<div class="admin-page-header">
+    <div class="admin-header-title">
         <span class="eyebrow">Access Control</span>
         <h1>Role & Account Management</h1>
         <p>
             Manage user accounts, assign administrative privileges, and maintain authorized access credentials.
         </p>
-    </header>
+    </div>
+    <div class="admin-header-actions">
+        <button type="button" class="button button-primary button-sm" id="btn-open-add-user">
+            <x-icon name="users" /> Create Account
+        </button>
+    </div>
+</div>
+@endsection
 
-    @if(session('success'))
-        <div class="alert-success-box" style="margin-bottom: 24px; padding: 14px 20px; background: #eaf3dc; border: 1px solid var(--lime); border-radius: 12px; color: var(--forest-dark); font-weight: 600;">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert-danger-box" style="margin-bottom: 24px; padding: 14px 20px; background: #fdf0ee; border: 1px solid var(--red); border-radius: 12px; color: var(--red); font-weight: 600;">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert-danger-box" style="margin-bottom: 24px; padding: 14px 20px; background: #fdf0ee; border: 1px solid var(--red); border-radius: 12px; color: var(--red); font-weight: 600;">
-            <ul style="margin: 0; padding-left: 20px;">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+@section('content')
 
     {{-- Accounts Table Card --}}
     <div style="background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 28px; box-shadow: var(--shadow); overflow-x: auto;">
@@ -118,7 +93,6 @@
             </tbody>
         </table>
     </div>
-</div>
 
 {{-- Modal: Create Account --}}
 <div class="game-modal-overlay" id="modal-add-user" style="display: none;">

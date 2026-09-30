@@ -19,6 +19,22 @@ class MemberController extends Controller
     }
 
     /**
+     * Display the Admin Members Management portal.
+     */
+    public function index(): \Illuminate\View\View
+    {
+        $members = Member::with('photo')
+            ->orderBy('full_name', 'asc')
+            ->get();
+
+        return view('admin.members', [
+            'members' => $members,
+            'totalCount' => $members->count(),
+            'activeCount' => $members->where('is_active', true)->count(),
+        ]);
+    }
+
+    /**
      * Store a newly created member in storage.
      */
     public function store(Request $request): RedirectResponse
@@ -53,7 +69,11 @@ class MemberController extends Controller
             }
         }
 
-        return redirect()->route('members')->with('success', 'Member added successfully.');
+        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
+            ? route('admin.members')
+            : route('members');
+
+        return redirect($target)->with('success', 'Member added successfully.');
     }
 
     /**
@@ -109,13 +129,17 @@ class MemberController extends Controller
 
         $member->update($updateData);
 
-        return redirect()->route('members')->with('success', 'Member updated successfully.');
+        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
+            ? route('admin.members')
+            : route('members');
+
+        return redirect($target)->with('success', 'Member updated successfully.');
     }
 
     /**
      * Remove the specified member from storage.
      */
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse
     {
         $member = Member::findOrFail($id);
 
@@ -133,6 +157,10 @@ class MemberController extends Controller
 
         $member->delete();
 
-        return redirect()->route('members')->with('success', 'Member removed successfully.');
+        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
+            ? route('admin.members')
+            : route('members');
+
+        return redirect($target)->with('success', 'Member removed successfully.');
     }
 }

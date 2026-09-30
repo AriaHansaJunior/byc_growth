@@ -7,6 +7,7 @@ import { initResetGame } from './components/reset';
 import { initHeroEnhancements } from './components/hero';
 import { initScrollReveal } from './components/scroll-reveal';
 import { initUserIdentity } from './components/user-identity';
+import { initAdminShell } from './components/admin-shell';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Cara Bermain modal & tabs
@@ -37,4 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize global user identity dropdown and welcome toast
     initUserIdentity();
+
+    // Initialize Admin Shell confirmation modal & controls
+    initAdminShell();
 });
