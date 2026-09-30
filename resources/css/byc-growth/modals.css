@@ -392,3 +392,53 @@
   display: flex;
   gap: 8px;
 }
+
+/* Earth-tone Alert & Notification Modal */
+.byc-alert-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(18, 30, 24, .75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.byc-alert-card {
+  max-width: 440px;
+  width: 90%;
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: 24px;
+  padding: 34px 28px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(32, 48, 41, 0.35);
+  position: relative;
+  animation: alertPopIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.byc-alert-icon-wrap {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 1.5px solid var(--line);
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  color: var(--forest);
+  font-size: 26px;
+}
+
+@keyframes alertPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

@@ -1,4 +1,5 @@
 import { postJson } from './api';
+import { showGameAlert } from './dialog';
 
 /**
  * Universal Game System Helper
@@ -118,6 +119,19 @@ export function setupRoundPointAssignment({ gameCode, getCurrentRound, onStateCh
         // If clicked on +/- adjustment buttons, do not trigger round award
         if (e.target.closest('.btn-score-action')) return;
 
+        const isAdmin = (window.BYC_GAME1 && window.BYC_GAME1.isAdmin) ||
+                        (window.BYC_GAME2 && window.BYC_GAME2.isAdmin);
+
+        if (!isAdmin) {
+            showGameAlert({
+                title: 'Admin Account Required',
+                message: 'You must login as an admin account to input score.',
+                eyebrow: 'Notice',
+                icon: '🔒',
+            });
+            return;
+        }
+
         const teamId = parseInt(teamCard.dataset.teamId, 10);
         if (!teamId) return;
 
@@ -159,7 +173,12 @@ export function setupRoundPointAssignment({ gameCode, getCurrentRound, onStateCh
                 }
             }
         } catch (err) {
-            alert('Failed to assign round points: ' + err.message);
+            showGameAlert({
+                title: 'Notice',
+                message: err.message || 'You must login as an admin account to input score.',
+                eyebrow: 'Notice',
+                icon: '⚠️',
+            });
         } finally {
             container.style.pointerEvents = '';
         }
@@ -294,7 +313,12 @@ export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
             const removeBtn = row.querySelector('.btn-remove-team');
             removeBtn.addEventListener('click', () => {
                 if (workingTeams.length <= 2) {
-                    alert('At least 2 teams are required.');
+                    showGameAlert({
+                        title: 'Team Configuration',
+                        message: 'At least 2 teams are required.',
+                        eyebrow: 'Validation',
+                        icon: 'ℹ️',
+                    });
                     return;
                 }
                 workingTeams.splice(idx, 1);
@@ -366,13 +390,23 @@ export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
 
             // Validate
             if (workingTeams.length < 2) {
-                alert('At least 2 teams are required.');
+                showGameAlert({
+                    title: 'Team Configuration',
+                    message: 'At least 2 teams are required.',
+                    eyebrow: 'Validation',
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
             for (let i = 0; i < workingTeams.length; i++) {
                 if (!workingTeams[i].name || !workingTeams[i].name.trim()) {
-                    alert(`Team ${i + 1} name cannot be empty.`);
+                    showGameAlert({
+                        title: 'Team Configuration',
+                        message: `Team ${i + 1} name cannot be empty.`,
+                        eyebrow: 'Validation',
+                        icon: 'ℹ️',
+                    });
                     return;
                 }
             }
@@ -398,7 +432,12 @@ export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
                     window.location.reload();
                 }
             } catch (err) {
-                alert('Failed to configure teams: ' + err.message);
+                showGameAlert({
+                    title: 'Team Configuration',
+                    message: 'Failed to configure teams: ' + err.message,
+                    eyebrow: 'Error',
+                    icon: '⚠️',
+                });
             } finally {
                 if (saveBtn) {
                     saveBtn.disabled = false;

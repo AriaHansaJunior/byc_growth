@@ -1,4 +1,5 @@
 import { postJson, deleteJson } from './api';
+import { showGameAlert } from './dialog';
 import {
     setupRoundPointAssignment,
     updateTeamCardsVisualState,
@@ -419,7 +420,11 @@ export function initGrowth100() {
         row.querySelector('.input-ans-text').addEventListener('input', recalculateEditorTotal);
         row.querySelector('.btn-remove-row').addEventListener('click', () => {
             if (answersContainer.querySelectorAll('.answer-edit-row').length <= 1) {
-                alert('At least 1 answer is required.');
+                showGameAlert({
+                    title: 'Validation',
+                    message: 'At least 1 answer is required.',
+                    icon: 'ℹ️',
+                });
                 return;
             }
             row.remove();
@@ -517,7 +522,11 @@ export function initGrowth100() {
     if (btnDeleteRound) {
         btnDeleteRound.addEventListener('click', async () => {
             if (workingRounds.length <= 1) {
-                alert('At least 1 round must remain.');
+                showGameAlert({
+                    title: 'Validation',
+                    message: 'At least 1 round must remain.',
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
@@ -537,7 +546,11 @@ export function initGrowth100() {
                         selectEditorRoundIndex(editingRoundIndex);
                     }
                 } catch (err) {
-                    alert('Failed to delete round: ' + err.message);
+                    showGameAlert({
+                        title: 'Error',
+                        message: 'Failed to delete round: ' + err.message,
+                        icon: '⚠️',
+                    });
                 }
             } else {
                 workingRounds.splice(editingRoundIndex, 1);
@@ -553,7 +566,11 @@ export function initGrowth100() {
             flushActiveFormToWorkingRound();
             const validation = validateSingleRound(workingRounds[editingRoundIndex], editingRoundIndex + 1);
             if (!validation.valid) {
-                alert(validation.error);
+                showGameAlert({
+                    title: 'Validation',
+                    message: validation.error,
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
@@ -578,7 +595,11 @@ export function initGrowth100() {
                     closeModal();
                 }
             } catch (err) {
-                alert('Failed to save round: ' + err.message);
+                showGameAlert({
+                    title: 'Error',
+                    message: 'Failed to save round: ' + err.message,
+                    icon: '⚠️',
+                });
             } finally {
                 btnSaveRound.disabled = false;
                 btnSaveRound.textContent = 'Save Round';
@@ -592,7 +613,11 @@ export function initGrowth100() {
             flushActiveFormToWorkingRound();
 
             if (workingRounds.length === 0) {
-                alert('At least 1 round is required.');
+                showGameAlert({
+                    title: 'Validation',
+                    message: 'At least 1 round is required.',
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
@@ -601,7 +626,11 @@ export function initGrowth100() {
                 const validation = validateSingleRound(workingRounds[i], i + 1);
                 if (!validation.valid) {
                     selectEditorRoundIndex(i);
-                    alert(validation.error);
+                    showGameAlert({
+                        title: 'Validation',
+                        message: validation.error,
+                        icon: 'ℹ️',
+                    });
                     return;
                 }
             }
@@ -630,7 +659,11 @@ export function initGrowth100() {
                     closeModal();
                 }
             } catch (err) {
-                alert('Batch save failed: ' + err.message);
+                showGameAlert({
+                    title: 'Error',
+                    message: 'Batch save failed: ' + err.message,
+                    icon: '⚠️',
+                });
             } finally {
                 btnSaveBatch.disabled = false;
                 btnSaveBatch.textContent = 'Save All Questions (Batch)';

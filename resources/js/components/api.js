@@ -18,9 +18,18 @@ export async function postJson(url, data) {
         body: JSON.stringify(data),
     });
 
-    const json = await response.json();
+    const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-        throw new Error(json.error || 'An error occurred while processing the request.');
+        if (response.status === 401) {
+            throw new Error('You must login as an admin account to input score.');
+        }
+        if (response.status === 403) {
+            throw new Error('Access denied: You must login as an admin account.');
+        }
+        if (response.status === 419) {
+            throw new Error('Security session expired. Please refresh the page.');
+        }
+        throw new Error(json.error || json.message || 'An error occurred while processing the request.');
     }
     return json;
 }
@@ -35,9 +44,18 @@ export async function postFormData(url, formData) {
         body: formData,
     });
 
-    const json = await response.json();
+    const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-        throw new Error(json.error || 'An error occurred while processing the request.');
+        if (response.status === 401) {
+            throw new Error('You must login as an admin account to input score.');
+        }
+        if (response.status === 403) {
+            throw new Error('Access denied: You must login as an admin account.');
+        }
+        if (response.status === 419) {
+            throw new Error('Security session expired. Please refresh the page.');
+        }
+        throw new Error(json.error || json.message || 'An error occurred while processing the request.');
     }
     return json;
 }
@@ -51,9 +69,18 @@ export async function deleteJson(url) {
         },
     });
 
-    const json = await response.json();
+    const json = await response.json().catch(() => ({}));
     if (!response.ok) {
-        throw new Error(json.error || 'An error occurred while deleting data.');
+        if (response.status === 401) {
+            throw new Error('You must login as an admin account to input score.');
+        }
+        if (response.status === 403) {
+            throw new Error('Access denied: You must login as an admin account.');
+        }
+        if (response.status === 419) {
+            throw new Error('Security session expired. Please refresh the page.');
+        }
+        throw new Error(json.error || json.message || 'An error occurred while deleting data.');
     }
     return json;
 }

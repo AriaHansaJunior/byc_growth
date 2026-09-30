@@ -1,8 +1,11 @@
 import './bootstrap';
+import './components/dialog';
 import { initModal, initHowToPlayTabs } from './components/modal';
 import { initGuessMe } from './components/guess-me';
 import { initGrowth100 } from './components/growth-100';
 import { initResetGame } from './components/reset';
+import { initHeroEnhancements } from './components/hero';
+import { initScrollReveal } from './components/scroll-reveal';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Cara Bermain modal & tabs
@@ -24,4 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initGuessMe();
     initGrowth100();
     initResetGame();
+
+    // Initialize hero smooth scroll & slideshow
+    initHeroEnhancements();
+
+    // Initialize smooth scroll reveal animations
+    initScrollReveal();
 });

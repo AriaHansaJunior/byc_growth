@@ -534,7 +534,7 @@ class Scope8CommunityAdminTest extends TestCase
         $todaySurabaya = Carbon::now('Asia/Jakarta');
 
         $birthdayMember = Member::create([
-            'full_name' => 'Today Birthday Member',
+            'full_name' => 'Today Birthday Member ' . time(),
             'date_of_birth' => '1995-' . $todaySurabaya->format('m-d'),
             'is_active' => true,
         ]);
@@ -543,6 +543,8 @@ class Scope8CommunityAdminTest extends TestCase
 
         $detected = Member::birthdayToday()->where('id', $birthdayMember->id)->first();
         $this->assertNotNull($detected);
+
+        $birthdayMember->delete();
     }
 
     /**
@@ -554,7 +556,7 @@ class Scope8CommunityAdminTest extends TestCase
         $otherDate = $todaySurabaya->copy()->addMonths(3);
 
         $nonBirthdayMember = Member::create([
-            'full_name' => 'Future Birthday Member',
+            'full_name' => 'Future Birthday Member ' . time(),
             'date_of_birth' => '1996-' . $otherDate->format('m-d'),
             'is_active' => true,
         ]);
@@ -562,6 +564,8 @@ class Scope8CommunityAdminTest extends TestCase
         $this->assertFalse($nonBirthdayMember->isBirthdayToday());
         $detected = Member::birthdayToday()->where('id', $nonBirthdayMember->id)->first();
         $this->assertNull($detected);
+
+        $nonBirthdayMember->delete();
     }
 
     /**
@@ -582,6 +586,8 @@ class Scope8CommunityAdminTest extends TestCase
         $response->assertSee($bdayMember->full_name);
         $response->assertSee('modal-birthday-popup');
         $response->assertSee('Special Birthday Greeting');
+
+        $bdayMember->delete();
     }
 
     /**
@@ -591,7 +597,7 @@ class Scope8CommunityAdminTest extends TestCase
     {
         $todaySurabaya = Carbon::now('Asia/Jakarta');
 
-        Member::create([
+        $m = Member::create([
             'full_name' => 'Locked Modal Member ' . time(),
             'date_of_birth' => '2002-' . $todaySurabaya->format('m-d'),
             'is_active' => true,
@@ -602,6 +608,8 @@ class Scope8CommunityAdminTest extends TestCase
         $response->assertSee('birthday-lock-state');
         $response->assertSee('Please wait...');
         $response->assertSee('birthday-countdown');
+
+        $m->delete();
     }
 
     /**
@@ -611,7 +619,7 @@ class Scope8CommunityAdminTest extends TestCase
     {
         $todaySurabaya = Carbon::now('Asia/Jakarta');
 
-        Member::create([
+        $m = Member::create([
             'full_name' => 'Action Modal Member ' . time(),
             'date_of_birth' => '2003-' . $todaySurabaya->format('m-d'),
             'is_active' => true,
@@ -621,6 +629,8 @@ class Scope8CommunityAdminTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Write a Letter');
         $response->assertSee('btn-birthday-close');
+
+        $m->delete();
     }
 
     /**
@@ -703,6 +713,8 @@ class Scope8CommunityAdminTest extends TestCase
         // Second visit (simulating refresh / return visit)
         $res2 = $this->get('/');
         $res2->assertSee($member->full_name);
+
+        $member->delete();
     }
 
     /**
@@ -729,6 +741,9 @@ class Scope8CommunityAdminTest extends TestCase
         $response->assertSee('btn-birthday-prev');
         $response->assertSee('btn-birthday-next');
         $response->assertSee('celebrating today');
+
+        $m1->delete();
+        $m2->delete();
     }
 
     // ==========================================

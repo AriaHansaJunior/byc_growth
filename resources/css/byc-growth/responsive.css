@@ -44,8 +44,8 @@
     font-size: 20px;
   }
   .home-hero {
-    min-height: 520px;
-    padding: 50px max(7vw, 72px) 50px;
+    min-height: calc(100vh - 76px);
+    padding: 36px max(7vw, 72px) 44px;
   }
 }
 

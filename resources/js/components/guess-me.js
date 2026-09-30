@@ -1,4 +1,5 @@
 import { postJson, postFormData, deleteJson } from './api';
+import { showGameAlert } from './dialog';
 import {
     animateScoreAward,
     updateScoreboard,
@@ -144,6 +145,16 @@ export function initGuessMe() {
     }
 
     async function changeScore(teamIdentifier, amount) {
+        if (!window.BYC_GAME1?.isAdmin) {
+            showGameAlert({
+                title: 'Admin Account Required',
+                message: 'You must login as an admin account to input score.',
+                eyebrow: 'Notice',
+                icon: '🔒',
+            });
+            return;
+        }
+
         try {
             const res = await postJson('/game/update-score', {
                 game: 'game1',
@@ -159,7 +170,11 @@ export function initGuessMe() {
                 animateScoreAward(res.team_id, amount);
             }
         } catch (err) {
-            alert('Failed to update score: ' + err.message);
+            showGameAlert({
+                title: 'Notice',
+                message: err.message || 'You must login as an admin account to input score.',
+                icon: '⚠️',
+            });
         }
     }
 
@@ -426,7 +441,12 @@ export function initGuessMe() {
     if (btnDeleteRound) {
         btnDeleteRound.addEventListener('click', async () => {
             if (workingRounds.length <= 1) {
-                alert('At least 1 round must remain.');
+                showGameAlert({
+                    title: 'Round Management',
+                    message: 'At least 1 round must remain.',
+                    eyebrow: 'Validation',
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
@@ -446,7 +466,11 @@ export function initGuessMe() {
                         selectEditorRoundIndex(editingRoundIndex);
                     }
                 } catch (err) {
-                    alert('Failed to delete round: ' + err.message);
+                    showGameAlert({
+                        title: 'Error',
+                        message: 'Failed to delete round: ' + err.message,
+                        icon: '⚠️',
+                    });
                 }
             } else {
                 workingRounds.splice(editingRoundIndex, 1);
@@ -460,7 +484,12 @@ export function initGuessMe() {
     if (btnSaveRound) {
         btnSaveRound.addEventListener('click', async () => {
             if (!validateClueInput()) {
-                alert('Please resolve clue validation errors before saving.');
+                showGameAlert({
+                    title: 'Clue Validation',
+                    message: 'Please resolve clue validation errors before saving.',
+                    eyebrow: 'Validation',
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
@@ -483,7 +512,11 @@ export function initGuessMe() {
                     closeModal();
                 }
             } catch (err) {
-                alert('Failed to save round: ' + err.message);
+                showGameAlert({
+                    title: 'Error',
+                    message: 'Failed to save round: ' + err.message,
+                    icon: '⚠️',
+                });
             } finally {
                 btnSaveRound.disabled = false;
                 btnSaveRound.textContent = 'Save Round';
@@ -497,7 +530,11 @@ export function initGuessMe() {
             flushActiveFormToWorkingRound();
 
             if (workingRounds.length === 0) {
-                alert('At least 1 round is required.');
+                showGameAlert({
+                    title: 'Validation',
+                    message: 'At least 1 round is required.',
+                    icon: 'ℹ️',
+                });
                 return;
             }
 
@@ -506,7 +543,11 @@ export function initGuessMe() {
                 const validation = validateSingleRound(workingRounds[i], i + 1);
                 if (!validation.valid) {
                     selectEditorRoundIndex(i);
-                    alert(validation.error);
+                    showGameAlert({
+                        title: 'Validation Error',
+                        message: validation.error,
+                        icon: 'ℹ️',
+                    });
                     return;
                 }
             }
@@ -534,7 +575,11 @@ export function initGuessMe() {
                     closeModal();
                 }
             } catch (err) {
-                alert('Batch save failed: ' + err.message);
+                showGameAlert({
+                    title: 'Batch Save Error',
+                    message: 'Batch save failed: ' + err.message,
+                    icon: '⚠️',
+                });
             } finally {
                 btnSaveBatch.disabled = false;
                 btnSaveBatch.textContent = 'Save All Rounds (Batch)';

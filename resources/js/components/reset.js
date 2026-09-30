@@ -1,4 +1,5 @@
 import { postJson } from './api';
+import { showGameAlert } from './dialog';
 
 export function initResetGame() {
     const btnReset = document.getElementById('btn-reset-game');
@@ -35,7 +36,11 @@ export function initResetGame() {
                     window.location.reload();
                 }
             } catch (err) {
-                alert('Gagal mereset permainan: ' + err.message);
+                showGameAlert({
+                    title: 'Reset Game',
+                    message: 'Gagal mereset permainan: ' + err.message,
+                    icon: '⚠️',
+                });
                 btnConfirm.disabled = false;
                 btnConfirm.textContent = 'Ya, Reset Game';
             }

@@ -30,8 +30,16 @@
             <x-brand compact="true" />
         </a>
         <x-score-pair :teams="$teams" :compact="true" game="game2" />
-        <div class="live-pill">
-            <span /> Game session
+        <div style="display: flex; align-items: center; gap: 10px;">
+            @if(Auth::check() && Auth::user()->isAdmin())
+                <div class="live-pill" style="background: rgba(186, 210, 89, 0.2); color: var(--forest-dark); border-color: var(--lime);">
+                    <span style="background: var(--forest);"></span> Host: {{ Auth::user()->name }}
+                </div>
+            @else
+                <a href="{{ route('login') }}?redirect={{ urlencode(request()->getRequestUri()) }}" class="button button-ghost button-sm" style="font-size: 13px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 99px; text-decoration: none;" title="Sign in as host to score rounds">
+                    <x-icon name="lock" /> Login Host
+                </a>
+            @endif
         </div>
     </header>
 
@@ -115,6 +123,10 @@
                         <button type="button" class="button button-ghost" id="btn-open-editor">
                             <x-icon name="edit" /> Edit Questions
                         </button>
+                    @else
+                        <a href="{{ route('login') }}?redirect={{ urlencode(request()->getRequestUri()) }}" class="button button-secondary button-sm" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                            <x-icon name="lock" /> Login Host / Admin
+                        </a>
                     @endif
                 </div>
             </div>

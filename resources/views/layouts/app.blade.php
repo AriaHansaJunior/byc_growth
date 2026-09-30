@@ -33,6 +33,7 @@
     </div>
 
     @include('components.birthday-popup')
+    @include('partials.alert-modal')
 
     @stack('scripts')
 </body>

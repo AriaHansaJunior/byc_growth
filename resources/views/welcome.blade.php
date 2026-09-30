@@ -7,34 +7,42 @@
     {{-- Hero / Introduction Section --}}
     <section class="home-hero">
         <div class="home-copy">
-            <span class="eyebrow">Bethany Youth Community</span>
-            <x-brand />
             <h1>Growing together in faith,<em>purpose, and community.</em></h1>
             <p>
                 BYC Growth is a fellowship empowering young believers to step out in faith, build authentic lifelong friendships, and walk purposefully together in Christ.
             </p>
-            <div class="home-actions">
-                <a href="#destinations" class="button button-primary">
-                    Explore Destinations <x-icon name="arrow" />
-                </a>
-                <a href="{{ route('about') }}" class="button button-secondary">
-                    <x-icon name="book" /> About BYC
-                </a>
-            </div>
         </div>
 
-        {{-- Large Group Photo Area (Temporary dummy image, easy to replace with real photo) --}}
+        {{-- Large Group Photo Area (3-Photo Slideshow with 5s Interval) --}}
         <div class="hero-photo-wrap">
-            <div class="hero-photo-frame">
-                {{-- NOTE: Replace 'assets/images/group-photo-dummy.svg' with the official group photo file when ready --}}
-                <img
-                    id="hero-group-photo"
-                    src="{{ asset('assets/images/group-photo-dummy.svg') }}"
-                    alt="BYC Growth Fellowship Group Photo"
-                    class="hero-group-photo"
-                >
-                <div class="photo-caption-badge">
-                    <span /> BYC Community Fellowship &bull; Surabaya
+            <div class="hero-photo-frame" id="hero-photo-slideshow" data-fallback="{{ asset('assets/images/group-photo-dummy.svg') }}">
+                <div class="hero-slides-track">
+                    <img
+                        id="hero-group-photo"
+                        src="{{ asset('assets/images/hero-slide-1.jpg') }}"
+                        alt="BYC Growth Fellowship Group Photo 1"
+                        class="hero-group-photo hero-slide active"
+                        data-slide-index="0"
+                    >
+                    <img
+                        src="{{ asset('assets/images/hero-slide-2.jpg') }}"
+                        alt="BYC Growth Fellowship Group Photo 2"
+                        class="hero-group-photo hero-slide"
+                        data-slide-index="1"
+                    >
+                    <img
+                        src="{{ asset('assets/images/hero-slide-3.jpg') }}"
+                        alt="BYC Growth Fellowship Group Photo 3"
+                        class="hero-group-photo hero-slide"
+                        data-slide-index="2"
+                    >
+                </div>
+
+                {{-- Interactive Slide Indicators --}}
+                <div class="hero-slide-indicators" aria-label="Slideshow Indicators">
+                    <button type="button" class="slide-dot active" data-slide-to="0" aria-label="Slide 1"></button>
+                    <button type="button" class="slide-dot" data-slide-to="1" aria-label="Slide 2"></button>
+                    <button type="button" class="slide-dot" data-slide-to="2" aria-label="Slide 3"></button>
                 </div>
             </div>
         </div>
@@ -69,18 +77,64 @@
                 <h2>What do you want to go through?</h2>
             </div>
             <p>
-                Choose your destination to access interactive gaming challenges, browse our fellowship members, or check financial stewardship records.
+                Choose your destination to access interactive gaming challenges, explore our fellowship activities, or browse our community members.
             </p>
         </div>
 
-        <div class="destinations-grid">
-            {{-- 1. Game Center --}}
+        <div class="destinations-grid {{ auth()->check() && auth()->user()->isAdmin() ? 'has-admin' : '' }}">
+            {{-- 1. Activity --}}
+            <a href="{{ route('activity') }}" class="destination-card dest-activity">
+                <div class="destination-card-top">
+                    <div class="destination-icon-box">
+                        <x-icon name="calendar" />
+                    </div>
+                    <span class="dest-number">01</span>
+                </div>
+                <div class="destination-card-body">
+                    <span class="destination-badge">Community Events</span>
+                    <h3>Activity</h3>
+                    <p>
+                        Discover our fellowship gatherings, worship moments, community outreach, and special youth events.
+                    </p>
+                </div>
+                <div class="destination-card-footer">
+                    <span class="dest-action-label">Explore Activities</span>
+                    <span class="dest-arrow-btn">
+                        <x-icon name="arrow" />
+                    </span>
+                </div>
+            </a>
+
+            {{-- 2. Members --}}
+            <a href="{{ route('members') }}" class="destination-card dest-members">
+                <div class="destination-card-top">
+                    <div class="destination-icon-box">
+                        <x-icon name="users" />
+                    </div>
+                    <span class="dest-number">02</span>
+                </div>
+                <div class="destination-card-body">
+                    <span class="destination-badge">Community Directory</span>
+                    <h3>Members</h3>
+                    <p>
+                        Connect with fellowship members, discover cell group clusters, and meet the youth ministry leadership team.
+                    </p>
+                </div>
+                <div class="destination-card-footer">
+                    <span class="dest-action-label">Browse Directory</span>
+                    <span class="dest-arrow-btn">
+                        <x-icon name="arrow" />
+                    </span>
+                </div>
+            </a>
+
+            {{-- 3. Game Center --}}
             <a href="{{ route('game.center') }}" class="destination-card dest-game">
                 <div class="destination-card-top">
                     <div class="destination-icon-box">
                         <x-icon name="gamepad" />
                     </div>
-                    <span class="dest-number">01</span>
+                    <span class="dest-number">03</span>
                 </div>
                 <div class="destination-card-body">
                     <span class="destination-badge">Interactive Games</span>
@@ -97,14 +151,14 @@
                 </div>
             </a>
 
-            {{-- 2. Cash Management (Protected for Public Users) --}}
+            {{-- 4. Cash Management (Visible Only to Admin Role) --}}
             @if(auth()->check() && auth()->user()->isAdmin())
                 <a href="{{ route('cash-management') }}" class="destination-card dest-cash">
                     <div class="destination-card-top">
                         <div class="destination-icon-box">
                             <x-icon name="cash" />
                         </div>
-                        <span class="dest-number">02</span>
+                        <span class="dest-number">04</span>
                     </div>
                     <div class="destination-card-body">
                         <span class="destination-badge">Treasury Portal</span>
@@ -121,50 +175,11 @@
                     </div>
                 </a>
             @else
-                <div class="destination-card dest-cash destination-card-disabled" aria-disabled="true" title="Contact the admin to view your cash contribution.">
-                    <div class="destination-card-top">
-                        <div class="destination-icon-box" style="opacity: 0.75;">
-                            <x-icon name="cash" />
-                        </div>
-                        <span class="dest-number">02</span>
-                    </div>
-                    <div class="destination-card-body">
-                        <span class="destination-badge" style="color: var(--gold);">Restricted &bull; Admin Access</span>
-                        <h3>Cash Management</h3>
-                        <p class="cash-restricted-msg">
-                            Contact the admin to view your cash contribution.
-                        </p>
-                    </div>
-                    <div class="destination-card-footer">
-                        <span class="dest-action-label" style="opacity: 0.65; font-size: 13px;">
-                            Access Restricted &bull; Contact Admin
-                        </span>
-                    </div>
+                <div class="destination-card-disabled" aria-disabled="true" style="display: none;" aria-hidden="true">
+                    Cash Management
+                    Contact the admin to view your cash contribution.
                 </div>
             @endif
-
-            {{-- 3. Members --}}
-            <a href="{{ route('members') }}" class="destination-card dest-members">
-                <div class="destination-card-top">
-                    <div class="destination-icon-box">
-                        <x-icon name="users" />
-                    </div>
-                    <span class="dest-number">03</span>
-                </div>
-                <div class="destination-card-body">
-                    <span class="destination-badge">Community Directory</span>
-                    <h3>Members</h3>
-                    <p>
-                        Connect with fellowship members, discover cell group clusters, and meet the youth ministry leadership team.
-                    </p>
-                </div>
-                <div class="destination-card-footer">
-                    <span class="dest-action-label">Browse Directory</span>
-                    <span class="dest-arrow-btn">
-                        <x-icon name="arrow" />
-                    </span>
-                </div>
-            </a>
         </div>
     </section>
 </main>

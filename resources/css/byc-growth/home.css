@@ -7,12 +7,14 @@
 
 /* Hero Section */
 .home-hero {
-  padding: 60px max(7vw, 72px) 70px;
+  min-height: calc(100vh - 76px);
+  padding: clamp(48px, 6vh, 84px) max(7vw, 72px) clamp(54px, 8vh, 96px);
   display: grid;
   grid-template-columns: 1fr 1.15fr;
   align-items: center;
   gap: 5vw;
   position: relative;
+  box-sizing: border-box;
 }
 
 .home-hero::before {
@@ -59,10 +61,12 @@
   gap: 14px;
 }
 
-/* Large Group Photo Area */
+/* Large Group Photo Area & Slideshow */
 .hero-photo-wrap {
   position: relative;
   width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
 }
 
 .hero-photo-frame {
@@ -73,6 +77,7 @@
   padding: 12px;
   box-shadow: var(--shadow);
   transition: transform .3s ease, box-shadow .3s ease;
+  overflow: hidden;
 }
 
 .hero-photo-frame:hover {
@@ -80,43 +85,93 @@
   box-shadow: 0 24px 60px rgba(32, 48, 41, .16);
 }
 
+.hero-slides-track {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.16 / 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--forest-dark);
+}
+
 .hero-group-photo {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 1.6 / 1;
+  height: 100%;
   object-fit: cover;
   border-radius: 20px;
 }
 
-.photo-caption-badge {
+.hero-group-photo.hero-slide {
   position: absolute;
-  bottom: 24px;
-  left: 24px;
-  background: rgba(23, 52, 38, 0.88);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #ffffff;
-  padding: 8px 16px;
-  border-radius: 99px;
-  display: inline-flex;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: unset;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 20px;
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 1.2s ease-in-out;
+  pointer-events: none;
+}
+
+/* Base slide (stays fully visible underneath during transition to eliminate white flashing) */
+.hero-group-photo.hero-slide.base {
+  opacity: 1;
+  z-index: 2;
+  transition: none;
+}
+
+/* Active incoming slide (slowly fades in on top of base slide) */
+.hero-group-photo.hero-slide.active {
+  opacity: 1;
+  z-index: 3;
+  pointer-events: auto;
+}
+
+.hero-slide-indicators {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
+  z-index: 10;
+  background: rgba(23, 52, 38, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 12px;
+  border-radius: 99px;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.photo-caption-badge span {
+.slide-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--lime);
+  background: rgba(255, 255, 255, 0.45);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slide-dot.active {
+  width: 22px;
+  border-radius: 6px;
+  background: var(--gold);
+}
+
+.slide-dot:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.85);
 }
 
 /* Scripture / Statement Section */
 .scripture-section {
-  padding: 20px max(7vw, 72px) 70px;
+  padding: clamp(70px, 9vh, 120px) max(7vw, 72px) clamp(80px, 11vh, 140px);
+  position: relative;
 }
 
 .scripture-card {
@@ -206,6 +261,7 @@
 
 /* Destination Section */
 .destinations-section {
+  scroll-margin-top: 90px;
   padding: 80px max(7vw, 72px) 90px;
   background: var(--forest-dark);
   color: #ffffff;
@@ -244,6 +300,10 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+}
+
+.destinations-grid.has-admin {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 .destination-card {
@@ -366,13 +426,22 @@
 }
 
 /* Card Accent Color Variations */
-.dest-cash .destination-icon-box {
+.dest-activity .destination-icon-box {
   background: var(--gold);
   color: var(--forest-dark);
 }
 
-.dest-cash .destination-badge {
+.dest-activity .destination-badge {
   color: var(--gold);
+}
+
+.dest-cash .destination-icon-box {
+  background: var(--lime);
+  color: var(--forest-dark);
+}
+
+.dest-cash .destination-badge {
+  color: var(--lime);
 }
 
 .dest-members .destination-icon-box {
@@ -386,8 +455,8 @@
 
 /* Game Center Hub Launcher Styles */
 .game-center-hub {
-  padding: 36px max(5vw, 48px) 72px;
-  max-width: 1360px;
+  width: 100%;
+  padding: 36px max(7vw, 72px) 72px;
   margin: 0 auto;
 }
 
@@ -724,8 +793,8 @@
    ---------------------------------------------------- */
 @media (min-width: 1600px) {
   .game-center-hub {
-    max-width: 1480px;
-    padding: 40px max(5vw, 56px) 80px;
+    width: 100%;
+    padding: 40px max(7vw, 72px) 80px;
   }
 
   .game-center-hero {
@@ -750,8 +819,8 @@
 @media (min-width: 2000px) {
   /* Primary 2560x1600 Target Display Optimization */
   .game-center-hub {
-    max-width: 1720px;
-    padding: 48px max(6vw, 72px) 96px;
+    width: 100%;
+    padding: 48px max(7vw, 72px) 96px;
   }
 
   .game-center-hero {

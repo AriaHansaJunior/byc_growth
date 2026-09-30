@@ -23,9 +23,8 @@
 }
 
 .header-container {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 16px max(5vw, 36px);
+  width: 100%;
+  padding: 16px max(7vw, 72px);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -35,6 +34,7 @@
 .header-brand-link {
   display: inline-flex;
   align-items: center;
+  gap: 14px;
   text-decoration: none;
   color: inherit;
   transition: opacity .2s ease;
@@ -42,6 +42,30 @@
 
 .header-brand-link:hover {
   opacity: .88;
+}
+
+.header-brand-divider {
+  width: 1.5px;
+  height: 22px;
+  background-color: var(--line);
+  border-radius: 1px;
+}
+
+.header-brand-tagline {
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--forest);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .header-brand-divider,
+  .header-brand-tagline {
+    display: none;
+  }
 }
 
 .header-nav {
@@ -69,6 +93,50 @@
   color: var(--forest);
   background: rgba(40, 78, 59, .1);
   font-weight: 800;
+}
+
+.nav-login-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--forest);
+  background: var(--cream);
+  border: 1px solid var(--line);
+  padding: 8px 20px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all .2s ease;
+  margin-left: 6px;
+}
+
+.nav-login-btn:hover {
+  background: var(--forest);
+  color: var(--white);
+  border-color: var(--forest);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(40, 78, 59, 0.2);
+}
+
+.nav-logout-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 10px;
+  transition: all .2s ease;
+  margin-left: 4px;
+}
+
+.nav-logout-btn:hover {
+  color: var(--red);
+  background: rgba(189, 76, 66, 0.08);
 }
 
 /* Back Navigation Standard */
@@ -106,7 +174,7 @@
 .page-shell {
   min-height: calc(100vh - 160px);
   padding: 48px max(7vw, 72px) 80px;
-  max-width: 1320px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -211,12 +279,12 @@
 .global-footer {
   background: var(--forest-dark);
   color: #ffffff;
-  padding: 80px max(5vw, 36px) 36px;
+  padding: 80px max(7vw, 72px) 36px;
   margin-top: auto;
 }
 
 .footer-container {
-  max-width: 1320px;
+  width: 100%;
   margin: 0 auto;
 }
 

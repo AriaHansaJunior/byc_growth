@@ -2,6 +2,8 @@
     <div class="header-container">
         <a href="{{ route('home') }}" class="header-brand-link" aria-label="BYC Growth Home">
             <x-brand :compact="true" />
+            <span class="header-brand-divider" aria-hidden="true"></span>
+            <span class="header-brand-tagline">Bethany Youth Community</span>
         </a>
 
         <nav class="header-nav" aria-label="Main Navigation">
@@ -18,7 +20,11 @@
                 Game Center
             </a>
 
-            @if(auth()->check())
+            @if(auth()->guest())
+                <a href="{{ route('login') }}" class="nav-login-btn" title="Member Sign In">
+                    Login
+                </a>
+            @else
                 @if(auth()->user()->isAdmin())
                     <a href="{{ route('birthday.wishes') }}" class="nav-item {{ request()->routeIs('birthday.wishes*') ? 'active' : '' }}">
                         Birthday Wishes
@@ -37,6 +43,12 @@
                         🎂 My Wishes
                     </a>
                 @endif
+                <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0; display: inline;">
+                    @csrf
+                    <button type="submit" class="nav-logout-btn" title="Sign out of your session">
+                        Logout
+                    </button>
+                </form>
             @endif
         </nav>
     </div>
