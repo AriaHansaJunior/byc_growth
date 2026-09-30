@@ -200,3 +200,14 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Anonymous Display with Administrator Traceability**: Anonymity is strictly a display preference for the birthday person. The underlying `user_id` is always persisted, allowing administrators to audit and identify senders while presenting "Anonymous" to the recipient.
 - **Birthday Date Editing Discipline**: Normal users may edit their submitted letter ONLY while the recipient's birthday is still active today in Surabaya (`Asia/Jakarta`). Administrators retain full privileges to edit letters at any time.
 
+---
+
+## 19. Birthday Wishes & Archive Discipline
+- **Three-Tier Role-Based Authorization**:
+  - **Administrators**: Full access at any time to browse all members, all years, and edit any wish.
+  - **Birthday Celebrants**: Granted access to `/birthday-wishes` strictly on their birthday date in `Asia/Jakarta`. Restricted solely to their own received letters across current and previous years. Viewing another member's letters is rejected server-side.
+  - **Logged-in Senders**: Granted access to review and edit only their own sent wish(es) for today's celebrant while today is still that celebrant's birthday. Cannot view other senders' wishes or celebrant archives.
+  - **Non-Birthday Users**: Access is strictly denied (HTTP 403). Unauthenticated visitors are redirected to login.
+- **Automatic Year-Based Archiving**: Archiving is fully automatic and derived from `birthday_year`. No manual archive flags or actions exist. Celebrants may browse their own current and previous years. Future years are strictly forbidden and rejected server-side.
+- **Privacy Enforcement**: Anonymity is preserved on all recipient views. The recipient never sees the real sender user account for anonymous letters, while administrators maintain full auditability.
+

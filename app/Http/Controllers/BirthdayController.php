@@ -227,4 +227,153 @@ class BirthdayController extends Controller
             ] : null,
         ]);
     }
+
+    /**
+     * Birthday Wishes & Archive View (/birthday-wishes).
+     * Server-side authorization distinguishes between:
+     * - Admin (can view all members/years and edit any wish)
+     * - Birthday recipient celebrating today (can view received wishes and own archive)
+     * - Sender who wrote a wish for today's celebrant (can review/edit own wish)
+     * - Unauthenticated visitors / unauthorized users (strictly rejected)
+     */
+    public function wishes(Request $request)
+    {
+        if (!Auth::check()) {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+
+            return redirect()->route('admin.login', [
+                'redirect' => $request->fullUrl(),
+            ])->with('error', 'Please sign in to access Birthday Wishes.');
+        }
+
+        $user = Auth::user();
+        $today = Carbon::now('Asia/Jakarta');
+        $currentYear = (int) $today->year;
+
+        // Security Guard: Future years must NEVER be accessible
+        if ($request->filled('year') && (int) $request->input('year') > $currentYear) {
+            abort(403, 'Forbidden. Future years cannot be accessed.');
+        }
+
+        $isAdmin = $user->isAdmin();
+        $isRecipientCelebrating = $user->member && $user->member->isBirthdayToday($today);
+
+        // Find active celebrants today
+        $todayCelebrants = Member::where('is_active', true)->birthdayToday($today)->get();
+        $todayCelebrantIds = $todayCelebrants->pluck('id')->all();
+
+        // Check if user has written a wish for today's celebrant(s) in current year
+        $senderLettersToday = BirthdayLetter::with(['member.photo', 'user.member'])
+            ->where('user_id', $user->id)
+            ->whereIn('member_id', $todayCelebrantIds)
+            ->where('birthday_year', $currentYear)
+            ->get();
+        $isSenderToday = $senderLettersToday->isNotEmpty();
+
+        // Access Rule: Non-admin, non-celebrant, and non-sender today cannot access
+        if (!$isAdmin && !$isRecipientCelebrating && !$isSenderToday) {
+            abort(403, 'Access denied. You do not have permission to view birthday wishes at this time.');
+        }
+
+        // ARCHETYPE 1: ADMINISTRATOR
+        if ($isAdmin) {
+            $availableYears = BirthdayLetter::where('birthday_year', '<=', $currentYear)
+                ->distinct()
+                ->orderBy('birthday_year', 'desc')
+                ->pluck('birthday_year')
+                ->all();
+
+            if (!in_array($currentYear, $availableYears)) {
+                array_unshift($availableYears, $currentYear);
+                rsort($availableYears);
+            }
+
+            $selectedYear = $request->filled('year') ? (int) $request->input('year') : null;
+            $selectedMemberId = $request->filled('member_id') ? (int) $request->input('member_id') : null;
+
+            $query = BirthdayLetter::with(['member.photo', 'user.member'])
+                ->where('birthday_year', '<=', $currentYear);
+
+            if ($selectedYear) {
+                $query->where('birthday_year', $selectedYear);
+            }
+
+            if ($selectedMemberId) {
+                $query->where('member_id', $selectedMemberId);
+            }
+
+            $wishes = $query->orderBy('birthday_year', 'desc')->orderBy('created_at', 'desc')->get();
+            $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();
+
+            return view('pages.birthday-wishes', [
+                'mode' => 'admin',
+                'user' => $user,
+                'wishes' => $wishes,
+                'availableYears' => $availableYears,
+                'selectedYear' => $selectedYear,
+                'selectedMemberId' => $selectedMemberId,
+                'members' => $members,
+                'currentYear' => $currentYear,
+                'today' => $today,
+                'senderLettersToday' => collect(),
+            ]);
+        }
+
+        // ARCHETYPE 2: BIRTHDAY RECIPIENT CELEBRATING TODAY
+        if ($isRecipientCelebrating) {
+            $recipientMember = $user->member;
+
+            // Strict security: ignore/override any member_id query to prevent viewing others' archive
+            $availableYears = BirthdayLetter::where('member_id', $recipientMember->id)
+                ->where('birthday_year', '<=', $currentYear)
+                ->distinct()
+                ->orderBy('birthday_year', 'desc')
+                ->pluck('birthday_year')
+                ->all();
+
+            if (!in_array($currentYear, $availableYears)) {
+                array_unshift($availableYears, $currentYear);
+                rsort($availableYears);
+            }
+
+            $selectedYear = $request->filled('year') ? (int) $request->input('year') : $currentYear;
+
+            // Recipient can only access years relevant to their own data
+            if ($selectedYear > $currentYear || (!in_array($selectedYear, $availableYears) && $selectedYear !== $currentYear)) {
+                abort(403, 'Forbidden. Requested year is not accessible.');
+            }
+
+            $wishes = BirthdayLetter::with(['user.member'])
+                ->where('member_id', $recipientMember->id)
+                ->where('birthday_year', $selectedYear)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return view('pages.birthday-wishes', [
+                'mode' => 'recipient',
+                'user' => $user,
+                'recipientMember' => $recipientMember,
+                'wishes' => $wishes,
+                'availableYears' => $availableYears,
+                'selectedYear' => $selectedYear,
+                'currentYear' => $currentYear,
+                'today' => $today,
+                'senderLettersToday' => $senderLettersToday,
+            ]);
+        }
+
+        // ARCHETYPE 3: SENDER REVIEWING OWN WISH FOR TODAY'S CELEBRANT
+        return view('pages.birthday-wishes', [
+            'mode' => 'sender',
+            'user' => $user,
+            'wishes' => $senderLettersToday,
+            'availableYears' => [$currentYear],
+            'selectedYear' => $currentYear,
+            'currentYear' => $currentYear,
+            'today' => $today,
+            'senderLettersToday' => $senderLettersToday,
+        ]);
+    }
 }

@@ -79,10 +79,15 @@
             </div>
 
             {{-- Action Controls (Hidden during initial lock sequence) --}}
-            <div id="birthday-action-buttons" style="display: none; justify-content: center; gap: 14px; margin-top: 8px;">
+            <div id="birthday-action-buttons" style="display: none; justify-content: center; align-items: center; gap: 14px; margin-top: 8px;">
                 <button type="button" id="btn-birthday-write-letter" class="button button-primary">
                     <x-icon name="sparkles" /> Write a Letter
                 </button>
+                @if(auth()->check() && auth()->user()->member && auth()->user()->member->isBirthdayToday())
+                    <a href="{{ route('birthday.wishes') }}" class="button button-ghost" style="border-color: var(--gold); color: #8e680a; font-weight: 700;">
+                        🎁 View My Wishes
+                    </a>
+                @endif
                 <button type="button" id="btn-birthday-close" class="button button-secondary">
                     Close
                 </button>
@@ -142,9 +147,14 @@
             <p style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">
                 Your birthday wishes have been recorded for <strong id="success-member-name"></strong>. Thank you for sharing joy!
             </p>
-            <button type="button" id="btn-success-close" class="button button-primary">
-                Done & Close
-            </button>
+            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px;">
+                <button type="button" id="btn-success-close" class="button button-primary">
+                    Done & Close
+                </button>
+                <a href="{{ route('birthday.wishes') }}" class="button button-secondary">
+                    Review My Wish &rarr;
+                </a>
+            </div>
         </div>
     </div>
 </div>
