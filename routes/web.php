@@ -133,12 +133,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::match(['put', 'patch', 'post'], '/games/growth-100/answers/{id}', [AdminGameController::class, 'updateGrowth100Answer'])->name('games.growth-100.update-answer');
         Route::delete('/games/growth-100/answers/{id}', [AdminGameController::class, 'deleteGrowth100Answer'])->name('games.growth-100.delete-answer');
 
-        // Birthday Wishes Administration
+        // Birthday Wishes Administration (Scope 5)
         Route::get('/birthday-wishes', [BirthdayWishController::class, 'index'])->name('birthday-wishes');
+        Route::get('/birthday-wishes/{id}', [BirthdayWishController::class, 'show'])->name('birthday-wishes.show');
+        Route::match(['put', 'patch', 'post'], '/birthday-wishes/{id}', [BirthdayWishController::class, 'update'])->name('birthday-wishes.update');
+        Route::delete('/birthday-wishes/{id}', [BirthdayWishController::class, 'destroy'])->name('birthday-wishes.destroy');
 
-        // Cash Management Portal
+        // Cash Management Portal (Scope 5)
         Route::get('/cash-management', [CashManagementController::class, 'adminIndex'])->name('cash-management');
         Route::post('/cash-management', [CashManagementController::class, 'store'])->name('cash.store');
+        Route::get('/cash-management/transaction/{id}', [CashManagementController::class, 'show'])->name('cash.show');
+        Route::match(['put', 'patch', 'post'], '/cash-management/{id}', [CashManagementController::class, 'update'])->name('cash.update');
+        Route::delete('/cash-management/{id}', [CashManagementController::class, 'destroy'])->name('cash.destroy');
         Route::get('/cash-management/shortcut/{memberId}', [CashManagementController::class, 'shortcut'])->name('cash.shortcut');
         Route::get('/cash-management/member/{memberId}/shortcut', [CashManagementController::class, 'shortcut'])->name('cash.member.shortcut');
 

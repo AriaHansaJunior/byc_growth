@@ -136,7 +136,7 @@ class CashManagementController extends Controller
     /**
      * Store a new cash contribution transaction with image proof.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
@@ -179,6 +179,14 @@ class CashManagementController extends Controller
 
             DB::commit();
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cash transaction recorded successfully.',
+                    'transaction' => $transaction,
+                ], 201);
+            }
+
             return redirect()->route('cash-management')->with('success', 'Cash transaction recorded successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -189,10 +197,157 @@ class CashManagementController extends Controller
 
             Log::error('Failed to record cash transaction: ' . $e->getMessage(), ['exception' => $e]);
 
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to record cash transaction.',
+                ], 500);
+            }
+
             return back()->withInput()->withErrors(['error' => 'Failed to record cash transaction. Please try again.']);
         }
     }
 
+    /**
+     * Get transaction details (JSON).
+     */
+    public function show(int $id): JsonResponse
+    {
+        $transaction = CashTransaction::with(['member', 'proof', 'user'])->findOrFail($id);
+
+        return response()->json([
+            'id' => $transaction->id,
+            'member_id' => $transaction->member_id,
+            'contributor_name' => $transaction->member ? $transaction->member->full_name : $transaction->contributor_name,
+            'account_type' => $transaction->account_type,
+            'amount' => (float) $transaction->amount,
+            'proof_url' => $transaction->proof_file_url,
+            'has_proof' => (bool) $transaction->proof_file_id,
+            'transaction_date' => $transaction->transaction_date ? $transaction->transaction_date->format('Y-m-d') : null,
+            'created_at' => $transaction->created_at ? $transaction->created_at->format('M j, Y H:i:s') : null,
+        ]);
+    }
+
+    /**
+     * Update an existing cash transaction.
+     */
+    public function update(Request $request, int $id)
+    {
+        $transaction = CashTransaction::with('proof')->findOrFail($id);
+
+        $validated = $request->validate([
+            'member_id' => 'nullable|exists:members,id',
+            'contributor_name' => 'nullable|string|max:255',
+            'account_type' => 'required|string|max:100',
+            'amount' => 'required|numeric|gt:0',
+            'proof' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        $newMedia = null;
+        $oldMedia = $transaction->proof;
+
+        try {
+            DB::beginTransaction();
+
+            if ($request->hasFile('proof')) {
+                $newMedia = $this->mediaService->storeImage(
+                    $request->file('proof'),
+                    'cash_proof',
+                    CashTransaction::class,
+                    $transaction->id
+                );
+                $transaction->proof_file_id = $newMedia->id;
+            }
+
+            if (!empty($validated['member_id'])) {
+                $member = Member::findOrFail($validated['member_id']);
+                $transaction->member_id = $member->id;
+                $transaction->contributor_name = $member->full_name;
+            } elseif (!empty($validated['contributor_name'])) {
+                $transaction->member_id = null;
+                $transaction->contributor_name = $validated['contributor_name'];
+            }
+
+            $transaction->account_type = $validated['account_type'];
+            $transaction->amount = $validated['amount'];
+            $transaction->save();
+
+            // Safely delete old proof after successful update
+            if ($newMedia && $oldMedia) {
+                $this->mediaService->deleteMediaFile($oldMedia);
+            }
+
+            DB::commit();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cash transaction updated successfully.',
+                    'transaction' => $transaction->fresh(['member', 'proof']),
+                ]);
+            }
+
+            return back()->with('success', 'Cash transaction updated successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            if ($newMedia) {
+                $this->mediaService->deleteMediaFile($newMedia);
+            }
+
+            Log::error('Failed to update cash transaction: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update cash transaction.',
+                ], 500);
+            }
+
+            return back()->withInput()->withErrors(['error' => 'Failed to update cash transaction. Please try again.']);
+        }
+    }
+
+    /**
+     * Delete an existing cash transaction.
+     */
+    public function destroy(Request $request, int $id)
+    {
+        $transaction = CashTransaction::with('proof')->findOrFail($id);
+
+        try {
+            DB::beginTransaction();
+
+            if ($transaction->proof) {
+                $this->mediaService->deleteMediaFile($transaction->proof);
+            }
+
+            $transaction->delete();
+
+            DB::commit();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cash transaction deleted successfully.',
+                ]);
+            }
+
+            return back()->with('success', 'Cash transaction deleted successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Failed to delete cash transaction: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete cash transaction.',
+                ], 500);
+            }
+
+            return back()->withErrors(['error' => 'Failed to delete cash transaction.']);
+        }
+    }
 
     /**
      * Return shortcut data for a selected member (account type & last amount).
