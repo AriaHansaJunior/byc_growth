@@ -23,14 +23,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('layouts.app', function ($view) {
+        View::composer(['layouts.app', 'welcome', 'pages.*'], function ($view) {
             try {
                 if (Schema::hasTable('members')) {
-                    $today = Carbon::now('Asia/Jakarta');
                     $birthdayMembers = Member::with('photo')
                         ->where('is_active', true)
-                        ->whereNotNull('date_of_birth')
-                        ->whereRaw("DATE_FORMAT(date_of_birth, '%m-%d') = ?", [$today->format('m-d')])
+                        ->birthdayToday()
+                        ->orderBy('full_name', 'asc')
                         ->get();
                     $view->with('birthdayMembers', $birthdayMembers);
                 } else {

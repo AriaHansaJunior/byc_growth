@@ -54,9 +54,12 @@
     @else
         <div class="members-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
             @foreach($members as $member)
-                <div class="member-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 20px; text-align: center; box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    {{-- Photo Frame --}}
-                    <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid var(--line); margin-bottom: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
+                @php
+                    $isBirthday = $member->isBirthdayToday();
+                @endphp
+                <div class="member-card {{ $isBirthday ? 'member-card-birthday' : '' }}" data-birthday="{{ $isBirthday ? '1' : '0' }}" style="background: var(--white); border: {{ $isBirthday ? '2px solid var(--gold)' : '1px solid var(--line)' }}; border-radius: 20px; padding: 20px; text-align: center; box-shadow: {{ $isBirthday ? '0 12px 30px rgba(231, 189, 82, 0.2)' : 'var(--shadow)' }}; position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                    {{-- Photo Frame (With celebratory decoration for today's birthday celebrants) --}}
+                    <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid {{ $isBirthday ? 'var(--gold)' : 'var(--line)' }}; {{ $isBirthday ? 'box-shadow: 0 0 0 3px var(--gold), 0 8px 24px rgba(231, 189, 82, 0.45);' : '' }} margin-bottom: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
                         @if($member->photo_url)
                             <img
                                 src="{{ $member->photo_url }}"
@@ -75,12 +78,31 @@
                                 {{ strtoupper(substr($member->full_name, 0, 1)) }}
                             </div>
                         @endif
+
+                        @if($isBirthday)
+                            <div class="birthday-badge-pin" title="Celebrating Birthday Today!" style="position: absolute; bottom: 2px; right: 2px; width: 32px; height: 32px; background: #fdf5d7; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; box-shadow: 0 3px 8px rgba(0,0,0,0.18);">
+                                🎂
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Member Full Name ONLY (No position, no role, no hierarchy, no birthday) --}}
                     <h2 class="member-name" style="font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; line-height: 1.3;">
                         {{ $member->full_name }}
                     </h2>
+
+                    {{-- Birthday Interaction Action (Available on birthday date, even after popup is closed) --}}
+                    @if($isBirthday)
+                        <button
+                            type="button"
+                            class="button button-sm btn-member-send-wishes"
+                            data-id="{{ $member->id }}"
+                            data-name="{{ $member->full_name }}"
+                            style="margin-top: 10px; background: #fdf5d7; border: 1px solid var(--gold); color: #8e680a; font-weight: 700; font-size: 12px; border-radius: 20px; padding: 4px 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(231, 189, 82, 0.2);"
+                        >
+                            🎂 Send Wishes
+                        </button>
+                    @endif
 
                     {{-- Admin Controls (Only visible to authenticated administrators) --}}
                     @if(auth()->check() && auth()->user()->isAdmin())
@@ -241,6 +263,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             editModal.style.display = 'flex';
+        });
+    });
+});
+</script>
+@endif
+
+@if($members->contains(fn($m) => $m->isBirthdayToday()))
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.btn-member-send-wishes').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const memberId = btn.dataset.id;
+            const memberName = btn.dataset.name;
+
+            if (typeof window.openBirthdayLetter === 'function') {
+                window.openBirthdayLetter(memberId, memberName);
+            } else {
+                @auth
+                    window.location.href = '/members?birthday_letter=1&member_id=' + memberId;
+                @else
+                    window.location.href = "{{ route('admin.login') }}?redirect=" + encodeURIComponent('/members?birthday_letter=1&member_id=' + memberId);
+                @endauth
+            }
         });
     });
 });

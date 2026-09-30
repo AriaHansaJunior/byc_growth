@@ -164,11 +164,13 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 
 ---
 
-## 15. Birthday Popup & 10-Second Lock Discipline
-- **Local Timezone Authority**: Birthday calculations are determined by the application server based on Surabaya, Indonesia (`Asia/Jakarta`). Matching is performed by comparing `month + day`, ignoring the birth year.
-- **10-Second Unclosable Modal Lock**: When a birthday popup appears, it MUST NOT be closable for the first 10 seconds. Close buttons, backdrop dismissal, and the ESC key must be strictly locked during this window. Clear countdown feedback must be communicated. After 10 seconds, `Write a Letter` and `Close` actions are unlocked.
-- **Stateless Reappearance**: The birthday popup must never set a permanent "seen" flag or database column. Re-visiting or refreshing the website on the birthday will display the greeting again.
-- **Multi-Member Non-Overlapping Presentation**: When multiple members celebrate birthdays on the same day, greetings must be navigated sequentially within a single modal without overlapping windows.
+## 15. Birthday Popup & Multi-Member Sequence Discipline
+- **Local Timezone Authority**: Birthday calculations are determined strictly by the application server based on Surabaya, Indonesia (`Asia/Jakarta`). Matching is performed by comparing `month + day`, ignoring the birth year.
+- **Strict Conditional Rendering**: The birthday popup exists and renders ONLY when at least one active BYC member has a birthday today. When no celebrants exist, zero popup markup, zero empty modal, and zero DOM layout space are rendered.
+- **Auto-Slide & Close-Lock Formula (N × 5s)**: For $N$ birthday members, each celebrant is displayed for 5 seconds during the initial automatic sequence (total lock duration = $N \times 5$ seconds). After cycling through all celebrants and returning to the first member, autoplay permanently stops, and manual controls (Prev, Next, Close, Write a Letter) unlock.
+- **Popup Cooldown Decoupled from Auth**: A 3-hour display cooldown governs popup reappearance on the same browser/user context. Normal client navigation does not trigger repeated popups. Deleting popup state resets popup eligibility without logging the user out or altering the authentication session lifetime.
+- **Date-Derived Presentation Ordering on Members Page**: Today's birthday celebrants appear first on the public Members directory, followed by non-birthday members, ordered deterministically. This ordering and the subtle birthday visual ring/badge are purely date-derived presentation states that never alter underlying database records.
+- **Post-Popup Birthday Interaction**: Closing the birthday popup does not terminate birthday actions for the day; celebrant cards on the Members page continue to provide a direct letter-writing interaction. Unauthenticated users selecting "Write a Letter" are routed through login and returned directly to the birthday context.
 
 ---
 

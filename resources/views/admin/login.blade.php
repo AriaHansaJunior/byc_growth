@@ -43,6 +43,9 @@
         {{-- Sign In Form --}}
         <form method="POST" action="{{ route('admin.login.submit') }}" class="auth-form" novalidate>
             @csrf
+            @if(request('redirect') || old('redirect'))
+                <input type="hidden" name="redirect" value="{{ request('redirect', old('redirect')) }}">
+            @endif
 
             <div class="form-group">
                 <label for="email" class="form-label">Email Address</label>

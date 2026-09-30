@@ -42,8 +42,11 @@ class PageController extends Controller
      */
     public function members(): View
     {
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->format('m-d');
+
         $members = Member::with('photo')
             ->where('is_active', true)
+            ->orderByRaw("CASE WHEN date_of_birth IS NOT NULL AND DATE_FORMAT(date_of_birth, '%m-%d') = ? THEN 0 ELSE 1 END ASC", [$today])
             ->orderBy('full_name', 'asc')
             ->get();
 
