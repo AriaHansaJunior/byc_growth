@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ActivityController as BaseActivityController;
 use App\Models\Activity;
+use App\Services\MediaUploadService;
 use Illuminate\View\View;
 
-class ActivityController extends Controller
+class ActivityController extends BaseActivityController
 {
+    public function __construct(MediaUploadService $mediaService)
+    {
+        parent::__construct($mediaService);
+    }
     /**
      * Display the Admin Activities Management portal.
      * Manages event timelines, announcements, and photo galleries.

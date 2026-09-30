@@ -65,7 +65,11 @@ class ActivityController extends Controller
             }
         }
 
-        return redirect()->route('activity')->with('success', 'Activity created successfully.');
+        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/activities'))
+            ? route('admin.activities')
+            : route('activity');
+
+        return redirect($target)->with('success', 'Activity created successfully.');
     }
 
     /**
@@ -117,13 +121,17 @@ class ActivityController extends Controller
             }
         }
 
-        return redirect()->route('activity')->with('success', 'Activity updated successfully.');
+        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/activities'))
+            ? route('admin.activities')
+            : route('activity');
+
+        return redirect($target)->with('success', 'Activity updated successfully.');
     }
 
     /**
      * Remove the specified activity and all supporting photos (Admin only).
      */
-    public function destroy(int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse
     {
         $activity = Activity::findOrFail($id);
 
@@ -132,8 +140,20 @@ class ActivityController extends Controller
             $this->mediaService->deleteMediaFile($photo);
         }
 
+        // Clean up any remaining media files pointing to this activity
+        $remainingMedia = MediaFile::where('fileable_type', Activity::class)
+            ->where('fileable_id', $activity->id)
+            ->get();
+        foreach ($remainingMedia as $media) {
+            $this->mediaService->deleteMediaFile($media);
+        }
+
         $activity->delete();
 
-        return redirect()->route('activity')->with('success', 'Activity deleted successfully.');
+        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/activities'))
+            ? route('admin.activities')
+            : route('activity');
+
+        return redirect($target)->with('success', 'Activity deleted successfully.');
     }
 }

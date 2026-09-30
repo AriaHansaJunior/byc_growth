@@ -106,9 +106,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         // Activity Management CRUD
         Route::get('/activities', [AdminActivityController::class, 'index'])->name('activities');
-        Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
-        Route::match(['put', 'post'], '/activities/{id}', [ActivityController::class, 'update'])->name('activities.update');
-        Route::delete('/activities/{id}', [ActivityController::class, 'destroy'])->name('activities.destroy');
+        Route::post('/activities', [AdminActivityController::class, 'store'])->name('activities.store');
+        Route::match(['put', 'post'], '/activities/{id}', [AdminActivityController::class, 'update'])->name('activities.update');
+        Route::delete('/activities/{id}', [AdminActivityController::class, 'destroy'])->name('activities.destroy');
 
         // Games Management
         Route::get('/games', [AdminGameController::class, 'index'])->name('games');

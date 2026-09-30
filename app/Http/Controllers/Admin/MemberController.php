@@ -150,6 +150,19 @@ class MemberController extends Controller
             }
         }
 
+        // Clean up any remaining media files associated with this member
+        $otherMedia = MediaFile::where('fileable_type', Member::class)
+            ->where('fileable_id', $member->id)
+            ->get();
+        foreach ($otherMedia as $media) {
+            $this->mediaService->deleteMediaFile($media);
+        }
+
+        // Safely disassociate user accounts to preserve credentials without dangling member_id
+        if (class_exists(\App\Models\User::class)) {
+            \App\Models\User::where('member_id', $member->id)->update(['member_id' => null]);
+        }
+
         // Safely disassociate cash transactions to preserve financial history integrity
         if (class_exists(\App\Models\CashTransaction::class)) {
             \App\Models\CashTransaction::where('member_id', $member->id)->update(['member_id' => null]);

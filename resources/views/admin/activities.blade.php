@@ -62,6 +62,7 @@
                                 data-name="{{ $activity->name }}"
                                 data-date="{{ $activity->event_date->format('Y-m-d') }}"
                                 data-description="{{ $activity->description }}"
+                                data-photos="{{ json_encode($activity->photos->map(fn($p) => ['id' => $p->id, 'url' => $p->getUrl(), 'name' => $p->original_name])) }}"
                                 style="font-size: 12px; padding: 4px 10px; height: 32px;"
                             >
                                 ✎ Edit
@@ -167,6 +168,11 @@
                     <label class="form-label" for="edit-activity-desc">Description</label>
                     <textarea id="edit-activity-desc" name="description" class="form-input" rows="4" required></textarea>
                 </div>
+                {{-- Existing Photos Management --}}
+                <div id="edit-activity-photos-container" style="display: none; margin-bottom: 16px;">
+                    <label class="form-label" style="display: block; margin-bottom: 6px;">Current Photos (Check to remove)</label>
+                    <div id="edit-photos-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; max-height: 160px; overflow-y: auto; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--cream);"></div>
+                </div>
                 <div class="form-group" style="margin-bottom: 24px;">
                     <label class="form-label" for="edit-activity-photos">Add Photos to Gallery</label>
                     <input type="file" id="edit-activity-photos" name="photos[]" class="form-input" multiple accept="image/*">
@@ -190,6 +196,8 @@
         const editName = document.getElementById('edit-activity-name');
         const editDate = document.getElementById('edit-activity-date');
         const editDesc = document.getElementById('edit-activity-desc');
+        const photosContainer = document.getElementById('edit-activity-photos-container');
+        const photosList = document.getElementById('edit-photos-list');
 
         if (btnOpenAdd && addModal) {
             btnOpenAdd.addEventListener('click', () => {
@@ -203,6 +211,8 @@
                 const name = this.getAttribute('data-name');
                 const date = this.getAttribute('data-date');
                 const desc = this.getAttribute('data-description');
+                const photosRaw = this.getAttribute('data-photos');
+                const photos = JSON.parse(photosRaw || '[]');
 
                 if (editForm) {
                     editForm.action = `/admin/activities/${id}`;
@@ -210,6 +220,25 @@
                 if (editName) editName.value = name || '';
                 if (editDate) editDate.value = date || '';
                 if (editDesc) editDesc.value = desc || '';
+
+                if (photosList) photosList.innerHTML = '';
+                if (photos.length > 0 && photosContainer && photosList) {
+                    photosContainer.style.display = 'block';
+                    photos.forEach(photo => {
+                        const item = document.createElement('div');
+                        item.style = 'position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 1;';
+                        item.innerHTML = `
+                            <img src="${photo.url}" alt="${photo.name}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                            <label style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(189,76,66,0.9); color: #fff; font-size: 11px; padding: 2px 4px; display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer;">
+                                <input type="checkbox" name="remove_photo_ids[]" value="${photo.id}"> Delete
+                            </label>
+                        `;
+                        photosList.appendChild(item);
+                    });
+                } else if (photosContainer) {
+                    photosContainer.style.display = 'none';
+                }
+
                 if (editModal) editModal.style.display = 'grid';
             });
         });

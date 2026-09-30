@@ -170,9 +170,15 @@
                     <label class="form-label" for="edit-dob">Date of Birth</label>
                     <input type="date" id="edit-dob" name="date_of_birth" class="form-input">
                 </div>
-                <div class="form-group" style="margin-bottom: 24px;">
+                <div class="form-group" style="margin-bottom: 16px;">
                     <label class="form-label" for="edit-photo">Replace Photo (Optional)</label>
                     <input type="file" id="edit-photo" name="photo" class="form-input" accept="image/*">
+                </div>
+                <div id="edit-member-remove-photo-wrap" style="display: none; margin-bottom: 24px;">
+                    <label style="font-size: 13px; color: var(--red); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <input type="checkbox" id="edit-remove-photo" name="remove_photo" value="1">
+                        Remove current profile photo
+                    </label>
                 </div>
                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
                     <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
@@ -192,6 +198,8 @@
         const editForm = document.getElementById('form-edit-member');
         const editName = document.getElementById('edit-full-name');
         const editDob = document.getElementById('edit-dob');
+        const removeWrap = document.getElementById('edit-member-remove-photo-wrap');
+        const removeCb = document.getElementById('edit-remove-photo');
 
         if (btnOpenAdd && addModal) {
             btnOpenAdd.addEventListener('click', () => {
@@ -204,12 +212,17 @@
                 const id = this.getAttribute('data-id');
                 const name = this.getAttribute('data-name');
                 const dob = this.getAttribute('data-dob');
+                const photo = this.getAttribute('data-photo');
 
                 if (editForm) {
                     editForm.action = `/admin/members/${id}`;
                 }
                 if (editName) editName.value = name || '';
                 if (editDob) editDob.value = dob || '';
+                if (removeCb) removeCb.checked = false;
+                if (removeWrap) {
+                    removeWrap.style.display = photo ? 'block' : 'none';
+                }
                 if (editModal) editModal.style.display = 'grid';
             });
         });
