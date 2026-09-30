@@ -82,7 +82,7 @@ class Scope1AdminShellTest extends TestCase
         $response->assertSee('Admin Portal');
         $response->assertSee('Dashboard');
         $response->assertSee('Protected Management Modules');
-        $response->assertSee($this->adminUser->name);
+        $response->assertSee($this->adminUser->username);
     }
 
     /**
@@ -370,6 +370,60 @@ class Scope1AdminShellTest extends TestCase
         $appCss = file_get_contents(resource_path('css/app.css'));
         $this->assertStringContainsString('./user/user.css', $appCss);
         $this->assertStringContainsString('./admin/admin.css', $appCss);
+    }
+
+    /**
+     * 19. Admin logout redirects to /admin-ganteng (never /admin/login)
+     */
+    public function test_19_admin_logout_redirects_to_admin_ganteng(): void
+    {
+        $response = $this->actingAs($this->adminUser)->post('/admin/logout');
+
+        $response->assertRedirect('/admin-ganteng');
+        $this->assertGuest();
+    }
+
+    /**
+     * 20. Dashboard and Roles / Accounts module cards render valid SVG icons
+     */
+    public function test_20_admin_dashboard_and_roles_icons_render_svg_paths(): void
+    {
+        $response = $this->actingAs($this->adminUser)->get('/admin/dashboard');
+
+        $response->assertStatus(200);
+        // Chart icon for Dashboard card is rendered with SVG path
+        $response->assertSee('M3 13.125C3 12.504 3.504 12', false);
+        // Shield icon for Roles / Accounts card is rendered with SVG path
+        $response->assertSee('M9 12.75 11.25 15 15 9.75', false);
+    }
+
+    /**
+     * 21. Admin account display and greeting strictly use username
+     */
+    public function test_21_admin_username_display_uses_username_not_name(): void
+    {
+        $jojoAdmin = User::updateOrCreate(
+            ['email' => 'jojo_ganteng@gmail.com'],
+            [
+                'name' => 'Jojo Admin',
+                'username' => 'rilbiezzz',
+                'password' => Hash::make('jojo123'),
+                'role' => 'admin',
+            ]
+        );
+
+        $response = $this->actingAs($jojoAdmin)->get('/admin/dashboard');
+
+        $response->assertStatus(200);
+        // Username is primary display in header
+        $response->assertSee('<strong>rilbiezzz</strong>', false);
+        $response->assertDontSee('Jojo Admin (rilbiezzz)');
+        // Greeting uses username
+        $response->assertSee('Welcome back, rilbiezzz');
+        $response->assertDontSee('Welcome back, Jojo Admin');
+        // Email and role badge remain intact
+        $response->assertSee('jojo_ganteng@gmail.com');
+        $response->assertSee('Admin');
     }
 }
 

@@ -121,7 +121,7 @@ class AuthTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('admin.dashboard');
         $response->assertSee('Admin Portal');
-        $response->assertSee($admin->name);
+        $response->assertSee($admin->username ?? $admin->name);
         $response->assertSee('Protected Management Modules');
     }
 
@@ -189,7 +189,7 @@ class AuthTest extends TestCase
 
         $loginResponse = $this->actingAs($admin)->post('/admin/logout');
 
-        $loginResponse->assertRedirect('/admin/login');
+        $loginResponse->assertRedirect('/admin-ganteng');
         $this->assertGuest();
     }
 

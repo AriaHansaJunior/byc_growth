@@ -47,7 +47,7 @@
             <div class="admin-user-nav">
                 @if($admin)
                     <div class="admin-user-info">
-                        <strong>{{ $admin->name }} ({{ $admin->username }})</strong>
+                        <strong>{{ $admin->username ?? $admin->name }}</strong>
                         <small>{{ $admin->email }} &bull; <span class="role-badge">{{ ucfirst($admin->role) }}</span></small>
                     </div>
                 @endif

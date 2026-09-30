@@ -7,7 +7,7 @@
     <div class="admin-welcome-card">
         <div>
             <span class="eyebrow" style="color: var(--lime);">Authentication & Authorization Active</span>
-            <h1>Welcome back, {{ $admin->name }}</h1>
+            <h1>Welcome back, {{ $admin->username ?? $admin->name }}</h1>
             <p>
                 You are securely authenticated as an administrator. Administration God Mode is active for data and content management.
             </p>

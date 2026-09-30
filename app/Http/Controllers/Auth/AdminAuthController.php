@@ -113,6 +113,6 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login')->with('status', 'You have been logged out successfully.');
+        return redirect()->route('admin.ganteng')->with('status', 'You have been logged out successfully.');
     }
 }
