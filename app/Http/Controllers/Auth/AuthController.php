@@ -10,22 +10,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
-class AdminAuthController extends Controller
+class AuthController extends Controller
 {
     /**
-     * Show the administrator sign-in form.
+     * Show the user sign-in form.
      */
     public function showLoginForm(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             if ($request->filled('redirect')) {
                 return redirect($request->input('redirect'));
-            }
-
-            /** @var User $user */
-            $user = Auth::user();
-            if ($user->isAdmin()) {
-                return redirect()->route('admin.dashboard');
             }
 
             return redirect()->route('home');
@@ -35,11 +29,11 @@ class AdminAuthController extends Controller
             session()->put('url.intended', $request->input('redirect'));
         }
 
-        return view('admin.login');
+        return view('auth.login');
     }
 
     /**
-     * Handle an incoming admin authentication request.
+     * Handle incoming normal user authentication.
      * Supports both email and username.
      */
     public function login(Request $request): RedirectResponse
@@ -70,23 +64,6 @@ class AdminAuthController extends Controller
                 ]);
         }
 
-        // Enforce administrator role requirement unless returning to a non-admin redirect target
-        if (!$user->isAdmin()) {
-            if ($request->filled('redirect') && !str_starts_with($request->input('redirect'), '/admin')) {
-                Auth::login($user, $request->boolean('remember'));
-                $request->session()->regenerate();
-                session()->flash('welcome_user', $user->username);
-                return redirect($request->input('redirect'));
-            }
-
-            return back()
-                ->withInput($request->only('login', 'email'))
-                ->withErrors([
-                    'login' => 'These credentials do not have administrator access.',
-                    'email' => 'These credentials do not have administrator access.',
-                ]);
-        }
-
         Auth::login($user, $request->boolean('remember'));
         $request->session()->regenerate();
         session()->flash('welcome_user', $user->username);
@@ -95,16 +72,11 @@ class AdminAuthController extends Controller
             return redirect($request->input('redirect'));
         }
 
-        $intended = $request->session()->pull('url.intended');
-        if ($intended) {
-            return redirect($intended);
-        }
-
-        return redirect()->route('admin.dashboard');
+        return redirect()->intended(route('home'));
     }
 
     /**
-     * Log the administrator out of the application and invalidate session.
+     * Log user out of the application and invalidate session.
      */
     public function logout(Request $request): RedirectResponse
     {
@@ -113,6 +85,6 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login')->with('status', 'You have been logged out successfully.');
+        return redirect()->route('home')->with('status', 'You have been logged out successfully.');
     }
 }

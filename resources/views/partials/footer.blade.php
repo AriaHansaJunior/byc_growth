@@ -50,10 +50,6 @@
                         <li><a href="{{ route('activity') }}" class="footer-link">Activity</a></li>
                         <li><a href="{{ route('members') }}" class="footer-link">Members</a></li>
                         <li><a href="{{ route('game.center') }}" class="footer-link">Game Center</a></li>
-                        @if(auth()->check() && auth()->user()->isAdmin())
-                            <li><a href="{{ route('cash-management') }}" class="footer-link">Cash Management</a></li>
-                            <li><a href="{{ route('admin.roles') }}" class="footer-link">Role</a></li>
-                        @endif
                     </ul>
                 </div>
             </div>

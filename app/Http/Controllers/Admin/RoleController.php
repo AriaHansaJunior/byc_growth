@@ -36,19 +36,26 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => 'nullable|string|max:60|regex:/^[a-zA-Z0-9_]+$/|unique:users,username',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
             'role' => ['required', Rule::in(['admin', 'user'])],
             'member_id' => 'nullable|exists:members,id|unique:users,member_id',
         ]);
 
-        User::create([
+        $userData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
-        ]);
+        ];
+
+        if (!empty($validated['username'])) {
+            $userData['username'] = $validated['username'];
+        }
+
+        User::create($userData);
 
         return redirect()->route('admin.roles')->with('success', 'Account created successfully.');
     }
@@ -62,6 +69,7 @@ class RoleController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'username' => ['nullable', 'string', 'max:60', 'regex:/^[a-zA-Z0-9_]+$/', Rule::unique('users', 'username')->ignore($user->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:6',
             'role' => ['required', Rule::in(['admin', 'user'])],
@@ -74,6 +82,10 @@ class RoleController extends Controller
             'role' => $validated['role'],
             'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ];
+
+        if (!empty($validated['username'])) {
+            $updateData['username'] = $validated['username'];
+        }
 
         if (!empty($validated['password'])) {
             $updateData['password'] = Hash::make($validated['password']);

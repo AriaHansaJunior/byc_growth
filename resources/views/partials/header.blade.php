@@ -20,35 +20,31 @@
                 Game Center
             </a>
 
+            @if(auth()->check() && auth()->user()->member && auth()->user()->member->isBirthdayToday())
+                <a href="{{ route('birthday.wishes') }}" class="nav-item {{ request()->routeIs('birthday.wishes*') ? 'active' : '' }}" style="color: var(--gold); font-weight: 700;">
+                    🎂 My Wishes
+                </a>
+            @endif
+
             @if(auth()->guest())
-                <a href="{{ route('login') }}" class="nav-login-btn" title="Member Sign In">
+                <a href="{{ route('login') }}" class="nav-login-btn" id="btn-header-login" title="Member Sign In">
                     Login
                 </a>
             @else
-                @if(auth()->user()->isAdmin())
-                    <a href="{{ route('birthday.wishes') }}" class="nav-item {{ request()->routeIs('birthday.wishes*') ? 'active' : '' }}">
-                        Birthday Wishes
-                    </a>
-                    <a href="{{ route('admin.roles') }}" class="nav-item {{ request()->routeIs('admin.roles*') ? 'active' : '' }}">
-                        Role
-                    </a>
-                    <a href="{{ route('cash-management') }}" class="nav-item {{ request()->routeIs('cash-management*') ? 'active' : '' }}">
-                        Cash Management
-                    </a>
-                    <a href="{{ route('admin.dashboard') }}" class="nav-badge-link" title="Administrator Dashboard">
-                        Admin Portal
-                    </a>
-                @elseif(auth()->user()->member && auth()->user()->member->isBirthdayToday())
-                    <a href="{{ route('birthday.wishes') }}" class="nav-item {{ request()->routeIs('birthday.wishes*') ? 'active' : '' }}" style="color: var(--gold); font-weight: 700;">
-                        🎂 My Wishes
-                    </a>
-                @endif
-                <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0; display: inline;">
-                    @csrf
-                    <button type="submit" class="nav-logout-btn" title="Sign out of your session">
-                        Logout
+                <div class="nav-user-dropdown-wrap" id="nav-user-dropdown-wrap">
+                    <button type="button" class="nav-user-btn" id="btn-user-dropdown" aria-haspopup="true" aria-expanded="false" title="Account Menu">
+                        <span class="nav-user-username">{{ auth()->user()->username }}</span>
+                        <x-icon name="chevron-down" />
                     </button>
-                </form>
+                    <div class="nav-user-dropdown-menu" id="nav-user-dropdown-menu" role="menu" style="display: none;">
+                        <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
+                            @csrf
+                            <button type="submit" class="nav-user-logout-item" id="btn-header-logout" role="menuitem">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
             @endif
         </nav>
     </div>

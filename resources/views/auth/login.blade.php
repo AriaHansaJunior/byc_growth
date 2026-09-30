@@ -1,32 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Sign In — BYC GROWTH')
+@section('title', 'Sign In — BYC GROWTH')
 @section('no-header', true)
 @section('no-footer', true)
 
 @section('content')
 <div class="auth-shell">
-    <div class="auth-card" style="border: 2px solid var(--forest);">
+    <div class="auth-card">
         {{-- Brand / Header --}}
         <div class="auth-header">
             <a href="{{ route('home') }}" class="auth-brand-link" title="Return to Website">
                 <x-brand :compact="true" />
             </a>
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(40, 78, 59, 0.12); color: var(--forest); padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 10px;">
-                <x-icon name="lock" /> Admin Portal
-            </div>
-            <h1 style="margin-top: 12px;">Admin Sign In</h1>
-        </div>
-
-        {{-- Warning Callout (Polished English per Spec) --}}
-        <div class="admin-login-warning-box" style="background: var(--cream); border: 1.5px solid var(--line); border-left: 5px solid var(--forest); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; text-align: left;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span style="font-size: 16px;">🛡️</span>
-                <strong style="color: var(--forest); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase;">WARNING! THIS IS THE ADMIN AREA.</strong>
-            </div>
-            <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;">
-                If you are an administrator, make sure you know the correct email/username and password before continuing.
-            </p>
+            <h1>Sign In</h1>
+            <p>Enter your email or username to access your account.</p>
         </div>
 
         {{-- Flash / Status Messages --}}
@@ -54,7 +41,7 @@
         @endif
 
         {{-- Sign In Form --}}
-        <form method="POST" action="{{ request()->is('admin-ganteng*') ? route('admin.ganteng.submit') : route('admin.login.submit') }}" class="auth-form" novalidate>
+        <form method="POST" action="{{ route('login.submit') }}" class="auth-form" novalidate>
             @csrf
             @if(request('redirect') || old('redirect'))
                 <input type="hidden" name="redirect" value="{{ request('redirect', old('redirect')) }}">
@@ -62,7 +49,6 @@
 
             <div class="form-group">
                 <label for="login" class="form-label">Email / Username</label>
-                <span style="display: none;" aria-hidden="true">Email Address</span>
                 <input
                     type="text"
                     id="login"
@@ -72,7 +58,7 @@
                     autofocus
                     autocomplete="username"
                     class="form-input @if($errors->has('login') || $errors->has('email')) input-invalid @enderror"
-                    placeholder="admin@gmail.com or admin_utama"
+                    placeholder="Enter email or username"
                 >
             </div>
 
@@ -97,7 +83,7 @@
             </div>
 
             <button type="submit" class="button button-primary" style="width: 100%;">
-                Login <x-icon name="arrow" />
+                Sign In <x-icon name="arrow" />
             </button>
         </form>
 

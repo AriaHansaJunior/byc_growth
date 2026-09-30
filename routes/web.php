@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CashManagementController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BirthdayController;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\PageController;
@@ -67,14 +68,16 @@ Route::middleware(['auth', 'admin'])->prefix('game')->name('game.')->group(funct
     Route::delete('/growth-100/round/{id}', [GameController::class, 'deleteGrowth100Round'])->name('growth-100.delete-round');
 });
 
-// Admin Authentication (Guest Only)
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
-});
+// Normal User Authentication
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Standard Login Fallback
-Route::get('/login', fn () => redirect()->route('admin.login'))->name('login');
+// Hidden Admin Login Entry (/admin-ganteng) & Legacy Compatibility
+Route::get('/admin-ganteng', [AdminAuthController::class, 'showLoginForm'])->name('admin.ganteng');
+Route::post('/admin-ganteng', [AdminAuthController::class, 'login'])->name('admin.ganteng.submit');
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 
 // Protected Administrator Routes (Requires Auth & Admin Role)
 Route::middleware(['auth', 'admin'])->group(function () {

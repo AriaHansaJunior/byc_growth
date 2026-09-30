@@ -18,11 +18,33 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
         'role',
         'member_id',
     ];
+
+    /**
+     * Bootstrap the model and its traits.
+     * Ensures every user automatically has a valid unique username if not explicitly set.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function ($user) {
+            if (empty($user->username)) {
+                $base = !empty($user->email) ? explode('@', $user->email)[0] : (!empty($user->name) ? \Illuminate\Support\Str::slug($user->name, '_') : 'user');
+                $base = strtolower(preg_replace('/[^a-zA-Z0-9_]/', '', $base) ?: 'user');
+                $candidate = $base;
+                $counter = 1;
+                while (static::where('username', $candidate)->exists()) {
+                    $candidate = $base . '_' . $counter;
+                    $counter++;
+                }
+                $user->username = $candidate;
+            }
+        });
+    }
 
     /**
      * The attributes that should be hidden for serialization.

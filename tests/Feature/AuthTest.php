@@ -15,7 +15,7 @@ class AuthTest extends TestCase
         parent::setUp();
 
         // Ensure the two required initial admin accounts exist
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin_byc@gmail.com'],
             [
                 'name' => 'Admin BYC',
@@ -24,11 +24,12 @@ class AuthTest extends TestCase
             ]
         );
 
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'jojo_ganteng@gmail.com'],
             [
                 'name' => 'Jojo Admin',
-                'password' => Hash::make('password123'),
+                'username' => 'rilbiezzz',
+                'password' => Hash::make('jojo123'),
                 'role' => 'admin',
             ]
         );
@@ -70,7 +71,7 @@ class AuthTest extends TestCase
     {
         $response = $this->post('/admin/login', [
             'email' => 'jojo_ganteng@gmail.com',
-            'password' => 'password123',
+            'password' => 'jojo123',
         ]);
 
         $response->assertRedirect('/admin/dashboard');

@@ -211,3 +211,25 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Automatic Year-Based Archiving**: Archiving is fully automatic and derived from `birthday_year`. No manual archive flags or actions exist. Celebrants may browse their own current and previous years. Future years are strictly forbidden and rejected server-side.
 - **Privacy Enforcement**: Anonymity is preserved on all recipient views. The recipient never sees the real sender user account for anonymous letters, while administrators maintain full auditability.
 
+---
+
+## 20. Admin Architecture, Global User Identity & Hidden Entry Discipline
+- **Hidden Admin Login Entry (`/admin-ganteng`)**:
+  - The hidden entrance `/admin-ganteng` is strictly the direct entrance to the Admin Login page and must NEVER be exposed in public navigation, headers, footers, homepage, members, games, or activities.
+  - The route serves the Admin Login page directly to any visitor; authentication is the authoritative protection mechanism (do not return 404).
+  - After authentication, the administrator is redirected to `/admin/dashboard`. Internal management routes use descriptive names (`/admin/dashboard`, `/admin/roles`, etc.).
+- **Global Dual-Identifier Authentication (Email or Username)**:
+  - Both normal user login (`/login`) and admin login (`/admin-ganteng`) support authentication via either email address OR unique username.
+  - The `username` field is persisted as a unique, required column in the database `users` table as the authoritative source of truth.
+- **Strict Role Verification for Admin Access**:
+  - Authenticating at `/admin-ganteng` strictly requires the `admin` role. Authenticated non-admin users attempting to enter or log in via the admin entrance are rejected at the server level.
+- **Global Header State & Single-Action Logout**:
+  - When unauthenticated, the public header displays the standard `[ Login ]` button.
+  - When authenticated, the Login button is replaced with the user's `username` from the database.
+  - Clicking the authenticated username reveals a compact popover containing ONLY `[ Logout ]`. Profile editing, account settings, and admin navigation are strictly forbidden from this dropdown.
+- **Self-Deletion Invariant**:
+  - An authenticated administrator is strictly prevented from deleting their own active account (`user.id !== Auth::id()`). This rule must be enforced server-side.
+- **Admin God Mode vs Design System Boundary**:
+  - Admin God Mode provides comprehensive control over website **DATA and CONTENT** (slideshow images, members, activities, games, questions, cash records, accounts).
+  - Administrators are strictly forbidden from modifying the underlying website **UI design system** (typography, color tokens, layout grids, CSS variables, animation systems, component spacing, or responsiveness).
+

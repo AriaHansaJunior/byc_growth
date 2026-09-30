@@ -6,6 +6,7 @@ import { initGrowth100 } from './components/growth-100';
 import { initResetGame } from './components/reset';
 import { initHeroEnhancements } from './components/hero';
 import { initScrollReveal } from './components/scroll-reveal';
+import { initUserIdentity } from './components/user-identity';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Cara Bermain modal & tabs
@@ -33,4 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize smooth scroll reveal animations
     initScrollReveal();
+
+    // Initialize global user identity dropdown and welcome toast
+    initUserIdentity();
 });

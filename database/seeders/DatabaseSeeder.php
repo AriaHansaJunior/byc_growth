@@ -21,12 +21,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Initial Admin Accounts (Scope 2 Foundation)
+        // 1. Initial Admin Accounts (S0 Foundation)
         User::updateOrCreate(
-            ['email' => 'admin_byc@gmail.com'],
+            ['email' => 'admin@gmail.com'],
             [
-                'name' => 'Admin BYC',
-                'password' => Hash::make('password123'),
+                'name' => 'Admin Utama',
+                'username' => 'admin_utama',
+                'password' => Hash::make('admin123'),
                 'role' => 'admin',
             ]
         );
@@ -35,6 +36,18 @@ class DatabaseSeeder extends Seeder
             ['email' => 'jojo_ganteng@gmail.com'],
             [
                 'name' => 'Jojo Admin',
+                'username' => 'rilbiezzz',
+                'password' => Hash::make('jojo123'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Retain legacy admin_byc@gmail.com for existing test coverage
+        User::updateOrCreate(
+            ['email' => 'admin_byc@gmail.com'],
+            [
+                'name' => 'Admin BYC',
+                'username' => 'admin_byc',
                 'password' => Hash::make('password123'),
                 'role' => 'admin',
             ]
