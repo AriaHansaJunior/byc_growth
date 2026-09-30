@@ -79,7 +79,7 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Asset Structure**:
   - Stylesheet modularity: `resources/css/byc-growth/*.css` imported cleanly into `resources/css/app.css`.
   - Scripts modularity: `resources/js/components/*.js` imported into `resources/js/app.js`.
-  - Blade templates: Common layout in `layouts/app.blade.php`, reusable UI in `resources/views/components/`, sub-sections in `resources/views/partials/`, and standalone screens in `resources/views/pages/`.
+  - Blade templates: Common layout in `layouts/app.blade.php`, Admin shell in `layouts/admin.blade.php`, reusable UI in `resources/views/components/`, sub-sections in `resources/views/partials/`, public screens in `resources/views/user/`, and admin management screens in `resources/views/admin/`.
 
 ---
 

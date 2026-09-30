@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer(['layouts.app', 'welcome', 'pages.*'], function ($view) {
+        View::composer(['layouts.app', 'layouts.admin', 'welcome', 'user.*'], function ($view) {
             try {
                 if (Schema::hasTable('members')) {
                     $birthdayMembers = Member::with('photo')

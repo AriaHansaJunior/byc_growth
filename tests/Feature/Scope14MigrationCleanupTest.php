@@ -105,6 +105,7 @@ class Scope14MigrationCleanupTest extends TestCase
     {
         $obsoleteContactView = resource_path('views/pages/contact.blade.php');
         $this->assertFalse(File::exists($obsoleteContactView), 'resources/views/pages/contact.blade.php must be removed.');
+        $this->assertFalse(File::exists(resource_path('views/user/contact.blade.php')), 'resources/views/user/contact.blade.php must be removed.');
 
         // Legacy /contact route safely redirects to /about with HTTP 301
         $response = $this->get('/contact');

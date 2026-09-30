@@ -1,0 +1,11 @@
+/* ==========================================================================
+   BYC GROWTH 2.0 — User Domain Stylesheet
+   Owned styles for public visitor and member experience
+   ========================================================================== */
+
+/* User page shell constraints and headers */
+.user-page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}

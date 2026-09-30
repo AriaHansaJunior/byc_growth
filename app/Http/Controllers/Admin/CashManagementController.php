@@ -107,7 +107,7 @@ class CashManagementController extends Controller
             ->orderBy('account_type', 'asc')
             ->pluck('account_type');
 
-        $viewName = $request->is('admin/*') ? 'admin.cash-management' : 'pages.cash-management';
+        $viewName = $request->is('admin/*') ? 'admin.cash-management' : 'user.cash-management';
 
         return view($viewName, [
             'transactions' => $transactions,

@@ -16,7 +16,7 @@ class GameCenterTest extends TestCase
         $response = $this->get('/game-center');
 
         $response->assertStatus(200);
-        $response->assertViewIs('pages.game-center');
+        $response->assertViewIs('user.game-center');
         $response->assertSee('BYC Game Center');
         $response->assertSee('Interactive Gaming Arena');
         $response->assertSee('Choose Your Challenge');
@@ -54,7 +54,7 @@ class GameCenterTest extends TestCase
         $response = $this->get(route('game.guess-me'));
 
         $response->assertStatus(200);
-        $response->assertViewIs('pages.guess-me');
+        $response->assertViewIs('user.guess-me');
         $response->assertSee('Guess Me!');
     }
 
@@ -66,7 +66,7 @@ class GameCenterTest extends TestCase
         $response = $this->get(route('game.growth-100'));
 
         $response->assertStatus(200);
-        $response->assertViewIs('pages.growth-100');
+        $response->assertViewIs('user.growth-100');
         $response->assertSee('BYC Growth 100');
     }
 

@@ -33,7 +33,7 @@ class PageController extends Controller
      */
     public function about(): View
     {
-        return view('pages.about');
+        return view('user.about');
     }
 
     /**
@@ -50,7 +50,7 @@ class PageController extends Controller
             ->orderBy('full_name', 'asc')
             ->get();
 
-        return view('pages.members', [
+        return view('user.members', [
             'members' => $members,
         ]);
     }

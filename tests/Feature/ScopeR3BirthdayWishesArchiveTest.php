@@ -233,7 +233,7 @@ class ScopeR3BirthdayWishesArchiveTest extends TestCase
 
         $response = $this->get('/birthday-wishes');
         $response->assertStatus(200);
-        $response->assertViewIs('pages.birthday-wishes');
+        $response->assertViewIs('user.birthday-wishes');
         $response->assertSee('Birthday Wishes Directory');
         $response->assertSee('Administrator Full Archive Access');
     }

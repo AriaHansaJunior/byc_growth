@@ -10,3 +10,7 @@
 @import './byc-growth/modals.css';
 @import './byc-growth/final.css';
 @import './byc-growth/responsive.css';
+
+/* Domain Stylesheets (Clear Ownership) */
+@import './user/user.css';
+@import './admin/admin.css';

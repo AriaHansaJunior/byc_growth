@@ -48,7 +48,7 @@ class GameTest extends TestCase
         // Game Center Hub
         $gcRes = $this->get('/game-center');
         $gcRes->assertStatus(200);
-        $gcRes->assertViewIs('pages.game-center');
+        $gcRes->assertViewIs('user.game-center');
         $gcRes->assertSee('BYC Game Center');
         $gcRes->assertSee('Team Scoreboard');
     }

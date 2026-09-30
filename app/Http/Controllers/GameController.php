@@ -54,7 +54,7 @@ class GameController extends Controller
             ],
         ];
 
-        return view('pages.game-center', [
+        return view('user.game-center', [
             'finalScores' => $scores,
             'gameState' => $gameState,
             'teams' => $teams,
@@ -71,7 +71,7 @@ class GameController extends Controller
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores('game1');
 
-        return view('pages.guess-me', [
+        return view('user.guess-me', [
             'rounds' => $rounds,
             'game1State' => $gameState['game1'],
             'teams' => $teams,
@@ -87,7 +87,7 @@ class GameController extends Controller
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores('game2');
 
-        return view('pages.growth-100', [
+        return view('user.growth-100', [
             'rounds' => $rounds,
             'game2State' => $gameState['game2'],
             'teams' => $teams,
@@ -102,7 +102,7 @@ class GameController extends Controller
         $scores = $this->storageService->getFinalScores();
         $teams = $this->storageService->getTeamsWithScores();
 
-        return view('pages.final', [
+        return view('user.final', [
             'scores' => $scores,
             'teams' => $teams,
         ]);

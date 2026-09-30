@@ -280,4 +280,96 @@ class Scope1AdminShellTest extends TestCase
         $aboutRes->assertStatus(200);
         $aboutRes->assertDontSee('id="admin-confirm-modal"', false);
     }
+
+    // ==========================================
+    // S1 REVISION TESTS: VIEW & CSS SEPARATION + UI ALIGNMENT
+    // ==========================================
+
+    /**
+     * 14. User pages resolve from resources/views/user/ and old pages/ directory is removed
+     */
+    public function test_14_user_views_resolve_from_user_directory(): void
+    {
+        $this->assertDirectoryDoesNotExist(resource_path('views/pages'));
+        $this->assertDirectoryExists(resource_path('views/user'));
+
+        $this->get('/about')->assertStatus(200)->assertViewIs('user.about');
+        $this->get('/members')->assertStatus(200)->assertViewIs('user.members');
+        $this->get('/activity')->assertStatus(200)->assertViewIs('user.activities');
+        $this->get('/game-center')->assertStatus(200)->assertViewIs('user.game-center');
+        $this->get('/guess-me')->assertStatus(200)->assertViewIs('user.guess-me');
+        $this->get('/growth-100')->assertStatus(200)->assertViewIs('user.growth-100');
+    }
+
+    /**
+     * 15. Members Admin page uses the User Members visual foundation with administrative controls
+     */
+    public function test_15_admin_members_uses_user_visual_foundation_with_controls(): void
+    {
+        $response = $this->actingAs($this->adminUser)->get('/admin/members');
+
+        $response->assertStatus(200);
+        // Shared User visual elements
+        $response->assertSee('members-grid', false);
+        $response->assertSee('member-card', false);
+        $response->assertSee('member-photo-frame', false);
+        $response->assertSee('member-name', false);
+        // Admin controls
+        $response->assertSee('id="btn-open-add-member"', false);
+        $response->assertSee('btn-edit-member', false);
+        $response->assertSee('data-admin-confirm', false);
+        $response->assertSee('id="modal-add-member"', false);
+        $response->assertSee('id="modal-edit-member"', false);
+    }
+
+    /**
+     * 16. Activities Admin page uses the User Activities visual foundation with administrative controls
+     */
+    public function test_16_admin_activities_uses_user_visual_foundation_with_controls(): void
+    {
+        $response = $this->actingAs($this->adminUser)->get('/admin/activities');
+
+        $response->assertStatus(200);
+        // Shared User visual elements
+        $response->assertSee('activities-list', false);
+        $response->assertSee('activity-card', false);
+        $response->assertSee('activity-header', false);
+        $response->assertSee('activity-date', false);
+        // Admin controls
+        $response->assertSee('id="btn-open-add-activity"', false);
+        $response->assertSee('btn-edit-activity', false);
+        $response->assertSee('id="modal-add-activity"', false);
+        $response->assertSee('id="modal-edit-activity"', false);
+    }
+
+    /**
+     * 17. Games Admin page uses the User Game Center visual foundation with administrative controls
+     */
+    public function test_17_admin_games_uses_user_visual_foundation_with_controls(): void
+    {
+        $response = $this->actingAs($this->adminUser)->get('/admin/games');
+
+        $response->assertStatus(200);
+        // Shared User visual elements
+        $response->assertSee('game-center-hero', false);
+        $response->assertSee('game-center-selection', false);
+        $response->assertSee('gc-scoreboard', false);
+        $response->assertSee('Team Scoreboard', false);
+        // Admin controls
+        $response->assertSee('data-admin-confirm="Are you sure you want to reset all game scores and active round states?"', false);
+    }
+
+    /**
+     * 18. User and Admin CSS stylesheets exist and have clear ownership
+     */
+    public function test_18_user_and_admin_css_stylesheets_exist_with_clear_ownership(): void
+    {
+        $this->assertFileExists(resource_path('css/user/user.css'));
+        $this->assertFileExists(resource_path('css/admin/admin.css'));
+
+        $appCss = file_get_contents(resource_path('css/app.css'));
+        $this->assertStringContainsString('./user/user.css', $appCss);
+        $this->assertStringContainsString('./admin/admin.css', $appCss);
+    }
 }
+

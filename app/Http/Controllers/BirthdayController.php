@@ -312,7 +312,7 @@ class BirthdayController extends Controller
             $wishes = $query->orderBy('birthday_year', 'desc')->orderBy('created_at', 'desc')->get();
             $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();
 
-            return view('pages.birthday-wishes', [
+            return view('user.birthday-wishes', [
                 'mode' => 'admin',
                 'user' => $user,
                 'wishes' => $wishes,
@@ -356,7 +356,7 @@ class BirthdayController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            return view('pages.birthday-wishes', [
+            return view('user.birthday-wishes', [
                 'mode' => 'recipient',
                 'user' => $user,
                 'recipientMember' => $recipientMember,
@@ -370,7 +370,7 @@ class BirthdayController extends Controller
         }
 
         // ARCHETYPE 3: SENDER REVIEWING OWN WISH FOR TODAY'S CELEBRANT
-        return view('pages.birthday-wishes', [
+        return view('user.birthday-wishes', [
             'mode' => 'sender',
             'user' => $user,
             'wishes' => $senderLettersToday,

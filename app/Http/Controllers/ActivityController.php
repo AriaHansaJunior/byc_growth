@@ -28,7 +28,7 @@ class ActivityController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('pages.activities', [
+        return view('user.activities', [
             'activities' => $activities,
         ]);
     }
