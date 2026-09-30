@@ -30,9 +30,11 @@ Route::get('/game-center', [GameController::class, 'gameCenter'])->name('game.ce
 // Legacy Contact Route — Redirects Safely to Combined About & Contact Page
 Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 
-// Birthday System Public Endpoints
+// Birthday System Endpoints
 Route::get('/birthday/today', [BirthdayController::class, 'today'])->name('birthday.today');
 Route::post('/birthday/letter', [BirthdayController::class, 'submitLetter'])->name('birthday.letter');
+Route::match(['put', 'patch', 'post'], '/birthday/letter/{id}', [BirthdayController::class, 'updateLetter'])->name('birthday.letter.update');
+Route::get('/birthday/letter/{id}', [BirthdayController::class, 'showLetter'])->name('birthday.letter.show');
 
 // Interactive Games (Public Access Preserved)
 Route::get('/guess-me', [GameController::class, 'guessMe'])->name('game.guess-me');

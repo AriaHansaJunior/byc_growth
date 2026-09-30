@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'member_id',
     ];
 
     /**
@@ -41,7 +42,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'member_id' => 'integer',
     ];
+
+    /**
+     * Get the associated fellowship member profile (One User Account = One Member).
+     */
+    public function member(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Member::class);
+    }
 
     /**
      * Check if the user is an administrator.

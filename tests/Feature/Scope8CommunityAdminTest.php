@@ -628,6 +628,16 @@ class Scope8CommunityAdminTest extends TestCase
      */
     public function test_31_write_a_letter_flow_works(): void
     {
+        $senderUser = User::firstOrCreate(
+            ['email' => 'timothy_scope8@bycgrowth.org'],
+            [
+                'name' => 'Timothy',
+                'password' => Hash::make('password123'),
+                'role' => 'user',
+            ]
+        );
+        $this->actingAs($senderUser);
+
         $member = Member::create([
             'full_name' => 'Recipient Member',
             'date_of_birth' => '2000-01-01',
@@ -657,6 +667,8 @@ class Scope8CommunityAdminTest extends TestCase
      */
     public function test_32_empty_birthday_letter_is_rejected(): void
     {
+        $this->actingAs($this->regularUser);
+
         $member = Member::create([
             'full_name' => 'Letter Target',
             'is_active' => true,

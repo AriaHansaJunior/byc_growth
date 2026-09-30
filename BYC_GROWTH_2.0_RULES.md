@@ -187,3 +187,14 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **MySQL/Eloquent as Single Source of Truth**: All game states, rounds, survey answers, scores, teams, member profiles, cash transactions, activities, and birthday letters are strictly persisted in the relational MySQL database via Eloquent models.
 - **No JSON Persistence**: Filesystem storage must never be used for authoritative application data, round definitions, or game state. Filesystem directories (`storage/app/game/images/`, `public/assets/images/uploads/`) exist exclusively for uploaded binary media assets.
 - **Dead & Legacy Code Elimination**: Obsolete endpoints, dead controller actions, unrendered legacy templates, and old JSON persistence remnants must remain completely eliminated from the codebase.
+
+---
+
+## 18. Birthday System Foundation & Access Control
+- **One User Account = One Member**: Each user account maps to at most one fellowship member via a unique foreign key constraint (`users.member_id`). The `Member` model remains the single source of member identity and profile data, while `User` represents authentication credentials.
+- **Server-Authoritative Sender Identity**: Birthday letter sender identity is derived strictly from the authenticated user (`Auth::id()`). Client payloads cannot spoof or override the sender identity.
+- **One-Letter Invariant**: A sender can submit only ONE birthday letter to a specific recipient member for a given birthday year (`unique(user_id, member_id, birthday_year)`).
+- **Self-Wish Prevention**: A user associated with a member is strictly prevented from submitting a birthday letter to themselves.
+- **Anonymous Display with Administrator Traceability**: Anonymity is strictly a display preference for the birthday person. The underlying `user_id` is always persisted, allowing administrators to audit and identify senders while presenting "Anonymous" to the recipient.
+- **Birthday Date Editing Discipline**: Normal users may edit their submitted letter ONLY while the recipient's birthday is still active today in Surabaya (`Asia/Jakarta`). Administrators retain full privileges to edit letters at any time.
+

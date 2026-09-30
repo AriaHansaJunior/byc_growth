@@ -58,6 +58,14 @@ class Member extends Model
     }
 
     /**
+     * Get the associated user account for this member.
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(User::class);
+    }
+
+    /**
      * Check if today in Surabaya (Asia/Jakarta) is this member's birthday.
      * Compares month and day only.
      */

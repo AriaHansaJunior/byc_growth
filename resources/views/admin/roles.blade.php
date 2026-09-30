@@ -63,6 +63,11 @@
                     <tr style="border-bottom: 1px solid var(--line);">
                         <td style="padding: 16px; font-weight: 700; color: var(--ink);">
                             {{ $user->name }}
+                            @if($user->member)
+                                <div style="font-size: 12px; font-weight: 500; color: var(--forest); margin-top: 2px;">
+                                    👤 {{ $user->member->full_name }}
+                                </div>
+                            @endif
                             @if($user->id === $currentUser->id)
                                 <span style="font-size: 11px; background: var(--cream); color: var(--forest); padding: 2px 8px; border-radius: 12px; margin-left: 6px;">You</span>
                             @endif
@@ -87,6 +92,7 @@
                                     data-name="{{ $user->name }}"
                                     data-email="{{ $user->email }}"
                                     data-role="{{ $user->role }}"
+                                    data-member-id="{{ $user->member_id }}"
                                     style="padding: 4px 10px; height: 32px; font-size: 12px;"
                                 >
                                     Edit
@@ -148,6 +154,17 @@
                     </select>
                 </div>
 
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">Linked Fellowship Member</label>
+                    <select name="member_id" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                        <option value="">-- No Linked Member --</option>
+                        @foreach($members as $m)
+                            <option value="{{ $m->id }}">{{ $m->full_name }}</option>
+                        @endforeach
+                    </select>
+                    <small style="color: var(--muted); font-size: 12px;">One user account links directly to one fellowship member.</small>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
                     <button type="submit" class="button button-primary">Create Account</button>
                 </div>
@@ -193,6 +210,17 @@
                     </select>
                 </div>
 
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">Linked Fellowship Member</label>
+                    <select name="member_id" id="edit-user-member-id" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                        <option value="">-- No Linked Member --</option>
+                        @foreach($members as $m)
+                            <option value="{{ $m->id }}">{{ $m->full_name }}</option>
+                        @endforeach
+                    </select>
+                    <small style="color: var(--muted); font-size: 12px;">One user account links directly to one fellowship member.</small>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
                     <button type="submit" class="button button-primary">Update Account</button>
                 </div>
@@ -234,11 +262,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = btn.dataset.name;
             const email = btn.dataset.email;
             const role = btn.dataset.role;
+            const memberId = btn.dataset.memberId || '';
 
             formEdit.action = `/admin/roles/${id}`;
             document.getElementById('edit-user-name').value = name;
             document.getElementById('edit-user-email').value = email;
             document.getElementById('edit-user-role').value = role;
+            const memberSelect = document.getElementById('edit-user-member-id');
+            if (memberSelect) memberSelect.value = memberId;
 
             editModal.style.display = 'flex';
         });

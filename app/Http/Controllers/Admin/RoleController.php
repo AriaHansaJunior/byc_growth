@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,10 +19,12 @@ class RoleController extends Controller
      */
     public function index(): View
     {
-        $users = User::orderBy('name', 'asc')->get();
+        $users = User::with('member')->orderBy('name', 'asc')->get();
+        $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();
 
         return view('admin.roles', [
             'users' => $users,
+            'members' => $members,
             'currentUser' => Auth::user(),
         ]);
     }
@@ -36,6 +39,7 @@ class RoleController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
             'role' => ['required', Rule::in(['admin', 'user'])],
+            'member_id' => 'nullable|exists:members,id|unique:users,member_id',
         ]);
 
         User::create([
@@ -43,6 +47,7 @@ class RoleController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ]);
 
         return redirect()->route('admin.roles')->with('success', 'Account created successfully.');
@@ -60,12 +65,14 @@ class RoleController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:6',
             'role' => ['required', Rule::in(['admin', 'user'])],
+            'member_id' => ['nullable', 'exists:members,id', Rule::unique('users', 'member_id')->ignore($user->id)],
         ]);
 
         $updateData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
+            'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ];
 
         if (!empty($validated['password'])) {
