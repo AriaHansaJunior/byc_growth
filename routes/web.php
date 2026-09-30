@@ -63,13 +63,20 @@ Route::middleware(['auth', 'admin'])->prefix('game')->name('game.')->group(funct
 
     // Game 1 — Guess Me! Management
     Route::post('/guess-me/round', [GameController::class, 'saveGuessMeRound'])->name('guess-me.save-round');
+    Route::match(['put', 'patch'], '/guess-me/round/{id}', [GameController::class, 'saveGuessMeRound'])->name('guess-me.update-round');
     Route::post('/guess-me/batch', [GameController::class, 'saveGuessMeBatchRounds'])->name('guess-me.batch');
     Route::delete('/guess-me/round/{id}', [GameController::class, 'deleteGuessMeRound'])->name('guess-me.delete-round');
 
     // Game 2 — BYC Growth 100 Management
     Route::post('/growth-100/round', [GameController::class, 'saveGrowth100Round'])->name('growth-100.save-round');
+    Route::match(['put', 'patch'], '/growth-100/round/{id}', [GameController::class, 'saveGrowth100Round'])->name('growth-100.update-round');
     Route::post('/growth-100/batch', [GameController::class, 'saveGrowth100BatchRounds'])->name('growth-100.batch');
     Route::delete('/growth-100/round/{id}', [GameController::class, 'deleteGrowth100Round'])->name('growth-100.delete-round');
+
+    // Answer-level Management
+    Route::post('/growth-100/round/{roundId}/answers', [AdminGameController::class, 'addGrowth100Answer'])->name('growth-100.add-answer');
+    Route::match(['put', 'patch', 'post'], '/growth-100/answers/{id}', [AdminGameController::class, 'updateGrowth100Answer'])->name('growth-100.update-answer');
+    Route::delete('/growth-100/answers/{id}', [AdminGameController::class, 'deleteGrowth100Answer'])->name('growth-100.delete-answer');
 });
 
 // Normal User Authentication
@@ -110,8 +117,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::match(['put', 'post'], '/activities/{id}', [AdminActivityController::class, 'update'])->name('activities.update');
         Route::delete('/activities/{id}', [AdminActivityController::class, 'destroy'])->name('activities.destroy');
 
-        // Games Management
+        // Games Management (Scope 4)
         Route::get('/games', [AdminGameController::class, 'index'])->name('games');
+        Route::post('/games/guess-me/round', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.save-round');
+        Route::match(['put', 'patch', 'post'], '/games/guess-me/round/{id}', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.update-round');
+        Route::delete('/games/guess-me/round/{id}', [AdminGameController::class, 'deleteGuessMeRound'])->name('games.guess-me.delete-round');
+        Route::post('/games/guess-me/reorder', [AdminGameController::class, 'reorderGuessMeRounds'])->name('games.guess-me.reorder');
+
+        Route::post('/games/growth-100/round', [AdminGameController::class, 'saveGrowth100Round'])->name('games.growth-100.save-round');
+        Route::match(['put', 'patch', 'post'], '/games/growth-100/round/{id}', [AdminGameController::class, 'saveGrowth100Round'])->name('games.growth-100.update-round');
+        Route::delete('/games/growth-100/round/{id}', [AdminGameController::class, 'deleteGrowth100Round'])->name('games.growth-100.delete-round');
+        Route::post('/games/growth-100/reorder', [AdminGameController::class, 'reorderGrowth100Rounds'])->name('games.growth-100.reorder');
+
+        Route::post('/games/growth-100/round/{roundId}/answers', [AdminGameController::class, 'addGrowth100Answer'])->name('games.growth-100.add-answer');
+        Route::match(['put', 'patch', 'post'], '/games/growth-100/answers/{id}', [AdminGameController::class, 'updateGrowth100Answer'])->name('games.growth-100.update-answer');
+        Route::delete('/games/growth-100/answers/{id}', [AdminGameController::class, 'deleteGrowth100Answer'])->name('games.growth-100.delete-answer');
 
         // Birthday Wishes Administration
         Route::get('/birthday-wishes', [BirthdayWishController::class, 'index'])->name('birthday-wishes');

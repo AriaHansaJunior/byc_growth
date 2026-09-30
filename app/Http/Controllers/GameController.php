@@ -367,6 +367,7 @@ class GameController extends Controller
 
         $storagePath = storage_path('app/game/images/' . $safeFilename);
         $publicPath = public_path('assets/images/' . $safeFilename);
+        $uploadsPath = public_path('assets/images/uploads/' . $safeFilename);
 
         if (File::exists($storagePath) && is_file($storagePath)) {
             return response()->file($storagePath);
@@ -374,6 +375,10 @@ class GameController extends Controller
 
         if (File::exists($publicPath) && is_file($publicPath)) {
             return response()->file($publicPath);
+        }
+
+        if (File::exists($uploadsPath) && is_file($uploadsPath)) {
+            return response()->file($uploadsPath);
         }
 
         abort(404, 'Image not found.');

@@ -9,6 +9,7 @@ use App\Models\GameScore;
 use App\Models\GameState;
 use App\Models\MediaFile;
 use App\Models\Team;
+use App\Services\MediaUploadService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -302,6 +303,7 @@ class GameStorageService
                 'id' => (int) $round->id,
                 'round_number' => (int) $round->round_number,
                 'image' => $imageName,
+                'image_url' => $round->image_url,
                 'correct_answer' => $round->correct_answer,
                 'clue' => $round->clue,
                 'score' => (int) $round->score,
@@ -508,39 +510,47 @@ class GameStorageService
 
         $validation = $this->validateClue($answer, $clue);
         if (!$validation['valid']) {
-            return ['success' => false, 'error' => $validation['error']];
+            return ['success' => false, 'error' => $validation['error'], 'status' => 422];
         }
 
         $game1 = $this->getGame('game1');
         $existingImage = 'BYC_Growth.jpg';
         $mediaFileId = null;
+        $existingRound = null;
 
         if ($id !== null) {
-            $existingRound = GameRound::where('game_id', $game1->id)->find($id);
-            if ($existingRound) {
-                $existingImage = $existingRound->image_path ?: 'BYC_Growth.jpg';
-                $mediaFileId = $existingRound->media_file_id;
+            $existingRound = GameRound::find($id);
+            if (!$existingRound) {
+                return ['success' => false, 'error' => 'Round not found.', 'status' => 404];
             }
+            if ((int) $existingRound->game_id !== (int) $game1->id) {
+                return ['success' => false, 'error' => 'Round does not belong to Guess Me.', 'status' => 403];
+            }
+            $existingImage = $existingRound->image_path ?: 'BYC_Growth.jpg';
+            $mediaFileId = $existingRound->media_file_id;
         }
 
-        // Handle uploaded image
+        // Handle uploaded image safely via MediaUploadService
         $imageName = $existingImage;
         if ($imageFile instanceof UploadedFile && $imageFile->isValid()) {
-            $extension = $imageFile->getClientOriginalExtension();
-            $imageName = 'guess_' . time() . '_' . uniqid() . '.' . $extension;
-            $imageFile->move($this->publicImagesDir, $imageName);
+            $mediaUploadService = app(MediaUploadService::class);
 
-            $media = MediaFile::create([
-                'disk' => 'public',
-                'file_path' => 'assets/images/' . $imageName,
-                'original_name' => $imageFile->getClientOriginalName(),
-                'mime_type' => $imageFile->getClientMimeType() ?: 'image/jpeg',
-                'file_size' => File::size($this->publicImagesDir . '/' . $imageName),
-            ]);
+            // Clean up old media file when replacing
+            if ($existingRound && $existingRound->mediaFile) {
+                $mediaUploadService->deleteMediaFile($existingRound->mediaFile);
+            }
+
+            $media = $mediaUploadService->storeImage(
+                $imageFile,
+                'guess',
+                GameRound::class,
+                $existingRound?->id
+            );
             $mediaFileId = $media->id;
+            $imageName = basename($media->file_path);
         }
 
-        if ($id !== null && $existingRound = GameRound::where('game_id', $game1->id)->find($id)) {
+        if ($existingRound) {
             $existingRound->update([
                 'correct_answer' => $answer,
                 'clue' => $clue,
@@ -548,9 +558,10 @@ class GameStorageService
                 'image_path' => $imageName,
                 'media_file_id' => $mediaFileId,
             ]);
+            $round = $existingRound;
         } else {
             $maxRound = (int) GameRound::where('game_id', $game1->id)->max('round_number');
-            GameRound::create([
+            $round = GameRound::create([
                 'game_id' => $game1->id,
                 'round_number' => $maxRound + 1,
                 'correct_answer' => $answer,
@@ -559,9 +570,12 @@ class GameStorageService
                 'image_path' => $imageName,
                 'media_file_id' => $mediaFileId,
             ]);
+            if ($mediaFileId) {
+                MediaFile::where('id', $mediaFileId)->update(['fileable_id' => $round->id]);
+            }
         }
 
-        return ['success' => true, 'rounds' => $this->getGuessMeRounds()];
+        return ['success' => true, 'round' => $round, 'rounds' => $this->getGuessMeRounds()];
     }
 
     /**
@@ -570,18 +584,32 @@ class GameStorageService
     public function deleteGuessMeRound(int $id): array
     {
         $game1 = $this->getGame('game1');
-        $round = GameRound::where('game_id', $game1->id)->find($id);
+        $round = GameRound::find($id);
 
         if (!$round) {
-            return ['success' => false, 'error' => 'Round not found.'];
+            return ['success' => false, 'error' => 'Round not found.', 'status' => 404];
+        }
+
+        if ((int) $round->game_id !== (int) $game1->id) {
+            return ['success' => false, 'error' => 'Round does not belong to Guess Me.', 'status' => 403];
         }
 
         $totalCount = GameRound::where('game_id', $game1->id)->count();
         if ($totalCount <= 1) {
-            return ['success' => false, 'error' => 'At least 1 round must remain.'];
+            return ['success' => false, 'error' => 'At least 1 round must remain.', 'status' => 422];
+        }
+
+        if ($round->mediaFile) {
+            app(MediaUploadService::class)->deleteMediaFile($round->mediaFile);
         }
 
         $round->delete();
+
+        // Reorder remaining rounds sequentially
+        $remaining = GameRound::where('game_id', $game1->id)->orderBy('round_number')->orderBy('id')->get();
+        foreach ($remaining as $idx => $r) {
+            $r->update(['round_number' => $idx + 1]);
+        }
 
         // Adjust state if current_round is out of bounds
         $rounds = $this->getGuessMeRounds();
@@ -594,6 +622,21 @@ class GameStorageService
     }
 
     /**
+     * Reorder Guess Me rounds by ID sequence.
+     */
+    public function reorderGuessMeRounds(array $roundIds): array
+    {
+        $game1 = $this->getGame('game1');
+        foreach ($roundIds as $index => $roundId) {
+            GameRound::where('game_id', $game1->id)
+                ->where('id', (int) $roundId)
+                ->update(['round_number' => $index + 1]);
+        }
+
+        return ['success' => true, 'rounds' => $this->getGuessMeRounds()];
+    }
+
+    /**
      * Add or update Growth 100 round in MySQL.
      */
     public function saveGrowth100Round(array $data): array
@@ -603,15 +646,25 @@ class GameStorageService
         $id = isset($data['id']) && $data['id'] !== '' ? (int) $data['id'] : null;
 
         if ($question === '') {
-            return ['success' => false, 'error' => 'Question cannot be empty.'];
+            return ['success' => false, 'error' => 'Question cannot be empty.', 'status' => 422];
         }
 
         $validation = $this->validateGrowthAnswers($answers);
         if (!$validation['valid']) {
-            return ['success' => false, 'error' => $validation['error']];
+            return ['success' => false, 'error' => $validation['error'], 'status' => 422];
         }
 
         $game2 = $this->getGame('game2');
+
+        if ($id !== null) {
+            $existingRound = GameRound::find($id);
+            if (!$existingRound) {
+                return ['success' => false, 'error' => 'Round not found.', 'status' => 404];
+            }
+            if ((int) $existingRound->game_id !== (int) $game2->id) {
+                return ['success' => false, 'error' => 'Round does not belong to Growth 100.', 'status' => 403];
+            }
+        }
 
         return DB::transaction(function () use ($game2, $id, $question, $validation) {
             if ($id !== null && $round = GameRound::where('game_id', $game2->id)->find($id)) {
@@ -639,7 +692,7 @@ class GameStorageService
                 ]);
             }
 
-            return ['success' => true, 'rounds' => $this->getGrowth100Rounds()];
+            return ['success' => true, 'round' => $round, 'rounds' => $this->getGrowth100Rounds()];
         });
     }
 
@@ -649,18 +702,30 @@ class GameStorageService
     public function deleteGrowth100Round(int $id): array
     {
         $game2 = $this->getGame('game2');
-        $round = GameRound::where('game_id', $game2->id)->find($id);
+        $round = GameRound::find($id);
 
         if (!$round) {
-            return ['success' => false, 'error' => 'Round not found.'];
+            return ['success' => false, 'error' => 'Round not found.', 'status' => 404];
+        }
+
+        if ((int) $round->game_id !== (int) $game2->id) {
+            return ['success' => false, 'error' => 'Round does not belong to Growth 100.', 'status' => 403];
         }
 
         $totalCount = GameRound::where('game_id', $game2->id)->count();
         if ($totalCount <= 1) {
-            return ['success' => false, 'error' => 'At least 1 round must remain.'];
+            return ['success' => false, 'error' => 'At least 1 round must remain.', 'status' => 422];
         }
 
+        // Clean up answers to prevent orphans
+        $round->answers()->delete();
         $round->delete();
+
+        // Reorder remaining rounds sequentially
+        $remaining = GameRound::where('game_id', $game2->id)->orderBy('round_number')->orderBy('id')->get();
+        foreach ($remaining as $idx => $r) {
+            $r->update(['round_number' => $idx + 1]);
+        }
 
         // Adjust state if current_round is out of bounds
         $rounds = $this->getGrowth100Rounds();
@@ -670,6 +735,179 @@ class GameStorageService
         }
 
         return ['success' => true, 'rounds' => $rounds];
+    }
+
+    /**
+     * Reorder Growth 100 rounds by ID sequence.
+     */
+    public function reorderGrowth100Rounds(array $roundIds): array
+    {
+        $game2 = $this->getGame('game2');
+        foreach ($roundIds as $index => $roundId) {
+            GameRound::where('game_id', $game2->id)
+                ->where('id', (int) $roundId)
+                ->update(['round_number' => $index + 1]);
+        }
+
+        return ['success' => true, 'rounds' => $this->getGrowth100Rounds()];
+    }
+
+    /**
+     * Add single answer to a Growth 100 round while enforcing sum == 100.
+     */
+    public function addGrowth100Answer(int $roundId, array $data): array
+    {
+        $game2 = $this->getGame('game2');
+        $round = GameRound::find($roundId);
+
+        if (!$round || (int) $round->game_id !== (int) $game2->id) {
+            return ['success' => false, 'error' => 'Round not found.', 'status' => 404];
+        }
+
+        $text = trim($data['text'] ?? '');
+        $score = (int) ($data['score'] ?? $data['points'] ?? 0);
+
+        if ($text === '') {
+            return ['success' => false, 'error' => 'Answer text cannot be empty.', 'status' => 422];
+        }
+        if ($score < 1) {
+            return ['success' => false, 'error' => 'Answer score must be at least 1.', 'status' => 422];
+        }
+
+        // If adjust_from_answer_id is provided, deduct the points from that answer
+        $adjustFromId = isset($data['adjust_from_answer_id']) ? (int) $data['adjust_from_answer_id'] : null;
+
+        return DB::transaction(function () use ($round, $text, $score, $adjustFromId) {
+            if ($adjustFromId) {
+                $target = GameAnswer::where('game_round_id', $round->id)->find($adjustFromId);
+                if ($target && $target->points > $score) {
+                    $target->decrement('points', $score);
+                }
+            }
+
+            $currentSum = (int) $round->answers()->sum('points');
+            if ($currentSum + $score !== 100) {
+                return [
+                    'success' => false,
+                    'error' => "Total score of all answers must equal exactly 100. Adding this answer results in " . ($currentSum + $score) . ".",
+                    'status' => 422,
+                ];
+            }
+
+            $maxSort = (int) $round->answers()->max('sort_order');
+            $newAnswer = GameAnswer::create([
+                'game_round_id' => $round->id,
+                'answer_text' => $text,
+                'points' => $score,
+                'sort_order' => $maxSort + 1,
+                'is_revealed' => false,
+            ]);
+
+            return ['success' => true, 'answer' => $newAnswer, 'rounds' => $this->getGrowth100Rounds()];
+        });
+    }
+
+    /**
+     * Edit single answer in Growth 100 while enforcing sum == 100.
+     */
+    public function updateGrowth100Answer(int $answerId, array $data): array
+    {
+        $answer = GameAnswer::with('round')->find($answerId);
+        if (!$answer || !$answer->round) {
+            return ['success' => false, 'error' => 'Answer not found.', 'status' => 404];
+        }
+
+        $game2 = $this->getGame('game2');
+        if ((int) $answer->round->game_id !== (int) $game2->id) {
+            return ['success' => false, 'error' => 'Answer does not belong to Growth 100.', 'status' => 403];
+        }
+
+        $text = isset($data['text']) ? trim((string) $data['text']) : $answer->answer_text;
+        $newScore = isset($data['score']) || isset($data['points'])
+            ? (int) ($data['score'] ?? $data['points'])
+            : (int) $answer->points;
+
+        if ($text === '') {
+            return ['success' => false, 'error' => 'Answer text cannot be empty.', 'status' => 422];
+        }
+        if ($newScore < 1) {
+            return ['success' => false, 'error' => 'Answer score must be at least 1.', 'status' => 422];
+        }
+
+        $adjustAnswerId = isset($data['adjust_answer_id']) ? (int) $data['adjust_answer_id'] : null;
+
+        return DB::transaction(function () use ($answer, $text, $newScore, $adjustAnswerId) {
+            $diff = $newScore - (int) $answer->points;
+            if ($diff !== 0 && $adjustAnswerId) {
+                $target = GameAnswer::where('game_round_id', $answer->game_round_id)->find($adjustAnswerId);
+                if ($target && ($target->points - $diff) >= 1) {
+                    $target->decrement('points', $diff);
+                }
+            }
+
+            $currentOtherSum = (int) GameAnswer::where('game_round_id', $answer->game_round_id)
+                ->where('id', '!=', $answer->id)
+                ->sum('points');
+
+            if ($currentOtherSum + $newScore !== 100) {
+                return [
+                    'success' => false,
+                    'error' => "Total score of all answers must equal exactly 100. Current sum with update would be " . ($currentOtherSum + $newScore) . ".",
+                    'status' => 422,
+                ];
+            }
+
+            $answer->update([
+                'answer_text' => $text,
+                'points' => $newScore,
+            ]);
+
+            return ['success' => true, 'answer' => $answer, 'rounds' => $this->getGrowth100Rounds()];
+        });
+    }
+
+    /**
+     * Delete single answer in Growth 100 with optional points transfer to keep sum == 100.
+     */
+    public function deleteGrowth100Answer(int $answerId, ?int $transferToId = null): array
+    {
+        $answer = GameAnswer::with('round')->find($answerId);
+        if (!$answer || !$answer->round) {
+            return ['success' => false, 'error' => 'Answer not found.', 'status' => 404];
+        }
+
+        $game2 = $this->getGame('game2');
+        if ((int) $answer->round->game_id !== (int) $game2->id) {
+            return ['success' => false, 'error' => 'Answer does not belong to Growth 100.', 'status' => 403];
+        }
+
+        $roundId = $answer->game_round_id;
+        $points = (int) $answer->points;
+
+        return DB::transaction(function () use ($answer, $roundId, $points, $transferToId) {
+            if ($transferToId) {
+                $target = GameAnswer::where('game_round_id', $roundId)->find($transferToId);
+                if ($target) {
+                    $target->increment('points', $points);
+                }
+            }
+
+            $remainingSum = (int) GameAnswer::where('game_round_id', $roundId)
+                ->where('id', '!=', $answer->id)
+                ->sum('points');
+
+            if ($remainingSum !== 100) {
+                return [
+                    'success' => false,
+                    'error' => "Deleting this answer would cause total score to be {$remainingSum} instead of 100. Please transfer points or update question.",
+                    'status' => 422,
+                ];
+            }
+
+            $answer->delete();
+
+            return ['success' => true, 'rounds' => $this->getGrowth100Rounds()];
+        });
     }
 
     /**
