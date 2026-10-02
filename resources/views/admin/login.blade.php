@@ -9,13 +9,10 @@
     <div class="auth-card" style="border: 2px solid var(--forest);">
         {{-- Brand / Header --}}
         <div class="auth-header">
-            <a href="{{ route('home') }}" class="auth-brand-link" title="Return to Website">
+            <div style="display: flex; justify-content: center; margin-bottom: 14px;">
                 <x-brand :compact="true" />
-            </a>
-            <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(40, 78, 59, 0.12); color: var(--forest); padding: 4px 12px; border-radius: 99px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 10px;">
-                <x-icon name="lock" /> Admin Portal
             </div>
-            <h1 style="margin-top: 12px;">Admin Sign In</h1>
+            <h1>Admin Sign In</h1>
         </div>
 
         {{-- Warning Callout (Polished English per Spec) --}}
@@ -76,7 +73,7 @@
                 >
             </div>
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom: 24px;">
                 <label for="password" class="form-label">Password</label>
                 <input
                     type="password"
@@ -89,24 +86,10 @@
                 >
             </div>
 
-            <div class="form-group" style="margin-bottom: 24px;">
-                <label class="remember-checkbox" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer;">
-                    <input type="checkbox" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} style="accent-color: var(--forest); width: 16px; height: 16px;">
-                    Remember this device
-                </label>
-            </div>
-
             <button type="submit" class="button button-primary" style="width: 100%;">
                 Login <x-icon name="arrow" />
             </button>
         </form>
-
-        {{-- Back Navigation --}}
-        <div class="auth-footer">
-            <a href="{{ route('home') }}" class="back-link-subtle">
-                <x-icon name="arrow-left" /> Return to Website
-            </a>
-        </div>
     </div>
 </div>
 @endsection

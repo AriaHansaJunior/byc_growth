@@ -73,7 +73,7 @@ class AdminAuthController extends Controller
         // Enforce administrator role requirement unless returning to a non-admin redirect target
         if (!$user->isAdmin()) {
             if ($request->filled('redirect') && !str_starts_with($request->input('redirect'), '/admin')) {
-                Auth::login($user, $request->boolean('remember'));
+                Auth::login($user, true);
                 $request->session()->regenerate();
                 session()->flash('welcome_user', $user->username);
                 return redirect($request->input('redirect'));
@@ -87,7 +87,7 @@ class AdminAuthController extends Controller
                 ]);
         }
 
-        Auth::login($user, $request->boolean('remember'));
+        Auth::login($user, true);
         $request->session()->regenerate();
         session()->flash('welcome_user', $user->username);
 

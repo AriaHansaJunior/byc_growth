@@ -70,6 +70,82 @@ class AuthTest extends TestCase
         $response->assertRedirect('/admin/dashboard');
         $this->assertAuthenticated();
         $this->assertTrue(Auth::user()->isAdmin());
+        $response->assertCookie(Auth::guard()->getRecallerName());
+    }
+
+    /**
+     * Test admin login UI has Return to Website, Admin Portal, and Remember Me removed, and logo centered
+     */
+    public function test_admin_login_ui_elements_cleaned_up(): void
+    {
+        $response = $this->get('/admin-ganteng');
+        $response->assertStatus(200);
+
+        // "Return to Website" is absent
+        $response->assertDontSee('Return to Website');
+
+        // "ADMIN PORTAL" is absent
+        $response->assertDontSee('Admin Portal');
+        $response->assertDontSee('ADMIN PORTAL');
+
+        // "Remember this device" is absent
+        $response->assertDontSee('Remember this device');
+        $response->assertDontSee('name="remember"');
+
+        // BYC Growth logo is centered horizontally
+        $response->assertSee('justify-content: center');
+        $response->assertSee('byc-logo.png');
+    }
+
+    /**
+     * Test authentication persists across subsequent requests and by default without remember checkbox
+     */
+    public function test_authentication_is_persistent_by_default_without_remember_checkbox(): void
+    {
+        $loginResponse = $this->post('/admin-ganteng', [
+            'login' => 'admin_byc@gmail.com',
+            'password' => 'password123',
+        ]);
+
+        $loginResponse->assertRedirect('/admin/dashboard');
+        $this->assertAuthenticated();
+
+        // The remember recaller cookie is queued automatically
+        $loginResponse->assertCookie(Auth::guard()->getRecallerName());
+
+        $admin = User::where('email', 'admin_byc@gmail.com')->first();
+        $this->assertNotNull($admin->remember_token);
+
+        // Subsequent requests remain authenticated
+        $dashboardResponse = $this->get('/admin/dashboard');
+        $dashboardResponse->assertStatus(200);
+    }
+
+    /**
+     * Test visiting /admin-ganteng while already authenticated redirects to dashboard
+     */
+    public function test_visiting_admin_ganteng_while_authenticated_redirects_to_dashboard(): void
+    {
+        $admin = User::where('email', 'admin_byc@gmail.com')->first();
+        $response = $this->actingAs($admin)->get('/admin-ganteng');
+        $response->assertRedirect('/admin/dashboard');
+    }
+
+    /**
+     * Test logout invalidates authentication and protected routes require auth again
+     */
+    public function test_logout_invalidates_auth_and_protected_routes_require_login(): void
+    {
+        $admin = User::where('email', 'admin_byc@gmail.com')->first();
+        $this->actingAs($admin);
+
+        $logoutResponse = $this->post('/admin/logout');
+        $logoutResponse->assertRedirect('/admin-ganteng');
+        $this->assertGuest();
+
+        // Protected route redirects back to login
+        $protectedResponse = $this->get('/admin/dashboard');
+        $protectedResponse->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -213,5 +289,49 @@ class AuthTest extends TestCase
         $this->assertNotEquals('password123', $admin->password);
         // Must verify against Hash check
         $this->assertTrue(Hash::check('password123', $admin->password));
+    }
+
+    /**
+     * Test normal user authentication persists indefinitely by default without remember option
+     */
+    public function test_normal_user_authentication_persists_by_default_without_remember_option(): void
+    {
+        $regularUser = User::firstOrCreate(
+            ['email' => 'regular_member@gmail.com'],
+            [
+                'name' => 'Regular Member',
+                'password' => Hash::make('password123'),
+                'role' => 'user',
+            ]
+        );
+
+        // 1. Log in without passing any 'remember' parameter
+        $loginResponse = $this->post('/login', [
+            'login' => 'regular_member@gmail.com',
+            'password' => 'password123',
+        ]);
+
+        $loginResponse->assertRedirect('/');
+        $this->assertAuthenticatedAs($regularUser);
+
+        // 2. Persistent recaller cookie is queued automatically
+        $loginResponse->assertCookie(Auth::guard()->getRecallerName());
+        $this->assertNotNull($regularUser->fresh()->remember_token);
+
+        // 3. Subsequent requests remain authenticated
+        $homeResponse = $this->get('/');
+        $homeResponse->assertStatus(200);
+
+        // 4. Visiting /login while authenticated redirects to home
+        $loginPageResponse = $this->get('/login');
+        $loginPageResponse->assertRedirect('/');
+
+        // 5. Explicit logout terminates the session
+        $logoutResponse = $this->post('/logout');
+        $logoutResponse->assertRedirect('/');
+        $this->assertGuest();
+
+        // 6. After logout, user is unauthenticated
+        $this->assertNull(Auth::user());
     }
 }

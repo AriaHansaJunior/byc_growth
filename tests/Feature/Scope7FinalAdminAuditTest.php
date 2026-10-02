@@ -89,7 +89,7 @@ class Scope7FinalAdminAuditTest extends TestCase
         // Hidden entrance must be accessible
         $entranceResponse = $this->get('/admin-ganteng');
         $entranceResponse->assertStatus(200);
-        $entranceResponse->assertSee('Admin Portal');
+        $entranceResponse->assertSee('Admin Sign In');
 
         // Legacy /admin/login route must return 404
         $legacyGet = $this->get('/admin/login');

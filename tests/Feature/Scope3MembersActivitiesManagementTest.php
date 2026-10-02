@@ -785,7 +785,7 @@ class Scope3MembersActivitiesManagementTest extends TestCase
     public function test_26_s0_to_s2_regression_admin_ganteng_logout_icons_and_username(): void
     {
         // /admin-ganteng login entrance accessible
-        $this->get('/admin-ganteng')->assertStatus(200)->assertSee('Admin Portal');
+        $this->get('/admin-ganteng')->assertStatus(200)->assertSee('Admin Sign In');
 
         // Logout redirects to /admin-ganteng
         $logoutResponse = $this->actingAs($this->adminUser)->post('/admin/logout');
