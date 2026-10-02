@@ -9,7 +9,7 @@
             <span class="eyebrow" style="color: var(--lime);">Authentication & Authorization Active</span>
             <h1>Welcome back, {{ $admin->username ?? $admin->name }}</h1>
             <p>
-                You are securely authenticated as an administrator. Administration God Mode is active for data and content management.
+                You are securely authenticated as an administrator with data and content management privileges.
             </p>
         </div>
         <div class="admin-stamp">
@@ -41,7 +41,7 @@
             </div>
             <h3>Homepage</h3>
             <p>Manage slideshow images, highlights, announcements, and editable showcase data.</p>
-            <span class="module-status-badge" style="background: var(--cream); color: var(--forest); border: 1px solid var(--line);">Manage Homepage &rarr;</span>
+            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Manage Homepage &rarr;</span>
         </a>
 
         {{-- 3. Members Management --}}

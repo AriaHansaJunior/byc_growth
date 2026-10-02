@@ -77,10 +77,20 @@ export function updateScoreboard(teams, gameCode = null) {
             scoreEl.textContent = team.score;
         }
 
+        const scoreValEl = document.getElementById(`team-score-val-${team.id}`);
+        if (scoreValEl) {
+            scoreValEl.textContent = team.score;
+        }
+
         // Legacy / code based fallback
         const codeScoreEl = document.getElementById(`score-team-code-${team.code}`);
         if (codeScoreEl) {
             codeScoreEl.textContent = team.score;
+        }
+
+        const codeScoreValEl = document.getElementById(`team-score-val-${team.code}`);
+        if (codeScoreValEl) {
+            codeScoreValEl.textContent = team.score;
         }
 
         // Host card specific game score

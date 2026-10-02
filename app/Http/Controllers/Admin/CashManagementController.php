@@ -34,9 +34,30 @@ class CashManagementController extends Controller
             ? (int) $request->input('per_page')
             : 10;
 
-        $query = CashTransaction::with(['member', 'proof', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->orderBy('id', 'desc');
+        $sort = $request->input('sort', 'date_desc');
+        $query = CashTransaction::with(['member', 'proof', 'user']);
+
+        switch ($sort) {
+            case 'date_asc':
+                $query->orderBy('created_at', 'asc')->orderBy('id', 'asc');
+                break;
+            case 'amount_desc':
+                $query->orderBy('amount', 'desc')->orderBy('created_at', 'desc');
+                break;
+            case 'amount_asc':
+                $query->orderBy('amount', 'asc')->orderBy('created_at', 'asc');
+                break;
+            case 'name_asc':
+                $query->orderBy('contributor_name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('contributor_name', 'desc');
+                break;
+            case 'date_desc':
+            default:
+                $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+                break;
+        }
 
         // Filter: Name
         if ($request->filled('name')) {
@@ -121,6 +142,7 @@ class CashManagementController extends Controller
                 'account_type' => $request->input('account_type', ''),
                 'amount' => $request->input('amount', ''),
                 'date' => $request->input('date', ''),
+                'sort' => $sort,
             ],
         ]);
     }
@@ -380,5 +402,56 @@ class CashManagementController extends Controller
             'account_type' => $lastTx->account_type,
             'amount' => (float) $lastTx->amount,
         ]);
+    }
+
+    /**
+     * Remove multiple cash transactions and their proof files in bulk.
+     */
+    public function batchDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer|exists:cash_transactions,id',
+        ]);
+
+        $ids = $validated['ids'];
+
+        try {
+            DB::beginTransaction();
+
+            $transactions = CashTransaction::with('proof')->whereIn('id', $ids)->get();
+            $count = $transactions->count();
+
+            foreach ($transactions as $transaction) {
+                if ($transaction->proof) {
+                    $this->mediaService->deleteMediaFile($transaction->proof);
+                }
+                $transaction->delete();
+            }
+
+            DB::commit();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Selected {$count} cash transactions deleted successfully.",
+                ]);
+            }
+
+            return redirect()->route('admin.cash-management')
+                ->with('success', "Selected {$count} " . ($count === 1 ? 'cash transaction has' : 'cash transactions have') . ' been deleted successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Batch delete cash transactions failed: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete selected cash transactions.',
+                ], 500);
+            }
+
+            return back()->with('error', 'Failed to delete selected cash transactions.');
+        }
     }
 }

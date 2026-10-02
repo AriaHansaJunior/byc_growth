@@ -370,7 +370,7 @@ class ScopeR2BirthdayPopupTest extends TestCase
             'message' => 'Happy Birthday!',
         ]);
 
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -380,12 +380,12 @@ class ScopeR2BirthdayPopupTest extends TestCase
     {
         // Test redirect query preservation on login form
         $redirectUrl = '/members?birthday_letter=1&member_id=' . $this->celebrantA->id;
-        $loginPageRes = $this->get('/admin/login?redirect=' . urlencode($redirectUrl));
+        $loginPageRes = $this->get('/admin-ganteng?redirect=' . urlencode($redirectUrl));
         $loginPageRes->assertStatus(200);
         $loginPageRes->assertSee('value="' . e($redirectUrl) . '"', false);
 
         // Test login redirects directly back to the birthday context
-        $loginPostRes = $this->post('/admin/login', [
+        $loginPostRes = $this->post('/admin-ganteng', [
             'email' => $this->senderUser->email,
             'password' => 'password123',
             'redirect' => $redirectUrl,

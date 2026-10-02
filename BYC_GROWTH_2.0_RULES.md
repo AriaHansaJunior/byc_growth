@@ -254,9 +254,58 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Page-Based Management Discipline**:
   - Admin management follows the actual website pages and domains, providing administrators with direct context for managing website data.
   - Management actions adhere to standard visual patterns (`[ + Add ]`, `[ ✎ Edit ]`, `[ Delete ]`, `[ Manage ]`, `[ View ]`) rendered using the existing BYC Growth earth-tone visual system.
-- **Destructive Action Confirmation**:
-  - All destructive actions (e.g. member deletion, account removal, activity deletion) must require explicit confirmation through the reusable Admin Confirmation Modal (`#admin-confirm-modal`) with server-side validation and CSRF protection.
+- **Destructive Action & Batch Deletion Architecture**:
+  - All single and multi-record destructive actions (e.g. member deletion, account removal, activity deletion, wish deletion, transaction deletion) must require explicit confirmation through the reusable Admin Confirmation Modal (`#admin-confirm-modal`) with server-side validation and CSRF protection.
+  - **Batch Deletion Standards across Core Domains** (Activities, Members, Birthday Wishes, Cash Management, and Roles / Accounts):
+    - Checkbox selection with select-all toggle, selection counter badge, and dedicated batch action toolbar.
+    - Transactional execution: multi-record deletions safely remove or disassociate relational dependencies (e.g. activity gallery media cleanup, member photo removal, cash transfer proof file deletion, account links).
+    - **Self-Deletion Invariant**: An authenticated administrator cannot select or batch-delete their own active account (`Auth::id()`). The UI renders disabled indicators, and the server-side controller explicitly filters out `Auth::id()` before execution.
+- **Tailored Domain-Specific Search, Filtering & Sorting**:
+  - Each admin management domain must provide search and filtering controls tailored to its specific data structure:
+    - **Activities**: Search query (title/description), event date filter, and chronological/alphabetical sorting (`Newest First`, `Oldest First`, `Activity Name A - Z`, `Activity Name Z - A`).
+    - **Members**: Search query (name/nickname), status/birthday filter (`All Members`, `Birthday Celebrants Today`), and alphabetical/DOB/registration sorting (`Name A - Z`, `Name Z - A`, `Date of Birth Earliest`, `Date of Birth Latest`, `Newest Registered`).
+    - **Birthday Wishes**: Search query (keyword/message), recipient member filter, birthday year filter, and date/recipient sorting (`Newest First`, `Oldest First`, `Celebrant A - Z`, `Celebrant Z - A`).
+    - **Cash Management**: Contributor search, account type filter, exact amount filter, input date filter, and date/amount/contributor sorting (`Date Newest First`, `Date Oldest First`, `Amount Highest First`, `Amount Lowest First`, `Contributor A - Z`, `Contributor Z - A`).
+    - **Roles / Accounts**: Keyword search (name/username/email), role filter (`All Roles`, `Administrator`, `Standard User`), and registration/alphabetical sorting (`Newest Registered`, `Oldest Registered`, `Username A - Z`, `Username Z - A`, `Name A - Z`, `Name Z - A`).
+- **Activity Presentation & Modal Gallery Sizing Standards**:
+  - **Zero Artificial Whitespace**: Activity card descriptions and titles must maintain natural visual proximity (`margin-bottom: 6px;` on header, single-line trimmed description rendering without blade whitespace padding).
+  - **Expansive Modal Gallery Workspace**: Activity Add/Edit dialogs must use wide modal containers (`max-width: min(800px, 95vw);`) with comfortable scrollable gallery management viewports (`max-height: 280px;`, thumbnail height `120px`), preserving native aspect ratios and smooth scrolling behavior.
 - **Strict Separation of Public UI & Admin Controls**:
   - The public user-facing website must remain a pure user experience. Visiting public pages via "View Site" does not inject or display admin editing controls.
   - Admin controls are rendered strictly within authorized `/admin/*` routes protected by the `EnsureUserIsAdmin` middleware.
+
+---
+
+## 22. Visual Calmness & Anti-Clutter Discipline (Clean UI Standards)
+- **Clear Functional Purpose**: Every visible UI element (badge, chip, button, counter, status pill, or label) must serve an explicit, unambiguous functional purpose. Never add decorative UI elements merely to create a "feature-rich" or artificial dashboard appearance.
+- **No Redundant User Navigation in Admin**: Admin management pages must NOT contain direct-link buttons or CTAs (e.g. `Live Guess Me →`, `Public Game Center →`, `View Public Wishes →`, `Open Public Portal →`) that merely navigate to public user-facing pages. Administrators can manually visit public URLs when needed.
+- **No In-Page Scroll Duplication**: Action cards must NOT provide redundant buttons (such as `Manage Data`) that merely duplicate smooth-scrolling to another section lower on the same page. Action cards should display only distinct, authoritative actions.
+- **Single Action Entry Point**: Do not duplicate action buttons or entry points on the same screen. Specifically, table-driven management interfaces (such as Homepage Slideshow Management) must have exactly ONE authoritative action button (e.g. `[ + Add Photo ]` located directly on the management table), avoiding redundant buttons in the page header or floating across content previews.
+- **No Decorative Overlay Clutter**: Content previews (e.g. hero slideshow, game artwork frames, clue images) must remain clean representations of the real asset. Do not place floating status pills, active count badges, camera icons, or decorative metadata over preview surfaces when that information is already authoritative in the accompanying management table or scoreboard.
+- **Admin Modal Scroll Architecture**: Admin editor and configuration modals must employ a fixed header with an accessible close button, a dedicated scrollable body (`overflow-y: auto; flex: 1; min-height: 0;`), and a fixed footer with reachable submit/cancel actions. Modals must remain within the viewport (`max-height: calc(100vh - 40px)`), lock the body scroll (`modal-open`), and never allow page scrolling behind the backdrop.
+- **Intentional Whitespace**: Layouts must maintain natural breathing room without excessive empty vertical gaps. Viewport-height rules (`min-height: 100vh` or `calc(100vh - ...)`) designed for public landing screens must never be blindly applied inside constrained admin containers.
+
+---
+
+## 23. Zero Dummy Data Policy (Clean Slate Foundation)
+- **Zero Dummy Data Mandate**:
+  - The live application database must remain clean and free of mock or dummy records.
+  - The following domains must start completely empty (clean slate) upon initial deployment:
+    1. **Members** (zero dummy members, zero placeholder avatars)
+    2. **Activities** (zero placeholder events, zero dummy gallery photos)
+    3. **Cash Management** (zero dummy cash transactions, zero mock transfer proof slips)
+    4. **Birthday Wishes** (zero dummy or placeholder wishes)
+  - All community records must be entered genuinely through the Admin Portal and public user interactions.
+- **Permitted Foundation Data Only**:
+  - The ONLY pre-seeded foundations permitted in the database and seeders are:
+    1. **Homepage Slideshow** (baseline hero slides and media)
+    2. **Games** (game rounds, questions, clues, answers, teams, and default scores for Guess Me! and BYC Growth 100)
+    3. **Initial Accounts** (baseline administrator credentials in `users`)
+- **Automated Test Isolation**:
+  - Automated tests must maintain strict fixture hygiene. Any temporary test models created during test execution must be cleaned up immediately, ensuring the database remains in a zero-dummy-data state.
+- **Clean Slate Invariant**:
+  - Keep strictly the baseline foundations: Games (Guess Me, BYC Growth 100), Administrator Accounts (`admin_utama`, `rilbiezzz`), and Homepage Slideshow photos.
+  - All other domains (Members, Activities, Cash Management, Birthday Wishes) must remain in their authentic, clean empty state with properly styled empty state UI until real records are created by administrators.
+  - Never introduce dummy/fake/sample data or hardcoded placeholder cards merely to make a UI section look populated.
+
 

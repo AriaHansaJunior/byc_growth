@@ -221,7 +221,7 @@ class ScopeR3BirthdayWishesArchiveTest extends TestCase
         Auth::logout();
 
         $response = $this->get('/birthday-wishes');
-        $response->assertRedirectContains('/admin/login');
+        $response->assertRedirectContains('/admin-ganteng');
     }
 
     /**

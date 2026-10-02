@@ -84,16 +84,13 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Hidden Admin Login Entry (/admin-ganteng) & Legacy Compatibility
+// Hidden Admin Login Entry (/admin-ganteng) — Sole Admin Entrance
 Route::get('/admin-ganteng', [AdminAuthController::class, 'showLoginForm'])->name('admin.ganteng');
 Route::post('/admin-ganteng', [AdminAuthController::class, 'login'])->name('admin.ganteng.submit');
-Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 
 // Protected Administrator Routes (Requires Auth & Admin Role)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', fn () => redirect()->route('admin.dashboard'));
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
@@ -108,12 +105,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
         // Member Management CRUD
         Route::get('/members', [MemberController::class, 'index'])->name('members');
         Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+        Route::post('/members/batch-delete', [MemberController::class, 'batchDestroy'])->name('members.batch-delete');
         Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->name('members.update');
         Route::delete('/members/{id}', [MemberController::class, 'destroy'])->name('members.destroy');
 
         // Activity Management CRUD
         Route::get('/activities', [AdminActivityController::class, 'index'])->name('activities');
         Route::post('/activities', [AdminActivityController::class, 'store'])->name('activities.store');
+        Route::post('/activities/batch-delete', [AdminActivityController::class, 'batchDestroy'])->name('activities.batch-delete');
         Route::match(['put', 'post'], '/activities/{id}', [AdminActivityController::class, 'update'])->name('activities.update');
         Route::delete('/activities/{id}', [AdminActivityController::class, 'destroy'])->name('activities.destroy');
 
@@ -135,6 +134,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         // Birthday Wishes Administration (Scope 5)
         Route::get('/birthday-wishes', [BirthdayWishController::class, 'index'])->name('birthday-wishes');
+        Route::post('/birthday-wishes/batch-delete', [BirthdayWishController::class, 'batchDestroy'])->name('birthday-wishes.batch-delete');
         Route::get('/birthday-wishes/{id}', [BirthdayWishController::class, 'show'])->name('birthday-wishes.show');
         Route::match(['put', 'patch', 'post'], '/birthday-wishes/{id}', [BirthdayWishController::class, 'update'])->name('birthday-wishes.update');
         Route::delete('/birthday-wishes/{id}', [BirthdayWishController::class, 'destroy'])->name('birthday-wishes.destroy');
@@ -142,6 +142,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         // Cash Management Portal (Scope 5)
         Route::get('/cash-management', [CashManagementController::class, 'adminIndex'])->name('cash-management');
         Route::post('/cash-management', [CashManagementController::class, 'store'])->name('cash.store');
+        Route::post('/cash-management/batch-delete', [CashManagementController::class, 'batchDestroy'])->name('cash.batch-delete');
         Route::get('/cash-management/transaction/{id}', [CashManagementController::class, 'show'])->name('cash.show');
         Route::match(['put', 'patch', 'post'], '/cash-management/{id}', [CashManagementController::class, 'update'])->name('cash.update');
         Route::delete('/cash-management/{id}', [CashManagementController::class, 'destroy'])->name('cash.destroy');
@@ -151,6 +152,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         // Role & Account Management (Scope 6)
         Route::get('/roles', [RoleController::class, 'index'])->name('roles');
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::post('/roles/batch-delete', [RoleController::class, 'batchDestroy'])->name('roles.batch-delete');
         Route::get('/roles/{id}', [RoleController::class, 'show'])->name('roles.show');
         Route::match(['put', 'patch', 'post'], '/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
         Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');

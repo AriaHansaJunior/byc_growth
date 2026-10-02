@@ -55,10 +55,10 @@
         <div class="activities-list" style="display: flex; flex-direction: column; gap: 32px;">
             @foreach($activities as $activity)
                 <article class="activity-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 28px 32px; box-shadow: var(--shadow);">
-                    <div class="activity-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;">
+                    <div class="activity-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 8px; flex-wrap: wrap;">
                         <div>
                             <span class="activity-date" style="display: inline-block; font-size: 13px; font-weight: 700; color: var(--forest); background: var(--cream); padding: 4px 12px; border-radius: 20px; margin-bottom: 8px;">
-                                {{ $activity->event_date->format('F d, Y') }}
+                                📅 {{ $activity->formatted_date_range }}
                             </span>
                             <h2 style="font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 800; color: var(--ink); margin: 0;">
                                 {{ $activity->name }}
@@ -89,9 +89,7 @@
                         @endif
                     </div>
 
-                    <div class="activity-description" style="color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 24px; white-space: pre-line;">
-                        {{ $activity->description }}
-                    </div>
+                    <div class="activity-description" style="color: var(--muted); font-size: 15px; line-height: 1.6; margin-top: 4px; margin-bottom: 20px; white-space: pre-line;">{{ trim($activity->description) }}</div>
 
                     {{-- Supporting Photos Gallery --}}
                     @if($activity->photos->isNotEmpty())

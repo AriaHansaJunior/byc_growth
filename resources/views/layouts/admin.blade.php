@@ -24,80 +24,66 @@
     @endphp
 
     <div class="admin-shell">
-        {{-- Unified Admin Topbar Header --}}
-        <header class="admin-topbar">
-            <div class="admin-brand-wrap">
-                <a href="{{ route('home') }}" class="brand-link" title="Visit Public Website">
-                    <x-brand :compact="true" />
-                </a>
-                <span class="admin-portal-badge">Admin Portal</span>
-            </div>
+        {{-- Unified Dedicated Admin Topbar Header --}}
+        @include('admin.partials.header')
 
-            <nav class="admin-quick-nav" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Dashboard</a>
-                <a href="{{ route('admin.homepage') }}" class="nav-item {{ request()->routeIs('admin.homepage*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Homepage</a>
-                <a href="{{ route('admin.members') }}" class="nav-item {{ request()->routeIs('admin.members*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Members</a>
-                <a href="{{ route('admin.activities') }}" class="nav-item {{ request()->routeIs('admin.activities*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Activities</a>
-                <a href="{{ route('admin.games') }}" class="nav-item {{ request()->routeIs('admin.games*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Games</a>
-                <a href="{{ route('admin.birthday-wishes') }}" class="nav-item {{ request()->routeIs('admin.birthday-wishes*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Birthday Wishes</a>
-                <a href="{{ route('admin.cash-management') }}" class="nav-item {{ request()->routeIs('admin.cash-management*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Cash Management</a>
-                <a href="{{ route('admin.roles') }}" class="nav-item {{ request()->routeIs('admin.roles*') ? 'active' : '' }}" style="font-size: 13px; padding: 6px 12px;">Roles / Accounts</a>
-            </nav>
+        {{-- Floating Toast Notifications (Top-Right Fixed, 5s Auto-dismiss, Stays visible on scroll) --}}
+        <div id="admin-toast-container" class="admin-toast-container" aria-live="polite">
+            @if(session('success') || session('status'))
+                <div class="admin-toast-item toast-success alert-box-success" role="status">
+                    <div class="toast-icon">✓</div>
+                    <div class="toast-content">{{ session('success') ?? session('status') }}</div>
+                    <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+                </div>
+            @endif
 
-            <div class="admin-user-nav">
-                @if($admin)
-                    <div class="admin-user-info">
-                        <strong>{{ $admin->username ?? $admin->name }}</strong>
-                        <small>{{ $admin->email }} &bull; <span class="role-badge">{{ ucfirst($admin->role) }}</span></small>
+            @if(session('error'))
+                <div class="admin-toast-item toast-error alert-box-error" role="alert">
+                    <div class="toast-icon">⚠️</div>
+                    <div class="toast-content">{{ session('error') }}</div>
+                    <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="admin-toast-item toast-error alert-box-error" role="alert">
+                    <div class="toast-icon">⚠️</div>
+                    <div class="toast-content">
+                        <strong>Please correct the errors below:</strong>
+                        <ul style="margin: 4px 0 0; padding-left: 18px; font-size: 13px;">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
-                @endif
-
-                <a href="{{ route('home') }}" class="button button-ghost button-sm" id="btn-admin-view-site" title="Visit Public Website">
-                    View Site
-                </a>
-
-                <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0;">
-                    @csrf
-                    <button type="submit" class="button button-danger button-sm" id="btn-admin-logout">
-                        Sign Out
-                    </button>
-                </form>
-            </div>
-        </header>
+                    <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+                </div>
+            @endif
+        </div>
+        <script>
+            (function() {
+                const toasts = document.querySelectorAll('.admin-toast-item');
+                toasts.forEach(toast => {
+                    const closeBtn = toast.querySelector('.toast-close');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            toast.classList.add('toast-dismissed');
+                            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 420);
+                        });
+                    }
+                    setTimeout(() => {
+                        toast.classList.add('toast-dismissed');
+                        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 420);
+                    }, 5000);
+                });
+            })();
+        </script>
 
         {{-- Unified Admin Content Shell --}}
         <main class="admin-container">
             {{-- Reusable Admin Page Header (if defined) --}}
             @hasSection('page-header')
                 @yield('page-header')
-            @endif
-
-            {{-- Reusable Success / Status Feedback --}}
-            @if(session('success') || session('status'))
-                <div class="alert-box-success" role="status" style="margin-bottom: 24px; padding: 14px 20px; background: #eaf3dc; border: 1px solid var(--lime); border-radius: 12px; color: var(--forest-dark); font-weight: 600; display: flex; align-items: center; gap: 10px;">
-                    <span>✓</span>
-                    <span>{{ session('success') ?? session('status') }}</span>
-                </div>
-            @endif
-
-            {{-- Reusable Error Feedback --}}
-            @if(session('error'))
-                <div class="alert-box-error" role="alert" style="margin-bottom: 24px; padding: 14px 20px; background: #fdf0ee; border: 1px solid var(--red); border-radius: 12px; color: var(--red); font-weight: 600; display: flex; align-items: center; gap: 10px;">
-                    <span>⚠️</span>
-                    <span>{{ session('error') }}</span>
-                </div>
-            @endif
-
-            {{-- Reusable Validation Error Summary --}}
-            @if($errors->any())
-                <div class="alert-box-error" role="alert" style="margin-bottom: 24px; padding: 14px 20px; background: #fdf0ee; border: 1px solid var(--red); border-radius: 12px; color: var(--red); font-weight: 600;">
-                    <strong style="display: block; margin-bottom: 6px;">Please correct the errors below:</strong>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
             @endif
 
             {{-- Page Content --}}

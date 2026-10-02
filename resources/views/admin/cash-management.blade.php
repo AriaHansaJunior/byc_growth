@@ -15,9 +15,6 @@
         <a href="#record-tx-section" class="button button-primary button-sm" id="btn-quick-record">
             <x-icon name="plus" /> Record Transaction
         </a>
-        <a href="{{ route('cash-management') }}" class="button button-ghost button-sm" target="_blank">
-            Open Public Portal &rarr;
-        </a>
     </div>
 </div>
 @endsection
@@ -32,11 +29,6 @@
                     Rp {{ number_format($totalCash, 0, ',', '.') }}
                 </div>
                 <small style="color: #b8c5bf; font-size: 13.5px;">Accurate total across all matching transactions in the fellowship treasury</small>
-            </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <span class="role-badge" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.25); padding: 6px 14px; font-size: 13px;">
-                    {{ $transactions->total() }} Transactions Total
-                </span>
             </div>
         </div>
     </div>
@@ -71,12 +63,12 @@
         <form method="GET" action="{{ route('admin.cash-management') }}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
             <div style="flex: 1; min-width: 180px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Contributor</label>
-                <input type="text" name="name" value="{{ $filters['name'] }}" placeholder="Search name..." class="form-input" style="height: 38px; font-size: 13px;">
+                <input type="text" name="name" value="{{ $filters['name'] }}" placeholder="Search name..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
             <div style="min-width: 150px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Account Type</label>
-                <select name="account_type" class="form-input" style="height: 38px; font-size: 13px;">
+                <select name="account_type" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="">All Accounts</option>
                     @foreach($accountTypes as $type)
                         <option value="{{ $type }}" {{ $filters['account_type'] === $type ? 'selected' : '' }}>{{ $type }}</option>
@@ -86,17 +78,29 @@
 
             <div style="min-width: 130px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Amount</label>
-                <input type="number" name="amount" value="{{ $filters['amount'] }}" placeholder="Exact amount..." class="form-input" style="height: 38px; font-size: 13px;">
+                <input type="number" name="amount" value="{{ $filters['amount'] }}" placeholder="Exact amount..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
             <div style="min-width: 140px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Input Date</label>
-                <input type="date" name="date" value="{{ $filters['date'] }}" class="form-input" style="height: 38px; font-size: 13px;">
+                <input type="date" name="date" value="{{ $filters['date'] }}" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 100px;">
+            <div style="min-width: 170px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
+                <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+                    <option value="date_desc" {{ ($filters['sort'] ?? 'date_desc') === 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
+                    <option value="date_asc" {{ ($filters['sort'] ?? '') === 'date_asc' ? 'selected' : '' }}>Date (Oldest First)</option>
+                    <option value="amount_desc" {{ ($filters['sort'] ?? '') === 'amount_desc' ? 'selected' : '' }}>Amount (Highest First)</option>
+                    <option value="amount_asc" {{ ($filters['sort'] ?? '') === 'amount_asc' ? 'selected' : '' }}>Amount (Lowest First)</option>
+                    <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Contributor (A - Z)</option>
+                    <option value="name_desc" {{ ($filters['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Contributor (Z - A)</option>
+                </select>
+            </div>
+
+            <div style="min-width: 90px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Per Page</label>
-                <select name="per_page" class="form-input" style="height: 38px; font-size: 13px;">
+                <select name="per_page" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="5" {{ $currentPerPage == 5 ? 'selected' : '' }}>5</option>
                     <option value="10" {{ $currentPerPage == 10 ? 'selected' : '' }}>10</option>
                     <option value="25" {{ $currentPerPage == 25 ? 'selected' : '' }}>25</option>
@@ -105,10 +109,10 @@
             </div>
 
             <div style="display: flex; gap: 8px;">
-                <button type="submit" class="button button-primary button-sm" style="height: 38px;">
+                <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.cash-management') }}" class="button button-ghost button-sm" style="height: 38px;">
+                <a href="{{ route('admin.cash-management') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>
@@ -122,9 +126,6 @@
                 <h2>Transactions Ledger</h2>
                 <small style="color: var(--muted); font-size: 13px;">Showing page {{ $transactions->currentPage() }} of {{ $transactions->lastPage() }} ({{ $transactions->total() }} total records)</small>
             </div>
-            <span class="role-badge" style="background: var(--cream); color: var(--forest);">
-                Admin Financial Stewardship
-            </span>
         </div>
 
         @if($transactions->isEmpty())
@@ -134,10 +135,28 @@
                 <p>Record a new cash contribution below or adjust your filter query.</p>
             </div>
         @else
+            {{-- Batch Actions Toolbar --}}
+            <form id="form-batch-delete-cash" method="POST" action="{{ route('admin.cash.batch-delete') }}" style="display: flex; justify-content: space-between; align-items: center; background: var(--cream); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;">
+                @csrf
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="batch-selected-count-cash" style="font-weight: 700; font-size: 13px; color: var(--forest);">
+                        0 transactions selected
+                    </span>
+                </div>
+                <div>
+                    <button type="button" class="button button-danger button-sm" id="btn-batch-delete-cash" disabled style="opacity: 0.5; height: 32px; font-size: 12px;">
+                        Delete Selected
+                    </button>
+                </div>
+            </form>
+
             <div class="admin-table-wrap">
                 <table class="admin-table" id="admin-cash-table">
                     <thead>
                         <tr>
+                            <th style="width: 44px; text-align: center;">
+                                <input type="checkbox" id="check-select-all-cash" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;" title="Select all on this page">
+                            </th>
                             <th>Date & Time</th>
                             <th>Contributor</th>
                             <th>Account / Type</th>
@@ -150,6 +169,9 @@
                     <tbody>
                         @foreach($transactions as $tx)
                             <tr id="tx-row-{{ $tx->id }}">
+                                <td style="text-align: center;">
+                                    <input type="checkbox" name="ids[]" value="{{ $tx->id }}" form="form-batch-delete-cash" class="cash-batch-checkbox" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;">
+                                </td>
                                 <td>
                                     <span style="color: var(--muted); font-size: 13px;">
                                         {{ $tx->created_at->format('M j, Y H:i:s') }}
@@ -251,9 +273,6 @@
                 <h2>Record New Contribution</h2>
                 <small style="color: var(--muted); font-size: 13px;">File an official cash transfer or cash deposit into fellowship records.</small>
             </div>
-            <span class="role-badge" style="background: var(--cream); color: var(--forest);">
-                Official Inflow Entry
-            </span>
         </div>
 
         <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-record-tx">
@@ -545,6 +564,75 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Batch Selection & Deletion
+    const selectAllCheckbox = document.getElementById('check-select-all-cash');
+    const batchCheckboxes = document.querySelectorAll('.cash-batch-checkbox');
+    const batchCountSpan = document.getElementById('batch-selected-count-cash');
+    const btnBatchDelete = document.getElementById('btn-batch-delete-cash');
+    const batchForm = document.getElementById('form-batch-delete-cash');
+
+    function updateBatchDeleteState() {
+        const checkedBoxes = document.querySelectorAll('.cash-batch-checkbox:checked');
+        const count = checkedBoxes.length;
+
+        if (batchCountSpan) {
+            batchCountSpan.textContent = `${count} transaction${count === 1 ? '' : 's'} selected`;
+        }
+
+        if (btnBatchDelete) {
+            if (count > 0) {
+                btnBatchDelete.disabled = false;
+                btnBatchDelete.style.opacity = '1';
+                btnBatchDelete.style.cursor = 'pointer';
+            } else {
+                btnBatchDelete.disabled = true;
+                btnBatchDelete.style.opacity = '0.5';
+                btnBatchDelete.style.cursor = 'not-allowed';
+            }
+        }
+
+        if (selectAllCheckbox && batchCheckboxes.length > 0) {
+            selectAllCheckbox.checked = (count === batchCheckboxes.length);
+            selectAllCheckbox.indeterminate = (count > 0 && count < batchCheckboxes.length);
+        }
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            batchCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+            updateBatchDeleteState();
+        });
+    }
+
+    batchCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateBatchDeleteState);
+    });
+
+    if (btnBatchDelete && batchForm) {
+        btnBatchDelete.addEventListener('click', function () {
+            const count = document.querySelectorAll('.cash-batch-checkbox:checked').length;
+            if (count === 0) return;
+
+            if (typeof window.openAdminConfirm === 'function') {
+                window.openAdminConfirm({
+                    title: 'Delete Selected Cash Transactions',
+                    message: `Are you sure you want to delete ${count} selected transaction${count === 1 ? '' : 's'}? All associated proof media files will be permanently removed.`,
+                    confirmText: 'Yes, Delete Selected',
+                    buttonClass: 'button-danger',
+                    onConfirm: function () {
+                        batchForm.submit();
+                    }
+                });
+            } else {
+                if (confirm(`Are you sure you want to delete ${count} selected transaction(s)?`)) {
+                    batchForm.submit();
+                }
+            }
+        });
+    }
 });
 </script>
 @endpush

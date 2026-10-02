@@ -578,8 +578,8 @@ class ScopeR1BirthdayFoundationTest extends TestCase
      */
     public function test_19_existing_authentication_remains_functional(): void
     {
-        $response = $this->post('/admin/login', [
-            'email' => 'admin_r1@bycgrowth.org',
+        $response = $this->post('/admin-ganteng', [
+            'login' => 'admin_r1@bycgrowth.org',
             'password' => 'password123',
         ]);
 

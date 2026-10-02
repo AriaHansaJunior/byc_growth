@@ -66,6 +66,9 @@ class Scope0AdminArchitectureTest extends TestCase
         $response->assertSee('Email / Username');
         $response->assertSee('Password');
         $response->assertSee('Login');
+
+        // Legacy /admin/login route must return 404
+        $this->get('/admin/login')->assertStatus(404);
     }
 
     /**
@@ -393,8 +396,8 @@ class Scope0AdminArchitectureTest extends TestCase
     public function test_26_admin_routes_require_admin_authorization(): void
     {
         // Unauthenticated visitor is redirected
-        $this->get('/admin/dashboard')->assertRedirect('/admin/login');
-        $this->get('/admin/roles')->assertRedirect('/admin/login');
+        $this->get('/admin/dashboard')->assertRedirect('/admin-ganteng');
+        $this->get('/admin/roles')->assertRedirect('/admin-ganteng');
 
         // Authenticated non-admin is forbidden (403)
         $this->actingAs($this->normalUser)->get('/admin/dashboard')->assertStatus(403);
@@ -472,7 +475,8 @@ class Scope0AdminArchitectureTest extends TestCase
      */
     public function test_29_existing_auth_flows_work(): void
     {
-        $this->get('/admin/login')->assertStatus(200);
+        $this->get('/admin/login')->assertStatus(404);
+        $this->get('/admin-ganteng')->assertStatus(200);
         $this->get('/login')->assertStatus(200);
     }
 
@@ -500,7 +504,7 @@ class Scope0AdminArchitectureTest extends TestCase
      */
     public function test_32_cash_management_protected(): void
     {
-        $this->get('/cash-management')->assertRedirect('/admin/login');
+        $this->get('/cash-management')->assertRedirect('/admin-ganteng');
         $this->actingAs($this->admin1)->get('/cash-management')->assertStatus(200);
     }
 

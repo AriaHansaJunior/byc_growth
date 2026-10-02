@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 /**
- * Scope S2 — Homepage Content & Slideshow Management Test Suite
+ * Scope S2 â€” Homepage Content & Slideshow Management Test Suite
  *
  * Verifies:
  * - Access & Authorization (Admin vs Normal vs Guest)
@@ -152,7 +152,7 @@ class Scope2HomepageSlideshowTest extends TestCase
     {
         $response = $this->get('/admin/homepage');
 
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -165,24 +165,24 @@ class Scope2HomepageSlideshowTest extends TestCase
         // Store
         $this->post('/admin/homepage/slides', [
             'image' => UploadedFile::fake()->image('test.jpg'),
-        ])->assertRedirect('/admin/login');
+        ])->assertRedirect('/admin-ganteng');
 
         // Delete
         $this->delete("/admin/homepage/slides/{$slide->id}")
-            ->assertRedirect('/admin/login');
+            ->assertRedirect('/admin-ganteng');
 
         // Reorder
         $this->post('/admin/homepage/slides/reorder', [
             'order' => [$slide->id],
-        ])->assertRedirect('/admin/login');
+        ])->assertRedirect('/admin-ganteng');
 
         // Move Up
         $this->post("/admin/homepage/slides/{$slide->id}/move-up")
-            ->assertRedirect('/admin/login');
+            ->assertRedirect('/admin-ganteng');
 
         // Move Down
         $this->post("/admin/homepage/slides/{$slide->id}/move-down")
-            ->assertRedirect('/admin/login');
+            ->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -496,7 +496,7 @@ class Scope2HomepageSlideshowTest extends TestCase
 
         // Unauthenticated
         $this->delete("/admin/homepage/slides/{$slide->id}")
-            ->assertRedirect('/admin/login');
+            ->assertRedirect('/admin-ganteng');
 
         // Regular user
         $this->actingAs($this->normalUser)
@@ -686,5 +686,60 @@ class Scope2HomepageSlideshowTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJson(['success' => true]);
+    }
+
+    /**
+     * 27. Admin can upload photo without title/caption; defaults title to filename and caption to null
+     */
+    public function test_27_upload_photo_without_title_and_caption(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        $file = UploadedFile::fake()->image('my-awesome-photo.jpg', 1200, 1200);
+
+        $response = $this->post('/admin/homepage/slides', [
+            'image' => $file,
+        ]);
+
+        $response->assertRedirect('/admin/homepage');
+        $response->assertSessionHas('success', 'Slideshow photo added successfully.');
+
+        $this->assertDatabaseHas('homepage_slides', [
+            'title' => 'my-awesome-photo.jpg',
+            'caption' => null,
+        ]);
+
+        $slide = HomepageSlide::where('title', 'my-awesome-photo.jpg')->firstOrFail();
+        $this->assertNull($slide->caption);
+        $this->assertNotNull($slide->media);
+        $this->assertEquals('my-awesome-photo.jpg', $slide->media->original_name);
+        $this->trackFile(public_path($slide->media->file_path));
+    }
+
+    /**
+     * 28. Admin homepage renders floating toast container and crop studio modal without title/caption inputs
+     */
+    public function test_28_admin_homepage_modal_crop_studio_and_floating_toast(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        $response = $this->withSession(['success' => 'Slideshow photo added successfully.'])
+            ->get('/admin/homepage');
+
+        $response->assertStatus(200);
+
+        // Assert floating toast container and item
+        $response->assertSee('id="admin-toast-container"', false);
+        $response->assertSee('class="admin-toast-item toast-success alert-box-success"', false);
+        $response->assertSee('Slideshow photo added successfully.');
+
+        // Assert 1:1 crop studio exists in modal
+        $response->assertSee('id="crop-studio"', false);
+        $response->assertSee('id="crop-viewport"', false);
+        $response->assertDontSee('1:1 Square Crop Preview');
+
+        // Assert legacy title and caption inputs are removed from modal
+        $response->assertDontSee('name="title"', false);
+        $response->assertDontSee('name="caption"', false);
     }
 }

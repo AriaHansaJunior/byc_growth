@@ -49,7 +49,6 @@
             <section class="guess-stage">
                 <div class="guess-image">
                     <img id="guess-image" src="{{ asset('assets/images/' . $currentRound['image']) }}" alt="Visual clue for active round">
-                    <span>Visual Clue</span>
                 </div>
                 <div class="guess-content">
                     <span class="clue-label">Clue for Teams</span>

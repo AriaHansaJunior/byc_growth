@@ -91,7 +91,7 @@ class Scope6RolesAccountsManagementTest extends TestCase
     {
         $response = $this->get('/admin/roles');
 
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     public function test_03_normal_user_cannot_access_roles_accounts_management_page(): void
@@ -628,7 +628,7 @@ class Scope6RolesAccountsManagementTest extends TestCase
 
     /*
     |--------------------------------------------------------------------------
-    | SCOPE 0–5 REGRESSION VERIFICATION
+    | SCOPE 0â€“5 REGRESSION VERIFICATION
     |--------------------------------------------------------------------------
     */
 

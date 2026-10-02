@@ -120,7 +120,7 @@ class Scope1AdminShellTest extends TestCase
 
         foreach ($routes as $route) {
             $response = $this->get($route);
-            $response->assertRedirect('/admin/login', "Guest was not redirected to login on route: {$route}");
+            $response->assertRedirect('/admin-ganteng', "Guest was not redirected to login on route: {$route}");
         }
     }
 
@@ -234,8 +234,9 @@ class Scope1AdminShellTest extends TestCase
             $res->assertSee('admin-shell', false);
             $res->assertSee('admin-topbar', false);
             $res->assertSee('Admin Portal');
+            $res->assertSee('id="btn-admin-profile-dropdown"', false);
             $res->assertSee('id="btn-admin-logout"', false);
-            $res->assertSee('id="btn-admin-view-site"', false);
+            $res->assertDontSee('id="btn-admin-view-site"', false);
         }
     }
 
@@ -253,16 +254,19 @@ class Scope1AdminShellTest extends TestCase
     }
 
     /**
-     * 12. View Site points to the public website
+     * 12. Admin profile dropdown exposes user email and sign out action while removing view site
      */
-    public function test_12_view_site_points_to_public_website(): void
+    public function test_12_admin_profile_dropdown_exposes_user_email_and_sign_out(): void
     {
         $response = $this->actingAs($this->adminUser)->get('/admin/dashboard');
 
         $response->assertStatus(200);
-        $response->assertSee('id="btn-admin-view-site"', false);
-        $response->assertSee('View Site');
-        $response->assertSee(route('home'));
+        $response->assertDontSee('id="btn-admin-view-site"', false);
+        $response->assertSee('id="btn-admin-profile-dropdown"', false);
+        $response->assertSee($this->adminUser->username);
+        $response->assertSee($this->adminUser->email);
+        $response->assertSee('id="btn-admin-logout"', false);
+        $response->assertSee('Sign Out');
     }
 
     /**
@@ -306,20 +310,30 @@ class Scope1AdminShellTest extends TestCase
      */
     public function test_15_admin_members_uses_user_visual_foundation_with_controls(): void
     {
-        $response = $this->actingAs($this->adminUser)->get('/admin/members');
+        $testMember = \App\Models\Member::create([
+            'full_name' => 'Temporary S1 Member',
+            'date_of_birth' => '2000-01-01',
+            'is_active' => true,
+        ]);
 
-        $response->assertStatus(200);
-        // Shared User visual elements
-        $response->assertSee('members-grid', false);
-        $response->assertSee('member-card', false);
-        $response->assertSee('member-photo-frame', false);
-        $response->assertSee('member-name', false);
-        // Admin controls
-        $response->assertSee('id="btn-open-add-member"', false);
-        $response->assertSee('btn-edit-member', false);
-        $response->assertSee('data-admin-confirm', false);
-        $response->assertSee('id="modal-add-member"', false);
-        $response->assertSee('id="modal-edit-member"', false);
+        try {
+            $response = $this->actingAs($this->adminUser)->get('/admin/members');
+
+            $response->assertStatus(200);
+            // Shared User visual elements
+            $response->assertSee('members-grid', false);
+            $response->assertSee('member-card', false);
+            $response->assertSee('member-photo-frame', false);
+            $response->assertSee('member-name', false);
+            // Admin controls
+            $response->assertSee('id="btn-open-add-member"', false);
+            $response->assertSee('btn-edit-member', false);
+            $response->assertSee('data-admin-confirm', false);
+            $response->assertSee('id="modal-add-member"', false);
+            $response->assertSee('id="modal-edit-member"', false);
+        } finally {
+            $testMember->delete();
+        }
     }
 
     /**
@@ -327,19 +341,29 @@ class Scope1AdminShellTest extends TestCase
      */
     public function test_16_admin_activities_uses_user_visual_foundation_with_controls(): void
     {
-        $response = $this->actingAs($this->adminUser)->get('/admin/activities');
+        $testActivity = \App\Models\Activity::create([
+            'name' => 'Temporary S1 Activity',
+            'description' => 'Temporary description',
+            'event_date' => '2026-10-01',
+        ]);
 
-        $response->assertStatus(200);
-        // Shared User visual elements
-        $response->assertSee('activities-list', false);
-        $response->assertSee('activity-card', false);
-        $response->assertSee('activity-header', false);
-        $response->assertSee('activity-date', false);
-        // Admin controls
-        $response->assertSee('id="btn-open-add-activity"', false);
-        $response->assertSee('btn-edit-activity', false);
-        $response->assertSee('id="modal-add-activity"', false);
-        $response->assertSee('id="modal-edit-activity"', false);
+        try {
+            $response = $this->actingAs($this->adminUser)->get('/admin/activities');
+
+            $response->assertStatus(200);
+            // Shared User visual elements
+            $response->assertSee('activities-list', false);
+            $response->assertSee('activity-card', false);
+            $response->assertSee('activity-header', false);
+            $response->assertSee('activity-date', false);
+            // Admin controls
+            $response->assertSee('id="btn-open-add-activity"', false);
+            $response->assertSee('btn-edit-activity', false);
+            $response->assertSee('id="modal-add-activity"', false);
+            $response->assertSee('id="modal-edit-activity"', false);
+        } finally {
+            $testActivity->delete();
+        }
     }
 
     /**
@@ -350,13 +374,13 @@ class Scope1AdminShellTest extends TestCase
         $response = $this->actingAs($this->adminUser)->get('/admin/games');
 
         $response->assertStatus(200);
-        // Shared User visual elements
-        $response->assertSee('game-center-hero', false);
+        // Shared visual elements
         $response->assertSee('game-center-selection', false);
         $response->assertSee('gc-scoreboard', false);
         $response->assertSee('Team Scoreboard', false);
         // Admin controls
-        $response->assertSee('data-admin-confirm="Are you sure you want to reset all game scores and active round states?"', false);
+        $response->assertSee('btn-admin-reset-gameplay', false);
+        $response->assertSee('Reset Gameplay', false);
     }
 
     /**

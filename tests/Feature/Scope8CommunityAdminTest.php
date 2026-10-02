@@ -196,7 +196,7 @@ class Scope8CommunityAdminTest extends TestCase
             'name' => 'Unauthorized Activity',
             'event_date' => '2026-08-01',
             'description' => 'Unauthorized.',
-        ])->assertRedirect('/admin/login');
+        ])->assertRedirect('/admin-ganteng');
 
         // Regular user
         $this->actingAs($this->regularUser);
@@ -502,7 +502,7 @@ class Scope8CommunityAdminTest extends TestCase
     {
         // Public / Guest
         Auth::logout();
-        $this->get('/admin/roles')->assertRedirect('/admin/login');
+        $this->get('/admin/roles')->assertRedirect('/admin-ganteng');
 
         // Regular user
         $this->actingAs($this->regularUser);
@@ -756,7 +756,7 @@ class Scope8CommunityAdminTest extends TestCase
     public function test_35_cash_management_is_admin_only(): void
     {
         Auth::logout();
-        $this->get('/cash-management')->assertRedirect('/admin/login');
+        $this->get('/cash-management')->assertRedirect('/admin-ganteng');
 
         $this->actingAs($this->regularUser);
         $this->get('/cash-management')->assertStatus(403);

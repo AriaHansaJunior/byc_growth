@@ -34,9 +34,6 @@
 
         <div class="game-center-art-frame">
             <img src="{{ asset('assets/images/BYC_Growth.jpg') }}" alt="BYC Growth Team Games">
-            <div class="game-center-art-badge">
-                <span class="live-dot" aria-hidden="true"></span> 2 Games Active
-            </div>
         </div>
     </section>
 

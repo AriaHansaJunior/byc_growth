@@ -196,7 +196,7 @@ class Scope10CashMemberShortcutTest extends TestCase
             'updated_at' => Carbon::now('Asia/Jakarta')->subDay(),
         ]);
 
-        // Transaction 3: Today (BRI, 45000) — Latest
+        // Transaction 3: Today (BRI, 45000) â€” Latest
         $tx3 = CashTransaction::create([
             'user_id' => $this->adminUser->id,
             'member_id' => $member->id,
@@ -518,7 +518,7 @@ class Scope10CashMemberShortcutTest extends TestCase
     public function test_18_s9_authorization_remains_intact(): void
     {
         // Public cannot access Cash Management
-        $this->get('/cash-management')->assertRedirect('/admin/login');
+        $this->get('/cash-management')->assertRedirect('/admin-ganteng');
 
         // Regular user receives 403
         $this->actingAs($this->regularUser)->get('/cash-management')->assertStatus(403);

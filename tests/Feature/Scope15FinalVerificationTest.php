@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /**
- * Scope 15 — Final Verification Test Suite for BYC GROWTH 2.0.
+ * Scope 15 â€” Final Verification Test Suite for BYC GROWTH 2.0.
  *
  * Verifies final project-wide architectural invariants, strict access control,
  * relational persistence integrity, member equality, and legacy elimination.
@@ -154,10 +154,10 @@ class Scope15FinalVerificationTest extends TestCase
     {
         // Unauthenticated access redirects to login
         $unauthCash = $this->get('/cash-management');
-        $unauthCash->assertRedirect('/admin/login');
+        $unauthCash->assertRedirect('/admin-ganteng');
 
         $unauthDashboard = $this->get('/admin/dashboard');
-        $unauthDashboard->assertRedirect('/admin/login');
+        $unauthDashboard->assertRedirect('/admin-ganteng');
 
         // Normal authenticated user is forbidden (HTTP 403)
         $forbiddenCash = $this->actingAs($this->normalUser)->get('/cash-management');

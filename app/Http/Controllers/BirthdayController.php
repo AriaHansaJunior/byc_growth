@@ -53,7 +53,7 @@ class BirthdayController extends Controller
                 ], 401);
             }
 
-            return redirect()->route('admin.login')->with('error', 'Please sign in to send a birthday letter.');
+            return redirect()->route('admin.ganteng')->with('error', 'Please sign in to send a birthday letter.');
         }
 
         /** @var User $user */
@@ -247,7 +247,7 @@ class BirthdayController extends Controller
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
 
-            return redirect()->route('admin.login', [
+            return redirect()->route('admin.ganteng', [
                 'redirect' => $request->fullUrl(),
             ])->with('error', 'Please sign in to access Birthday Wishes.');
         }

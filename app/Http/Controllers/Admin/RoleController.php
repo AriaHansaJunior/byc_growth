@@ -18,15 +18,67 @@ class RoleController extends Controller
     /**
      * Display accounts and role management interface.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::with('member')->orderBy('created_at', 'desc')->get();
+        $search = trim((string) $request->query('search', ''));
+        $role = (string) $request->query('role', 'all');
+        $sort = (string) $request->query('sort', 'newest');
+
+        $query = User::with('member');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if (in_array($role, ['admin', 'user'], true)) {
+            $query->where('role', $role);
+        }
+
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'username_asc':
+                $query->orderBy('username', 'asc');
+                break;
+            case 'username_desc':
+                $query->orderBy('username', 'desc');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'newest':
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
+
+        $users = $query->get();
         $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();
+
+        $totalUsersCount = User::count();
+        $totalAdminsCount = User::where('role', 'admin')->count();
+        $totalStandardUsersCount = User::where('role', 'user')->count();
 
         return view('admin.roles', [
             'users' => $users,
             'members' => $members,
             'currentUser' => Auth::user(),
+            'totalUsersCount' => $totalUsersCount,
+            'totalAdminsCount' => $totalAdminsCount,
+            'totalStandardUsersCount' => $totalStandardUsersCount,
+            'filters' => [
+                'search' => $search,
+                'role' => $role,
+                'sort' => $sort,
+            ],
         ]);
     }
 
@@ -190,5 +242,53 @@ class RoleController extends Controller
         }
 
         return redirect()->route('admin.roles')->with('success', 'Account deleted successfully.');
+    }
+
+    /**
+     * Remove multiple accounts from storage.
+     * Prevents deletion of the currently authenticated admin account.
+     */
+    public function batchDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'exists:users,id'],
+        ]);
+
+        $currentUserId = Auth::id();
+        // Prevent deleting current logged-in admin account
+        $targetIds = array_values(array_filter($validated['ids'], function ($id) use ($currentUserId) {
+            return (int) $id !== (int) $currentUserId;
+        }));
+
+        if (empty($targetIds)) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Cannot delete your own active administrator account.',
+                ], 403);
+            }
+
+            return redirect()->route('admin.roles')->with('error', 'Cannot delete your own active administrator account.');
+        }
+
+        $targetUsers = User::whereIn('id', $targetIds)->get();
+        $deletedCount = 0;
+        foreach ($targetUsers as $user) {
+            $user->delete();
+            $deletedCount++;
+        }
+
+        $message = "Successfully deleted {$deletedCount} account" . ($deletedCount === 1 ? '' : 's') . '.';
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'deleted_count' => $deletedCount,
+            ]);
+        }
+
+        return redirect()->route('admin.roles')->with('success', $message);
     }
 }

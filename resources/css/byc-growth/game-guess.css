@@ -100,21 +100,6 @@
   box-shadow: 0 8px 30px rgba(32, 48, 41, .08);
 }
 
-.guess-image span {
-  position: absolute;
-  left: 32px;
-  bottom: 32px;
-  padding: 8px 16px;
-  border-radius: 20px;
-  background: rgba(255, 254, 249, .95);
-  color: var(--forest-dark);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  font-weight: 800;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, .08);
-}
 
 .guess-content {
   padding: 44px 48px;

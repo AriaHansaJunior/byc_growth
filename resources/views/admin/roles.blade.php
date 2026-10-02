@@ -8,7 +8,7 @@
         <span class="eyebrow">Security & Access Governance</span>
         <h1>Role & Account Management</h1>
         <p>
-            Manage application credentials, allocate administrator privileges, link accounts to fellowship member profiles, and ensure safe God Mode governance.
+            Manage application credentials, allocate administrator privileges, link accounts to fellowship member profiles, and secure access permissions.
         </p>
     </div>
     <div class="admin-header-actions">
@@ -26,17 +26,17 @@
             <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
                 <div>
                     <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .08em; display: block;">Total Accounts</span>
-                    <strong style="font-size: 20px; color: var(--ink); font-family: 'Manrope', sans-serif;">{{ $users->count() }}</strong>
+                    <strong style="font-size: 20px; color: var(--ink); font-family: 'Manrope', sans-serif;">{{ $totalUsersCount }}</strong>
                 </div>
                 <div style="width: 1px; height: 28px; background: var(--line);"></div>
                 <div>
                     <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .08em; display: block;">Administrators</span>
-                    <strong style="font-size: 20px; color: var(--forest); font-family: 'Manrope', sans-serif;">{{ $users->where('role', 'admin')->count() }}</strong>
+                    <strong style="font-size: 20px; color: var(--forest); font-family: 'Manrope', sans-serif;">{{ $totalAdminsCount }}</strong>
                 </div>
                 <div style="width: 1px; height: 28px; background: var(--line);"></div>
                 <div>
                     <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .08em; display: block;">Standard Users</span>
-                    <strong style="font-size: 20px; color: #315e89; font-family: 'Manrope', sans-serif;">{{ $users->where('role', 'user')->count() }}</strong>
+                    <strong style="font-size: 20px; color: #315e89; font-family: 'Manrope', sans-serif;">{{ $totalStandardUsersCount }}</strong>
                 </div>
             </div>
 
@@ -48,6 +48,46 @@
         </div>
     </div>
 
+    {{-- Search & Filtering Controls --}}
+    <div class="admin-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px;">
+        <form method="GET" action="{{ route('admin.roles') }}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+            <div style="flex: 1; min-width: 200px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Accounts</label>
+                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Search by name, username, or email..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+            </div>
+
+            <div style="min-width: 150px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Role</label>
+                <select name="role" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+                    <option value="all" {{ ($filters['role'] ?? 'all') === 'all' ? 'selected' : '' }}>All Roles</option>
+                    <option value="admin" {{ ($filters['role'] ?? '') === 'admin' ? 'selected' : '' }}>Administrator</option>
+                    <option value="user" {{ ($filters['role'] ?? '') === 'user' ? 'selected' : '' }}>Standard User</option>
+                </select>
+            </div>
+
+            <div style="min-width: 170px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
+                <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+                    <option value="newest" {{ ($filters['sort'] ?? 'newest') === 'newest' ? 'selected' : '' }}>Newest Registered</option>
+                    <option value="oldest" {{ ($filters['sort'] ?? '') === 'oldest' ? 'selected' : '' }}>Oldest Registered</option>
+                    <option value="username_asc" {{ ($filters['sort'] ?? '') === 'username_asc' ? 'selected' : '' }}>Username (A - Z)</option>
+                    <option value="username_desc" {{ ($filters['sort'] ?? '') === 'username_desc' ? 'selected' : '' }}>Username (Z - A)</option>
+                    <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Name (A - Z)</option>
+                    <option value="name_desc" {{ ($filters['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Name (Z - A)</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                    Filter
+                </button>
+                <a href="{{ route('admin.roles') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+
     {{-- Accounts Ledger Table --}}
     <div class="admin-card">
         <div class="admin-card-header">
@@ -56,36 +96,68 @@
                 <small style="color: var(--muted); font-size: 13px;">Overview of all application credentials and privilege levels</small>
             </div>
             <span class="role-badge" style="background: var(--paper); color: var(--ink);">
-                God Mode Security
+                Access Control
             </span>
         </div>
 
-        <div class="admin-table-wrap">
-            <table class="admin-table" id="accounts-table">
-                <thead>
-                    <tr>
-                        <th>Username & Name</th>
-                        <th>Email Address</th>
-                        <th>Access Role</th>
-                        <th>Linked Member</th>
-                        <th>Created At</th>
-                        <th style="text-align: right;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($users as $user)
-                        <tr id="user-row-{{ $user->id }}">
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <strong style="color: var(--ink); font-size: 14.5px;">
-                                        {{ '@' . $user->username }}
-                                    </strong>
+        @if($users->isEmpty())
+            <div style="text-align: center; padding: 48px 24px; color: var(--muted);">
+                <div style="font-size: 36px; margin-bottom: 8px;">👤</div>
+                <h3>No accounts found</h3>
+                <p>Adjust your search query or reset the filter.</p>
+            </div>
+        @else
+            {{-- Batch Actions Toolbar --}}
+            <form id="form-batch-delete-roles" method="POST" action="{{ route('admin.roles.batch-delete') }}" style="display: flex; justify-content: space-between; align-items: center; background: var(--cream); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; margin-bottom: 16px;">
+                @csrf
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="batch-selected-count-roles" style="font-weight: 700; font-size: 13px; color: var(--forest);">
+                        0 accounts selected
+                    </span>
+                </div>
+                <div>
+                    <button type="button" class="button button-danger button-sm" id="btn-batch-delete-roles" disabled style="opacity: 0.5; height: 32px; font-size: 12px;">
+                        Delete Selected
+                    </button>
+                </div>
+            </form>
+
+            <div class="admin-table-wrap">
+                <table class="admin-table" id="accounts-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 44px; text-align: center;">
+                                <input type="checkbox" id="check-select-all-roles" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;" title="Select all selectable accounts on this page">
+                            </th>
+                            <th>Username & Name</th>
+                            <th>Email Address</th>
+                            <th>Access Role</th>
+                            <th>Linked Member</th>
+                            <th>Created At</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($users as $user)
+                            <tr id="user-row-{{ $user->id }}">
+                                <td style="text-align: center;">
                                     @if($user->id === $currentUser->id)
-                                        <span class="role-badge" style="background: var(--cream); color: var(--forest); font-size: 10.5px; padding: 2px 7px;">
-                                            You
-                                        </span>
+                                        <input type="checkbox" disabled title="Cannot select your own active administrator account" style="width: 17px; height: 17px; opacity: 0.35; cursor: not-allowed;">
+                                    @else
+                                        <input type="checkbox" name="ids[]" value="{{ $user->id }}" form="form-batch-delete-roles" class="role-batch-checkbox" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;">
                                     @endif
-                                </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <strong style="color: var(--ink); font-size: 14.5px;">
+                                            {{ '@' . $user->username }}
+                                        </strong>
+                                        @if($user->id === $currentUser->id)
+                                            <span class="role-badge" style="background: var(--cream); color: var(--forest); font-size: 10.5px; padding: 2px 7px;">
+                                                You
+                                            </span>
+                                        @endif
+                                    </div>
                                 @if($user->name && $user->name !== $user->username)
                                     <small style="color: var(--muted); display: block; font-size: 12px; margin-top: 2px;">
                                         {{ $user->name }}
@@ -173,6 +245,7 @@
                 </tbody>
             </table>
         </div>
+        @endif
     </div>
 
     {{-- Modal: Create Account --}}
@@ -249,7 +322,7 @@
                         <label class="form-label" for="add-user-role">Access Role *</label>
                         <select name="role" id="add-user-role" required class="form-input">
                             <option value="user">User (Standard Fellowship Member)</option>
-                            <option value="admin">Admin (Full Administrator God Mode)</option>
+                            <option value="admin">Admin (Full Administrator)</option>
                         </select>
                     </div>
 
@@ -348,7 +421,7 @@
                         <label class="form-label" for="edit-user-role">Access Role *</label>
                         <select name="role" id="edit-user-role" required class="form-input">
                             <option value="user">User (Standard Fellowship Member)</option>
-                            <option value="admin">Admin (Full Administrator God Mode)</option>
+                            <option value="admin">Admin (Full Administrator)</option>
                         </select>
                     </div>
 
@@ -429,6 +502,75 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Batch Selection & Deletion
+    const selectAllCheckbox = document.getElementById('check-select-all-roles');
+    const batchCheckboxes = document.querySelectorAll('.role-batch-checkbox');
+    const batchCountSpan = document.getElementById('batch-selected-count-roles');
+    const btnBatchDelete = document.getElementById('btn-batch-delete-roles');
+    const batchForm = document.getElementById('form-batch-delete-roles');
+
+    function updateBatchDeleteState() {
+        const checkedBoxes = document.querySelectorAll('.role-batch-checkbox:checked');
+        const count = checkedBoxes.length;
+
+        if (batchCountSpan) {
+            batchCountSpan.textContent = `${count} account${count === 1 ? '' : 's'} selected`;
+        }
+
+        if (btnBatchDelete) {
+            if (count > 0) {
+                btnBatchDelete.disabled = false;
+                btnBatchDelete.style.opacity = '1';
+                btnBatchDelete.style.cursor = 'pointer';
+            } else {
+                btnBatchDelete.disabled = true;
+                btnBatchDelete.style.opacity = '0.5';
+                btnBatchDelete.style.cursor = 'not-allowed';
+            }
+        }
+
+        if (selectAllCheckbox && batchCheckboxes.length > 0) {
+            selectAllCheckbox.checked = (count === batchCheckboxes.length);
+            selectAllCheckbox.indeterminate = (count > 0 && count < batchCheckboxes.length);
+        }
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            batchCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+            updateBatchDeleteState();
+        });
+    }
+
+    batchCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateBatchDeleteState);
+    });
+
+    if (btnBatchDelete && batchForm) {
+        btnBatchDelete.addEventListener('click', function () {
+            const count = document.querySelectorAll('.role-batch-checkbox:checked').length;
+            if (count === 0) return;
+
+            if (typeof window.openAdminConfirm === 'function') {
+                window.openAdminConfirm({
+                    title: 'Delete Selected Accounts',
+                    message: `Are you sure you want to delete ${count} selected account${count === 1 ? '' : 's'}? This action cannot be undone.`,
+                    confirmText: 'Yes, Delete Selected',
+                    buttonClass: 'button-danger',
+                    onConfirm: function () {
+                        batchForm.submit();
+                    }
+                });
+            } else {
+                if (confirm(`Are you sure you want to delete ${count} selected account(s)?`)) {
+                    batchForm.submit();
+                }
+            }
+        });
+    }
 });
 </script>
 @endpush

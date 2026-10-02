@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 /**
- * Scope S3 — Members & Activities Management
+ * Scope S3 â€” Members & Activities Management
  *
  * Covers:
  * - Members Management (Access, CRUD, Photo Upload/Replace/Delete, Media Cleanup)
@@ -114,7 +114,7 @@ class Scope3MembersActivitiesManagementTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('admin.members');
         $response->assertSee('Members Management');
-        $response->assertSee('Live Roster God Mode');
+        $response->assertDontSee('Live Roster God Mode');
         $response->assertSee('id="btn-open-add-member"', false);
     }
 
@@ -152,10 +152,10 @@ class Scope3MembersActivitiesManagementTest extends TestCase
      */
     public function test_03_guest_cannot_access_member_management_actions(): void
     {
-        $this->get('/admin/members')->assertRedirect('/admin/login');
-        $this->post('/admin/members', ['full_name' => 'Ghost Member'])->assertRedirect('/admin/login');
-        $this->post('/admin/members/1', ['full_name' => 'Ghost Member'])->assertRedirect('/admin/login');
-        $this->delete('/admin/members/1')->assertRedirect('/admin/login');
+        $this->get('/admin/members')->assertRedirect('/admin-ganteng');
+        $this->post('/admin/members', ['full_name' => 'Ghost Member'])->assertRedirect('/admin-ganteng');
+        $this->post('/admin/members/1', ['full_name' => 'Ghost Member'])->assertRedirect('/admin-ganteng');
+        $this->delete('/admin/members/1')->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -314,8 +314,8 @@ class Scope3MembersActivitiesManagementTest extends TestCase
         ]);
         $response2->assertSessionHasErrors('photo');
 
-        // Oversized file (>5MB)
-        $oversized = UploadedFile::fake()->image('huge.jpg')->size(6000);
+        // Oversized file (>50MB ceiling)
+        $oversized = UploadedFile::fake()->image('huge.jpg')->size(60000);
         $response3 = $this->actingAs($this->adminUser)->post('/admin/members', [
             'full_name' => 'Oversized Test ' . uniqid(),
             'photo' => $oversized,
@@ -518,7 +518,7 @@ class Scope3MembersActivitiesManagementTest extends TestCase
         $response->assertStatus(200);
         $response->assertViewIs('admin.activities');
         $response->assertSee('Activities Management');
-        $response->assertSee('Live Timeline God Mode');
+        $response->assertDontSee('Live Timeline God Mode');
         $response->assertSee('id="btn-open-add-activity"', false);
     }
 
@@ -560,10 +560,10 @@ class Scope3MembersActivitiesManagementTest extends TestCase
      */
     public function test_18_guest_cannot_mutate_activities(): void
     {
-        $this->get('/admin/activities')->assertRedirect('/admin/login');
-        $this->post('/admin/activities', ['name' => 'Unauthorized'])->assertRedirect('/admin/login');
-        $this->post('/admin/activities/1', ['name' => 'Unauthorized'])->assertRedirect('/admin/login');
-        $this->delete('/admin/activities/1')->assertRedirect('/admin/login');
+        $this->get('/admin/activities')->assertRedirect('/admin-ganteng');
+        $this->post('/admin/activities', ['name' => 'Unauthorized'])->assertRedirect('/admin-ganteng');
+        $this->post('/admin/activities/1', ['name' => 'Unauthorized'])->assertRedirect('/admin-ganteng');
+        $this->delete('/admin/activities/1')->assertRedirect('/admin-ganteng');
     }
 
     /**

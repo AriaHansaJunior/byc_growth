@@ -250,15 +250,15 @@ class Scope12MembersPageTest extends TestCase
         $response = $this->post('/admin/members', [
             'full_name' => 'Public Unauth Member',
         ]);
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
 
         $updateResponse = $this->post('/admin/members/1', [
             'full_name' => 'Public Unauth Member Edit',
         ]);
-        $updateResponse->assertRedirect('/admin/login');
+        $updateResponse->assertRedirect('/admin-ganteng');
 
         $deleteResponse = $this->delete('/admin/members/1');
-        $deleteResponse->assertRedirect('/admin/login');
+        $deleteResponse->assertRedirect('/admin-ganteng');
     }
 
     // ==========================================

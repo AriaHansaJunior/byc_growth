@@ -55,9 +55,14 @@ class HomepageController extends Controller
             $maxOrder = (int) HomepageSlide::max('sort_order');
             $nextOrder = $maxOrder + 1;
 
+            $file = $request->file('image');
+            $originalName = $file->getClientOriginalName();
+            $title = !empty($validated['title']) ? $validated['title'] : $originalName;
+            $caption = $validated['caption'] ?? null;
+
             $slide = HomepageSlide::create([
-                'title' => $validated['title'] ?? null,
-                'caption' => $validated['caption'] ?? null,
+                'title' => $title,
+                'caption' => $caption,
                 'sort_order' => $nextOrder,
                 'is_active' => true,
             ]);

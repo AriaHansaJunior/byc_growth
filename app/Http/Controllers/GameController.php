@@ -114,7 +114,7 @@ class GameController extends Controller
     public function configureTeams(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'game' => 'nullable|string|in:game1,game2',
+            'game' => 'nullable|string|in:game1,game2,all',
             'teams' => 'required|array|min:2',
             'teams.*.id' => 'nullable|integer',
             'teams.*.name' => 'required|string|max:100',

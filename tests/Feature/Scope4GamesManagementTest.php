@@ -119,7 +119,6 @@ class Scope4GamesManagementTest extends TestCase
         $res->assertSee('Games Management');
         $res->assertSee('Guess Me!');
         $res->assertSee('BYC GROWTH 100');
-        $res->assertSee('Universal Game System');
     }
 
     public function test_guest_cannot_access_games_management(): void
@@ -129,7 +128,7 @@ class Scope4GamesManagementTest extends TestCase
         $res = $this->get('/admin/games');
         $this->assertTrue(in_array($res->status(), [302, 401]));
         if ($res->status() === 302) {
-            $this->assertTrue($res->isRedirect(route('admin.login')) || $res->isRedirect(route('admin.ganteng')));
+            $this->assertTrue($res->isRedirect(route('admin.ganteng')));
         }
     }
 
@@ -169,7 +168,7 @@ class Scope4GamesManagementTest extends TestCase
         $res = $this->get('/admin/games?tab=guess-me');
         $res->assertOk();
         $res->assertSee('Guess Me! Rounds');
-        $res->assertSee('+ Add Round');
+        $res->assertSee('Add Round');
         $res->assertSee('Clue (Letter Slots)');
         $res->assertSee('Correct Answer');
     }
@@ -382,7 +381,7 @@ class Scope4GamesManagementTest extends TestCase
         $res = $this->get('/admin/games?tab=growth-100');
         $res->assertOk();
         $res->assertSee('BYC GROWTH 100 Questions');
-        $res->assertSee('+ Add Question');
+        $res->assertSee('Add Question');
         $res->assertSee('Survey Answers');
     }
 

@@ -106,7 +106,7 @@ class WebsiteArchitectureTest extends TestCase
     {
         // Unauthenticated access must redirect to login
         $unauthRes = $this->get('/cash-management');
-        $unauthRes->assertRedirect('/admin/login');
+        $unauthRes->assertRedirect('/admin-ganteng');
 
         // Authenticated admin can view Cash Management
         $admin = User::firstOrCreate(

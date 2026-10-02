@@ -91,6 +91,16 @@ class Scope7FinalAdminAuditTest extends TestCase
         $entranceResponse->assertStatus(200);
         $entranceResponse->assertSee('Admin Portal');
 
+        // Legacy /admin/login route must return 404
+        $legacyGet = $this->get('/admin/login');
+        $legacyGet->assertStatus(404);
+
+        $legacyPost = $this->post('/admin/login', [
+            'login' => 'admin@gmail.com',
+            'password' => 'admin123',
+        ]);
+        $legacyPost->assertStatus(404);
+
         // Public pages must NOT leak the hidden entrance
         $publicRoutes = ['/', '/about', '/activity', '/members', '/game-center'];
         foreach ($publicRoutes as $route) {
@@ -226,7 +236,7 @@ class Scope7FinalAdminAuditTest extends TestCase
         // 1. Guests redirected
         foreach ($adminEndpoints as $url) {
             $resp = $this->get($url);
-            $resp->assertRedirect('/admin/login');
+            $resp->assertRedirect('/admin-ganteng');
         }
 
         // 2. Normal user gets 403 Forbidden

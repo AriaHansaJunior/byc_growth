@@ -24,7 +24,7 @@ class ActivityController extends Controller
     public function index(): View
     {
         $activities = Activity::with('photos')
-            ->orderBy('event_date', 'desc')
+            ->orderByRaw('COALESCE(start_date, event_date) desc')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -40,15 +40,25 @@ class ActivityController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'event_date' => 'required|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'event_date' => 'nullable|date',
             'description' => 'required|string',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:51200',
         ]);
+
+        $startDate = $validated['start_date'] ?? $validated['event_date'] ?? now()->toDateString();
+        $endDate = $validated['end_date'] ?? $startDate;
+        if ($endDate < $startDate) {
+            $endDate = $startDate;
+        }
 
         $activity = Activity::create([
             'name' => $validated['name'],
-            'event_date' => $validated['event_date'],
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'event_date' => $startDate,
             'description' => $validated['description'],
         ]);
 
@@ -81,17 +91,28 @@ class ActivityController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'event_date' => 'required|date',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+            'event_date' => 'nullable|date',
             'description' => 'required|string',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'photos.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:51200',
             'remove_photo_ids' => 'nullable|array',
             'remove_photo_ids.*' => 'integer|exists:media_files,id',
         ]);
 
+        $fallbackStart = $activity->start_date ? $activity->start_date->format('Y-m-d') : ($activity->event_date ? $activity->event_date->format('Y-m-d') : now()->toDateString());
+        $startDate = $validated['start_date'] ?? $validated['event_date'] ?? $fallbackStart;
+        $endDate = $validated['end_date'] ?? $startDate;
+        if ($endDate < $startDate) {
+            $endDate = $startDate;
+        }
+
         $activity->update([
             'name' => $validated['name'],
-            'event_date' => $validated['event_date'],
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'event_date' => $startDate,
             'description' => $validated['description'],
         ]);
 

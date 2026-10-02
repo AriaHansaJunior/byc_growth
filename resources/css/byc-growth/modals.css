@@ -3,12 +3,12 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 20;
-  background: rgba(18, 30, 24, .72);
+  z-index: 9999;
+  background: rgba(18, 30, 24, .75);
   display: grid;
   place-items: center;
-  padding: 34px;
-  backdrop-filter: blur(7px);
+  padding: 20px;
+  backdrop-filter: blur(8px);
 }
 
 .info-modal,

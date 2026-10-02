@@ -64,7 +64,7 @@ class Scope11CashTransactionTableTest extends TestCase
     public function test_03_public_visitor_cannot_access_transaction_table(): void
     {
         $response = $this->get('/cash-management');
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -248,7 +248,7 @@ class Scope11CashTransactionTableTest extends TestCase
         \Illuminate\Support\Facades\Auth::logout();
         $this->flushSession();
 
-        $this->get('/cash-management')->assertRedirect('/admin/login');
+        $this->get('/cash-management')->assertRedirect('/admin-ganteng');
     }
 
     /**

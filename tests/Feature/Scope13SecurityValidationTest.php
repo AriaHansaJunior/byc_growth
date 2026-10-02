@@ -81,9 +81,9 @@ class Scope13SecurityValidationTest extends TestCase
      */
     public function test_02_protected_admin_routes_reject_guests(): void
     {
-        $this->get('/admin/dashboard')->assertRedirect('/admin/login');
-        $this->get('/admin/roles')->assertRedirect('/admin/login');
-        $this->get('/cash-management')->assertRedirect('/admin/login');
+        $this->get('/admin/dashboard')->assertRedirect('/admin-ganteng');
+        $this->get('/admin/roles')->assertRedirect('/admin-ganteng');
+        $this->get('/cash-management')->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -139,9 +139,9 @@ class Scope13SecurityValidationTest extends TestCase
      */
     public function test_06_public_user_cannot_perform_admin_crud(): void
     {
-        $this->post('/admin/members', ['full_name' => 'Public Hacker'])->assertRedirect('/admin/login');
-        $this->post('/admin/cash-management', ['amount' => 100000])->assertRedirect('/admin/login');
-        $this->post('/game/teams/configure', ['teams' => []])->assertRedirect('/admin/login');
+        $this->post('/admin/members', ['full_name' => 'Public Hacker'])->assertRedirect('/admin-ganteng');
+        $this->post('/admin/cash-management', ['amount' => 100000])->assertRedirect('/admin-ganteng');
+        $this->post('/game/teams/configure', ['teams' => []])->assertRedirect('/admin-ganteng');
     }
 
     /**
@@ -384,7 +384,7 @@ class Scope13SecurityValidationTest extends TestCase
      */
     public function test_18_unauthorized_cash_access_rejected(): void
     {
-        $this->get('/cash-management')->assertRedirect('/admin/login');
+        $this->get('/cash-management')->assertRedirect('/admin-ganteng');
         $this->actingAs($this->regularUser)->get('/cash-management')->assertStatus(403);
     }
 
@@ -424,7 +424,7 @@ class Scope13SecurityValidationTest extends TestCase
      */
     public function test_20_unauthorized_member_crud_rejected(): void
     {
-        $this->post('/admin/members', ['full_name' => 'Test'])->assertRedirect('/admin/login');
+        $this->post('/admin/members', ['full_name' => 'Test'])->assertRedirect('/admin-ganteng');
         $this->actingAs($this->regularUser)->post('/admin/members', ['full_name' => 'Test'])->assertStatus(403);
     }
 

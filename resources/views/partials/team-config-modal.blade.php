@@ -30,7 +30,7 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
                 <button type="button" class="button button-secondary" id="btn-add-team-row">
-                    + Add Team
+                    Add Team
                 </button>
                 <small id="team-config-status" style="color: var(--muted); font-size: 13px;">Min. 2 teams required</small>
             </div>

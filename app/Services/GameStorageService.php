@@ -148,6 +148,23 @@ class GameStorageService
             return ['success' => false, 'error' => 'A minimum of 2 teams is required for gameplay.'];
         }
 
+        if ($gameCode === 'all') {
+            $r1 = $this->configureTeams('game1', $teams);
+            if (!$r1['success']) {
+                return $r1;
+            }
+            $r2 = $this->configureTeams('game2', $teams);
+            if (!$r2['success']) {
+                return $r2;
+            }
+            return [
+                'success' => true,
+                'message' => 'Teams configured successfully across all games.',
+                'teams' => $this->getTeamsWithScores(),
+                'final_scores' => $this->getFinalScores(),
+            ];
+        }
+
         $palette = Team::COLOR_PALETTE;
         $seenNames = [];
 

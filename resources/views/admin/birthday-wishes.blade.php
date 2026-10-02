@@ -11,11 +11,6 @@
             Audit and moderate fellowship birthday wishes across all celebrants and historical years. True sender identities are confidential and revealed only to administrators.
         </p>
     </div>
-    <div class="admin-header-actions">
-        <a href="{{ route('birthday.wishes') }}" class="button button-ghost button-sm" target="_blank">
-            🎁 View Public Wishes &rarr;
-        </a>
-    </div>
 </div>
 @endsection
 
@@ -54,7 +49,7 @@
 
             <div style="flex: 1; min-width: 200px;">
                 <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Filter by Celebrant</label>
-                <select name="member_id" class="form-input" style="height: 38px; font-size: 13px;" onchange="this.form.submit()">
+                <select name="member_id" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;" onchange="this.form.submit()">
                     <option value="">All Birthday Celebrants</option>
                     @foreach($members as $m)
                         <option value="{{ $m->id }}" {{ (string)$selectedMemberId === (string)$m->id ? 'selected' : '' }}>
@@ -66,14 +61,24 @@
 
             <div style="flex: 1; min-width: 200px;">
                 <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Search Keyword</label>
-                <input type="text" name="search" value="{{ $searchKeyword }}" placeholder="Search message, sender, email..." class="form-input" style="height: 38px; font-size: 13px;">
+                <input type="text" name="search" value="{{ $searchKeyword }}" placeholder="Search message, sender, email..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+            </div>
+
+            <div style="min-width: 170px;">
+                <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Sort By</label>
+                <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+                    <option value="newest" {{ ($sort ?? '') === 'newest' ? 'selected' : '' }}>Newest First</option>
+                    <option value="oldest" {{ ($sort ?? '') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
+                    <option value="recipient_asc" {{ ($sort ?? '') === 'recipient_asc' ? 'selected' : '' }}>Recipient (A – Z)</option>
+                    <option value="recipient_desc" {{ ($sort ?? '') === 'recipient_desc' ? 'selected' : '' }}>Recipient (Z – A)</option>
+                </select>
             </div>
 
             <div style="display: flex; gap: 8px;">
-                <button type="submit" class="button button-primary button-sm" style="height: 38px;">
+                <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.birthday-wishes') }}" class="button button-ghost button-sm" style="height: 38px;">
+                <a href="{{ route('admin.birthday-wishes') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>
@@ -94,9 +99,6 @@
                 </h2>
                 <small style="color: var(--muted); font-size: 13px;">Showing {{ $letters->count() }} of {{ $letters->total() }} matching wishes</small>
             </div>
-            <span class="role-badge" style="background: var(--cream); color: var(--forest);">
-                Admin God Mode Moderation
-            </span>
         </div>
 
         @if($letters->isEmpty())
@@ -106,10 +108,26 @@
                 <p>Try switching the year tab or clearing your filter criteria.</p>
             </div>
         @else
+            {{-- Batch Actions Bar --}}
+            <form id="form-batch-delete-wishes" method="POST" action="{{ route('admin.birthday-wishes.batch-delete') }}" style="margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px;">
+                @csrf
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span id="batch-selected-count-wishes" style="font-size: 13px; font-weight: 700; color: var(--ink);">0 wishes selected</span>
+                </div>
+                <div>
+                    <button type="button" class="button button-danger button-sm" id="btn-batch-delete-wishes" disabled style="opacity: 0.5; height: 32px; font-size: 12px;">
+                        Delete Selected
+                    </button>
+                </div>
+            </form>
+
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
                         <tr>
+                            <th style="width: 44px; text-align: center;">
+                                <input type="checkbox" id="check-select-all-wishes" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;" title="Select all on this page">
+                            </th>
                             <th>Celebrant (Recipient)</th>
                             <th>Sender Identity (Admin View)</th>
                             <th>Year</th>
@@ -126,6 +144,9 @@
                                     : ($letter->sender_name ?: 'A BYC Friend');
                             @endphp
                             <tr id="letter-row-{{ $letter->id }}">
+                                <td style="text-align: center;">
+                                    <input type="checkbox" name="ids[]" value="{{ $letter->id }}" form="form-batch-delete-wishes" class="wish-batch-checkbox" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;">
+                                </td>
                                 <td>
                                     <strong style="color: var(--ink); font-size: 14px;">
                                         {{ $letter->recipient->full_name ?? 'Unknown Celebrant' }}
@@ -406,6 +427,75 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // Batch Delete Wishes Selection & Confirmation
+    const selectAllCheckbox = document.getElementById('check-select-all-wishes');
+    const batchCheckboxes = document.querySelectorAll('.wish-batch-checkbox');
+    const batchCountSpan = document.getElementById('batch-selected-count-wishes');
+    const btnBatchDelete = document.getElementById('btn-batch-delete-wishes');
+    const batchForm = document.getElementById('form-batch-delete-wishes');
+
+    function updateBatchDeleteState() {
+        const checkedBoxes = document.querySelectorAll('.wish-batch-checkbox:checked');
+        const count = checkedBoxes.length;
+
+        if (batchCountSpan) {
+            batchCountSpan.textContent = `${count} wish${count === 1 ? '' : 'es'} selected`;
+        }
+
+        if (btnBatchDelete) {
+            if (count > 0) {
+                btnBatchDelete.disabled = false;
+                btnBatchDelete.style.opacity = '1';
+                btnBatchDelete.style.cursor = 'pointer';
+            } else {
+                btnBatchDelete.disabled = true;
+                btnBatchDelete.style.opacity = '0.5';
+                btnBatchDelete.style.cursor = 'not-allowed';
+            }
+        }
+
+        if (selectAllCheckbox && batchCheckboxes.length > 0) {
+            selectAllCheckbox.checked = (count === batchCheckboxes.length);
+            selectAllCheckbox.indeterminate = (count > 0 && count < batchCheckboxes.length);
+        }
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            batchCheckboxes.forEach(cb => {
+                cb.checked = selectAllCheckbox.checked;
+            });
+            updateBatchDeleteState();
+        });
+    }
+
+    batchCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateBatchDeleteState);
+    });
+
+    if (btnBatchDelete && batchForm) {
+        btnBatchDelete.addEventListener('click', function () {
+            const count = document.querySelectorAll('.wish-batch-checkbox:checked').length;
+            if (count === 0) return;
+
+            if (typeof window.openAdminConfirm === 'function') {
+                window.openAdminConfirm({
+                    title: 'Delete Selected Birthday Wishes',
+                    message: `Are you sure you want to delete ${count} selected birthday wish${count === 1 ? '' : 'es'}? This action cannot be undone.`,
+                    confirmText: 'Yes, Delete Selected',
+                    buttonClass: 'button-danger',
+                    onConfirm: function () {
+                        batchForm.submit();
+                    }
+                });
+            } else {
+                if (confirm(`Are you sure you want to delete ${count} selected birthday wish(es)?`)) {
+                    batchForm.submit();
+                }
+            }
+        });
+    }
 });
 </script>
 @endpush

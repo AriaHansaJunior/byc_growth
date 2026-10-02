@@ -54,7 +54,7 @@
         @endif
 
         {{-- Sign In Form --}}
-        <form method="POST" action="{{ request()->is('admin-ganteng*') ? route('admin.ganteng.submit') : route('admin.login.submit') }}" class="auth-form" novalidate>
+        <form method="POST" action="{{ route('admin.ganteng.submit') }}" class="auth-form" novalidate>
             @csrf
             @if(request('redirect') || old('redirect'))
                 <input type="hidden" name="redirect" value="{{ request('redirect', old('redirect')) }}">

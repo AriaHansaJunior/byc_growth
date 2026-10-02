@@ -67,7 +67,7 @@ class Scope9CashManagementTest extends TestCase
     {
         Auth::logout();
         $response = $this->get('/cash-management');
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     /**

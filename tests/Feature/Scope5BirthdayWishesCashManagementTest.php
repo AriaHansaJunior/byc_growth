@@ -77,12 +77,16 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
                 'member_id' => $this->celebrantMember->id,
             ]
         );
+        $this->recipientUser->update(['member_id' => $this->celebrantMember->id]);
     }
 
     protected function tearDown(): void
     {
         BirthdayLetter::whereIn('user_id', [$this->adminUser->id, $this->regularUser->id, $this->recipientUser->id])->delete();
         CashTransaction::whereIn('user_id', [$this->adminUser->id, $this->regularUser->id])->delete();
+        $this->recipientUser->update(['member_id' => null]);
+        $this->regularUser->update(['member_id' => null]);
+        Member::whereIn('id', [$this->celebrantMember->id, $this->regularMember->id])->delete();
         parent::tearDown();
     }
 
@@ -101,7 +105,7 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
     public function test_guest_cannot_access_birthday_wishes_management(): void
     {
         $response = $this->get('/admin/birthday-wishes');
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     public function test_normal_user_cannot_access_birthday_wishes_management(): void
@@ -121,7 +125,7 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
     public function test_guest_cannot_access_cash_management(): void
     {
         $response = $this->get('/admin/cash-management');
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
     }
 
     public function test_normal_user_cannot_access_cash_management(): void
@@ -605,7 +609,7 @@ class Scope5BirthdayWishesCashManagementTest extends TestCase
     public function test_s0_authentication_and_admin_ganteng_intact(): void
     {
         $this->get('/admin-ganteng')->assertStatus(200);
-        $this->get('/admin/login')->assertStatus(200);
+        $this->get('/admin/login')->assertStatus(404);
 
         $loginRes = $this->post('/admin-ganteng', [
             'login' => $this->adminUser->username,

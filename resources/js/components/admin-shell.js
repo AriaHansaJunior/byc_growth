@@ -2,7 +2,79 @@
  * Admin Shell & Confirmation Foundation
  * BYC GROWTH 2.0 — Scope S1
  */
+export function initAdminProfileDropdown() {
+    const wrap = document.getElementById('admin-profile-dropdown-wrap');
+    const btn = document.getElementById('btn-admin-profile-dropdown');
+    if (!btn || !wrap) return;
+
+    btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = wrap.classList.toggle('is-open');
+        btn.setAttribute('aria-expanded', String(isOpen));
+    };
+
+    if (!window.__adminDocClickBound) {
+        window.__adminDocClickBound = true;
+        document.addEventListener('click', (e) => {
+            const currentWrap = document.getElementById('admin-profile-dropdown-wrap');
+            const currentBtn = document.getElementById('btn-admin-profile-dropdown');
+            if (currentWrap && !currentWrap.contains(e.target)) {
+                currentWrap.classList.remove('is-open');
+                if (currentBtn) currentBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const currentWrap = document.getElementById('admin-profile-dropdown-wrap');
+                const currentBtn = document.getElementById('btn-admin-profile-dropdown');
+                if (currentWrap && currentWrap.classList.contains('is-open')) {
+                    currentWrap.classList.remove('is-open');
+                    if (currentBtn) {
+                        currentBtn.setAttribute('aria-expanded', 'false');
+                        currentBtn.focus();
+                    }
+                }
+            }
+        });
+    }
+}
+
+export function initAdminToasts() {
+    const container = document.getElementById('admin-toast-container');
+    if (!container) return;
+
+    const toasts = container.querySelectorAll('.admin-toast-item:not([data-toast-initialized])');
+    toasts.forEach(toast => {
+        toast.setAttribute('data-toast-initialized', 'true');
+
+        const closeBtn = toast.querySelector('.toast-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => dismissToast(toast));
+        }
+
+        setTimeout(() => {
+            dismissToast(toast);
+        }, 5000);
+    });
+}
+
+function dismissToast(toast) {
+    if (!toast || toast.dataset.dismissing === 'true') return;
+    toast.dataset.dismissing = 'true';
+    toast.classList.add('toast-dismissed');
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 420);
+}
+
 export function initAdminShell() {
+    initAdminProfileDropdown();
+    initAdminToasts();
+
     const modal = document.getElementById('admin-confirm-modal');
     if (!modal) return;
 
@@ -34,14 +106,30 @@ export function initAdminShell() {
         }
     });
 
+    let activeOnConfirm = null;
+
+    if (formEl) {
+        formEl.addEventListener('submit', (e) => {
+            if (typeof activeOnConfirm === 'function') {
+                e.preventDefault();
+                const callback = activeOnConfirm;
+                activeOnConfirm = null;
+                closeModal();
+                callback();
+            }
+        });
+    }
+
     window.openAdminConfirm = function({
         title = 'Are you sure?',
         message = 'This action cannot be undone. Are you sure you want to proceed?',
         actionUrl = '',
         method = 'DELETE',
         confirmText = 'Confirm Delete',
-        buttonClass = 'button-danger'
+        buttonClass = 'button-danger',
+        onConfirm = null
     }) {
+        activeOnConfirm = onConfirm;
         if (titleEl) titleEl.textContent = title;
         if (msgEl) msgEl.textContent = message;
         if (formEl) formEl.action = actionUrl;

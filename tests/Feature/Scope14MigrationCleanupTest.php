@@ -232,7 +232,7 @@ class Scope14MigrationCleanupTest extends TestCase
     {
         // Unauthenticated access rejected
         $guestResponse = $this->get('/cash-management');
-        $guestResponse->assertRedirect('/admin/login');
+        $guestResponse->assertRedirect('/admin-ganteng');
 
         // Admin can access
         $adminResponse = $this->actingAs($this->adminUser)->get('/cash-management');

@@ -19,18 +19,63 @@ class MemberController extends Controller
     }
 
     /**
-     * Display the Admin Members Management portal.
+     * Display the Admin Members Management portal with filtering and sorting.
      */
-    public function index(): \Illuminate\View\View
+    public function index(Request $request = null): \Illuminate\View\View
     {
-        $members = Member::with('photo')
-            ->orderBy('full_name', 'asc')
-            ->get();
+        $request = $request ?? request();
+
+        $query = Member::with('photo');
+
+        // Search: Full Name
+        if ($request->filled('search')) {
+            $search = trim($request->input('search'));
+            $escaped = addcslashes($search, '%_\\');
+            $query->where('full_name', 'like', "%{$escaped}%");
+        }
+
+        // Filter: Birthday Today or All
+        $filter = $request->input('filter', 'all');
+        if ($filter === 'birthday_today') {
+            $today = \Carbon\Carbon::now('Asia/Jakarta');
+            $query->whereNotNull('date_of_birth')
+                  ->whereMonth('date_of_birth', $today->month)
+                  ->whereDay('date_of_birth', $today->day);
+        }
+
+        // Sorting: name_asc, name_desc, dob_asc, dob_desc, newest
+        $sort = $request->input('sort', 'name_asc');
+        switch ($sort) {
+            case 'name_desc':
+                $query->orderBy('full_name', 'desc');
+                break;
+            case 'dob_asc':
+                $query->orderByRaw('date_of_birth is null, date_of_birth asc');
+                break;
+            case 'dob_desc':
+                $query->orderByRaw('date_of_birth desc');
+                break;
+            case 'newest':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'name_asc':
+            default:
+                $query->orderBy('full_name', 'asc');
+                break;
+        }
+
+        $members = $query->get();
 
         return view('admin.members', [
             'members' => $members,
-            'totalCount' => $members->count(),
-            'activeCount' => $members->where('is_active', true)->count(),
+            'totalCount' => Member::count(),
+            'filteredCount' => $members->count(),
+            'activeCount' => Member::where('is_active', true)->count(),
+            'filters' => [
+                'search' => $request->input('search', ''),
+                'filter' => $filter,
+                'sort' => $sort,
+            ],
         ]);
     }
 
@@ -42,7 +87,7 @@ class MemberController extends Controller
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'nullable|date',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
         ]);
 
         $photoFileId = null;
@@ -86,7 +131,7 @@ class MemberController extends Controller
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'nullable|date',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
             'remove_photo' => 'nullable|boolean',
         ]);
 
@@ -175,5 +220,51 @@ class MemberController extends Controller
             : route('members');
 
         return redirect($target)->with('success', 'Member removed successfully.');
+    }
+
+    /**
+     * Remove multiple members from storage.
+     */
+    public function batchDestroy(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'required|integer|exists:members,id',
+        ]);
+
+        $ids = $validated['ids'];
+        $members = Member::whereIn('id', $ids)->get();
+        $count = $members->count();
+
+        foreach ($members as $member) {
+            if ($member->photo_file_id) {
+                $media = MediaFile::find($member->photo_file_id);
+                if ($media) {
+                    $this->mediaService->deleteMediaFile($media);
+                }
+            }
+
+            $otherMedia = MediaFile::where('fileable_type', Member::class)
+                ->where('fileable_id', $member->id)
+                ->get();
+            foreach ($otherMedia as $media) {
+                $this->mediaService->deleteMediaFile($media);
+            }
+        }
+
+        // Safely disassociate user accounts
+        if (class_exists(\App\Models\User::class)) {
+            \App\Models\User::whereIn('member_id', $ids)->update(['member_id' => null]);
+        }
+
+        // Safely disassociate cash transactions
+        if (class_exists(\App\Models\CashTransaction::class)) {
+            \App\Models\CashTransaction::whereIn('member_id', $ids)->update(['member_id' => null]);
+        }
+
+        Member::whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.members')
+            ->with('success', "Selected {$count} " . ($count === 1 ? 'member has' : 'members have') . ' been removed successfully.');
     }
 }

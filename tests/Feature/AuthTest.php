@@ -36,26 +36,34 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test admin can access login page
+     * Test admin can access login page at /admin-ganteng and /admin/login is removed (404)
      */
     public function test_admin_can_access_login_page(): void
     {
-        $response = $this->get('/admin/login');
+        $response = $this->get('/admin-ganteng');
 
         $response->assertStatus(200);
         $response->assertViewIs('admin.login');
-        $response->assertSee('Sign In');
-        $response->assertSee('Email Address');
+        $response->assertSee('Admin Sign In');
+        $response->assertSee('Email / Username');
         $response->assertSee('Password');
+
+        // Legacy /admin/login route must return 404
+        $legacy = $this->get('/admin/login');
+        $legacy->assertStatus(404);
+
+        // /admin root route must return 404 to avoid leaking hidden /admin-ganteng URL
+        $adminRoot = $this->get('/admin');
+        $adminRoot->assertStatus(404);
     }
 
     /**
-     * Test valid admin credentials can authenticate
+     * Test valid admin credentials can authenticate through /admin-ganteng
      */
     public function test_valid_admin_credentials_can_authenticate(): void
     {
-        $response = $this->post('/admin/login', [
-            'email' => 'admin_byc@gmail.com',
+        $response = $this->post('/admin-ganteng', [
+            'login' => 'admin_byc@gmail.com',
             'password' => 'password123',
         ]);
 
@@ -65,12 +73,12 @@ class AuthTest extends TestCase
     }
 
     /**
-     * Test second seeded admin account can authenticate
+     * Test second seeded admin account can authenticate through /admin-ganteng
      */
     public function test_second_seeded_admin_can_authenticate(): void
     {
-        $response = $this->post('/admin/login', [
-            'email' => 'jojo_ganteng@gmail.com',
+        $response = $this->post('/admin-ganteng', [
+            'login' => 'jojo_ganteng@gmail.com',
             'password' => 'jojo123',
         ]);
 
@@ -84,13 +92,13 @@ class AuthTest extends TestCase
      */
     public function test_invalid_credentials_are_rejected(): void
     {
-        $response = $this->from('/admin/login')->post('/admin/login', [
-            'email' => 'admin_byc@gmail.com',
+        $response = $this->from('/admin-ganteng')->post('/admin-ganteng', [
+            'login' => 'admin_byc@gmail.com',
             'password' => 'wrongpassword',
         ]);
 
-        $response->assertRedirect('/admin/login');
-        $response->assertSessionHasErrors('email');
+        $response->assertRedirect('/admin-ganteng');
+        $response->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
@@ -99,13 +107,13 @@ class AuthTest extends TestCase
      */
     public function test_non_existent_user_is_rejected(): void
     {
-        $response = $this->from('/admin/login')->post('/admin/login', [
-            'email' => 'unknown@example.com',
+        $response = $this->from('/admin-ganteng')->post('/admin-ganteng', [
+            'login' => 'unknown@example.com',
             'password' => 'password123',
         ]);
 
-        $response->assertRedirect('/admin/login');
-        $response->assertSessionHasErrors('email');
+        $response->assertRedirect('/admin-ganteng');
+        $response->assertSessionHasErrors('login');
         $this->assertGuest();
     }
 
@@ -132,7 +140,7 @@ class AuthTest extends TestCase
     {
         $response = $this->get('/admin/dashboard');
 
-        $response->assertRedirect('/admin/login');
+        $response->assertRedirect('/admin-ganteng');
         $this->assertGuest();
     }
 

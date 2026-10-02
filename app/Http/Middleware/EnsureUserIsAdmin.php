@@ -23,7 +23,7 @@ class EnsureUserIsAdmin
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
 
-            return redirect()->route('admin.login')->with('error', 'Please sign in to access the administrator portal.');
+            return redirect()->route('admin.ganteng')->with('error', 'Please sign in to access the administrator portal.');
         }
 
         /** @var \App\Models\User $user */

@@ -3,6 +3,303 @@
    Owned styles for Admin Shell, Management Controls & God Mode Overlays
    ========================================================================== */
 
+/* Admin Shell Topbar & Header Navigation */
+.admin-topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+  padding: 12px max(3vw, 24px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  box-shadow: 0 2px 8px rgba(32, 48, 41, 0.04);
+}
+
+body.modal-open .admin-topbar,
+body:has(.modal-backdrop[style*="display: grid"]) .admin-topbar,
+body:has(.modal-backdrop[style*="display: block"]) .admin-topbar,
+body:has(.modal-backdrop[style*="display: flex"]) .admin-topbar {
+  display: none !important;
+}
+
+.admin-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.admin-brand-wrap .brand-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.admin-portal-badge {
+  background: rgba(40, 78, 59, 0.08);
+  color: var(--forest);
+  font: 800 10.5px "Manrope", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid rgba(40, 78, 59, 0.18);
+  white-space: nowrap;
+}
+
+.admin-quick-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+}
+
+.admin-quick-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-nav-item {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 7px 12px;
+  border-radius: 99px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.admin-nav-item:hover {
+  color: var(--forest);
+  background: rgba(40, 78, 59, 0.07);
+}
+
+.admin-nav-item.active {
+  color: var(--forest);
+  background: rgba(40, 78, 59, 0.12);
+  font-weight: 800;
+}
+
+/* Admin User Navigation & Profile Dropdown */
+.admin-user-nav {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.admin-profile-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.admin-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--forest-dark);
+  background: var(--cream);
+  border: 1.5px solid var(--line);
+  padding: 5px 12px 5px 6px;
+  border-radius: 99px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  user-select: none;
+}
+
+.admin-profile-btn:hover,
+.admin-profile-btn[aria-expanded="true"] {
+  background: var(--paper);
+  border-color: var(--forest);
+  box-shadow: 0 4px 14px rgba(40, 78, 59, 0.12);
+}
+
+.admin-profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  box-shadow: 0 1px 3px rgba(40, 78, 59, 0.3);
+}
+
+.admin-profile-username {
+  font-weight: 700;
+  color: var(--forest-dark);
+  line-height: 1;
+}
+
+.admin-profile-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--muted);
+  transition: transform 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.admin-profile-btn[aria-expanded="true"] .admin-profile-chevron {
+  transform: rotate(180deg);
+  color: var(--forest);
+}
+
+/* Admin Profile Dropdown Menu */
+.admin-profile-dropdown-menu {
+  display: none !important;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 240px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 16px 36px rgba(32, 48, 41, 0.16);
+  padding: 14px;
+  z-index: 1000;
+}
+
+.admin-profile-dropdown-wrap.is-open .admin-profile-dropdown-menu {
+  display: block !important;
+  animation: adminDropIn 0.18s ease-out;
+}
+
+@keyframes adminDropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-profile-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+
+.admin-profile-menu-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(40, 78, 59, 0.2);
+}
+
+.admin-profile-menu-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-profile-menu-username {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.admin-profile-menu-email {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  margin-top: 1px;
+}
+
+.admin-profile-menu-role {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(40, 78, 59, 0.08);
+  color: var(--forest);
+}
+
+.admin-profile-menu-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 0 0 10px;
+}
+
+.admin-profile-menu-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-profile-logout-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #fdf0ee;
+  border: 1px solid rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.admin-profile-logout-btn:hover {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.22);
+}
+
+.admin-profile-logout-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.admin-profile-logout-btn:hover svg {
+  transform: translateX(2px);
+}
+
+
 .admin-container {
   max-width: 1320px;
   margin: 0 auto;
@@ -214,3 +511,269 @@
   gap: 8px;
   margin-top: 14px;
 }
+
+/* Homepage Management Preview Spacing — Clean, natural spacing without 100vh viewport gap */
+.admin-container .home {
+  min-height: auto;
+  margin-bottom: 32px;
+}
+
+.admin-container .home-hero {
+  min-height: auto;
+  padding: 0 0 32px;
+  gap: clamp(24px, 4vw, 48px);
+}
+
+/* ==========================================================================
+   Admin Floating Toast Notifications (Top-Right Fixed, 5s Auto Dismiss)
+   ========================================================================== */
+.admin-toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: 420px;
+  width: calc(100% - 48px);
+}
+
+.admin-toast-item {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 13.5px;
+  box-shadow: 0 12px 32px rgba(18, 38, 26, 0.14), 0 4px 10px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  animation: adminToastSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+}
+
+@keyframes adminToastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(45px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.admin-toast-item.toast-success {
+  background: #f4faea;
+  border: 1.5px solid #84cc16;
+  color: #1e3a1e;
+}
+
+.admin-toast-item.toast-success .toast-icon {
+  background: #2d5a27;
+  color: #ffffff;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.admin-toast-item.toast-error {
+  background: #fdf2f2;
+  border: 1.5px solid #f87171;
+  color: #7f1d1d;
+}
+
+.admin-toast-item.toast-error .toast-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.admin-toast-item .toast-content {
+  flex: 1;
+  line-height: 1.45;
+}
+
+.admin-toast-item .toast-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  color: currentColor;
+  opacity: 0.55;
+  padding: 0;
+  margin: -2px -2px 0 4px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.admin-toast-item .toast-close:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.admin-toast-item.toast-dismissed {
+  opacity: 0 !important;
+  transform: translateX(40px) scale(0.95) !important;
+}
+
+/* ==========================================================================
+   1:1 Photo Upload & Crop Studio
+   ========================================================================== */
+.crop-dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 16px;
+  padding: 32px 20px;
+  text-align: center;
+  background: var(--paper);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crop-dropzone:hover,
+.crop-dropzone.dragover {
+  border-color: var(--forest);
+  background: rgba(45, 90, 39, 0.04);
+}
+
+.crop-dropzone-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  color: var(--forest);
+}
+
+.crop-studio-wrap {
+  margin-top: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+}
+
+.crop-viewport-container {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  max-width: 100%;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  border: 2px solid var(--forest);
+  background: #141f17;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.crop-viewport-container:active {
+  cursor: grabbing;
+}
+
+.crop-viewport-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  will-change: transform, left, top, width, height;
+}
+
+.crop-grid-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  opacity: 0.25;
+  transition: opacity 0.2s ease;
+}
+
+.crop-viewport-container:active .crop-grid-overlay {
+  opacity: 0.6;
+}
+
+.crop-grid-cell {
+  border: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.crop-badge-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(20, 31, 23, 0.82);
+  backdrop-filter: blur(6px);
+  color: #eaf3dc;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  letter-spacing: 0.04em;
+}
+
+.crop-controls-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.crop-preset-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.crop-preset-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.crop-preset-btn:hover {
+  border-color: var(--forest);
+  background: var(--forest);
+  color: var(--white);
+}
+
+.crop-zoom-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--white);
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.crop-zoom-bar input[type="range"] {
+  flex: 1;
+  accent-color: var(--forest);
+  cursor: pointer;
+}
+
+
