@@ -157,7 +157,7 @@ class DatabasePersistenceTest extends TestCase
      */
     public function test_cash_transaction_proof_image_architecture(): void
     {
-        $admin = User::where('email', 'admin_byc@gmail.com')->first();
+        $admin = User::where('role', 'admin')->first();
 
         $proof = MediaFile::create([
             'disk' => 'local',

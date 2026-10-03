@@ -43,17 +43,6 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Retain legacy admin_byc@gmail.com for existing test coverage
-        User::updateOrCreate(
-            ['email' => 'admin_byc@gmail.com'],
-            [
-                'name' => 'Admin BYC',
-                'username' => 'admin_byc',
-                'password' => Hash::make('password123'),
-                'role' => 'admin',
-            ]
-        );
-
         // 2. Games
         $game1 = Game::updateOrCreate(
             ['code' => 'game1'],

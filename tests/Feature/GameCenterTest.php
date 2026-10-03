@@ -93,15 +93,19 @@ class GameCenterTest extends TestCase
     }
 
     /**
-     * Test Game Center contains Back to Home navigation per global rules.
+     * Test Game Center does not contain custom back button per Revision 2.
      */
-    public function test_game_center_has_back_nav_to_home(): void
+    public function test_game_center_has_no_custom_back_button(): void
     {
         $response = $this->get('/game-center');
 
         $response->assertStatus(200);
-        $response->assertSee('Back to Home');
-        $response->assertSee(route('home'));
+        $response->assertDontSee('Back to Home');
+        $response->assertDontSee('Choose a Game');
+        $response->assertDontSee('Reset Game');
+        $response->assertDontSee('Top Survey Answers');
+        $response->assertDontSee('Card Reveal');
+        $response->assertDontSee('3-Strike Steal');
     }
 
     /**

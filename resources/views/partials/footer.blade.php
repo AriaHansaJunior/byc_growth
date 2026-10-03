@@ -21,13 +21,13 @@
                     <p class="footer-contact-title">Fellowship & Youth Coordinator</p>
                     <ul class="footer-contact-list">
                         <li>
-                            <a href="mailto:fellowship@bycgrowth.org" class="footer-link">
-                                fellowship@bycgrowth.org
+                            <a href="mailto:bycgrowthbethany1@gmail.com" class="footer-link">
+                                bycgrowthbethany1@gmail.com
                             </a>
                         </li>
                         <li>
-                            <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" class="footer-link">
-                                +62 812-3456-7890 (WhatsApp)
+                            <a href="https://wa.me/6283857509420" target="_blank" rel="noopener noreferrer" class="footer-link">
+                                +62 838-5750-9420 (WhatsApp)
                             </a>
                         </li>
                     </ul>

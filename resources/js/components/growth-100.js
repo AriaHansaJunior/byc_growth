@@ -132,7 +132,6 @@ export function initGrowth100() {
                     <span class="answer-text-label">${isOpen ? ans.text : 'Click to reveal'}</span>
                     <em>${isOpen ? ans.score : '?'}</em>
                 `;
-                btn.addEventListener('click', () => toggleAnswer(idx));
                 answersGridContainer.appendChild(btn);
             });
         }
@@ -287,6 +286,22 @@ export function initGrowth100() {
     if (btnNextRound) {
         btnNextRound.addEventListener('click', () => goToRound(currentIndex + 1));
     }
+
+    // Answer tile click delegation (immediately active for server-rendered & dynamic tiles)
+    if (answersGridContainer) {
+        answersGridContainer.addEventListener('click', (e) => {
+            const tile = e.target.closest('.answer-tile');
+            if (tile && tile.dataset.answerIndex !== undefined) {
+                const idx = parseInt(tile.dataset.answerIndex, 10);
+                if (!isNaN(idx)) {
+                    toggleAnswer(idx);
+                }
+            }
+        });
+    }
+
+    // Synchronize UI on initial page load
+    updateRoundUI();
 
     // ==========================================
     // CRUD Editor Modal Logic with Batch Save

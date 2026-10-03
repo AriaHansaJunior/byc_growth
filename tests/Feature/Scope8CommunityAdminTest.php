@@ -55,8 +55,8 @@ class Scope8CommunityAdminTest extends TestCase
         $response = $this->get('/about');
         $response->assertStatus(200);
         $response->assertSee('About BYC Growth');
-        $response->assertSee('Connect With Us');
-        $response->assertSee('Back to Home');
+        $response->assertSee('Part of Successful Bethany Families');
+        $response->assertDontSee('Back to Home');
     }
 
     /**
@@ -94,7 +94,7 @@ class Scope8CommunityAdminTest extends TestCase
         $response = $this->get('/activity');
         $response->assertStatus(200);
         $response->assertSee('Activities');
-        $response->assertSee('Back to Home');
+        $response->assertDontSee('Back to Home');
     }
 
     /**

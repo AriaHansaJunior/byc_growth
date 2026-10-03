@@ -4,13 +4,6 @@
 
 @section('content')
 <div class="game-center-hub">
-    {{-- Back Navigation --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-    </nav>
-
     {{-- Game Center Hero --}}
     <section class="game-center-hero">
         <div class="game-center-hero-content">
@@ -20,14 +13,8 @@
                 The central arena for BYC Growth fellowship games. Choose a challenge below to launch an active session, test team synergy, and celebrate every growth milestone together.
             </p>
             <div class="game-center-hero-actions">
-                <a href="#game-selection" class="button button-primary">
-                    Choose a Game <x-icon name="arrow" />
-                </a>
                 <button type="button" class="button button-secondary" id="btn-how-to-play">
                     <x-icon name="book" /> Rules & How to Play
-                </button>
-                <button type="button" class="button button-ghost" id="btn-reset-game" style="color: var(--muted);" title="Reset scores and gameplay rounds">
-                    Reset Game
                 </button>
             </div>
         </div>
@@ -68,20 +55,12 @@
                     <div class="gc-card-body">
                         <h3 class="gc-card-title">{{ $game['title'] }}</h3>
                         <p class="gc-card-desc">{{ $game['description'] }}</p>
-
-                        @if(!empty($game['features']))
-                            <ul class="gc-features-list" aria-label="Key features">
-                                @foreach($game['features'] as $feature)
-                                    <li><x-icon name="check" /> {{ $feature }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
                     </div>
 
                     <div class="gc-card-footer">
                         @if($isAvailable)
                             <a href="{{ $playUrl }}" class="button button-primary gc-play-btn" id="btn-play-{{ $game['id'] }}">
-                                Play Now <x-icon name="arrow" />
+                                Play Now
                             </a>
                         @else
                             <button type="button" class="button button-ghost gc-play-btn" disabled>
@@ -101,29 +80,68 @@
             <h2 style="margin: 0; font: 800 28px 'Manrope', sans-serif;">Team Scoreboard</h2>
             <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">Combined cumulative scores across all games.</p>
         </div>
-        <x-score-pair :scores="['red' => $finalScores['final_red'] ?? 0, 'blue' => $finalScores['final_blue'] ?? 0]" />
-        <a href="{{ route('game.final') }}" class="button button-ghost">
-            View Final Results <x-icon name="arrow" />
+
+        @php
+            $activeBoardTeams = $finalScores['teams'] ?? $teams ?? [];
+            $teamCount = count($activeBoardTeams);
+        @endphp
+
+        <div class="gc-scoreboard-teams">
+            @if($teamCount <= 3)
+                <div class="gc-scoreboard-row">
+                    @foreach($activeBoardTeams as $t)
+                        @php
+                            $tScore = $t['total_score'] ?? $t['score'] ?? 0;
+                            $tColor = $t['color'] ?? '#284e3b';
+                            $tTheme = in_array($t['code'] ?? '', ['red', 'blue', 'forest', 'gold', 'purple', 'teal']) ? $t['code'] : 'forest';
+                        @endphp
+                        <div class="team-score team-{{ $tTheme }}" style="--team-accent: {{ $tColor }};">
+                            <span class="team-name">{{ $t['name'] }}</span>
+                            <strong class="team-score-num">{{ $tScore }}</strong>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                @php
+                    $half = (int) ceil($teamCount / 2);
+                    $row1 = array_slice($activeBoardTeams, 0, $half);
+                    $row2 = array_slice($activeBoardTeams, $half);
+                @endphp
+                <div class="gc-scoreboard-row">
+                    @foreach($row1 as $t)
+                        @php
+                            $tScore = $t['total_score'] ?? $t['score'] ?? 0;
+                            $tColor = $t['color'] ?? '#284e3b';
+                            $tTheme = in_array($t['code'] ?? '', ['red', 'blue', 'forest', 'gold', 'purple', 'teal']) ? $t['code'] : 'forest';
+                        @endphp
+                        <div class="team-score team-{{ $tTheme }}" style="--team-accent: {{ $tColor }};">
+                            <span class="team-name">{{ $t['name'] }}</span>
+                            <strong class="team-score-num">{{ $tScore }}</strong>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="gc-scoreboard-row">
+                    @foreach($row2 as $t)
+                        @php
+                            $tScore = $t['total_score'] ?? $t['score'] ?? 0;
+                            $tColor = $t['color'] ?? '#284e3b';
+                            $tTheme = in_array($t['code'] ?? '', ['red', 'blue', 'forest', 'gold', 'purple', 'teal']) ? $t['code'] : 'forest';
+                        @endphp
+                        <div class="team-score team-{{ $tTheme }}" style="--team-accent: {{ $tColor }};">
+                            <span class="team-name">{{ $t['name'] }}</span>
+                            <strong class="team-score-num">{{ $tScore }}</strong>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <a href="{{ route('game.final') }}" class="button button-ghost" style="white-space: nowrap;">
+            View Final Results
         </a>
     </section>
 
     {{-- How to Play Modal --}}
     @include('partials.how-to-play')
-
-    {{-- Reset Confirmation Modal --}}
-    <div class="modal-backdrop" id="modal-reset-game" style="display: none;">
-        <section aria-label="Confirm Game Reset" class="info-modal" style="max-width: 480px; text-align: center; padding: 32px 28px;">
-            <div style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
-            <h2 style="font: 800 24px 'Manrope', sans-serif; margin-bottom: 10px;">Reset Gameplay?</h2>
-            <p style="color: var(--muted); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
-                This action will reset scores for Game 1 and Game 2, active rounds, reveal status, and strikes back to zero.<br>
-                <strong>Questions and images will not be deleted.</strong>
-            </p>
-            <div style="display: flex; gap: 12px; justify-content: center;">
-                <button type="button" class="button button-secondary" id="btn-cancel-reset">Cancel</button>
-                <button type="button" class="button button-danger" id="btn-confirm-reset">Yes, Reset Game</button>
-            </div>
-        </section>
-    </div>
 </div>
 @endsection

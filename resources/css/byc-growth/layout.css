@@ -356,7 +356,7 @@
   color: var(--muted);
   font-size: 17px;
   line-height: 1.6;
-  max-width: 680px;
+  max-width: 1080px;
   margin: 0;
 }
 
@@ -395,8 +395,145 @@
   color: var(--muted);
   font-size: 16px;
   line-height: 1.65;
-  max-width: 760px;
+  max-width: 1080px;
   margin: 0 0 28px;
+}
+
+/* About Page Primary Information Showcase */
+.about-hero-showcase {
+  display: grid;
+  grid-template-columns: 1.65fr 1fr;
+  gap: 36px;
+  align-items: stretch;
+  background: var(--cream);
+  border: 1px solid #dcd7c8;
+  border-radius: 24px;
+  padding: 38px 42px;
+  margin-bottom: 36px;
+  box-shadow: 0 10px 35px rgba(32, 48, 41, 0.05);
+}
+
+.about-focal-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.about-kicker {
+  font: 800 12px "Manrope", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--forest);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.about-location-city {
+  font: 800 32px/1.2 "Manrope", sans-serif;
+  letter-spacing: -.025em;
+  color: var(--forest-dark);
+  margin: 0 0 8px;
+}
+
+.about-location-details {
+  font-size: 16px;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* Weekly Gathering Feature with Strong Visual Prominence */
+.about-gathering-unit {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--forest);
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 18px rgba(32, 48, 41, 0.04);
+}
+
+.about-gathering-time {
+  font: 800 24px/1.25 "Manrope", sans-serif;
+  letter-spacing: -.02em;
+  color: var(--forest-dark);
+  white-space: nowrap;
+}
+
+/* Supporting Contact Column */
+.about-contact-column {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--line);
+  padding-left: 36px;
+  justify-content: space-between;
+}
+
+.about-contact-role {
+  font: 800 20px "Manrope", sans-serif;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin: 0 0 18px;
+  white-space: nowrap;
+}
+
+.about-contact-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-contact-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 13px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(32, 48, 41, 0.03);
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.about-contact-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--forest);
+  box-shadow: 0 6px 18px rgba(40, 78, 59, 0.12);
+}
+
+.about-channel-type {
+  font: 700 11px "Manrope", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+.about-channel-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--forest);
+  transition: color .2s ease;
+}
+
+.about-contact-card:hover .about-channel-value {
+  color: var(--forest-dark);
+  text-decoration: underline;
+}
+
+@media (max-width: 960px) {
+  .about-hero-showcase {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 28px 24px;
+  }
+  .about-contact-column {
+    border-left: none;
+    border-top: 1px solid var(--line);
+    padding-left: 0;
+    padding-top: 24px;
+  }
 }
 
 .feature-grid-3 {
@@ -453,8 +590,8 @@
 
 .footer-top {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 60px;
+  grid-template-columns: minmax(380px, 520px) 1fr;
+  gap: 52px;
   align-items: start;
   padding-bottom: 60px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
@@ -464,7 +601,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  padding: 36px;
+  padding: 34px 38px;
 }
 
 .footer-eyebrow {
@@ -488,8 +625,8 @@
 
 .footer-columns {
   display: grid;
-  grid-template-columns: 1fr 1.1fr 0.9fr;
-  gap: 32px;
+  grid-template-columns: minmax(260px, 1.2fr) minmax(290px, 1.35fr) minmax(130px, 0.75fr);
+  gap: 40px;
 }
 
 .footer-col-heading {
@@ -506,6 +643,7 @@
   font-size: 14px;
   color: #e2e8e5;
   margin: 0 0 10px;
+  white-space: nowrap;
 }
 
 .footer-contact-list,
@@ -527,6 +665,7 @@
 
 .footer-location-text strong {
   color: #ffffff;
+  white-space: nowrap;
 }
 
 .footer-link {

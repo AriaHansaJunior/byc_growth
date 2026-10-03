@@ -4,11 +4,7 @@
 
 @section('content')
 <div class="page-shell">
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-    </nav>
+
 
     <div class="placeholder-card" style="text-align: center; padding: 64px 24px; max-width: 600px; margin: 40px auto;">
         <span class="placeholder-badge" style="background: #fdf0ee; color: var(--red); border: 1px solid var(--red);">

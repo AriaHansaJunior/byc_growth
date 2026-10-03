@@ -83,14 +83,14 @@
             </div>
 
             <button type="submit" class="button button-primary" style="width: 100%;">
-                Sign In <x-icon name="arrow" />
+                Sign In 
             </button>
         </form>
 
         {{-- Back Navigation --}}
         <div class="auth-footer">
             <a href="{{ route('home') }}" class="back-link-subtle">
-                <x-icon name="arrow-left" /> Return to Website
+             Return to Website
             </a>
         </div>
     </div>

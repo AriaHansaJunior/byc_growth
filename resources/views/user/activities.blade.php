@@ -4,18 +4,13 @@
 
 @section('content')
 <div class="page-shell">
-    {{-- Back Navigation & Admin Action --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-
-        @if(auth()->check() && auth()->user()->isAdmin())
-            <button type="button" class="button button-primary button-sm" id="btn-open-add-activity" style="margin-left: auto;">
+    @if(auth()->check() && auth()->user()->isAdmin())
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            <button type="button" class="button button-primary button-sm" id="btn-open-add-activity">
                 <x-icon name="sparkles" /> Add New Activity
             </button>
-        @endif
-    </nav>
+        </div>
+    @endif
 
     {{-- Page Header --}}
     <header class="page-header">

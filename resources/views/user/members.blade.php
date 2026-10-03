@@ -4,22 +4,19 @@
 
 @section('content')
 <div class="page-shell">
-    {{-- Back Navigation & Admin Action --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-
-        @if(auth()->check() && auth()->user()->isAdmin())
-            <button type="button" class="button button-primary button-sm" id="btn-open-add-member" style="margin-left: auto;">
-                <x-icon name="users" /> Add New Member
-            </button>
-        @elseif(auth()->check() && auth()->user()->member && auth()->user()->member->isBirthdayToday())
-            <a href="{{ route('birthday.wishes') }}" class="button button-primary button-sm" style="margin-left: auto;">
-                🎁 View My Birthday Wishes
-            </a>
-        @endif
-    </nav>
+    @if(auth()->check() && (auth()->user()->isAdmin() || (auth()->user()->member && auth()->user()->member->isBirthdayToday())))
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            @if(auth()->user()->isAdmin())
+                <button type="button" class="button button-primary button-sm" id="btn-open-add-member">
+                    <x-icon name="users" /> Add New Member
+                </button>
+            @elseif(auth()->user()->member && auth()->user()->member->isBirthdayToday())
+                <a href="{{ route('birthday.wishes') }}" class="button button-primary button-sm">
+                    🎁 View My Birthday Wishes
+                </a>
+            @endif
+        </div>
+    @endif
 
     {{-- Page Header --}}
     <header class="page-header">

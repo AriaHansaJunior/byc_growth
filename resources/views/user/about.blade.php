@@ -4,13 +4,6 @@
 
 @section('content')
 <div class="page-shell">
-    {{-- Back Navigation --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-    </nav>
-
     {{-- Page Header --}}
     <header class="page-header">
         <span class="eyebrow">Who We Are & Connect</span>
@@ -20,11 +13,47 @@
         </p>
     </header>
 
-    {{-- Main About Section --}}
-    <div class="placeholder-card" style="margin-bottom: 32px;">
-        <span class="placeholder-badge">
-            <x-icon name="sparkles" /> Our Identity & Heritage
-        </span>
+    {{-- Primary Information Showcase: Location & Gathering Priority with Supporting Contact --}}
+    <section class="about-hero-showcase" aria-label="Location, Gathering, and Contact Information">
+        {{-- Visual Focal Point: Location & Weekly Gathering --}}
+        <div class="about-focal-column">
+            {{-- Location Block --}}
+            <div class="about-location-unit">
+                <span class="about-kicker">Location</span>
+                <h2 class="about-location-city">Gunung Anyar, Surabaya</h2>
+                <p class="about-location-details">
+                    Part of Successful Bethany Families &bull; East Java, Indonesia
+                </p>
+            </div>
+
+            {{-- Weekly Gathering Feature (Standout emphasis) --}}
+            <div class="about-gathering-unit">
+                <span class="about-kicker">Weekly Gathering</span>
+                <div class="about-gathering-time">Every Monday &bull; 19:00 WIB</div>
+            </div>
+        </div>
+
+        {{-- Supporting Column: Contact Information --}}
+        <div class="about-contact-column">
+            <span class="about-kicker">Contact Person</span>
+            <h3 class="about-contact-role">Fellowship & Youth Coordinator</h3>
+
+            <div class="about-contact-channels">
+                <a href="https://wa.me/6283857509420" target="_blank" rel="noopener noreferrer" class="about-contact-card">
+                    <span class="about-channel-type">WhatsApp</span>
+                    <span class="about-channel-value">+62 838-5750-9420</span>
+                </a>
+
+                <a href="mailto:bycgrowthbethany1@gmail.com" class="about-contact-card">
+                    <span class="about-channel-type">Email</span>
+                    <span class="about-channel-value">bycgrowthbethany1@gmail.com</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    {{-- Secondary Section: Our Identity & Heritage --}}
+    <div class="placeholder-card">
         <h2>Rooted in Christ, Growing in Fellowship</h2>
         <p>
             As part of <strong>Successful Bethany Families</strong> located in <strong>Gunung Anyar, Surabaya</strong>, BYC Growth exists to equip the next generation with spiritual conviction, leadership skills, and genuine brotherly love. We believe that true growth happens when we step forward by faith and encourage one another every day.
@@ -53,59 +82,6 @@
                 </div>
                 <h3>Impactful Leadership</h3>
                 <p>Nurturing young leaders to serve their church, families, campuses, and workplaces with integrity.</p>
-            </div>
-        </div>
-    </div>
-
-    {{-- Integrated Contact & Location Section --}}
-    <div class="placeholder-card">
-        <span class="placeholder-badge">
-            <x-icon name="phone" /> Connect With Us
-        </span>
-        <h2>Get in Touch with BYC Growth</h2>
-        <p>
-            Our leadership team and fellowship coordinators are ready to welcome you. Drop us an email, message us via WhatsApp, or join us in person at our weekend service.
-        </p>
-
-        <div class="feature-grid-3">
-            <div class="feature-box">
-                <div class="feature-box-icon">
-                    <x-icon name="phone" />
-                </div>
-                <h3>Contact Person</h3>
-                <p>
-                    <strong>Youth Coordinator:</strong><br>
-                    <a href="https://wa.me/6281234567890" target="_blank" rel="noopener noreferrer" style="color: var(--forest); font-weight: 700; text-decoration: none;">
-                        +62 812-3456-7890
-                    </a><br>
-                    <a href="mailto:fellowship@bycgrowth.org" style="color: var(--muted); text-decoration: none; font-size: 13px;">
-                        fellowship@bycgrowth.org
-                    </a>
-                </p>
-            </div>
-
-            <div class="feature-box">
-                <div class="feature-box-icon">
-                    <x-icon name="home" />
-                </div>
-                <h3>Our Church Location</h3>
-                <p>
-                    <strong>Part of Successful Bethany Families</strong><br>
-                    Gunung Anyar, Surabaya<br>
-                    East Java, Indonesia
-                </p>
-            </div>
-
-            <div class="feature-box">
-                <div class="feature-box-icon">
-                    <x-icon name="sparkles" />
-                </div>
-                <h3>Weekly Gatherings</h3>
-                <p>
-                    <strong>Youth Service & Fellowship</strong><br>
-                    Every Saturday &bull; 17:00 WIB<br>
-                    All young people are welcome!
-                </p>
             </div>
         </div>
     </div>

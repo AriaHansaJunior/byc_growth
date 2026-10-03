@@ -116,7 +116,7 @@ class Scope14MigrationCleanupTest extends TestCase
         $aboutResponse = $this->get('/about');
         $aboutResponse->assertStatus(200);
         $aboutResponse->assertSee('About BYC Growth');
-        $aboutResponse->assertSee('Get in Touch with BYC Growth');
+        $aboutResponse->assertSee('bycgrowthbethany1@gmail.com');
     }
 
     /**

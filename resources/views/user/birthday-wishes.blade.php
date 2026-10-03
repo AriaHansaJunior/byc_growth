@@ -4,15 +4,7 @@
 
 @section('content')
 <div class="page-shell">
-    {{-- Back Navigation --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-        <a href="{{ route('members') }}" class="back-nav-btn" style="margin-left: 12px;">
-            <x-icon name="users" /> Members Directory
-        </a>
-    </nav>
+
 
     {{-- Page Header --}}
     <header class="page-header">

@@ -68,9 +68,9 @@ class Scope15FinalVerificationTest extends TestCase
             $response->assertStatus(200);
             $response->assertSee($expectedTitle, false);
 
-            // Subpages must feature back navigation
+            // Subpages must not feature custom Back buttons per Revision 2
             if ($uri !== '/') {
-                $response->assertSee('Back to Home');
+                $response->assertDontSee('Back to Home');
             }
         }
 
@@ -245,7 +245,7 @@ class Scope15FinalVerificationTest extends TestCase
 
             $content = File::get($fullPath);
             $this->assertStringContainsString($expectedString, $content);
-            $this->assertStringContainsString('Back to Home', $content);
+            $this->assertStringNotContainsString('Back to Home', $content);
         }
     }
 }

@@ -4,18 +4,11 @@
 
 @section('content')
 <div class="page-shell">
-    {{-- Back Navigation & Role Badge --}}
-    <nav class="back-nav-bar" aria-label="Breadcrumb">
-        <a href="{{ route('home') }}" class="back-nav-btn">
-            <x-icon name="arrow-left" /> Back to Home
-        </a>
-
-        <div style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 13px; font-weight: 700; color: var(--forest); background: #eaf3dc; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--lime);">
-                Admin Financial Stewardship
-            </span>
-        </div>
-    </nav>
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+        <span style="font-size: 13px; font-weight: 700; color: var(--forest); background: #eaf3dc; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--lime);">
+            Admin Financial Stewardship
+        </span>
+    </div>
 
     {{-- Page Header --}}
     <header class="page-header">

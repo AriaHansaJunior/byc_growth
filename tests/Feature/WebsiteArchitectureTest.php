@@ -48,54 +48,54 @@ class WebsiteArchitectureTest extends TestCase
     }
 
     /**
-     * Test About Us page renders with back navigation and combined content
+     * Test About Us page renders properly without custom back button and with real contact info
      */
     public function test_about_page_renders_with_back_nav(): void
     {
         $response = $this->get('/about');
         $response->assertStatus(200);
         $response->assertSee('About BYC Growth');
-        $response->assertSee('Back to Home');
-        $response->assertSee('Successful Bethany Families');
-        $response->assertSee('Connect With Us');
+        $response->assertDontSee('Back to Home');
+        $response->assertSee('Part of Successful Bethany Families');
         $response->assertSee('Gunung Anyar, Surabaya');
-        $response->assertSee('+62 812-3456-7890');
+        $response->assertSee('+62 838-5750-9420');
+        $response->assertSee('bycgrowthbethany1@gmail.com');
     }
 
     /**
-     * Test Public Activity page renders with back navigation
+     * Test Public Activity page renders without custom back button
      */
     public function test_activity_page_renders_with_back_nav(): void
     {
         $response = $this->get('/activity');
         $response->assertStatus(200);
         $response->assertSee('Activities');
-        $response->assertSee('Back to Home');
+        $response->assertDontSee('Back to Home');
     }
 
 
     /**
-     * Test Members Directory page renders with back navigation
+     * Test Members Directory page renders without custom back button
      */
     public function test_members_page_renders_with_back_nav(): void
     {
         $response = $this->get('/members');
         $response->assertStatus(200);
         $response->assertSee('Members Directory');
-        $response->assertSee('Back to Home');
+        $response->assertDontSee('Back to Home');
     }
 
     /**
-     * Test Game Center page renders with back navigation and game options
+     * Test Game Center page renders without custom back button and with simplified options
      */
     public function test_game_center_page_renders_with_back_nav(): void
     {
         $response = $this->get('/game-center');
         $response->assertStatus(200);
         $response->assertSee('BYC Game Center');
-        $response->assertSee('Back to Home');
+        $response->assertDontSee('Back to Home');
         $response->assertSee('Guess Me!');
-        $response->assertSee('BYC Growth 100');
+        $response->assertSee('BYC GROWTH 100');
         $response->assertSee('Team Scoreboard');
     }
 
@@ -117,7 +117,7 @@ class WebsiteArchitectureTest extends TestCase
         $response = $this->actingAs($admin)->get('/cash-management');
         $response->assertStatus(200);
         $response->assertSee('Cash Management');
-        $response->assertSee('Back to Home');
+        $response->assertDontSee('Back to Home');
         $response->assertSee('Record Contribution');
     }
 
@@ -132,6 +132,6 @@ class WebsiteArchitectureTest extends TestCase
         $followResponse = $this->get('/about');
         $followResponse->assertStatus(200);
         $followResponse->assertSee('About BYC Growth');
-        $followResponse->assertSee('Get in Touch with BYC Growth');
+        $followResponse->assertSee('Part of Successful Bethany Families');
     }
 }
