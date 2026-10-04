@@ -300,6 +300,25 @@ export function initGrowth100() {
         });
     }
 
+    // Reload cleanly if page was restored from browser bfcache
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
+    // Reset revealed answers when navigating away or exiting the page
+    window.addEventListener('pagehide', () => {
+        if (navigator.sendBeacon) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            const data = new FormData();
+            if (csrfToken) {
+                data.append('_token', csrfToken);
+            }
+            navigator.sendBeacon('/game/growth-100/reset-revealed', data);
+        }
+    });
+
     // Synchronize UI on initial page load
     updateRoundUI();
 

@@ -12,9 +12,9 @@
         </p>
     </div>
     <div class="admin-header-actions">
-        <a href="#record-tx-section" class="button button-primary button-sm" id="btn-quick-record">
-            <x-icon name="plus" /> Record Transaction
-        </a>
+        <button type="button" class="button button-primary button-sm" id="btn-open-record-tx">
+            Record Transaction
+        </button>
     </div>
 </div>
 @endsection
@@ -112,7 +112,7 @@
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.cash-management') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.cash-management') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>
@@ -266,99 +266,6 @@
         @endif
     </div>
 
-    {{-- Record New Transaction Card --}}
-    <div id="record-tx-section" class="admin-card" style="margin-top: 28px;">
-        <div class="admin-card-header">
-            <div>
-                <h2>Record New Contribution</h2>
-                <small style="color: var(--muted); font-size: 13px;">File an official cash transfer or cash deposit into fellowship records.</small>
-            </div>
-        </div>
-
-        <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-record-tx">
-            @csrf
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 20px;">
-                {{-- Member Selection --}}
-                <div class="form-group">
-                    <label class="form-label" for="record-member-id">Associated Member *</label>
-                    <select name="member_id" id="record-member-id" class="form-input" required>
-                        <option value="">-- Choose Member --</option>
-                        @foreach($members as $m)
-                            <option
-                                value="{{ $m->id }}"
-                                data-name="{{ $m->full_name }}"
-                                data-account="{{ $shortcuts[$m->id]['account_type'] ?? '' }}"
-                                data-amount="{{ $shortcuts[$m->id]['amount'] ?? '' }}"
-                            >
-                                {{ $m->full_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                {{-- Account Type --}}
-                <div class="form-group">
-                    <label class="form-label" for="record-account-type">Source Bank / Account Type *</label>
-                    <input
-                        type="text"
-                        id="record-account-type"
-                        name="account_type"
-                        class="form-input"
-                        required
-                        placeholder="e.g. BCA, Mandiri, Cash"
-                    >
-                </div>
-
-                {{-- Transfer Amount --}}
-                <div class="form-group">
-                    <label class="form-label" for="record-amount">Transfer Amount (IDR) *</label>
-                    <input
-                        type="number"
-                        id="record-amount"
-                        name="amount"
-                        class="form-input"
-                        required
-                        min="1000"
-                        step="1000"
-                        placeholder="e.g. 50000"
-                    >
-                </div>
-
-                {{-- Proof Image File --}}
-                <div class="form-group">
-                    <label class="form-label" for="record-proof">Transfer Proof Image *</label>
-                    <input
-                        type="file"
-                        id="record-proof"
-                        name="proof"
-                        class="form-input"
-                        required
-                        accept="image/jpeg,image/png,image/jpg,image/webp"
-                    >
-                    <small style="color: var(--muted); font-size: 11px;">Image only (JPG, PNG, WEBP, max 5MB). PDF/documents rejected.</small>
-                </div>
-
-                {{-- System Input Time --}}
-                <div class="form-group">
-                    <label class="form-label">System Input Time</label>
-                    <div style="padding: 10px 14px; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; font-size: 12.5px; color: var(--muted); display: flex; align-items: center; gap: 8px;">
-                        <span>⏱️</span>
-                        <span>Auto-recorded on server submission (Asia/Jakarta)</span>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                <button type="reset" class="button button-ghost button-sm">
-                    Reset Form
-                </button>
-                <button type="submit" class="button button-primary button-sm" style="min-width: 160px;">
-                    <x-icon name="check" /> Submit Transaction
-                </button>
-            </div>
-        </form>
-    </div>
-
     {{-- Proof Image Viewer Modal --}}
     <div id="modal-proof-viewer" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 600px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
@@ -385,23 +292,132 @@
         </div>
     </div>
 
+    {{-- Modal: Record New Transaction --}}
+    <div id="modal-record-tx" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 580px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
+                        Record New Contribution
+                    </h3>
+                    <small style="color: var(--muted); font-size: 12.5px; display: block; margin-top: 2px;">File an official cash transfer or cash deposit into fellowship records.</small>
+                </div>
+                <button type="button" class="btn-close-modal" data-target="modal-record-tx" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-record-tx" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
+                @csrf
+                <div style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
+                    {{-- Associated Member --}}
+                    <div class="form-group">
+                        <label class="form-label" for="record-member-id">Associated Member *</label>
+                        <select name="member_id" id="record-member-id" class="form-input @error('member_id') input-invalid @enderror">
+                            <option value="">-- Choose Member --</option>
+                            @foreach($members as $m)
+                                <option
+                                    value="{{ $m->id }}"
+                                    {{ old('member_id') == $m->id ? 'selected' : '' }}
+                                    data-name="{{ $m->full_name }}"
+                                    data-account="{{ $shortcuts[$m->id]['account_type'] ?? '' }}"
+                                    data-amount="{{ $shortcuts[$m->id]['amount'] ?? '' }}"
+                                >
+                                    {{ $m->full_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('member_id')
+                            <div class="form-field-error" data-for="record-member-id">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Account Type --}}
+                    <div class="form-group">
+                        <label class="form-label" for="record-account-type">Source Bank / Account Type *</label>
+                        <input
+                            type="text"
+                            id="record-account-type"
+                            name="account_type"
+                            class="form-input @error('account_type') input-invalid @enderror"
+                            value="{{ old('account_type') }}"
+                            placeholder="e.g. BCA, Mandiri, Cash"
+                        >
+                        @error('account_type')
+                            <div class="form-field-error" data-for="record-account-type">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Transfer Amount --}}
+                    <div class="form-group">
+                        <label class="form-label" for="record-amount">Transfer Amount (IDR) *</label>
+                        <input
+                            type="number"
+                            id="record-amount"
+                            name="amount"
+                            class="form-input @error('amount') input-invalid @enderror"
+                            value="{{ old('amount') }}"
+                            step="1000"
+                            placeholder="e.g. 50000"
+                        >
+                        @error('amount')
+                            <div class="form-field-error" data-for="record-amount">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Proof Image File --}}
+                    <div class="form-group">
+                        <label class="form-label" for="record-proof">Transfer Proof Image *</label>
+                        <input
+                            type="file"
+                            id="record-proof"
+                            name="proof"
+                            class="form-input @error('proof') input-invalid @enderror"
+                            accept="image/jpeg,image/png,image/jpg,image/webp"
+                        >
+                        @error('proof')
+                            <div class="form-field-error" data-for="record-proof">{{ $message }}</div>
+                        @enderror
+                        <small style="color: var(--muted); font-size: 11px;">Image only (JPG, PNG, WEBP, max 5MB). PDF/documents rejected.</small>
+                    </div>
+
+                    {{-- System Input Time --}}
+                    <div class="form-group">
+                        <label class="form-label">System Input Time</label>
+                        <div style="padding: 10px 14px; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; font-size: 12.5px; color: var(--muted);">
+                            Auto-recorded on server submission (Asia/Jakarta)
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Modal Footer --}}
+                <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-shrink: 0;">
+                    <button type="reset" class="button button-danger button-sm">
+                        Reset Form
+                    </button>
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 160px;">
+                        Submit Transaction
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Edit Transaction Modal --}}
     <div id="modal-edit-tx" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 540px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <form id="form-edit-tx" method="POST" action="" enctype="multipart/form-data">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 540px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 20px;">✏️</span>
+                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
+                        Edit Cash Transaction
+                    </h3>
+                </div>
+                <button type="button" class="btn-close-modal" data-target="modal-edit-tx" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+            </div>
+            <form id="form-edit-tx" method="POST" action="" enctype="multipart/form-data" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
                 @method('PUT')
-                <div style="padding: 20px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 20px;">✏️</span>
-                        <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
-                            Edit Cash Transaction
-                        </h3>
-                    </div>
-                    <button type="button" class="btn-close-modal" data-target="modal-edit-tx" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
-                </div>
-                <div style="padding: 24px;">
-                    <div class="form-group" style="margin-bottom: 16px;">
+                <div style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
+                    <div class="form-group">
                         <label class="form-label" for="edit-tx-member">Associated Member</label>
                         <select name="member_id" id="edit-tx-member" class="form-input">
                             <option value="">-- Non-Member / Custom Contributor --</option>
@@ -411,36 +427,36 @@
                         </select>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 16px;">
+                    <div class="form-group">
                         <label class="form-label" for="edit-tx-contributor">Contributor Name</label>
                         <input type="text" id="edit-tx-contributor" name="contributor_name" class="form-input" placeholder="Contributor Name">
                         <small style="color: var(--muted); font-size: 11px;">Automatically syncs with selected member, or can be custom.</small>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 16px;">
+                    <div class="form-group">
                         <label class="form-label" for="edit-tx-account">Source Bank / Account Type *</label>
-                        <input type="text" id="edit-tx-account" name="account_type" class="form-input" required>
+                        <input type="text" id="edit-tx-account" name="account_type" class="form-input" placeholder="e.g. BCA, Mandiri, Cash">
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 16px;">
+                    <div class="form-group">
                         <label class="form-label" for="edit-tx-amount">Amount (IDR) *</label>
-                        <input type="number" id="edit-tx-amount" name="amount" class="form-input" required min="1" step="1000">
+                        <input type="number" id="edit-tx-amount" name="amount" class="form-input" step="1000" placeholder="e.g. 50000">
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 24px;">
+                    <div class="form-group">
                         <label class="form-label" for="edit-tx-proof">Replacement Proof Image (Optional)</label>
                         <input type="file" id="edit-tx-proof" name="proof" class="form-input" accept="image/jpeg,image/png,image/jpg,image/webp">
                         <small style="color: var(--muted); font-size: 11px;">Upload only if replacing existing proof. Old proof will be safely cleaned up.</small>
                     </div>
+                </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-tx">
-                            Cancel
-                        </button>
-                        <button type="submit" class="button button-primary button-sm" style="min-width: 120px;">
-                            Save Changes
-                        </button>
-                    </div>
+                <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-tx">
+                        Cancel
+                    </button>
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 120px;">
+                        Save Changes
+                    </button>
                 </div>
             </form>
         </div>
@@ -450,6 +466,196 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const modalRecordTx = document.getElementById('modal-record-tx');
+    const btnOpenRecordTx = document.getElementById('btn-open-record-tx') || document.getElementById('btn-quick-record');
+
+    function openModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.style.display = 'flex';
+        document.body.classList.add('modal-open');
+    }
+
+    function closeModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.style.display = 'none';
+        const anyOpen = document.querySelectorAll('.admin-modal-backdrop[style*="display: flex"], .modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: block"]');
+        if (anyOpen.length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    if (btnOpenRecordTx && modalRecordTx) {
+        btnOpenRecordTx.addEventListener('click', function (e) {
+            e.preventDefault();
+            openModal(modalRecordTx);
+        });
+    }
+
+    // Custom Form Validation & BYC Growth Error Presentation
+    function setFieldError(field, message) {
+        if (!field) return;
+        clearFieldError(field);
+        field.classList.add('input-invalid');
+        const errorEl = document.createElement('div');
+        errorEl.className = 'form-field-error';
+        const fieldId = field.id || field.name;
+        if (fieldId) {
+            errorEl.setAttribute('data-for', fieldId);
+        }
+        errorEl.textContent = message;
+        field.insertAdjacentElement('afterend', errorEl);
+    }
+
+    function clearFieldError(field) {
+        if (!field) return;
+        field.classList.remove('input-invalid');
+        const fieldId = field.id || field.name;
+        const parent = field.closest('.form-group') || field.parentElement;
+        if (parent) {
+            parent.querySelectorAll(`.form-field-error[data-for="${fieldId}"]`).forEach(el => el.remove());
+        }
+        if (field.nextElementSibling && field.nextElementSibling.classList.contains('form-field-error')) {
+            field.nextElementSibling.remove();
+        }
+    }
+
+    function clearAllErrors(form) {
+        if (!form) return;
+        form.querySelectorAll('.input-invalid').forEach(el => el.classList.remove('input-invalid'));
+        form.querySelectorAll('.form-field-error').forEach(el => el.remove());
+    }
+
+    const formRecordTx = document.getElementById('form-record-tx');
+    if (formRecordTx) {
+        const recMember = document.getElementById('record-member-id');
+        const recAccount = document.getElementById('record-account-type');
+        const recAmount = document.getElementById('record-amount');
+        const recProof = document.getElementById('record-proof');
+
+        [recMember, recAccount, recAmount, recProof].forEach(input => {
+            if (!input) return;
+            input.addEventListener('input', () => clearFieldError(input));
+            input.addEventListener('change', () => clearFieldError(input));
+        });
+
+        formRecordTx.addEventListener('reset', () => {
+            clearAllErrors(formRecordTx);
+        });
+
+        formRecordTx.addEventListener('submit', function (e) {
+            clearAllErrors(formRecordTx);
+            let hasError = false;
+
+            if (!recMember || !recMember.value || !recMember.value.trim()) {
+                setFieldError(recMember, 'Please select a member.');
+                hasError = true;
+            }
+
+            if (!recAccount || !recAccount.value || !recAccount.value.trim()) {
+                setFieldError(recAccount, 'Please enter the account type.');
+                hasError = true;
+            }
+
+            if (!recAmount || !recAmount.value || !recAmount.value.trim()) {
+                setFieldError(recAmount, 'Please enter the amount.');
+                hasError = true;
+            } else {
+                const num = parseFloat(recAmount.value);
+                if (isNaN(num) || num <= 0) {
+                    setFieldError(recAmount, 'Please enter a valid amount.');
+                    hasError = true;
+                }
+            }
+
+            if (!recProof || !recProof.files || recProof.files.length === 0) {
+                setFieldError(recProof, 'Please upload a proof image.');
+                hasError = true;
+            } else {
+                const file = recProof.files[0];
+                const ext = file.name.split('.').pop().toLowerCase();
+                const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/'))) {
+                    setFieldError(recProof, 'This file type is not supported.');
+                    hasError = true;
+                } else if (file.size > 5 * 1024 * 1024) {
+                    setFieldError(recProof, 'File size must not exceed 5MB.');
+                    hasError = true;
+                }
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                const firstInvalid = formRecordTx.querySelector('.input-invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
+                return false;
+            }
+        });
+    }
+
+    const formEditTx = document.getElementById('form-edit-tx');
+    if (formEditTx) {
+        const editAccount = document.getElementById('edit-tx-account');
+        const editAmount = document.getElementById('edit-tx-amount');
+        const editProof = document.getElementById('edit-tx-proof');
+
+        [editAccount, editAmount, editProof].forEach(input => {
+            if (!input) return;
+            input.addEventListener('input', () => clearFieldError(input));
+            input.addEventListener('change', () => clearFieldError(input));
+        });
+
+        formEditTx.addEventListener('submit', function (e) {
+            clearAllErrors(formEditTx);
+            let hasError = false;
+
+            if (!editAccount || !editAccount.value || !editAccount.value.trim()) {
+                setFieldError(editAccount, 'Please enter the account type.');
+                hasError = true;
+            }
+
+            if (!editAmount || !editAmount.value || !editAmount.value.trim()) {
+                setFieldError(editAmount, 'Please enter the amount.');
+                hasError = true;
+            } else {
+                const num = parseFloat(editAmount.value);
+                if (isNaN(num) || num <= 0) {
+                    setFieldError(editAmount, 'Please enter a valid amount.');
+                    hasError = true;
+                }
+            }
+
+            if (editProof && editProof.files && editProof.files.length > 0) {
+                const file = editProof.files[0];
+                const ext = file.name.split('.').pop().toLowerCase();
+                const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/'))) {
+                    setFieldError(editProof, 'This file type is not supported.');
+                    hasError = true;
+                } else if (file.size > 5 * 1024 * 1024) {
+                    setFieldError(editProof, 'File size must not exceed 5MB.');
+                    hasError = true;
+                }
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                const firstInvalid = formEditTx.querySelector('.input-invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
+                return false;
+            }
+        });
+    }
+
+    @if($errors->hasAny(['member_id', 'account_type', 'amount', 'proof']))
+        if (modalRecordTx) {
+            openModal(modalRecordTx);
+        }
+    @endif
+
     // Member dropdown change listener for auto-fill in Record Form
     const memberSelect = document.getElementById('record-member-id');
     const accountInput = document.getElementById('record-account-type');
@@ -457,15 +663,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (memberSelect) {
         memberSelect.addEventListener('change', function () {
+            clearFieldError(memberSelect);
             const selected = this.options[this.selectedIndex];
             if (selected && selected.value) {
                 const acc = selected.getAttribute('data-account');
                 const amt = selected.getAttribute('data-amount');
                 if (acc && accountInput && !accountInput.value) {
                     accountInput.value = acc;
+                    clearFieldError(accountInput);
                 }
                 if (amt && amountInput && !amountInput.value) {
                     amountInput.value = amt;
+                    clearFieldError(amountInput);
                 }
             }
         });
@@ -480,17 +689,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (memberSelect) {
                 memberSelect.value = memberId;
+                clearFieldError(memberSelect);
             }
             if (accountInput && account) {
                 accountInput.value = account;
+                clearFieldError(accountInput);
             }
             if (amountInput && amount) {
                 amountInput.value = amount;
+                clearFieldError(amountInput);
             }
 
-            const recordSection = document.getElementById('record-tx-section');
-            if (recordSection) {
-                recordSection.scrollIntoView({ behavior: 'smooth' });
+            if (modalRecordTx) {
+                openModal(modalRecordTx);
             }
         });
     });
@@ -509,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('proof-viewer-link').href = url;
 
             const modal = document.getElementById('modal-proof-viewer');
-            modal.style.display = 'flex';
+            openModal(modal);
         });
     });
 
@@ -523,6 +734,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const amount = this.dataset.amount;
 
             const form = document.getElementById('form-edit-tx');
+            clearAllErrors(form);
             form.action = '/admin/cash-management/' + id;
 
             document.getElementById('edit-tx-member').value = memberId || '';
@@ -531,7 +743,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit-tx-amount').value = amount || '';
 
             const modal = document.getElementById('modal-edit-tx');
-            modal.style.display = 'flex';
+            openModal(modal);
         });
     });
 
@@ -551,7 +763,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             const targetId = this.dataset.target;
             if (targetId) {
-                document.getElementById(targetId).style.display = 'none';
+                closeModal(document.getElementById(targetId));
             }
         });
     });
@@ -560,9 +772,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.admin-modal-backdrop').forEach(function (backdrop) {
         backdrop.addEventListener('click', function (e) {
             if (e.target === this) {
-                this.style.display = 'none';
+                closeModal(this);
             }
         });
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.admin-modal-backdrop').forEach(function (modal) {
+                if (modal.style.display !== 'none') {
+                    closeModal(modal);
+                }
+            });
+        }
     });
 
     // Batch Selection & Deletion

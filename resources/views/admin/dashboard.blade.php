@@ -31,7 +31,6 @@
             </div>
             <h3>Dashboard</h3>
             <p>Centralized administration command center, system health, and navigation hub.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Current &bull; Control Center</span>
         </a>
 
         {{-- 2. Homepage Management --}}
@@ -41,7 +40,6 @@
             </div>
             <h3>Homepage</h3>
             <p>Manage slideshow images, highlights, announcements, and editable showcase data.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Manage Homepage &rarr;</span>
         </a>
 
         {{-- 3. Members Management --}}
@@ -51,7 +49,6 @@
             </div>
             <h3>Members</h3>
             <p>Add/edit member profiles, upload photos, and maintain confidential birthday records.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; View Roster &rarr;</span>
         </a>
 
         {{-- 4. Activities Management --}}
@@ -61,7 +58,6 @@
             </div>
             <h3>Activities</h3>
             <p>Record community events, publish fellowship recaps, and upload event galleries.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Manage Activities &rarr;</span>
         </a>
 
         {{-- 5. Games Center --}}
@@ -71,7 +67,6 @@
             </div>
             <h3>Games</h3>
             <p>Universal Game System: Guess Me! & BYC Growth 100 rounds, questions, and team configs.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Open Games &rarr;</span>
         </a>
 
         {{-- 6. Birthday Wishes --}}
@@ -81,7 +76,6 @@
             </div>
             <h3>Birthday Wishes</h3>
             <p>Full archive browse across all members, all years, and letter audit privileges.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Open Archive &rarr;</span>
         </a>
 
         {{-- 7. Cash Management --}}
@@ -91,7 +85,6 @@
             </div>
             <h3>Cash Management</h3>
             <p>Transaction ledger, member shortcuts, transfer proof review, and treasury total.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Open Ledger &rarr;</span>
         </a>
 
         {{-- 8. Roles / Accounts --}}
@@ -101,7 +94,6 @@
             </div>
             <h3>Roles / Accounts</h3>
             <p>Manage user and admin accounts, system credentials, usernames, and access roles.</p>
-            <span class="module-status-badge" style="background: var(--forest); color: var(--white);">Active &bull; Manage Accounts &rarr;</span>
         </a>
     </div>
 @endsection

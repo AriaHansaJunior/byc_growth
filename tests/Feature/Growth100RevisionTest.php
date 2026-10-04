@@ -594,4 +594,55 @@ class Growth100RevisionTest extends TestCase
         $this->assertNotNull($round);
         $this->assertEquals('S _ R _ W _ E _ R _', $round->clue);
     }
+
+    /**
+     * Requirement 17: Growth 100 answers return to hidden on page refresh, exit, or navigation.
+     */
+    public function test_growth_100_answers_return_to_hidden_on_page_refresh_or_exit(): void
+    {
+        $this->actingAs($this->adminUser);
+
+        $game2 = Game::where('code', 'game2')->first();
+        $round = GameRound::where('game_id', $game2->id)->first();
+        $this->assertNotNull($round);
+
+        // 1. Reveal answer 0 for this round during gameplay
+        $revealRes = $this->postJson('/game/growth-100/state', [
+            'round_index' => 0,
+            'answer_index' => 0,
+        ]);
+        $revealRes->assertOk();
+        $revealedInState = $revealRes->json('state.revealed.' . $round->id);
+        $this->assertContains(0, $revealedInState);
+
+        // 2. When user/admin refreshes or visits /growth-100, answers must return to all hidden
+        $refreshRes = $this->get('/growth-100');
+        $refreshRes->assertOk();
+
+        // Must NOT render any answer tiles with 'open' class
+        $refreshRes->assertDontSee('answer-tile open', false);
+
+        // All answers must display default 'Click to reveal'
+        $refreshRes->assertSee('Click to reveal');
+
+        // Round revealed points must be 0
+        $refreshRes->assertSee('id="round-revealed-points">0<', false);
+        $refreshRes->assertSee('id="round-progress-percent">0%<', false);
+
+        // State in database must be reset
+        $dbState = GameState::where('game_id', $game2->id)->first();
+        $this->assertEmpty($dbState->state_data['revealed'] ?? []);
+
+        // 3. Explicit reset endpoint (used on pagehide/exit) also resets revealed state
+        $this->postJson('/game/growth-100/state', [
+            'round_index' => 0,
+            'answer_index' => 0,
+        ]);
+        $resetEndpointRes = $this->postJson('/game/growth-100/reset-revealed');
+        $resetEndpointRes->assertOk();
+        $resetEndpointRes->assertJsonPath('success', true);
+
+        $dbStateAfter = GameState::where('game_id', $game2->id)->first();
+        $this->assertEmpty($dbStateAfter->state_data['revealed'] ?? []);
+    }
 }

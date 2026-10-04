@@ -52,6 +52,7 @@ Route::get('/game/image/{filename}', [GameController::class, 'getImage'])->name(
 Route::prefix('game')->name('game.')->group(function () {
     Route::post('/guess-me/state', [GameController::class, 'updateGame1State'])->name('guess-me.state');
     Route::post('/growth-100/state', [GameController::class, 'updateGame2State'])->name('growth-100.state');
+    Route::match(['get', 'post'], '/growth-100/reset-revealed', [GameController::class, 'resetGrowth100Revealed'])->name('growth-100.reset-revealed');
 });
 
 // Protected Game Management Endpoints (Requires Auth & Admin Role)

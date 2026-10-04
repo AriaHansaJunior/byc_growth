@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-cash-transaction">
+        <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-cash-transaction" novalidate>
             @csrf
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
                 {{-- Member Selection (Searchable Dropdown) --}}
@@ -63,7 +63,7 @@
                             id="cash-member-search"
                             placeholder="Type to search member (e.g. Mega)..."
                             autocomplete="off"
-                            class="input-field"
+                            class="input-field @error('member_id') input-invalid @enderror"
                             style="width: 100%; padding: 10px 38px 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 14px; background: var(--white); color: var(--ink);"
                         >
                         <button
@@ -74,6 +74,9 @@
                             aria-label="Clear member selection"
                         >&times;</button>
                     </div>
+                    @error('member_id')
+                        <div class="form-field-error" data-for="cash-member-search">{{ $message }}</div>
+                    @enderror
 
                     {{-- Searchable Dropdown List --}}
                     <div
@@ -107,11 +110,12 @@
                     </div>
 
                     {{-- Synchronized native select for accessibility and form submission --}}
-                    <select name="member_id" id="cash-member-select" required style="position: absolute; opacity: 0; width: 1px; height: 1px; top: 30px; left: 10px; z-index: -1;">
+                    <select name="member_id" id="cash-member-select" style="position: absolute; opacity: 0; width: 1px; height: 1px; top: 30px; left: 10px; z-index: -1;">
                         <option value="">-- Choose Member --</option>
                         @foreach($members as $member)
                             <option
                                 value="{{ $member->id }}"
+                                {{ old('member_id') == $member->id ? 'selected' : '' }}
                                 data-name="{{ $member->full_name }}"
                                 data-account="{{ $shortcuts[$member->id]['account_type'] ?? '' }}"
                                 data-amount="{{ $shortcuts[$member->id]['amount'] ?? '' }}"
@@ -131,11 +135,14 @@
                         type="text"
                         name="account_type"
                         id="cash-account-type"
-                        required
+                        value="{{ old('account_type') }}"
                         placeholder="e.g. BCA, Mandiri, BRI, Cash"
-                        class="input-field"
+                        class="input-field @error('account_type') input-invalid @enderror"
                         style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;"
                     >
+                    @error('account_type')
+                        <div class="form-field-error" data-for="cash-account-type">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 {{-- Transfer Amount --}}
@@ -145,13 +152,15 @@
                         type="number"
                         name="amount"
                         id="cash-amount"
-                        required
+                        value="{{ old('amount') }}"
                         step="1000"
-                        min="1"
                         placeholder="Amount in Rupiah"
-                        class="input-field"
+                        class="input-field @error('amount') input-invalid @enderror"
                         style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;"
                     >
+                    @error('amount')
+                        <div class="form-field-error" data-for="cash-amount">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 {{-- Transfer Proof --}}
@@ -161,11 +170,13 @@
                         type="file"
                         name="proof"
                         id="cash-proof"
-                        required
                         accept="image/jpeg,image/png,image/jpg,image/webp"
-                        class="input-field"
+                        class="input-field @error('proof') input-invalid @enderror"
                         style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;"
                     >
+                    @error('proof')
+                        <div class="form-field-error" data-for="cash-proof">{{ $message }}</div>
+                    @enderror
                     <small style="color: var(--muted); font-size: 11px;">Image only (JPG, PNG, WEBP). Rejects PDF/docs.</small>
                 </div>
 
@@ -181,7 +192,7 @@
 
 
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 20px;">
-                <button type="button" id="btn-reset-cash-form" class="button button-secondary">
+                <button type="button" id="btn-reset-cash-form" class="button button-danger">
                     <x-icon name="refresh" /> Reset Form
                 </button>
                 <button type="submit" class="button button-primary">
@@ -233,7 +244,7 @@
                 <button type="submit" class="button button-primary button-sm" style="height: 38px;">
                     Filter
                 </button>
-                <a href="{{ route('cash-management') }}" class="button button-secondary button-sm" style="height: 38px;">
+                <a href="{{ route('cash-management') }}" class="button button-danger button-sm" style="height: 38px;">
                     Reset
                 </a>
             </div>
@@ -407,11 +418,45 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Custom Form Validation & BYC Growth Error Presentation
+    function setFieldError(field, message) {
+        if (!field) return;
+        clearFieldError(field);
+        field.classList.add('input-invalid');
+        const errorEl = document.createElement('div');
+        errorEl.className = 'form-field-error';
+        const fieldId = field.id || field.name;
+        if (fieldId) {
+            errorEl.setAttribute('data-for', fieldId);
+        }
+        errorEl.textContent = message;
+        field.insertAdjacentElement('afterend', errorEl);
+    }
+
+    function clearFieldError(field) {
+        if (!field) return;
+        field.classList.remove('input-invalid');
+        const fieldId = field.id || field.name;
+        const parent = field.closest('.searchable-member-wrapper') || field.parentElement;
+        if (parent) {
+            parent.querySelectorAll(`.form-field-error[data-for="${fieldId}"]`).forEach(el => el.remove());
+        }
+        if (field.nextElementSibling && field.nextElementSibling.classList.contains('form-field-error')) {
+            field.nextElementSibling.remove();
+        }
+    }
+
+    function clearAllErrors(form) {
+        if (!form) return;
+        form.querySelectorAll('.input-invalid').forEach(el => el.classList.remove('input-invalid'));
+        form.querySelectorAll('.form-field-error').forEach(el => el.remove());
+    }
+
     function selectMember(id, name, account, amount) {
         if (memberSelect) memberSelect.value = id;
         if (memberSearch) {
             memberSearch.value = name;
-            memberSearch.setCustomValidity('');
+            clearFieldError(memberSearch);
         }
         if (btnClearMember) btnClearMember.style.display = 'block';
         if (memberDropdown) memberDropdown.style.display = 'none';
@@ -431,17 +476,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (memberSelect) memberSelect.value = '';
         if (memberSearch) {
             memberSearch.value = '';
-            memberSearch.setCustomValidity('');
+            clearFieldError(memberSearch);
         }
-        if (accountInput) accountInput.value = '';
-        if (amountInput) amountInput.value = '';
-        if (proofInput) proofInput.value = '';
+        if (accountInput) {
+            accountInput.value = '';
+            clearFieldError(accountInput);
+        }
+        if (amountInput) {
+            amountInput.value = '';
+            clearFieldError(amountInput);
+        }
+        if (proofInput) {
+            proofInput.value = '';
+            clearFieldError(proofInput);
+        }
         if (btnClearMember) btnClearMember.style.display = 'none';
         if (statusBadge) statusBadge.style.display = 'none';
 
         memberItems.forEach(item => item.classList.remove('is-selected'));
         filterMembers('');
     }
+
+    [memberSearch, accountInput, amountInput, proofInput].forEach(input => {
+        if (!input) return;
+        input.addEventListener('input', () => clearFieldError(input));
+        input.addEventListener('change', () => clearFieldError(input));
+    });
 
     function filterMembers(query) {
         const q = (query || '').trim().toLowerCase();
@@ -550,18 +610,58 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnResetForm) {
         btnResetForm.addEventListener('click', () => {
             clearMemberSelection();
+            clearAllErrors(cashForm);
             if (cashForm) cashForm.reset();
         });
     }
 
     if (cashForm) {
         cashForm.addEventListener('submit', (e) => {
-            if (!memberSelect || !memberSelect.value) {
+            clearAllErrors(cashForm);
+            let hasError = false;
+
+            if (!memberSelect || !memberSelect.value || !memberSelect.value.trim()) {
+                setFieldError(memberSearch, 'Please select a member.');
+                hasError = true;
+            }
+
+            if (!accountInput || !accountInput.value || !accountInput.value.trim()) {
+                setFieldError(accountInput, 'Please enter the account type.');
+                hasError = true;
+            }
+
+            if (!amountInput || !amountInput.value || !amountInput.value.trim()) {
+                setFieldError(amountInput, 'Please enter the amount.');
+                hasError = true;
+            } else {
+                const num = parseFloat(amountInput.value);
+                if (isNaN(num) || num <= 0) {
+                    setFieldError(amountInput, 'Please enter a valid amount.');
+                    hasError = true;
+                }
+            }
+
+            if (!proofInput || !proofInput.files || proofInput.files.length === 0) {
+                setFieldError(proofInput, 'Please upload a proof image.');
+                hasError = true;
+            } else {
+                const file = proofInput.files[0];
+                const ext = file.name.split('.').pop().toLowerCase();
+                const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/'))) {
+                    setFieldError(proofInput, 'This file type is not supported.');
+                    hasError = true;
+                } else if (file.size > 5 * 1024 * 1024) {
+                    setFieldError(proofInput, 'File size must not exceed 5MB.');
+                    hasError = true;
+                }
+            }
+
+            if (hasError) {
                 e.preventDefault();
-                if (memberSearch) {
-                    memberSearch.focus();
-                    memberSearch.setCustomValidity('Please select a member.');
-                    memberSearch.reportValidity();
+                const firstInvalid = cashForm.querySelector('.input-invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
                 }
                 return false;
             }
@@ -569,6 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         cashForm.addEventListener('reset', () => {
             clearMemberSelection();
+            clearAllErrors(cashForm);
         });
     }
 

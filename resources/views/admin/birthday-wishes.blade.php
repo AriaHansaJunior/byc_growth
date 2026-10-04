@@ -78,7 +78,7 @@
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.birthday-wishes') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.birthday-wishes') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>

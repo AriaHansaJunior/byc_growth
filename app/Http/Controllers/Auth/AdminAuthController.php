@@ -113,6 +113,8 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        app(\App\Services\GameStorageService::class)->resetGame2Revealed();
+
         return redirect()->route('admin.ganteng')->with('status', 'You have been logged out successfully.');
     }
 }

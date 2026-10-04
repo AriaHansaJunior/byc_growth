@@ -13,7 +13,7 @@
     </div>
     <div class="admin-header-actions">
         <button type="button" class="button button-primary button-sm" id="btn-open-add-activity">
-            <x-icon name="plus" /> Add Activity
+           Add Activity
         </button>
     </div>
 </div>
@@ -47,7 +47,7 @@
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.activities') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.activities') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>

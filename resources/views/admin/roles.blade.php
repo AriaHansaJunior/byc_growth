@@ -13,7 +13,7 @@
     </div>
     <div class="admin-header-actions">
         <button type="button" class="button button-primary button-sm" id="btn-open-add-user">
-            <x-icon name="users" /> Create Account
+         Create Account
         </button>
     </div>
 </div>
@@ -81,7 +81,7 @@
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.roles') }}" class="button button-ghost button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.roles') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>
@@ -250,8 +250,8 @@
 
     {{-- Modal: Create Account --}}
     <div class="admin-modal-backdrop" id="modal-add-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 20px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 20px;">👤</span>
                     <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
@@ -261,23 +261,23 @@
                 <button type="button" class="btn-close-modal" data-target="modal-add-user" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
             </div>
 
-            <form method="POST" action="{{ route('admin.roles.store') }}" style="padding: 24px;">
+            <form method="POST" action="{{ route('admin.roles.store') }}" id="form-add-user" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
-                <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="padding: 20px 22px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 13px;">
                     <div class="form-group">
                         <label class="form-label" for="add-user-username">Username *</label>
                         <input
                             type="text"
                             name="username"
                             id="add-user-username"
-                            required
-                            class="form-input"
+                            class="form-input @error('username') input-invalid @enderror"
+                            value="{{ old('username') }}"
                             placeholder="e.g. john_doe"
-                            minlength="3"
                             maxlength="60"
-                            pattern="^[a-zA-Z0-9_]+$"
-                            title="Only letters, numbers, and underscores allowed"
                         >
+                        @error('username')
+                            <div class="form-field-error" data-for="add-user-username">{{ $message }}</div>
+                        @enderror
                         <small style="color: var(--muted); font-size: 11px;">Alphanumeric and underscores only (used for login & identity).</small>
                     </div>
 
@@ -287,6 +287,7 @@
                             type="text"
                             name="name"
                             id="add-user-name"
+                            value="{{ old('name') }}"
                             class="form-input"
                             placeholder="e.g. John Doe (optional, defaults to username)"
                         >
@@ -298,10 +299,13 @@
                             type="email"
                             name="email"
                             id="add-user-email"
-                            required
-                            class="form-input"
+                            value="{{ old('email') }}"
+                            class="form-input @error('email') input-invalid @enderror"
                             placeholder="e.g. user@bycgrowth.org"
                         >
+                        @error('email')
+                            <div class="form-field-error" data-for="add-user-email">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="form-group">
@@ -310,20 +314,24 @@
                             type="password"
                             name="password"
                             id="add-user-password"
-                            required
-                            minlength="6"
-                            class="form-input"
+                            class="form-input @error('password') input-invalid @enderror"
                             placeholder="Minimum 6 characters"
                         >
+                        @error('password')
+                            <div class="form-field-error" data-for="add-user-password">{{ $message }}</div>
+                        @enderror
                         <small style="color: var(--muted); font-size: 11px;">Securely encrypted using bcrypt before database storage.</small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="add-user-role">Access Role *</label>
-                        <select name="role" id="add-user-role" required class="form-input">
-                            <option value="user">User (Standard Fellowship Member)</option>
-                            <option value="admin">Admin (Full Administrator)</option>
+                        <select name="role" id="add-user-role" class="form-input @error('role') input-invalid @enderror">
+                            <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>User (Standard Fellowship Member)</option>
+                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin (Full Administrator)</option>
                         </select>
+                        @error('role')
+                            <div class="form-field-error" data-for="add-user-role">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="form-group">
@@ -331,20 +339,20 @@
                         <select name="member_id" id="add-user-member-id" class="form-input">
                             <option value="">-- No Linked Member Profile --</option>
                             @foreach($members as $m)
-                                <option value="{{ $m->id }}">{{ $m->full_name }}</option>
+                                <option value="{{ $m->id }}" {{ old('member_id') == $m->id ? 'selected' : '' }}>{{ $m->full_name }}</option>
                             @endforeach
                         </select>
                         <small style="color: var(--muted); font-size: 11px;">Links this authentication credential to their public fellowship directory profile.</small>
                     </div>
+                </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
-                        <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user">
-                            Cancel
-                        </button>
-                        <button type="submit" class="button button-primary button-sm" style="min-width: 140px;">
-                            Create Account
-                        </button>
-                    </div>
+                <div style="padding: 14px 22px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user">
+                        Cancel
+                    </button>
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 140px;">
+                        Create Account
+                    </button>
                 </div>
             </form>
         </div>
@@ -352,8 +360,8 @@
 
     {{-- Modal: Edit Account --}}
     <div class="admin-modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 20px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 20px;">✏️</span>
                     <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
@@ -363,21 +371,18 @@
                 <button type="button" class="btn-close-modal" data-target="modal-edit-user" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
             </div>
 
-            <form method="POST" id="form-edit-user" action="" style="padding: 24px;">
+            <form method="POST" id="form-edit-user" action="" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
                 @method('PUT')
-                <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="padding: 20px 22px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 13px;">
                     <div class="form-group">
                         <label class="form-label" for="edit-user-username">Username *</label>
                         <input
                             type="text"
                             name="username"
                             id="edit-user-username"
-                            required
                             class="form-input"
-                            minlength="3"
                             maxlength="60"
-                            pattern="^[a-zA-Z0-9_]+$"
                         >
                     </div>
 
@@ -397,7 +402,6 @@
                             type="email"
                             name="email"
                             id="edit-user-email"
-                            required
                             class="form-input"
                         >
                     </div>
@@ -411,7 +415,6 @@
                             type="password"
                             name="password"
                             id="edit-user-password"
-                            minlength="6"
                             class="form-input"
                             placeholder="Leave blank to keep current password"
                         >
@@ -419,7 +422,7 @@
 
                     <div class="form-group">
                         <label class="form-label" for="edit-user-role">Access Role *</label>
-                        <select name="role" id="edit-user-role" required class="form-input">
+                        <select name="role" id="edit-user-role" class="form-input">
                             <option value="user">User (Standard Fellowship Member)</option>
                             <option value="admin">Admin (Full Administrator)</option>
                         </select>
@@ -434,15 +437,15 @@
                             @endforeach
                         </select>
                     </div>
+                </div>
 
-                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px;">
-                        <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user">
-                            Cancel
-                        </button>
-                        <button type="submit" class="button button-primary button-sm" style="min-width: 140px;">
-                            Save Changes
-                        </button>
-                    </div>
+                <div style="padding: 14px 22px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user">
+                        Cancel
+                    </button>
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 140px;">
+                        Save Changes
+                    </button>
                 </div>
             </form>
         </div>
@@ -455,18 +458,198 @@ document.addEventListener('DOMContentLoaded', function () {
     const addModal = document.getElementById('modal-add-user');
     const openAddBtn = document.getElementById('btn-open-add-user');
 
-    if (openAddBtn && addModal) {
-        openAddBtn.addEventListener('click', function () {
-            addModal.style.display = 'flex';
+    function openModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.style.display = 'flex';
+        document.body.classList.add('modal-open');
+    }
+
+    function closeModal(modalEl) {
+        if (!modalEl) return;
+        modalEl.style.display = 'none';
+        const anyOpen = document.querySelectorAll('.admin-modal-backdrop[style*="display: flex"], .modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: block"]');
+        if (anyOpen.length === 0) {
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    // Custom Form Validation & BYC Growth Error Presentation
+    function setFieldError(field, message) {
+        if (!field) return;
+        clearFieldError(field);
+        field.classList.add('input-invalid');
+        const errorEl = document.createElement('div');
+        errorEl.className = 'form-field-error';
+        const fieldId = field.id || field.name;
+        if (fieldId) {
+            errorEl.setAttribute('data-for', fieldId);
+        }
+        errorEl.textContent = message;
+        field.insertAdjacentElement('afterend', errorEl);
+    }
+
+    function clearFieldError(field) {
+        if (!field) return;
+        field.classList.remove('input-invalid');
+        const fieldId = field.id || field.name;
+        const parent = field.closest('.form-group') || field.parentElement;
+        if (parent) {
+            parent.querySelectorAll(`.form-field-error[data-for="${fieldId}"]`).forEach(el => el.remove());
+        }
+        if (field.nextElementSibling && field.nextElementSibling.classList.contains('form-field-error')) {
+            field.nextElementSibling.remove();
+        }
+    }
+
+    function clearAllErrors(form) {
+        if (!form) return;
+        form.querySelectorAll('.input-invalid').forEach(el => el.classList.remove('input-invalid'));
+        form.querySelectorAll('.form-field-error').forEach(el => el.remove());
+    }
+
+    const formAddUser = document.getElementById('form-add-user');
+    if (formAddUser) {
+        const addUsername = document.getElementById('add-user-username');
+        const addEmail = document.getElementById('add-user-email');
+        const addPassword = document.getElementById('add-user-password');
+        const addRole = document.getElementById('add-user-role');
+
+        [addUsername, addEmail, addPassword, addRole].forEach(input => {
+            if (!input) return;
+            input.addEventListener('input', () => clearFieldError(input));
+            input.addEventListener('change', () => clearFieldError(input));
+        });
+
+        formAddUser.addEventListener('reset', () => {
+            clearAllErrors(formAddUser);
+        });
+
+        formAddUser.addEventListener('submit', function (e) {
+            clearAllErrors(formAddUser);
+            let hasError = false;
+
+            const uVal = addUsername ? addUsername.value.trim() : '';
+            if (!uVal) {
+                setFieldError(addUsername, 'Please enter a username.');
+                hasError = true;
+            } else if (uVal.length < 3) {
+                setFieldError(addUsername, 'Username must be at least 3 characters.');
+                hasError = true;
+            } else if (!/^[a-zA-Z0-9_]+$/.test(uVal)) {
+                setFieldError(addUsername, 'Username may only contain letters, numbers, and underscores.');
+                hasError = true;
+            }
+
+            const eVal = addEmail ? addEmail.value.trim() : '';
+            if (!eVal) {
+                setFieldError(addEmail, 'Please enter an email address.');
+                hasError = true;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eVal)) {
+                setFieldError(addEmail, 'Please enter a valid email address.');
+                hasError = true;
+            }
+
+            const pVal = addPassword ? addPassword.value : '';
+            if (!pVal) {
+                setFieldError(addPassword, 'Please enter a password.');
+                hasError = true;
+            } else if (pVal.length < 6) {
+                setFieldError(addPassword, 'Password must be at least 6 characters.');
+                hasError = true;
+            }
+
+            const rVal = addRole ? addRole.value : '';
+            if (!rVal) {
+                setFieldError(addRole, 'Please select an access role.');
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                const firstInvalid = formAddUser.querySelector('.input-invalid');
+                if (firstInvalid) firstInvalid.focus();
+                return false;
+            }
         });
     }
 
     const editModal = document.getElementById('modal-edit-user');
     const formEdit = document.getElementById('form-edit-user');
+    if (formEdit) {
+        const editUsername = document.getElementById('edit-user-username');
+        const editEmail = document.getElementById('edit-user-email');
+        const editPassword = document.getElementById('edit-user-password');
+        const editRole = document.getElementById('edit-user-role');
+
+        [editUsername, editEmail, editPassword, editRole].forEach(input => {
+            if (!input) return;
+            input.addEventListener('input', () => clearFieldError(input));
+            input.addEventListener('change', () => clearFieldError(input));
+        });
+
+        formEdit.addEventListener('submit', function (e) {
+            clearAllErrors(formEdit);
+            let hasError = false;
+
+            const uVal = editUsername ? editUsername.value.trim() : '';
+            if (!uVal) {
+                setFieldError(editUsername, 'Please enter a username.');
+                hasError = true;
+            } else if (uVal.length < 3) {
+                setFieldError(editUsername, 'Username must be at least 3 characters.');
+                hasError = true;
+            } else if (!/^[a-zA-Z0-9_]+$/.test(uVal)) {
+                setFieldError(editUsername, 'Username may only contain letters, numbers, and underscores.');
+                hasError = true;
+            }
+
+            const eVal = editEmail ? editEmail.value.trim() : '';
+            if (!eVal) {
+                setFieldError(editEmail, 'Please enter an email address.');
+                hasError = true;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(eVal)) {
+                setFieldError(editEmail, 'Please enter a valid email address.');
+                hasError = true;
+            }
+
+            const pVal = editPassword ? editPassword.value : '';
+            if (pVal && pVal.length < 6) {
+                setFieldError(editPassword, 'Password must be at least 6 characters.');
+                hasError = true;
+            }
+
+            const rVal = editRole ? editRole.value : '';
+            if (!rVal) {
+                setFieldError(editRole, 'Please select an access role.');
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                const firstInvalid = formEdit.querySelector('.input-invalid');
+                if (firstInvalid) firstInvalid.focus();
+                return false;
+            }
+        });
+    }
+
+    @if($errors->hasAny(['username', 'email', 'password', 'role']))
+        if (addModal) {
+            openModal(addModal);
+        }
+    @endif
+
+    if (openAddBtn && addModal) {
+        openAddBtn.addEventListener('click', function () {
+            clearAllErrors(formAddUser);
+            openModal(addModal);
+        });
+    }
 
     document.querySelectorAll('.btn-edit-user').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const data = this.dataset;
+            clearAllErrors(formEdit);
             formEdit.action = '/admin/roles/' + data.id;
 
             document.getElementById('edit-user-username').value = data.username || '';
@@ -480,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 memberSelect.value = data.memberId || '';
             }
 
-            editModal.style.display = 'flex';
+            openModal(editModal);
         });
     });
 
@@ -489,7 +672,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             const targetId = this.dataset.target;
             if (targetId) {
-                document.getElementById(targetId).style.display = 'none';
+                closeModal(document.getElementById(targetId));
             }
         });
     });
@@ -498,9 +681,20 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.admin-modal-backdrop').forEach(function (backdrop) {
         backdrop.addEventListener('click', function (e) {
             if (e.target === this) {
-                this.style.display = 'none';
+                closeModal(this);
             }
         });
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.admin-modal-backdrop').forEach(function (modal) {
+                if (modal.style.display !== 'none') {
+                    closeModal(modal);
+                }
+            });
+        }
     });
 
     // Batch Selection & Deletion

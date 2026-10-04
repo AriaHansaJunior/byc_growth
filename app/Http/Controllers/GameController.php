@@ -23,6 +23,9 @@ class GameController extends Controller
      */
     public function gameCenter()
     {
+        // Reset Game 2 revealed answers when navigating to Game Center
+        $this->storageService->resetGame2Revealed();
+
         $scores = $this->storageService->getFinalScores();
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores();
@@ -83,15 +86,22 @@ class GameController extends Controller
      */
     public function growth100()
     {
+        // Whenever a user/admin enters, refreshes, or returns to Growth 100, answers return to hidden state
+        $this->storageService->resetGame2Revealed();
+
         $rounds = $this->storageService->getGrowth100Rounds();
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores('game2');
 
-        return view('user.growth-100', [
-            'rounds' => $rounds,
-            'game2State' => $gameState['game2'],
-            'teams' => $teams,
-        ]);
+        return response()
+            ->view('user.growth-100', [
+                'rounds' => $rounds,
+                'game2State' => $gameState['game2'],
+                'teams' => $teams,
+            ])
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     /**
@@ -306,6 +316,19 @@ class GameController extends Controller
         );
 
         return response()->json($result);
+    }
+
+    /**
+     * Explicitly reset Game 2 revealed state (e.g. called on pagehide/unload beacon)
+     */
+    public function resetGrowth100Revealed(): JsonResponse
+    {
+        $this->storageService->resetGame2Revealed();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Growth 100 revealed answers reset.',
+        ]);
     }
 
     /**

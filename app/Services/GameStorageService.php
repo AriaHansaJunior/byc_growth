@@ -1375,6 +1375,27 @@ class GameStorageService
     }
 
     /**
+     * Reset Game 2 revealed answers and crosses when entering, refreshing, or leaving the page.
+     * Round questions, configurations, and team scores remain intact.
+     */
+    public function resetGame2Revealed(): void
+    {
+        $game2 = $this->getGame('game2');
+        $state = GameState::firstOrCreate(
+            ['game_id' => $game2->id],
+            ['current_round_index' => 0, 'state_data' => ['crosses' => [], 'revealed' => []]]
+        );
+
+        $data = $state->state_data ?: [];
+        $data['revealed'] = [];
+        $data['crosses'] = [];
+
+        $state->update([
+            'state_data' => $data,
+        ]);
+    }
+
+    /**
      * Reset Game State to initial in MySQL.
      * Scores = 0, revealed = [], crosses = [], current_round_index = 0, round awards = null.
      * Questions and image records are PRESERVED.

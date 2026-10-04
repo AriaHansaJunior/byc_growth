@@ -75,7 +75,7 @@
             </div>
             <div>
                 <button type="button" class="button button-primary button-sm btn-trigger-add-slide" id="btn-open-add-slide">
-                    <x-icon name="plus" /> Add Photo
+                   Add Photo
                 </button>
             </div>
         </div>

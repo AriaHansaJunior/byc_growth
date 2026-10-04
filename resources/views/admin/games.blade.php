@@ -14,9 +14,8 @@
     <div class="admin-header-actions">
         <button
             type="button"
-            class="button button-ghost"
+            class="button button-danger"
             id="btn-admin-reset-gameplay"
-            style="border: 1px solid var(--line); color: var(--ink);"
         >
             Reset Gameplay
         </button>

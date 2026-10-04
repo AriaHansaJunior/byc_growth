@@ -65,10 +65,12 @@
 .button-danger {
   color: var(--red);
   background: var(--red-soft);
+  border: 1px solid #e5c4ba;
 }
 
 .button-danger:hover:not(:disabled) {
   background: #eccdc3;
+  border-color: #dfb2a6;
 }
 
 /* Brand Component */
