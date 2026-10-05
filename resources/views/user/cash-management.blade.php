@@ -227,7 +227,7 @@
 
             <div style="min-width: 140px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Input Date</label>
-                <input type="date" name="date" value="{{ $filters['date'] }}" class="input-field" style="width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit;">
+                <input type="date" name="date" max="{{ date('Y-m-d') }}" value="{{ $filters['date'] }}" class="input-field" style="width: 100%; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit;">
             </div>
 
             <div style="min-width: 110px;">

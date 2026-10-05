@@ -6,7 +6,9 @@
  * - Month View (4x3 12-Month Grid)
  * - Symmetrical vertically centered chevrons
  * - Single "Today" action button in footer
- * - Click outside to close
+ * - Max / Min date constraints (e.g. max today for birthdays and transfers)
+ * - Teleported to document.body with fixed smart-collision positioning (drop-up/drop-down)
+ * - Click outside & Escape to close
  */
 
 const MONTH_NAMES = [
@@ -55,15 +57,39 @@ function parseDateString(str) {
     return isNaN(fallback.getTime()) ? null : fallback;
 }
 
+function startOfDay(d) {
+    if (!d || isNaN(d.getTime())) return null;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+}
+
+function endOfDay(d) {
+    if (!d || isNaN(d.getTime())) return null;
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+}
+
 class BycDatePicker {
     constructor(originalInput) {
         this.originalInput = originalInput;
         this.originalInput._bycDatePicker = this;
 
+        // Setup min and max constraints
+        this.initConstraints();
+
         // Current selection
         const initialVal = this.originalInput.value || this.originalInput.getAttribute('value');
-        this.selectedDate = parseDateString(initialVal);
+        const parsedInitial = parseDateString(initialVal);
+        if (parsedInitial && this.maxDate && parsedInitial > this.maxDate) {
+            this.selectedDate = null;
+        } else if (parsedInitial && this.minDate && parsedInitial < this.minDate) {
+            this.selectedDate = null;
+        } else {
+            this.selectedDate = parsedInitial;
+        }
+
         this.viewDate = this.selectedDate ? new Date(this.selectedDate) : new Date();
+        if (!this.selectedDate && this.maxDate && this.viewDate > this.maxDate) {
+            this.viewDate = new Date(this.maxDate);
+        }
 
         // View mode: 'days' | 'years' | 'months'
         this.currentView = 'days';
@@ -74,6 +100,34 @@ class BycDatePicker {
         // Setup DOM
         this.setupDOM();
         this.bindEvents();
+    }
+
+    initConstraints() {
+        const rawMax = this.originalInput.getAttribute('max') || this.originalInput.dataset.max;
+        const inputName = (this.originalInput.name || '').toLowerCase();
+        const inputId = (this.originalInput.id || '').toLowerCase();
+        const isBirthdayOrTransfer = inputName.includes('birth') || inputId.includes('birth') || 
+                                     inputName.includes('dob') || inputId.includes('dob') ||
+                                     (inputName === 'date' && !inputName.includes('event') && !inputName.includes('start'));
+
+        if (rawMax === 'today' || (!rawMax && isBirthdayOrTransfer)) {
+            this.maxDate = endOfDay(new Date());
+        } else if (rawMax) {
+            const parsed = parseDateString(rawMax);
+            this.maxDate = parsed ? endOfDay(parsed) : null;
+        } else {
+            this.maxDate = null;
+        }
+
+        const rawMin = this.originalInput.getAttribute('min') || this.originalInput.dataset.min;
+        if (rawMin === 'today') {
+            this.minDate = startOfDay(new Date());
+        } else if (rawMin) {
+            const parsedMin = parseDateString(rawMin);
+            this.minDate = parsedMin ? startOfDay(parsedMin) : null;
+        } else {
+            this.minDate = null;
+        }
     }
 
     setupDOM() {
@@ -102,11 +156,11 @@ class BycDatePicker {
 
         this.originalInput.style.display = 'none';
 
-        // Create popup card
+        // Create popup card and teleport to document.body so modal overflow:hidden never clips it
         this.popup = document.createElement('div');
         this.popup.className = 'byc-dp-popup';
         this.popup.style.display = 'none';
-        this.wrapper.appendChild(this.popup);
+        document.body.appendChild(this.popup);
     }
 
     bindEvents() {
@@ -126,11 +180,15 @@ class BycDatePicker {
             e.stopPropagation();
         });
 
-        // Watch for disabled state on original input
+        // Watch for disabled state and constraint changes on original input
         const observer = new MutationObserver(() => {
             this.displayInput.disabled = this.originalInput.disabled;
+            this.initConstraints();
+            if (this.isOpen()) {
+                this.render();
+            }
         });
-        observer.observe(this.originalInput, { attributes: true, attributeFilter: ['disabled'] });
+        observer.observe(this.originalInput, { attributes: true, attributeFilter: ['disabled', 'max', 'min'] });
 
         // Intercept programmatic value setter on originalInput
         const originalSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
@@ -140,13 +198,18 @@ class BycDatePicker {
                 set: function(val) {
                     originalSetter.call(this, val);
                     const parsed = parseDateString(val);
-                    self.selectedDate = parsed;
-                    if (parsed) {
-                        self.viewDate = new Date(parsed);
-                        self.yearRangeStart = Math.floor(parsed.getFullYear() / 20) * 20;
-                        self.displayInput.value = formatDateDisplay(parsed);
-                    } else {
+                    if (parsed && ((self.maxDate && parsed > self.maxDate) || (self.minDate && parsed < self.minDate))) {
+                        self.selectedDate = null;
                         self.displayInput.value = '';
+                    } else {
+                        self.selectedDate = parsed;
+                        if (parsed) {
+                            self.viewDate = new Date(parsed);
+                            self.yearRangeStart = Math.floor(parsed.getFullYear() / 20) * 20;
+                            self.displayInput.value = formatDateDisplay(parsed);
+                        } else {
+                            self.displayInput.value = '';
+                        }
                     }
                     if (self.isOpen()) {
                         self.render();
@@ -164,28 +227,100 @@ class BycDatePicker {
         return this.popup.style.display !== 'none';
     }
 
+    updatePosition() {
+        if (!this.isOpen()) return;
+        const rect = this.displayInput.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) {
+            this.close();
+            return;
+        }
+
+        const popupWidth = 320;
+        const popupHeight = this.popup.offsetHeight || 360;
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+
+        let top;
+        // Prefer drop-down, but drop up if spaceBelow is not enough and spaceAbove is larger
+        if (spaceBelow < popupHeight + 12 && spaceAbove > spaceBelow) {
+            top = Math.max(10, rect.top - popupHeight - 8);
+            this.popup.classList.add('is-dropup');
+        } else {
+            top = rect.bottom + 8;
+            this.popup.classList.remove('is-dropup');
+        }
+
+        let left = rect.left;
+        if (left + popupWidth > viewportWidth - 12) {
+            left = Math.max(12, viewportWidth - popupWidth - 12);
+        }
+        if (left < 12) left = 12;
+
+        this.popup.style.position = 'fixed';
+        this.popup.style.top = `${Math.round(top)}px`;
+        this.popup.style.left = `${Math.round(left)}px`;
+        this.popup.style.zIndex = '999999';
+    }
+
     open() {
         // Close any other open datepickers
         document.querySelectorAll('.byc-dp-popup').forEach(p => p.style.display = 'none');
         document.querySelectorAll('.byc-date-display').forEach(d => d.classList.remove('is-active'));
+
+        this.initConstraints();
 
         // Reset view to days whenever opening
         this.currentView = 'days';
         if (this.selectedDate) {
             this.viewDate = new Date(this.selectedDate);
         } else {
-            this.viewDate = new Date();
+            const now = new Date();
+            if (this.maxDate && now > this.maxDate) {
+                this.viewDate = new Date(this.maxDate);
+            } else {
+                this.viewDate = new Date();
+            }
         }
         this.yearRangeStart = Math.floor(this.viewDate.getFullYear() / 20) * 20;
 
         this.render();
         this.popup.style.display = 'block';
         this.displayInput.classList.add('is-active');
+
+        this.updatePosition();
+
+        // Attach listeners for dynamic repositioning on scroll/resize
+        if (this._scrollHandler) {
+            window.removeEventListener('scroll', this._scrollHandler, true);
+            window.removeEventListener('resize', this._scrollHandler);
+        }
+        this._scrollHandler = (e) => {
+            if (!this.isOpen()) return;
+            if (e && e.target && (e.target === this.popup || this.popup.contains(e.target))) {
+                return;
+            }
+            const rect = this.displayInput.getBoundingClientRect();
+            if (rect.bottom < 0 || rect.top > window.innerHeight) {
+                this.close();
+            } else {
+                this.updatePosition();
+            }
+        };
+        window.addEventListener('scroll', this._scrollHandler, true);
+        window.addEventListener('resize', this._scrollHandler);
     }
 
     close() {
         this.popup.style.display = 'none';
         this.displayInput.classList.remove('is-active');
+        if (this._scrollHandler) {
+            window.removeEventListener('scroll', this._scrollHandler, true);
+            window.removeEventListener('resize', this._scrollHandler);
+            this._scrollHandler = null;
+        }
     }
 
     render() {
@@ -201,6 +336,9 @@ class BycDatePicker {
 
         // Always render footer with ONLY Today button
         this.renderFooter();
+
+        // Re-adjust position if height changed
+        requestAnimationFrame(() => this.updatePosition());
     }
 
     // -------------------------------------------------------------------------
@@ -210,12 +348,25 @@ class BycDatePicker {
         const header = document.createElement('div');
         header.className = 'byc-dp-header';
 
+        const year = this.viewDate.getFullYear();
+        const month = this.viewDate.getMonth();
+
         const prevBtn = document.createElement('button');
         prevBtn.type = 'button';
         prevBtn.className = 'byc-dp-arrow byc-dp-prev';
         prevBtn.setAttribute('aria-label', 'Previous Month');
         prevBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+        
+        // Disable prev button if whole prev month is before minDate
+        if (this.minDate) {
+            const prevMonthLastDate = new Date(year, month, 0, 23, 59, 59, 999);
+            if (prevMonthLastDate < this.minDate) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('is-disabled');
+            }
+        }
         prevBtn.addEventListener('click', () => {
+            if (prevBtn.disabled) return;
             this.viewDate.setMonth(this.viewDate.getMonth() - 1);
             this.render();
         });
@@ -250,7 +401,18 @@ class BycDatePicker {
         nextBtn.className = 'byc-dp-arrow byc-dp-next';
         nextBtn.setAttribute('aria-label', 'Next Month');
         nextBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+
+        // Disable next button if whole next month is beyond maxDate
+        if (this.maxDate) {
+            const nextMonthFirstDate = new Date(year, month + 1, 1);
+            if (nextMonthFirstDate > this.maxDate) {
+                nextBtn.disabled = true;
+                nextBtn.classList.add('is-disabled');
+                nextBtn.setAttribute('title', 'Next month is beyond maximum allowed date');
+            }
+        }
         nextBtn.addEventListener('click', () => {
+            if (nextBtn.disabled) return;
             this.viewDate.setMonth(this.viewDate.getMonth() + 1);
             this.render();
         });
@@ -274,9 +436,6 @@ class BycDatePicker {
         // Days Grid (7 Columns)
         const daysGrid = document.createElement('div');
         daysGrid.className = 'byc-dp-days-grid';
-
-        const year = this.viewDate.getFullYear();
-        const month = this.viewDate.getMonth();
 
         // First day of current month (0 = Sun, 1 = Mon...)
         const firstDayIndex = new Date(year, month, 1).getDay();
@@ -337,10 +496,20 @@ class BycDatePicker {
             btn.classList.add('is-selected');
         }
 
-        btn.addEventListener('click', () => {
-            this.selectDate(dateObj);
-            this.close();
-        });
+        const isPastMax = this.maxDate && dateObj > this.maxDate;
+        const isBeforeMin = this.minDate && dateObj < this.minDate;
+
+        if (isPastMax || isBeforeMin) {
+            btn.disabled = true;
+            btn.classList.add('is-disabled');
+            btn.setAttribute('aria-disabled', 'true');
+            btn.setAttribute('title', isPastMax ? 'Cannot select date in the future' : 'Date is before minimum allowed');
+        } else {
+            btn.addEventListener('click', () => {
+                this.selectDate(dateObj);
+                this.close();
+            });
+        }
 
         return btn;
     }
@@ -357,7 +526,16 @@ class BycDatePicker {
         prevBtn.className = 'byc-dp-arrow byc-dp-prev';
         prevBtn.setAttribute('aria-label', 'Previous 20 Years');
         prevBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+        
+        if (this.minDate) {
+            const prevDecadeEnd = new Date(this.yearRangeStart - 1, 11, 31, 23, 59, 59, 999);
+            if (prevDecadeEnd < this.minDate) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('is-disabled');
+            }
+        }
         prevBtn.addEventListener('click', () => {
+            if (prevBtn.disabled) return;
             this.yearRangeStart -= 20;
             this.render();
         });
@@ -386,7 +564,17 @@ class BycDatePicker {
         nextBtn.className = 'byc-dp-arrow byc-dp-next';
         nextBtn.setAttribute('aria-label', 'Next 20 Years');
         nextBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+
+        if (this.maxDate) {
+            const nextDecadeStart = new Date(this.yearRangeStart + 20, 0, 1);
+            if (nextDecadeStart > this.maxDate) {
+                nextBtn.disabled = true;
+                nextBtn.classList.add('is-disabled');
+                nextBtn.setAttribute('title', 'Future years are disabled');
+            }
+        }
         nextBtn.addEventListener('click', () => {
+            if (nextBtn.disabled) return;
             this.yearRangeStart += 20;
             this.render();
         });
@@ -416,11 +604,23 @@ class BycDatePicker {
                 btn.classList.add('is-selected');
             }
 
-            btn.addEventListener('click', () => {
-                this.viewDate.setFullYear(y);
-                this.currentView = 'months';
-                this.render();
-            });
+            const yearStart = new Date(y, 0, 1);
+            const yearEnd = new Date(y, 11, 31, 23, 59, 59, 999);
+            const isPastMax = this.maxDate && yearStart > this.maxDate;
+            const isBeforeMin = this.minDate && yearEnd < this.minDate;
+
+            if (isPastMax || isBeforeMin) {
+                btn.disabled = true;
+                btn.classList.add('is-disabled');
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('title', isPastMax ? 'Cannot select future year' : 'Year before minimum allowed');
+            } else {
+                btn.addEventListener('click', () => {
+                    this.viewDate.setFullYear(y);
+                    this.currentView = 'months';
+                    this.render();
+                });
+            }
 
             yearsGrid.appendChild(btn);
         }
@@ -440,7 +640,16 @@ class BycDatePicker {
         prevBtn.className = 'byc-dp-arrow byc-dp-prev';
         prevBtn.setAttribute('aria-label', 'Previous Year');
         prevBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+
+        if (this.minDate) {
+            const prevYearEnd = new Date(this.viewDate.getFullYear() - 1, 11, 31, 23, 59, 59, 999);
+            if (prevYearEnd < this.minDate) {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('is-disabled');
+            }
+        }
         prevBtn.addEventListener('click', () => {
+            if (prevBtn.disabled) return;
             this.viewDate.setFullYear(this.viewDate.getFullYear() - 1);
             this.render();
         });
@@ -475,7 +684,17 @@ class BycDatePicker {
         nextBtn.className = 'byc-dp-arrow byc-dp-next';
         nextBtn.setAttribute('aria-label', 'Next Year');
         nextBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+
+        if (this.maxDate) {
+            const nextYearStart = new Date(this.viewDate.getFullYear() + 1, 0, 1);
+            if (nextYearStart > this.maxDate) {
+                nextBtn.disabled = true;
+                nextBtn.classList.add('is-disabled');
+                nextBtn.setAttribute('title', 'Future years are disabled');
+            }
+        }
         nextBtn.addEventListener('click', () => {
+            if (nextBtn.disabled) return;
             this.viewDate.setFullYear(this.viewDate.getFullYear() + 1);
             this.render();
         });
@@ -506,11 +725,23 @@ class BycDatePicker {
                 btn.classList.add('is-selected');
             }
 
-            btn.addEventListener('click', () => {
-                this.viewDate.setMonth(idx);
-                this.currentView = 'days';
-                this.render();
-            });
+            const monthStart = new Date(this.viewDate.getFullYear(), idx, 1);
+            const monthEnd = new Date(this.viewDate.getFullYear(), idx + 1, 0, 23, 59, 59, 999);
+            const isPastMax = this.maxDate && monthStart > this.maxDate;
+            const isBeforeMin = this.minDate && monthEnd < this.minDate;
+
+            if (isPastMax || isBeforeMin) {
+                btn.disabled = true;
+                btn.classList.add('is-disabled');
+                btn.setAttribute('aria-disabled', 'true');
+                btn.setAttribute('title', isPastMax ? 'Cannot select future month' : 'Month before minimum allowed');
+            } else {
+                btn.addEventListener('click', () => {
+                    this.viewDate.setMonth(idx);
+                    this.currentView = 'days';
+                    this.render();
+                });
+            }
 
             monthsGrid.appendChild(btn);
         });
@@ -529,11 +760,22 @@ class BycDatePicker {
         todayBtn.type = 'button';
         todayBtn.className = 'byc-dp-today-btn';
         todayBtn.textContent = 'Today';
-        todayBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.selectDate(new Date());
-            this.close();
-        });
+
+        const today = new Date();
+        const isPastMax = this.maxDate && today > this.maxDate;
+        const isBeforeMin = this.minDate && today < this.minDate;
+
+        if (isPastMax || isBeforeMin) {
+            todayBtn.disabled = true;
+            todayBtn.classList.add('is-disabled');
+            todayBtn.setAttribute('title', 'Today is outside allowed range');
+        } else {
+            todayBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.selectDate(new Date());
+                this.close();
+            });
+        }
 
         footer.appendChild(todayBtn);
         this.popup.appendChild(footer);
@@ -541,8 +783,18 @@ class BycDatePicker {
 
     // Select a date and synchronize inputs
     selectDate(dateObj) {
-        this.selectedDate = new Date(dateObj);
-        this.viewDate = new Date(dateObj);
+        if (!dateObj) return;
+        const target = new Date(dateObj);
+
+        if (this.maxDate && target > this.maxDate) {
+            return;
+        }
+        if (this.minDate && target < this.minDate) {
+            return;
+        }
+
+        this.selectedDate = new Date(target);
+        this.viewDate = new Date(target);
 
         const isoStr = formatDateISO(this.selectedDate);
         const displayStr = formatDateDisplay(this.selectedDate);
@@ -566,7 +818,15 @@ class BycDatePicker {
 
 // Global click-outside listener to close any open datepickers
 document.addEventListener('click', (e) => {
-    if (!e.target.closest('.byc-date-wrapper')) {
+    if (!e.target.closest('.byc-date-wrapper') && !e.target.closest('.byc-dp-popup')) {
+        document.querySelectorAll('.byc-dp-popup').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.byc-date-display').forEach(d => d.classList.remove('is-active'));
+    }
+});
+
+// Global Escape listener to close any open datepickers
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
         document.querySelectorAll('.byc-dp-popup').forEach(p => p.style.display = 'none');
         document.querySelectorAll('.byc-date-display').forEach(d => d.classList.remove('is-active'));
     }
@@ -597,6 +857,10 @@ window.setDatePickerValue = function(elementOrId, dateVal) {
         if (dateVal) {
             const parsed = parseDateString(dateVal);
             if (parsed) {
+                if (el._bycDatePicker.maxDate && parsed > el._bycDatePicker.maxDate) {
+                    console.warn('[BycDatePicker] Date exceeds maximum allowed:', dateVal);
+                    return;
+                }
                 el._bycDatePicker.selectDate(parsed);
             } else {
                 el.value = '';

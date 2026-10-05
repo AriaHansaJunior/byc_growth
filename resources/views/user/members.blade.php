@@ -143,7 +143,7 @@
             <button type="button" class="btn-close-modal" id="btn-close-add-member" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
         </div>
 
-        <form method="POST" action="{{ route('admin.members.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('admin.members.store') }}" enctype="multipart/form-data" novalidate id="form-user-add-member">
             @csrf
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div>
@@ -156,7 +156,7 @@
                         Date of Birth
                         <span style="font-size: 11px; font-weight: 500; color: var(--muted);">(Internal application data for Birthday Popup)</span>
                     </label>
-                    <input type="date" name="date_of_birth" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                    <input type="date" name="date_of_birth" max="{{ date('Y-m-d') }}" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
                 </div>
 
                 <div>
@@ -181,7 +181,7 @@
             <button type="button" class="btn-close-modal" id="btn-close-edit-member" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
         </div>
 
-        <form method="POST" id="form-edit-member" action="" enctype="multipart/form-data">
+        <form method="POST" id="form-edit-member" action="" enctype="multipart/form-data" novalidate>
             @csrf
             <div style="display: flex; flex-direction: column; gap: 16px;">
                 <div>
@@ -194,7 +194,7 @@
                         Date of Birth
                         <span style="font-size: 11px; font-weight: 500; color: var(--muted);">(Internal application data for Birthday Popup)</span>
                     </label>
-                    <input type="date" name="date_of_birth" id="edit-member-dob" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                    <input type="date" name="date_of_birth" id="edit-member-dob" max="{{ date('Y-m-d') }}" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
                 </div>
 
                 <div>
@@ -224,29 +224,144 @@ document.addEventListener('DOMContentLoaded', () => {
     const openAddBtn = document.getElementById('btn-open-add-member');
     const closeAddBtn = document.getElementById('btn-close-add-member');
 
+    const formAdd = document.getElementById('form-user-add-member');
+
+    function setFieldError(field, message) {
+        if (!field) return;
+        clearFieldError(field);
+
+        field.classList.add('input-invalid');
+        if (field._bycDatePicker && field._bycDatePicker.displayInput) {
+            field._bycDatePicker.displayInput.classList.add('input-invalid');
+        }
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'form-field-error';
+        const fieldId = field.id || field.name;
+        if (fieldId) {
+            errorEl.setAttribute('data-for', fieldId);
+        }
+        errorEl.innerHTML = `<span style="font-size: 13px; line-height: 1;">⚠️</span> <span>${message}</span>`;
+
+        const targetEl = field.closest('.byc-date-wrapper') || field;
+        targetEl.insertAdjacentElement('afterend', errorEl);
+    }
+
+    function clearFieldError(field) {
+        if (!field) return;
+        field.classList.remove('input-invalid');
+        if (field._bycDatePicker && field._bycDatePicker.displayInput) {
+            field._bycDatePicker.displayInput.classList.remove('input-invalid');
+        }
+
+        const fieldId = field.id || field.name;
+        const parent = field.closest('div') || field.parentElement;
+        if (parent) {
+            parent.querySelectorAll(`.form-field-error[data-for="${fieldId}"]`).forEach(el => el.remove());
+        }
+        const targetEl = field.closest('.byc-date-wrapper') || field;
+        if (targetEl.nextElementSibling && targetEl.nextElementSibling.classList.contains('form-field-error')) {
+            targetEl.nextElementSibling.remove();
+        }
+    }
+
+    function clearAllErrors(form) {
+        if (!form) return;
+        form.querySelectorAll('.input-invalid').forEach(el => el.classList.remove('input-invalid'));
+        form.querySelectorAll('.form-field-error').forEach(el => el.remove());
+        form.querySelectorAll('.byc-date-display').forEach(el => el.classList.remove('input-invalid'));
+    }
+
+    function validateMemberForm(form) {
+        clearAllErrors(form);
+        let hasError = false;
+
+        const nameInput = form.querySelector('input[name="full_name"]');
+        const dobInput = form.querySelector('input[name="date_of_birth"]');
+
+        if (!nameInput || !nameInput.value || !nameInput.value.trim()) {
+            setFieldError(nameInput, 'Full name is required. Please enter member name.');
+            hasError = true;
+        } else if (nameInput.value.trim().length < 2) {
+            setFieldError(nameInput, 'Full name must be at least 2 characters.');
+            hasError = true;
+        }
+
+        if (dobInput && dobInput.value) {
+            const parts = dobInput.value.split('-');
+            if (parts.length === 3) {
+                const entered = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 23, 59, 59);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                if (entered > today) {
+                    setFieldError(dobInput, 'Date of birth cannot be in the future (maximum date is today).');
+                    hasError = true;
+                }
+            }
+        }
+
+        if (hasError) {
+            const firstInvalid = form.querySelector('.input-invalid');
+            if (firstInvalid) {
+                if (firstInvalid._bycDatePicker && firstInvalid._bycDatePicker.displayInput) {
+                    firstInvalid._bycDatePicker.displayInput.focus();
+                } else {
+                    firstInvalid.focus();
+                }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    [formAdd, formEdit].forEach(form => {
+        if (!form) return;
+        const nameInput = form.querySelector('input[name="full_name"]');
+        const dobInput = form.querySelector('input[name="date_of_birth"]');
+
+        if (nameInput) {
+            nameInput.addEventListener('input', () => clearFieldError(nameInput));
+            nameInput.addEventListener('change', () => clearFieldError(nameInput));
+        }
+        if (dobInput) {
+            dobInput.addEventListener('input', () => clearFieldError(dobInput));
+            dobInput.addEventListener('change', () => clearFieldError(dobInput));
+        }
+
+        form.addEventListener('submit', (e) => {
+            if (!validateMemberForm(form)) {
+                e.preventDefault();
+            }
+        });
+    });
+
     if (openAddBtn && addModal) {
         openAddBtn.addEventListener('click', () => {
+            clearAllErrors(formAdd);
             addModal.style.display = 'flex';
         });
     }
     if (closeAddBtn && addModal) {
         closeAddBtn.addEventListener('click', () => {
+            clearAllErrors(formAdd);
             addModal.style.display = 'none';
         });
     }
 
     const editModal = document.getElementById('modal-edit-member');
     const closeEditBtn = document.getElementById('btn-close-edit-member');
-    const formEdit = document.getElementById('form-edit-member');
 
     if (closeEditBtn && editModal) {
         closeEditBtn.addEventListener('click', () => {
+            clearAllErrors(formEdit);
             editModal.style.display = 'none';
         });
     }
 
     document.querySelectorAll('.btn-edit-member').forEach(btn => {
         btn.addEventListener('click', () => {
+            clearAllErrors(formEdit);
             const id = btn.dataset.id;
             const name = btn.dataset.name;
             const dob = btn.dataset.dob;

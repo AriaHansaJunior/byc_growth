@@ -127,9 +127,6 @@
             @if(empty($guessMeRounds))
                 <div class="empty-state-box" style="padding: 48px; text-align: center; background: var(--white); border-radius: 20px; border: 1px dashed var(--line); margin-bottom: 40px;">
                     <p style="color: var(--muted); font-size: 16px; margin-bottom: 16px;">No rounds currently configured for Guess Me!.</p>
-                    <button type="button" class="button button-primary" onclick="document.getElementById('btn-admin-add-guess-round').click();">
-                        Create First Round
-                    </button>
                 </div>
             @else
                 <div class="admin-guess-rounds-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 40px;">
@@ -231,9 +228,6 @@
             @if(empty($growth100Rounds))
                 <div class="empty-state-box" style="padding: 48px; text-align: center; background: var(--white); border-radius: 20px; border: 1px dashed var(--line); margin-bottom: 40px;">
                     <p style="color: var(--muted); font-size: 16px; margin-bottom: 16px;">No survey questions currently configured for BYC GROWTH 100.</p>
-                    <button type="button" class="button button-primary" onclick="document.getElementById('btn-admin-add-growth-round').click();">
-                        Create First Question
-                    </button>
                 </div>
             @else
                 <div class="admin-growth-questions-list" style="display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px;">

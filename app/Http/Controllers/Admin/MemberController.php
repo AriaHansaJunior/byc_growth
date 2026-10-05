@@ -86,8 +86,10 @@ class MemberController extends Controller
     {
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
+            'date_of_birth' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+        ], [
+            'date_of_birth.before_or_equal' => 'Date of birth cannot be in the future (maximum date is today).',
         ]);
 
         $photoFileId = null;
@@ -130,9 +132,11 @@ class MemberController extends Controller
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
+            'date_of_birth' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
             'remove_photo' => 'nullable|boolean',
+        ], [
+            'date_of_birth.before_or_equal' => 'Date of birth cannot be in the future (maximum date is today).',
         ]);
 
         $photoFileId = $member->photo_file_id;

@@ -84,11 +84,15 @@ class CashManagementController extends Controller
             }
         }
 
-        // Filter: Input Date (safe Carbon parse checking server timestamp and date)
+        // Filter: Input Date (safe Carbon parse checking server timestamp and date; max today)
         if ($request->filled('date')) {
             $date = $request->input('date');
             try {
                 $parsedDate = Carbon::parse($date)->toDateString();
+                $todayStr = Carbon::now('Asia/Jakarta')->toDateString();
+                if ($parsedDate > $todayStr) {
+                    $parsedDate = $todayStr;
+                }
                 $query->where(function ($dq) use ($parsedDate) {
                     $dq->whereDate('created_at', $parsedDate)
                        ->orWhereDate('transaction_date', $parsedDate);

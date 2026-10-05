@@ -168,7 +168,7 @@
 
     {{-- Add Member Modal --}}
     <div id="modal-add-member" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-add-member-title">
-        <div class="info-modal" style="width: min(720px, 94vw); max-height: calc(100vh - 40px); overflow: hidden; padding: 22px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
+        <div class="info-modal" style="width: min(720px, 94vw); max-height: calc(100vh - 40px); overflow: visible; padding: 22px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
             <button type="button" class="icon-button btn-close-modal" id="btn-close-add-member" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
                 <x-icon name="x" />
             </button>
@@ -177,7 +177,7 @@
                 <h3 id="modal-add-member-title" style="font: 800 20px 'Manrope', sans-serif; color: var(--ink); margin: 2px 0 0;">Add New Member</h3>
             </div>
 
-            <form method="POST" action="{{ route('admin.members.store') }}" enctype="multipart/form-data" id="form-add-member" class="member-modal-grid">
+            <form method="POST" action="{{ route('admin.members.store') }}" enctype="multipart/form-data" id="form-add-member" class="member-modal-grid" novalidate>
                 @csrf
 
                 {{-- Left Column: Photo Picker & Live Large Preview --}}
@@ -233,7 +233,7 @@
                             <label class="form-label" for="add-dob" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 6px;">
                                 Date of Birth
                             </label>
-                            <input type="date" id="add-dob" name="date_of_birth" class="form-input" style="height: 38px; font-size: 13.5px;">
+                            <input type="date" id="add-dob" name="date_of_birth" max="{{ date('Y-m-d') }}" class="form-input" style="height: 38px; font-size: 13.5px;">
                             <small style="color: var(--muted); font-size: 11.5px; display: block; margin-top: 4px;">Used for community birthday celebrations.</small>
                         </div>
                     </div>
@@ -251,7 +251,7 @@
 
     {{-- Edit Member Modal --}}
     <div id="modal-edit-member" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-edit-member-title">
-        <div class="info-modal" style="width: min(720px, 94vw); max-height: calc(100vh - 40px); overflow: hidden; padding: 22px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
+        <div class="info-modal" style="width: min(720px, 94vw); max-height: calc(100vh - 40px); overflow: visible; padding: 22px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
             <button type="button" class="icon-button btn-close-modal" id="btn-close-edit-member" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
                 <x-icon name="x" />
             </button>
@@ -260,7 +260,7 @@
                 <h3 id="modal-edit-member-title" style="font: 800 20px 'Manrope', sans-serif; color: var(--ink); margin: 2px 0 0;">Edit Member</h3>
             </div>
 
-            <form id="form-edit-member" method="POST" action="" enctype="multipart/form-data" class="member-modal-grid">
+            <form id="form-edit-member" method="POST" action="" enctype="multipart/form-data" class="member-modal-grid" novalidate>
                 @csrf
                 @method('PUT')
 
@@ -325,7 +325,7 @@
                             <label class="form-label" for="edit-dob" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 6px;">
                                 Date of Birth
                             </label>
-                            <input type="date" id="edit-dob" name="date_of_birth" class="form-input" style="height: 38px; font-size: 13.5px;">
+                            <input type="date" id="edit-dob" name="date_of_birth" max="{{ date('Y-m-d') }}" class="form-input" style="height: 38px; font-size: 13.5px;">
                             <small style="color: var(--muted); font-size: 11.5px; display: block; margin-top: 4px;">Used for community birthday celebrations.</small>
                         </div>
                     </div>
@@ -356,6 +356,112 @@ document.addEventListener('DOMContentLoaded', function () {
     const editDob = document.getElementById('edit-dob');
     const removeWrap = document.getElementById('edit-member-remove-photo-wrap');
     const removeCb = document.getElementById('edit-remove-photo');
+
+    // Custom Themed Form Validation
+    function setFieldError(field, message) {
+        if (!field) return;
+        clearFieldError(field);
+
+        field.classList.add('input-invalid');
+        if (field._bycDatePicker && field._bycDatePicker.displayInput) {
+            field._bycDatePicker.displayInput.classList.add('input-invalid');
+        }
+
+        const errorEl = document.createElement('div');
+        errorEl.className = 'form-field-error';
+        const fieldId = field.id || field.name;
+        if (fieldId) {
+            errorEl.setAttribute('data-for', fieldId);
+        }
+        errorEl.innerHTML = `<span style="font-size: 13px; line-height: 1;">⚠️</span> <span>${message}</span>`;
+
+        const targetEl = field.closest('.byc-date-wrapper') || field;
+        targetEl.insertAdjacentElement('afterend', errorEl);
+    }
+
+    function clearFieldError(field) {
+        if (!field) return;
+        field.classList.remove('input-invalid');
+        if (field._bycDatePicker && field._bycDatePicker.displayInput) {
+            field._bycDatePicker.displayInput.classList.remove('input-invalid');
+        }
+
+        const fieldId = field.id || field.name;
+        const parent = field.closest('.form-group') || field.parentElement;
+        if (parent) {
+            parent.querySelectorAll(`.form-field-error[data-for="${fieldId}"]`).forEach(el => el.remove());
+        }
+        const targetEl = field.closest('.byc-date-wrapper') || field;
+        if (targetEl.nextElementSibling && targetEl.nextElementSibling.classList.contains('form-field-error')) {
+            targetEl.nextElementSibling.remove();
+        }
+    }
+
+    function clearAllErrors(form) {
+        if (!form) return;
+        form.querySelectorAll('.input-invalid').forEach(el => el.classList.remove('input-invalid'));
+        form.querySelectorAll('.form-field-error').forEach(el => el.remove());
+        form.querySelectorAll('.byc-date-display').forEach(el => el.classList.remove('input-invalid'));
+    }
+
+    function validateMemberForm(form) {
+        clearAllErrors(form);
+        let hasError = false;
+
+        const nameInput = form.querySelector('input[name="full_name"]');
+        const dobInput = form.querySelector('input[name="date_of_birth"]');
+
+        if (!nameInput || !nameInput.value || !nameInput.value.trim()) {
+            setFieldError(nameInput, 'Full name is required. Please enter member name.');
+            hasError = true;
+        } else if (nameInput.value.trim().length < 2) {
+            setFieldError(nameInput, 'Full name must be at least 2 characters.');
+            hasError = true;
+        }
+
+        if (dobInput && dobInput.value) {
+            const parts = dobInput.value.split('-');
+            if (parts.length === 3) {
+                const entered = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 23, 59, 59);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                if (entered > today) {
+                    setFieldError(dobInput, 'Date of birth cannot be in the future (maximum date is today).');
+                    hasError = true;
+                }
+            }
+        }
+
+        if (hasError) {
+            const firstInvalid = form.querySelector('.input-invalid');
+            if (firstInvalid) {
+                if (firstInvalid._bycDatePicker && firstInvalid._bycDatePicker.displayInput) {
+                    firstInvalid._bycDatePicker.displayInput.focus();
+                } else {
+                    firstInvalid.focus();
+                }
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    // Attach real-time clear listeners on input and change
+    [formAdd, formEdit].forEach(form => {
+        if (!form) return;
+        const nameInput = form.querySelector('input[name="full_name"]');
+        const dobInput = form.querySelector('input[name="date_of_birth"]');
+
+        if (nameInput) {
+            nameInput.addEventListener('input', () => clearFieldError(nameInput));
+            nameInput.addEventListener('change', () => clearFieldError(nameInput));
+        }
+        if (dobInput) {
+            dobInput.addEventListener('input', () => clearFieldError(dobInput));
+            dobInput.addEventListener('change', () => clearFieldError(dobInput));
+        }
+    });
 
     // Cropper instance controller helper
     function setupCropper(config) {
@@ -561,8 +667,13 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Intercept form submit to attach compressed cropped file
+        // Intercept form submit to validate and attach compressed cropped file
         form.addEventListener('submit', async (e) => {
+            if (!validateMemberForm(form)) {
+                e.preventDefault();
+                return;
+            }
+
             if (!hasNewFile) {
                 return; // Standard submit if no new photo was chosen
             }
@@ -637,6 +748,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Open Add Modal
     if (btnOpenAdd && addModal) {
         btnOpenAdd.addEventListener('click', () => {
+            clearAllErrors(formAdd);
             addCropper.reset();
             if (window.setDatePickerValue) window.setDatePickerValue('add-dob', '');
             addModal.style.display = 'grid';
@@ -648,6 +760,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Open Edit Modal
     document.querySelectorAll('.btn-edit-member').forEach(btn => {
         btn.addEventListener('click', function () {
+            clearAllErrors(formEdit);
             const id = this.getAttribute('data-id');
             const name = this.getAttribute('data-name');
             const dob = this.getAttribute('data-dob');
@@ -692,6 +805,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Close Modals
     function closeAllModals() {
+        clearAllErrors(formAdd);
+        clearAllErrors(formEdit);
         if (addModal) addModal.style.display = 'none';
         if (editModal) editModal.style.display = 'none';
         document.body.classList.remove('modal-open');

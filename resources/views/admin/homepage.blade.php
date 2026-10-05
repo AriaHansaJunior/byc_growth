@@ -87,9 +87,6 @@
                 <p style="color: var(--muted); font-size: 14px; max-width: 440px; margin: 0 auto 16px;">
                     The homepage currently displays the default image. Click "Add Photo" to upload the first slideshow photo.
                 </p>
-                <button type="button" class="button button-primary button-sm btn-trigger-add-slide">
-                    <x-icon name="plus" /> Add First Photo
-                </button>
             </div>
         @else
             <div class="slideshow-table-wrap" style="overflow-x: auto; border: 1px solid var(--line); border-radius: 16px;">

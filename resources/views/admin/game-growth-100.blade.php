@@ -162,9 +162,9 @@
                 </button>
             </div>
         @else
-            <div style="padding: 40px; text-align: center; background: #14223a; border-radius: 20px;">
+            <div style="padding: 40px; text-align: center; background: #bad3ff; border-radius: 20px;">
                 <p>No survey questions available.</p>
-                <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Add Survey Question</button>
+                <button type="button" class="button button-primary" id="btn-open-editor-empty">Add Survey Question</button>
             </div>
         @endif
     </main>

@@ -83,7 +83,7 @@
 
             <div style="min-width: 140px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Input Date</label>
-                <input type="date" name="date" value="{{ $filters['date'] }}" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+                <input type="date" name="date" max="{{ date('Y-m-d') }}" value="{{ $filters['date'] }}" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
             <div style="min-width: 170px;">

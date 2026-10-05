@@ -45,17 +45,15 @@
     border-color: var(--line, #e2ded5) !important;
 }
 
-/* Datepicker Popup Card Container */
+/* Datepicker Popup Card Container (Fixed Teleported to Body) */
 .byc-dp-popup {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    z-index: 99999;
+    position: fixed;
+    z-index: 999999;
     width: 320px;
     background: #ffffff;
     border: 1px solid var(--line, #e2ded5);
     border-radius: 18px;
-    box-shadow: 0 16px 42px rgba(20, 31, 23, 0.16), 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 18px 46px rgba(20, 31, 23, 0.22), 0 4px 14px rgba(0, 0, 0, 0.08);
     font-family: 'DM Sans', 'Manrope', -apple-system, sans-serif;
     padding: 16px;
     box-sizing: border-box;
@@ -63,10 +61,25 @@
     user-select: none;
 }
 
+.byc-dp-popup.is-dropup {
+    animation: bycDpPopUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @keyframes bycDpPop {
     from {
         opacity: 0;
         transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes bycDpPopUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
     }
     to {
         opacity: 1;
@@ -235,11 +248,37 @@
     box-shadow: 0 4px 12px rgba(34, 66, 41, 0.3) !important;
 }
 
-.byc-dp-day-cell:disabled {
-    color: #d1d5db;
-    background: transparent;
-    cursor: not-allowed;
-    opacity: 0.4;
+.byc-dp-day-cell:disabled,
+.byc-dp-day-cell.is-disabled,
+.byc-dp-month-cell:disabled,
+.byc-dp-month-cell.is-disabled,
+.byc-dp-year-cell:disabled,
+.byc-dp-year-cell.is-disabled {
+    color: #c4cdc5 !important;
+    background: transparent !important;
+    cursor: not-allowed !important;
+    opacity: 0.35 !important;
+    pointer-events: none !important;
+    border-color: transparent !important;
+    text-decoration: line-through !important;
+    text-decoration-color: rgba(196, 205, 197, 0.7) !important;
+}
+
+.byc-dp-arrow:disabled,
+.byc-dp-arrow.is-disabled {
+    opacity: 0.22 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    color: var(--muted, #667669) !important;
+}
+
+.byc-dp-today-btn:disabled,
+.byc-dp-today-btn.is-disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    background: var(--paper, #fbf8ef) !important;
+    border-color: var(--line, #e2ded5) !important;
 }
 
 /* ==========================================================================

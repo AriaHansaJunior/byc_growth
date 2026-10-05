@@ -90,7 +90,7 @@
         @else
             <div style="padding: 40px; text-align: center; background: white; border-radius: 20px;">
                 <p>No rounds available.</p>
-                <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Add Round</button>
+                <button type="button" class="button button-primary" id="btn-open-editor-empty">Add Round</button>
             </div>
         @endif
 
