@@ -1,19 +1,48 @@
 /* Final Screen & Winner Summary */
 
+html:has(.final-screen),
+body:has(.final-screen) {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body:has(.final-screen) .site-wrapper,
+body:has(.final-screen) .site-main {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
 .final-screen {
-  min-height: 100vh;
-  padding: 32px 8vw 60px;
+  height: 100vh;
+  max-height: 100vh;
+  padding: clamp(10px, 1.8vh, 20px) clamp(16px, 3vw, 40px);
   background: radial-gradient(circle at 50% 10%, #204030 0%, var(--forest-dark) 70%);
   color: #ffffff;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
   overflow: hidden;
   position: relative;
+  box-sizing: border-box;
 }
 
-.final-screen > .brand-button {
-  align-self: flex-start;
+/* Pinned Brand Link (Top-left, takes zero flex height) */
+.final-screen > .brand-button.final-brand-link {
+  position: absolute;
+  top: clamp(12px, 2vh, 22px);
+  left: clamp(14px, 2.5vw, 30px);
+  z-index: 10;
+  text-decoration: none;
 }
 
 .final-screen .brand {
@@ -26,6 +55,7 @@
 
 .final-screen .brand:hover {
   background: #ffffff;
+  transform: translateY(-1px);
 }
 
 .final-screen .brand-mark {
@@ -37,38 +67,47 @@
   color: #ffffff;
 }
 
+/* Winner / Header Section */
 .winner {
   text-align: center;
-  margin-top: 24px;
+  margin-top: clamp(2px, 0.5vh, 8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .winner .eyebrow {
   color: var(--lime);
-  margin: 18px 0 8px;
+  font-size: clamp(11px, 1.2vh, 13px);
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin: clamp(4px, 0.6vh, 8px) 0 clamp(2px, 0.4vh, 4px);
+  display: block;
 }
 
 .trophy {
-  width: 90px;
-  height: 90px;
-  margin: auto;
-  border-radius: 30px 14px;
+  width: clamp(52px, 6.5vh, 74px);
+  height: clamp(52px, 6.5vh, 74px);
+  margin: 0 auto;
+  border-radius: clamp(16px, 2vh, 22px) clamp(8px, 1vh, 12px);
   color: var(--forest-dark);
   background: var(--gold);
   display: grid;
   place-items: center;
-  box-shadow: 0 0 0 12px rgba(231, 189, 82, .18), 0 12px 35px rgba(0, 0, 0, .3);
+  box-shadow: 0 0 0 clamp(6px, 1vh, 10px) rgba(231, 189, 82, .18), 0 10px 28px rgba(0, 0, 0, .35);
   animation: trophyBounce 3s ease-in-out infinite;
 }
 
 .trophy .icon {
-  width: 48px;
-  height: 48px;
+  width: clamp(28px, 3.5vh, 38px);
+  height: clamp(28px, 3.5vh, 38px);
 }
 
 .winner h1 {
   margin: 0;
-  font: 800 62px/1.05 "Manrope", sans-serif;
-  letter-spacing: -.05em;
+  font: 800 clamp(26px, 4.2vh, 44px)/1.08 "Manrope", sans-serif;
+  letter-spacing: -.03em;
   background: linear-gradient(180deg, #ffffff 0%, #e0e9e3 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -76,156 +115,388 @@
 
 .winner p {
   color: #b9c8c1;
-  font-size: 17px;
+  font-size: clamp(12px, 1.4vh, 14px);
   max-width: 520px;
-  margin: 12px auto 0;
-  line-height: 1.6;
+  margin: clamp(3px, 0.5vh, 6px) auto 0;
+  line-height: 1.4;
 }
 
-.final-board {
-  width: min(860px, 90vw);
-  margin: 36px 0;
-  display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  background: #213e30;
-  border: 1px solid #446351;
-  border-radius: 26px;
-  overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+/* ==========================================================================
+   Podium Layout (Olympic-style: 2nd on Left, 1st in Center, 3rd on Right)
+   ========================================================================== */
+.final-podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: clamp(12px, 2vw, 26px);
+  width: 100%;
+  max-width: 880px;
+  flex: 1;
+  max-height: clamp(260px, 39vh, 350px);
+  min-height: 0;
+  margin: clamp(4px, 0.8vh, 12px) 0;
   position: relative;
 }
 
+.final-podium-container.is-two-teams {
+  max-width: 600px;
+}
+
+/* Individual Podium Card */
+.podium-card {
+  flex: 1;
+  max-width: clamp(200px, 25vw, 275px);
+  min-width: 155px;
+  border-radius: 22px 22px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+  padding: clamp(14px, 1.8vh, 20px) clamp(12px, 1.5vw, 18px) 0;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+  box-sizing: border-box;
+}
+
+.podium-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Heights & Elevation by Rank */
+.podium-card-first {
+  height: 100%;
+  z-index: 3;
+  max-width: clamp(225px, 27vw, 300px);
+  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.48), 0 0 0 2px rgba(231, 189, 82, 0.45);
+}
+
+.podium-card-second {
+  height: 85%;
+  z-index: 2;
+  box-shadow: 0 15px 38px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.3);
+}
+
+.podium-card-third {
+  height: 74%;
+  z-index: 1;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(205, 127, 50, 0.3);
+}
+
+/* Rank Badges */
+.podium-rank-badge {
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: clamp(12px, 1.4vh, 14px);
+  letter-spacing: .08em;
+  padding: clamp(4px, 0.6vh, 7px) clamp(12px, 1.4vw, 18px);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  margin-bottom: clamp(4px, 0.6vh, 8px);
+  white-space: nowrap;
+}
+
+.podium-rank-badge .crown-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.badge-gold {
+  background: linear-gradient(135deg, #e7bd52 0%, #caa038 100%);
+  color: #261b04;
+  font-size: clamp(13px, 1.5vh, 15px);
+  box-shadow: 0 4px 12px rgba(231, 189, 82, 0.4);
+}
+
+.badge-silver {
+  background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+  color: #1e293b;
+  box-shadow: 0 3px 10px rgba(203, 213, 225, 0.3);
+}
+
+.badge-bronze {
+  background: linear-gradient(135deg, #e29f6d 0%, #c47c45 100%);
+  color: #2d1808;
+  box-shadow: 0 3px 10px rgba(196, 124, 69, 0.3);
+}
+
+.tie-badge {
+  background: rgba(186, 210, 89, 0.25);
+  color: var(--lime);
+  border: 1px solid rgba(186, 210, 89, 0.5);
+  font-size: clamp(13px, 1.5vh, 15px);
+  padding: clamp(4px, 0.6vh, 6px) clamp(16px, 1.8vw, 22px);
+}
+
+/* Card Content Elements */
+.podium-card .team-label,
+.final-team .team-label {
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .1em;
+  font-size: clamp(15px, 2vh, 19px);
+  color: #ffffff;
+  margin: clamp(2px, 0.4vh, 6px) 0 2px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 95%;
+}
+
+.podium-card-first .team-label {
+  font-size: clamp(16px, 2.2vh, 21px);
+}
+
+.podium-card .team-score,
+.final-team .team-score {
+  display: block;
+  font: 800 clamp(54px, 8.2vh, 78px)/1 "Manrope", sans-serif;
+  margin: clamp(4px, 0.6vh, 8px) 0 clamp(2px, 0.3vh, 4px);
+  color: #ffffff;
+  text-align: center;
+  letter-spacing: -.03em;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.podium-card-first .team-score {
+  font: 800 clamp(60px, 9.2vh, 88px)/1 "Manrope", sans-serif;
+}
+
+.podium-card .team-points-label,
+.final-team .team-points-label {
+  color: #d1ded7;
+  font-size: clamp(11px, 1.3vh, 13px);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 700;
+  text-align: center;
+  display: block;
+}
+
+.podium-subscores {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1vw, 14px);
+  font-size: clamp(12px, 1.4vh, 14px);
+  color: rgba(255, 255, 255, 0.95);
+  margin: clamp(6px, 0.8vh, 12px) 0;
+  white-space: nowrap;
+}
+
+.podium-subscores strong {
+  font-weight: 800;
+  font-family: "Manrope", sans-serif;
+}
+
+.podium-subscores .subscore-dot {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 14px;
+}
+
+/* Podium Pedestal Bases with Embossed Rank Numbers */
+.podium-pedestal-base {
+  width: calc(100% + clamp(24px, 3vw, 36px));
+  margin-left: calc(-1 * clamp(12px, 1.5vw, 18px));
+  margin-right: calc(-1 * clamp(12px, 1.5vw, 18px));
+  margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  color: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
+}
+
+.base-gold {
+  height: clamp(38px, 4.8vh, 50px);
+  background: linear-gradient(180deg, rgba(231, 189, 82, 0.5) 0%, rgba(184, 134, 11, 0.72) 100%);
+  border-top: 2.5px solid var(--gold);
+  font-size: clamp(22px, 2.8vh, 28px);
+}
+
+.base-silver {
+  height: clamp(32px, 4vh, 42px);
+  background: linear-gradient(180deg, rgba(226, 232, 240, 0.35) 0%, rgba(148, 163, 184, 0.55) 100%);
+  border-top: 2.5px solid #cbd5e1;
+  font-size: clamp(18px, 2.3vh, 24px);
+}
+
+.base-bronze {
+  height: clamp(26px, 3.2vh, 34px);
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.35) 0%, rgba(140, 88, 54, 0.55) 100%);
+  border-top: 2.5px solid #cd7f32;
+  font-size: clamp(16px, 2vh, 21px);
+}
+
+/* ==========================================================================
+   Spectators Row (4th Place and Beyond — Equal horizontal cards below)
+   ========================================================================== */
+.final-spectators-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 16px);
+  width: 100%;
+  max-width: 880px;
+  flex-wrap: wrap;
+  margin: clamp(2px, 0.5vh, 6px) 0;
+  z-index: 4;
+}
+
+.spectator-card {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 1vw, 14px);
+  padding: clamp(6px, 0.9vh, 10px) clamp(12px, 1.4vw, 18px);
+  border-radius: 14px;
+  background: rgba(23, 52, 38, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  flex: 1 1 200px;
+  max-width: 275px;
+  box-sizing: border-box;
+}
+
+.spectator-rank-pill {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-family: "Manrope", sans-serif;
+  font-weight: 800;
+  font-size: clamp(11px, 1.3vh, 13px);
+  padding: 3px 8px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+
+.spectator-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.spectator-name {
+  font-weight: 800;
+  font-size: clamp(12px, 1.4vh, 14px);
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spectator-breakdown {
+  font-size: clamp(10px, 1.2vh, 12px);
+  color: #bac8c1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.spectator-total {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.spectator-total strong {
+  font: 800 clamp(16px, 2vh, 20px) "Manrope", sans-serif;
+  color: #ffffff;
+}
+
+.spectator-total small {
+  font-size: 11px;
+  color: #bac8c1;
+  margin-left: 2px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Tie Board (When 1st place is tied — Equal prominence)
+   ========================================================================== */
+.final-tie-board {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: clamp(14px, 2.2vw, 28px);
+  width: 100%;
+  max-width: 880px;
+  flex: 1;
+  max-height: clamp(260px, 39vh, 345px);
+  margin: clamp(4px, 0.8vh, 12px) 0;
+}
+
+.final-tie-board .final-team {
+  flex: 1;
+  max-width: clamp(220px, 28vw, 310px);
+  border-radius: 24px;
+  padding: clamp(18px, 2.5vh, 28px) clamp(16px, 2vw, 24px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+  border: 2px dashed rgba(186, 210, 89, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
 .final-team {
-  padding: 38px 24px;
   text-align: center;
   position: relative;
   transition: transform .3s ease;
 }
 
-.final-team > span {
-  text-transform: uppercase;
-  font-weight: 800;
-  letter-spacing: .12em;
-  font-size: 13px;
-  display: block;
-}
-
-.final-team > strong {
-  display: block;
-  font: 800 68px/1 "Manrope", sans-serif;
-  margin: 10px 0;
-}
-
-.final-team small {
-  color: #bac8c1;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-weight: 600;
-}
-
-.final-team.is-winner {
-  box-shadow: inset 0 0 0 3px var(--lime);
-}
-
-.winner-crown {
-  display: inline-block;
-  font-size: 20px;
-  margin-bottom: 4px;
-}
-
+/* ==========================================================================
+   Color Themes
+   ========================================================================== */
 .final-red {
   background: #72322f;
-}
-
-.final-red.is-winner {
-  background: #883a37;
 }
 
 .final-blue {
   background: #234b73;
 }
 
-.final-blue.is-winner {
-  background: #2b5d8f;
-}
-
 .final-forest {
   background: #1f4935;
-}
-
-.final-forest.is-winner {
-  background: #265c43;
 }
 
 .final-gold {
   background: #795316;
 }
 
-.final-gold.is-winner {
-  background: #95661b;
-}
-
 .final-purple {
   background: #4c287a;
-}
-
-.final-purple.is-winner {
-  background: #5f339b;
 }
 
 .final-teal {
   background: #134e4a;
 }
 
-.final-teal.is-winner {
-  background: #18635e;
+/* Return Button */
+.final-return-btn {
+  margin: clamp(4px, 0.8vh, 12px) 0 clamp(2px, 0.4vh, 6px);
+  padding: clamp(8px, 1.2vh, 12px) clamp(18px, 2vw, 26px);
+  font-size: clamp(13px, 1.5vh, 15px);
+  font-weight: 700;
+  z-index: 5;
 }
 
-.final-details {
-  padding: 28px 24px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 16px;
-  background: rgba(18, 38, 29, .75);
-}
-
-.final-details div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #c1cec7;
-  font-size: 13px;
-}
-
-.final-details div strong {
-  color: #ffffff;
-  font-size: 15px;
-  font-family: "Manrope", sans-serif;
-}
-
-.final-details em {
-  padding-top: 14px;
-  border-top: 1px solid #456151;
-  color: var(--lime);
-  text-transform: uppercase;
-  text-align: center;
-  letter-spacing: .16em;
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 800;
-}
-
-/* Animations */
+/* Confetti Animations */
 @keyframes trophyBounce {
   0%, 100% {
     transform: translateY(0);
-    box-shadow: 0 0 0 12px rgba(231, 189, 82, .18), 0 12px 35px rgba(0, 0, 0, .3);
+    box-shadow: 0 0 0 clamp(6px, 1vh, 10px) rgba(231, 189, 82, .18), 0 10px 28px rgba(0, 0, 0, .35);
   }
   50% {
-    transform: translateY(-8px);
-    box-shadow: 0 0 0 20px rgba(231, 189, 82, .25), 0 20px 45px rgba(0, 0, 0, .4);
+    transform: translateY(-6px);
+    box-shadow: 0 0 0 clamp(10px, 1.4vh, 16px) rgba(231, 189, 82, .25), 0 16px 36px rgba(0, 0, 0, .45);
   }
 }
 
