@@ -303,7 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentZoom = 1.0;
     let currentOffsetX = 0;
     let currentOffsetY = 0;
-    const viewportSize = 280; // px (matches CSS .crop-viewport-container)
+    const viewportW = 320; // px (4:3 aspect ratio)
+    const viewportH = 240; // px
     let isDragging = false;
     let startX = 0;
     let startY = 0;
@@ -413,14 +414,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getDimensions() {
-        const baseScale = Math.max(viewportSize / imgNaturalW, viewportSize / imgNaturalH);
+        const baseScale = Math.max(viewportW / imgNaturalW, viewportH / imgNaturalH);
         const scale = baseScale * currentZoom;
         const displayW = imgNaturalW * scale;
         const displayH = imgNaturalH * scale;
 
-        const minOffsetX = viewportSize - displayW;
+        const minOffsetX = viewportW - displayW;
         const maxOffsetX = 0;
-        const minOffsetY = viewportSize - displayH;
+        const minOffsetY = viewportH - displayH;
         const maxOffsetY = 0;
 
         return { scale, displayW, displayH, minOffsetX, maxOffsetX, minOffsetY, maxOffsetY };
@@ -443,8 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function alignPosition(align) {
         const { displayW, displayH, minOffsetX, minOffsetY } = getDimensions();
         if (align === 'center') {
-            currentOffsetX = (viewportSize - displayW) / 2;
-            currentOffsetY = (viewportSize - displayH) / 2;
+            currentOffsetX = (viewportW - displayW) / 2;
+            currentOffsetY = (viewportH - displayH) / 2;
         } else if (align === 'top') {
             currentOffsetY = 0;
         } else if (align === 'bottom') {
@@ -516,13 +517,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const { scale } = getDimensions();
                 const cropX = -currentOffsetX / scale;
                 const cropY = -currentOffsetY / scale;
-                const cropW = viewportSize / scale;
-                const cropH = viewportSize / scale;
+                const cropW = viewportW / scale;
+                const cropH = viewportH / scale;
 
-                const targetSize = Math.min(1600, Math.max(600, Math.round(cropW)));
+                const targetW = Math.min(1600, Math.max(800, Math.round(cropW)));
+                const targetH = Math.round(targetW * 3 / 4);
                 const canvas = document.createElement('canvas');
-                canvas.width = targetSize;
-                canvas.height = targetSize;
+                canvas.width = targetW;
+                canvas.height = targetH;
                 const ctx = canvas.getContext('2d');
 
                 ctx.imageSmoothingEnabled = true;
@@ -530,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.drawImage(
                     cropImg,
                     cropX, cropY, cropW, cropH,
-                    0, 0, targetSize, targetSize
+                    0, 0, targetW, targetH
                 );
 
                 const mimeType = (originalFile && originalFile.type) ? originalFile.type : 'image/jpeg';

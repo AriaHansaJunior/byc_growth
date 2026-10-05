@@ -8,8 +8,11 @@ import { initHeroEnhancements } from './components/hero';
 import { initScrollReveal } from './components/scroll-reveal';
 import { initUserIdentity } from './components/user-identity';
 import { initAdminShell } from './components/admin-shell';
+import { initDatepickers } from './components/datepicker';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize universal enhanced datepickers
+    initDatepickers();
     // Initialize Cara Bermain modal & tabs
     initModal('btn-how-to-play', 'modal-how-to-play', 'btn-close-how-to-play');
     initHowToPlayTabs();

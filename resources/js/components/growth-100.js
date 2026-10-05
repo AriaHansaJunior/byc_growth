@@ -29,7 +29,7 @@ export function initGrowth100() {
     const btnResetCrosses = document.getElementById('btn-reset-crosses');
     const crossOverlay = document.getElementById('cross-overlay');
     const crossOverlayContent = document.getElementById('cross-overlay-content');
-    const growthTeamsContainer = document.getElementById('growth-teams-award-container');
+    const hostTeamsContainer = document.getElementById('host-teams-container') || document.getElementById('growth-teams-award-container');
 
     let crossOverlayTimeout = null;
 
@@ -109,10 +109,14 @@ export function initGrowth100() {
             el.textContent = total;
         });
 
+        document.querySelectorAll('.award-points-display').forEach((el) => {
+            el.textContent = `+${total}`;
+        });
+
         // Update Host Team Cards Visual Selection State
-        if (growthTeamsContainer) {
+        if (hostTeamsContainer) {
             updateTeamCardsVisualState(
-                growthTeamsContainer,
+                hostTeamsContainer,
                 currentRound.awarded_team_id ?? null,
                 total
             );
@@ -247,7 +251,12 @@ export function initGrowth100() {
     async function goToRound(index) {
         if (index < 0 || index >= rounds.length) return;
         currentIndex = index;
+        if (window.BYC_GAME2) window.BYC_GAME2.currentIndex = index;
         updateRoundUI();
+
+        window.dispatchEvent(new CustomEvent('byc:round-changed', {
+            detail: { round: rounds[currentIndex], index: currentIndex }
+        }));
 
         try {
             await postJson('/game/growth-100/state', {
@@ -321,6 +330,52 @@ export function initGrowth100() {
 
     // Synchronize UI on initial page load
     updateRoundUI();
+
+    // ==========================================
+    // Scoreboard & Host Controls Modal Overlay
+    // ==========================================
+    const modalScoreboard = document.getElementById('modal-host-scoreboard');
+    const btnToggleScoreboard = document.getElementById('btn-toggle-scoreboard');
+    const btnOpenScoreboardNav = document.getElementById('btn-open-scoreboard-nav');
+    const btnCloseScoreboard = document.getElementById('btn-close-scoreboard');
+
+    function openScoreboard() {
+        if (!modalScoreboard) return;
+        modalScoreboard.style.display = 'flex';
+        document.body.classList.add('modal-open');
+    }
+
+    function closeScoreboard() {
+        if (!modalScoreboard) return;
+        modalScoreboard.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+
+    if (btnToggleScoreboard) {
+        btnToggleScoreboard.addEventListener('click', () => {
+            if (modalScoreboard.style.display === 'none' || !modalScoreboard.style.display) {
+                openScoreboard();
+            } else {
+                closeScoreboard();
+            }
+        });
+    }
+
+    if (btnOpenScoreboardNav) {
+        btnOpenScoreboardNav.addEventListener('click', openScoreboard);
+    }
+
+    if (btnCloseScoreboard) {
+        btnCloseScoreboard.addEventListener('click', closeScoreboard);
+    }
+
+    if (modalScoreboard) {
+        modalScoreboard.addEventListener('click', (e) => {
+            if (e.target === modalScoreboard) {
+                closeScoreboard();
+            }
+        });
+    }
 
     // ==========================================
     // CRUD Editor Modal Logic with Batch Save

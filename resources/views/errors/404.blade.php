@@ -16,7 +16,7 @@
         <p style="color: var(--muted); line-height: 1.6; margin-bottom: 28px;">
             The page or resource you are looking for does not exist, has been removed, or is temporarily unavailable.
         </p>
-        <a href="{{ route('home') }}" class="button button-primary">
+        <a href="{{ (Auth::check() && Auth::user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="button button-primary">
             Return to Homepage
         </a>
     </div>

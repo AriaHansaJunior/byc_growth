@@ -513,6 +513,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnOpenAdd && addModal) {
         btnOpenAdd.addEventListener('click', () => {
             formAdd.reset();
+            if (window.setDatePickerValue) {
+                window.setDatePickerValue(addStartDate, '');
+                window.setDatePickerValue(addEndDate, '');
+            }
             addEndDate.disabled = true;
             addEndDate.value = '';
             addEndDate.style.opacity = '0.6';
@@ -538,11 +542,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (editName) editName.value = name || '';
             if (editStartDate) {
-                editStartDate.value = startDate;
-                if (editEndDate) {
-                    editEndDate.disabled = false;
-                    editEndDate.min = startDate;
-                    editEndDate.value = endDate;
+                if (window.setDatePickerValue) {
+                    window.setDatePickerValue(editStartDate, startDate);
+                    if (editEndDate) {
+                        editEndDate.disabled = false;
+                        editEndDate.min = startDate;
+                        window.setDatePickerValue(editEndDate, endDate);
+                    }
+                } else {
+                    editStartDate.value = startDate;
+                    if (editEndDate) {
+                        editEndDate.disabled = false;
+                        editEndDate.min = startDate;
+                        editEndDate.value = endDate;
+                    }
                 }
             }
             if (editDesc) editDesc.value = desc || '';

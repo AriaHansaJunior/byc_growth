@@ -1,0 +1,372 @@
+/* ==========================================================================
+   BYC GROWTH — Bespoke Enhanced Datepicker Styles
+   Matches BYC Forest & Lime Aesthetic with Multi-Level Allianz UX
+   ========================================================================== */
+
+/* Date Input Display Wrapper & Trigger */
+.byc-date-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.byc-date-display {
+    background-color: var(--white, #ffffff) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23224229' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='3' ry='3'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3Cpath d='M8 14h.01'%3E%3C/path%3E%3Cpath d='M12 14h.01'%3E%3C/path%3E%3Cpath d='M16 14h.01'%3E%3C/path%3E%3Cpath d='M8 18h.01'%3E%3C/path%3E%3Cpath d='M12 18h.01'%3E%3C/path%3E%3Cpath d='M16 18h.01'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    background-size: 18px 18px !important;
+    padding-right: 44px !important;
+    cursor: pointer !important;
+    font-family: 'DM Sans', 'Manrope', -apple-system, sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    color: var(--ink, #141f17) !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.byc-date-display:hover {
+    border-color: var(--forest, #224229) !important;
+}
+
+.byc-date-display:focus,
+.byc-date-display.is-active {
+    outline: none !important;
+    border-color: var(--forest, #224229) !important;
+    box-shadow: 0 0 0 3px rgba(186, 210, 89, 0.35) !important;
+}
+
+.byc-date-display:disabled,
+.byc-date-display[disabled] {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    background-color: var(--paper, #fbf8ef) !important;
+    border-color: var(--line, #e2ded5) !important;
+}
+
+/* Datepicker Popup Card Container */
+.byc-dp-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 99999;
+    width: 320px;
+    background: #ffffff;
+    border: 1px solid var(--line, #e2ded5);
+    border-radius: 18px;
+    box-shadow: 0 16px 42px rgba(20, 31, 23, 0.16), 0 2px 8px rgba(0, 0, 0, 0.04);
+    font-family: 'DM Sans', 'Manrope', -apple-system, sans-serif;
+    padding: 16px;
+    box-sizing: border-box;
+    animation: bycDpPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+}
+
+@keyframes bycDpPop {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Header Area (Symmetrical, Vertically Centered Chevrons) */
+.byc-dp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 50px;
+    padding: 0 2px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.byc-dp-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--forest, #224229);
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.byc-dp-arrow:hover {
+    background: rgba(186, 210, 89, 0.3);
+    border-color: var(--lime, #bad259);
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-arrow svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
+.byc-dp-header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    text-align: center;
+    padding: 0 8px;
+}
+
+.byc-dp-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink, #141f17);
+    line-height: 1.2;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 2px 6px;
+    transition: background 0.15s ease;
+}
+
+.byc-dp-title:hover {
+    background: rgba(186, 210, 89, 0.25);
+    color: var(--forest, #224229);
+}
+
+.byc-dp-sublink {
+    background: none;
+    border: none;
+    padding: 2px 0 0;
+    margin: 0;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--forest, #224229);
+    cursor: pointer;
+    line-height: 1.2;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.15s ease;
+}
+
+.byc-dp-sublink:hover {
+    color: var(--forest-dark, #162e1c);
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   VIEW 1: DAY VIEW
+   ========================================================================== */
+
+/* Weekday column headers */
+.byc-dp-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed var(--line, #e2ded5);
+    padding-bottom: 6px;
+}
+
+.byc-dp-weekday {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted, #667669);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+/* Days Grid: 7 Equal Columns, Guaranteed Never Squished */
+.byc-dp-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.byc-dp-day-cell {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    width: 36px;
+    margin: 0 auto;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink, #141f17);
+    background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.byc-dp-day-cell:hover:not(:disabled) {
+    background: #f0f7e6;
+    border-color: var(--lime, #bad259);
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-day-cell.is-other-month {
+    color: #b5beb6;
+    opacity: 0.55;
+}
+
+.byc-dp-day-cell.is-today {
+    border-color: var(--lime, #bad259);
+    background: rgba(186, 210, 89, 0.18);
+    font-weight: 800;
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-day-cell.is-selected {
+    background: var(--forest, #224229) !important;
+    border-color: var(--forest, #224229) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px rgba(34, 66, 41, 0.3) !important;
+}
+
+.byc-dp-day-cell:disabled {
+    color: #d1d5db;
+    background: transparent;
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+/* ==========================================================================
+   VIEW 2: YEAR / DECADE VIEW (Allianz Style 4x5 Grid = 20 Years)
+   ========================================================================== */
+.byc-dp-years-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px 6px;
+    margin-top: 4px;
+    margin-bottom: 6px;
+}
+
+.byc-dp-year-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink, #141f17);
+    border-radius: 10px;
+    background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.byc-dp-year-cell:hover:not(:disabled) {
+    background: #f0f7e6;
+    border-color: var(--lime, #bad259);
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-year-cell.is-current-year {
+    border-color: var(--lime, #bad259);
+    background: rgba(186, 210, 89, 0.15);
+    font-weight: 800;
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-year-cell.is-selected {
+    background: var(--forest, #224229) !important;
+    border-color: var(--forest, #224229) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px rgba(34, 66, 41, 0.3) !important;
+}
+
+/* ==========================================================================
+   VIEW 3: MONTH VIEW (4x3 Grid = 12 Months)
+   ========================================================================== */
+.byc-dp-months-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px 6px;
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+.byc-dp-month-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--ink, #141f17);
+    border-radius: 10px;
+    background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.byc-dp-month-cell:hover {
+    background: #f0f7e6;
+    border-color: var(--lime, #bad259);
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-month-cell.is-current-month {
+    border-color: var(--lime, #bad259);
+    background: rgba(186, 210, 89, 0.15);
+    font-weight: 800;
+    color: var(--forest-dark, #162e1c);
+}
+
+.byc-dp-month-cell.is-selected {
+    background: var(--forest, #224229) !important;
+    border-color: var(--forest, #224229) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 4px 12px rgba(34, 66, 41, 0.3) !important;
+}
+
+/* ==========================================================================
+   FOOTER (Only "Today" Button, Clear & Close removed per user requirement)
+   ========================================================================== */
+.byc-dp-footer {
+    display: flex;
+    padding-top: 12px;
+    margin-top: 8px;
+    border-top: 1px solid var(--line, #e2ded5);
+}
+
+.byc-dp-today-btn {
+    width: 100%;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(186, 210, 89, 0.22);
+    color: var(--forest-dark, #162e1c);
+    border: 1px solid var(--lime, #bad259);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.byc-dp-today-btn:hover {
+    background: var(--lime, #bad259);
+    color: #162e1c;
+    box-shadow: 0 2px 8px rgba(186, 210, 89, 0.4);
+}

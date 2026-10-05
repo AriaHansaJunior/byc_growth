@@ -1,51 +1,72 @@
 /* Game 01 — Guess Me! Styles (Unified Cream / Forest Theme) */
 
 .game-shell {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background: var(--paper);
   color: var(--ink);
+  display: flex;
+  flex-direction: column;
 }
 
 .topbar {
-  height: 72px;
+  height: 64px;
   background: var(--white);
   border-bottom: 1px solid var(--line);
-  padding: 0 max(4vw, 46px);
+  padding: 0 max(2.5vw, 24px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 10;
+  overflow: hidden;
+}
+
+.topbar-scores-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 0 16px;
 }
 
 .game-content {
-  width: min(1140px, calc(100% - 60px));
-  margin: auto;
-  padding: 34px 0 50px;
+  width: min(1280px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 14px 0 16px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
 }
 
 .game-titlebar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .game-titlebar h1 {
   margin: 0;
-  font: 800 40px "Manrope", sans-serif;
-  letter-spacing: -.04em;
+  font: 800 32px/1.1 "Manrope", sans-serif;
+  letter-spacing: -.03em;
   color: var(--ink);
 }
 
 .game-titlebar .eyebrow {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .round-counter {
   border-left: 1px solid var(--line);
-  padding-left: 24px;
+  padding-left: 20px;
 }
 
 .round-counter span {
@@ -58,27 +79,31 @@
 }
 
 .round-counter strong {
-  font: 800 26px "Manrope", sans-serif;
+  font: 800 24px "Manrope", sans-serif;
   color: var(--forest);
 }
 
 .round-counter em {
   color: var(--muted);
   font-style: normal;
-  font-size: 16px;
+  font-size: 15px;
 }
 
-/* Guess Stage — Focus on Visual & Clue */
+/* Guess Stage — Prominent 4:3 Visual & Clue */
 .guess-stage {
-  min-height: 420px;
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 48px;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 30px;
+  border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow);
   position: relative;
+  padding: 24px 38px;
+  align-items: center;
 }
 
 .guess-image {
@@ -87,38 +112,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 14px;
   overflow: hidden;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  min-width: 0;
+  max-height: calc(100vh - 240px);
+  margin: 0 auto;
+  justify-self: center;
 }
 
 .guess-image img {
   width: 100%;
   height: 100%;
-  max-height: 380px;
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(32, 48, 41, .08);
+  object-fit: contain;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(32, 48, 41, .08);
 }
 
-
 .guess-content {
-  padding: 44px 48px;
+  padding: 10px 16px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .clue-label {
+  display: block;
   color: var(--forest);
   text-transform: uppercase;
   letter-spacing: .14em;
   font-size: 12px;
   font-weight: 800;
+  margin-bottom: 6px;
+  white-space: nowrap;
 }
 
 .answer-display {
-  margin: 14px 0 18px;
-  padding: 22px 24px;
+  margin: 12px 0 16px;
+  padding: 18px 22px;
   border-radius: 18px;
   background: var(--paper);
   border: 2px dashed #b7b9ab;
@@ -128,8 +166,8 @@
 .answer-display small {
   display: block;
   color: var(--muted);
-  margin-bottom: 6px;
-  font-size: 12px;
+  margin-bottom: 4px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -137,8 +175,8 @@
 
 .answer-display strong {
   display: block;
-  font: 800 42px/1.1 "Manrope", sans-serif;
-  letter-spacing: .2em;
+  font: 800 36px/1.15 "Manrope", sans-serif;
+  letter-spacing: .18em;
   color: var(--ink);
   word-break: break-all;
 }
@@ -154,24 +192,24 @@
 
 .guess-content p {
   color: var(--muted);
-  line-height: 1.6;
-  margin: 0 0 24px;
-  font-size: 15px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  font-size: 14.5px;
 }
 
 .guess-content .button {
   align-self: flex-start;
-  min-height: 48px;
+  min-height: 46px;
   padding: 0 24px;
-  font-size: 15px;
+  font-size: 14.5px;
 }
 
 .point-badge {
   position: absolute;
-  top: 22px;
-  right: 22px;
-  width: 72px;
-  height: 72px;
+  top: 18px;
+  right: 18px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: var(--gold);
   color: var(--forest-dark);
@@ -179,60 +217,66 @@
   place-content: center;
   text-align: center;
   box-shadow: 0 8px 24px rgba(231, 189, 82, .35);
-  border: 4px solid var(--paper);
+  border: 3px solid var(--paper);
 }
 
 .point-badge strong {
-  font: 800 26px/1 "Manrope", sans-serif;
+  font: 800 24px/1 "Manrope", sans-serif;
 }
 
 .point-badge span {
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
   font-weight: 800;
   letter-spacing: .06em;
 }
 
-/* Host Panel — Clean & Seamless Integration */
-.host-panel {
-  margin-top: 20px;
-  padding: 16px 24px;
+/* Scoreboard Modal Overlay with Backdrop Blur */
+.scoreboard-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(18, 30, 23, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: modalFadeIn .2s ease;
+}
+
+.scoreboard-modal-panel {
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 4px 18px rgba(32, 48, 41, .04);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  width: min(860px, 94vw);
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 24px 28px;
   display: flex;
-  align-items: center;
-  gap: 24px;
+  flex-direction: column;
+  gap: 18px;
+  animation: modalScaleIn .22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.host-heading {
-  min-width: 220px;
-  padding-right: 22px;
-  border-right: 1px solid var(--line);
+.scoreboard-modal-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
 }
 
-.host-heading span {
-  display: block;
-  color: var(--muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  font-weight: 800;
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.host-heading strong {
-  font: 800 15px "Manrope", sans-serif;
-  color: var(--ink);
-}
-
-.host-heading .button {
-  padding: 0 12px;
-  min-height: 36px;
-  font-size: 12px;
+@keyframes modalScaleIn {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 /* Dynamic Host Teams Grid */
@@ -356,8 +400,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 22px;
-  margin-top: 24px;
+  gap: 16px;
+  margin-top: 12px;
+  flex-shrink: 0;
 }
 
 .round-dots {

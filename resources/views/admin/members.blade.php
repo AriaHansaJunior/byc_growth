@@ -241,7 +241,7 @@
                     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line);">
                         <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
                         <button type="submit" class="button button-primary button-sm" id="btn-submit-add-member">
-                            <x-icon name="plus" /> Save Member
+                             Save Member
                         </button>
                     </div>
                 </div>
@@ -638,6 +638,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (btnOpenAdd && addModal) {
         btnOpenAdd.addEventListener('click', () => {
             addCropper.reset();
+            if (window.setDatePickerValue) window.setDatePickerValue('add-dob', '');
             addModal.style.display = 'grid';
             document.body.classList.add('modal-open');
             document.body.style.overflow = 'hidden';
@@ -656,7 +657,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 formEdit.action = `/admin/members/${id}`;
             }
             if (editName) editName.value = name || '';
-            if (editDob) editDob.value = dob || '';
+            if (editDob) {
+                if (window.setDatePickerValue) window.setDatePickerValue(editDob, dob || '');
+                else editDob.value = dob || '';
+            }
             if (removeCb) removeCb.checked = false;
 
             if (photo) {

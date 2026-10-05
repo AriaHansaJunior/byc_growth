@@ -119,6 +119,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         // Games Management (Scope 4)
         Route::get('/games', [AdminGameController::class, 'index'])->name('games');
+        Route::get('/games/guess-me', [AdminGameController::class, 'guessMeHost'])->name('games.guess-me.host');
+        Route::get('/games/growth-100', [AdminGameController::class, 'growth100Host'])->name('games.growth-100.host');
+        Route::post('/games/{id}/toggle-visibility', [AdminGameController::class, 'toggleGameVisibility'])->name('games.toggle-visibility');
+        Route::post('/games/rounds/{id}/toggle-visibility', [AdminGameController::class, 'toggleRoundVisibility'])->name('games.rounds.toggle-visibility');
+
         Route::post('/games/guess-me/round', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.save-round');
         Route::match(['put', 'patch', 'post'], '/games/guess-me/round/{id}', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.update-round');
         Route::delete('/games/guess-me/round/{id}', [AdminGameController::class, 'deleteGuessMeRound'])->name('games.guess-me.delete-round');

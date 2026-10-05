@@ -133,7 +133,12 @@ export function initGuessMe() {
     async function goToRound(index) {
         if (index < 0 || index >= rounds.length) return;
         currentIndex = index;
+        if (window.BYC_GAME1) window.BYC_GAME1.currentIndex = index;
         updateRoundUI();
+
+        window.dispatchEvent(new CustomEvent('byc:round-changed', {
+            detail: { round: rounds[currentIndex], index: currentIndex }
+        }));
 
         try {
             await postJson('/game/guess-me/state', {
@@ -199,6 +204,60 @@ export function initGuessMe() {
             const amount = parseInt(btn.dataset.amount, 10);
             changeScore(team, amount);
         });
+    });
+
+    // ==========================================
+    // Scoreboard & Host Controls Modal Overlay
+    // ==========================================
+    const modalScoreboard = document.getElementById('modal-host-scoreboard');
+    const btnToggleScoreboard = document.getElementById('btn-toggle-scoreboard');
+    const btnOpenScoreboardNav = document.getElementById('btn-open-scoreboard-nav');
+    const btnCloseScoreboard = document.getElementById('btn-close-scoreboard');
+
+    function openScoreboard() {
+        if (!modalScoreboard) return;
+        modalScoreboard.style.display = 'flex';
+        document.body.classList.add('modal-open');
+    }
+
+    function closeScoreboard() {
+        if (!modalScoreboard) return;
+        modalScoreboard.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+
+    if (btnToggleScoreboard) {
+        btnToggleScoreboard.addEventListener('click', () => {
+            if (modalScoreboard.style.display === 'none' || !modalScoreboard.style.display) {
+                openScoreboard();
+            } else {
+                closeScoreboard();
+            }
+        });
+    }
+
+    if (btnOpenScoreboardNav) {
+        btnOpenScoreboardNav.addEventListener('click', openScoreboard);
+    }
+
+    if (btnCloseScoreboard) {
+        btnCloseScoreboard.addEventListener('click', closeScoreboard);
+    }
+
+    if (modalScoreboard) {
+        modalScoreboard.addEventListener('click', (e) => {
+            if (e.target === modalScoreboard) {
+                closeScoreboard();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (modalScoreboard && modalScoreboard.style.display === 'flex') {
+                closeScoreboard();
+            }
+        }
     });
 
     // ==========================================

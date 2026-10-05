@@ -254,7 +254,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             formEdit.action = `/admin/members/${id}`;
             document.getElementById('edit-member-name').value = name;
-            document.getElementById('edit-member-dob').value = dob;
+            if (window.setDatePickerValue) {
+                window.setDatePickerValue('edit-member-dob', dob || '');
+            } else {
+                document.getElementById('edit-member-dob').value = dob;
+            }
 
             const removeWrap = document.getElementById('edit-member-remove-photo-wrap');
             if (photo) {

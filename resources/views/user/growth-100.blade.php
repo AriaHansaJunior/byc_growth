@@ -24,19 +24,15 @@
 @endphp
 
 <div class="game-shell">
-    {{-- Topbar --}}
+    {{-- Topbar: Brand & Live Scores Only --}}
     <header class="topbar">
         <a href="{{ route('game.center') }}" class="brand-button" aria-label="Back to Game Center" title="Back to Game Center">
             <x-brand compact="true" />
         </a>
-        <x-score-pair :teams="$teams" :compact="true" game="game2" />
-        <div style="display: flex; align-items: center; gap: 10px;">
-            @if(Auth::check() && Auth::user()->isAdmin())
-                <div class="live-pill" style="background: rgba(186, 210, 89, 0.2); color: var(--forest-dark); border-color: var(--lime);">
-                    <span style="background: var(--forest);"></span> Host: {{ Auth::user()->name }}
-                </div>
-            @endif
+        <div class="topbar-scores-wrap">
+            <x-score-pair :teams="$teams" :compact="true" game="game2" />
         </div>
+        <div>{{-- Spacer to balance topbar --}}</div>
     </header>
 
     {{-- Main Game Content --}}
@@ -112,14 +108,6 @@
                 <div class="reveal-control">
                     <button type="button" class="button button-secondary" id="btn-reveal-all">Reveal All</button>
                     <button type="button" class="button button-ghost" id="btn-hide-all">Hide All</button>
-                    @if(Auth::check() && Auth::user()->isAdmin())
-                        <button type="button" class="button button-ghost" id="btn-open-teams-modal">
-                            <x-icon name="user" /> Configure Teams
-                        </button>
-                        <button type="button" class="button button-ghost" id="btn-open-editor">
-                            <x-icon name="edit" /> Edit Questions
-                        </button>
-                    @endif
                 </div>
             </div>
 
@@ -130,67 +118,27 @@
                 </span>
             </div>
 
-            {{-- Dynamic Team Award & Navigation Footer --}}
-            <div class="growth-footer">
-                <div class="growth-teams-award-area" id="growth-teams-award-container">
-                    <span class="award-section-title">Award Round Points (<span class="current-total-label">{{ $roundRevealedPoints }}</span> pts):</span>
-                    <div class="growth-teams-grid">
-                        @foreach ($teams as $team)
-                            @php
-                                $isAwarded = ($currentRound && ($currentRound['awarded_team_id'] ?? null) == $team['id']);
-                                $hasOtherAwarded = ($currentRound && ($currentRound['awarded_team_id'] ?? null) && ($currentRound['awarded_team_id'] ?? null) != $team['id']);
-                            @endphp
-                            <div class="growth-team-card host-team-{{ $team['theme'] }} {{ $isAwarded ? 'is-selected' : '' }} {{ $hasOtherAwarded ? 'is-dimmed' : '' }}"
-                                 data-team-id="{{ $team['id'] }}"
-                                 id="growth-team-card-{{ $team['id'] }}">
-                                <div class="growth-team-info">
-                                    <span class="team-dot" style="background: {{ $team['color'] }};"></span>
-                                    <strong class="growth-team-name">{{ $team['name'] }}</strong>
-                                </div>
-                                @if(Auth::check() && Auth::user()->isAdmin())
-                                    <div class="growth-team-actions">
-                                        <button type="button" class="button {{ $isAwarded ? 'button-primary' : 'button-secondary' }} btn-award-round"
-                                                data-team="{{ $team['id'] }}"
-                                                id="btn-award-growth-{{ $team['id'] }}">
-                                            {{ $isAwarded ? 'Points Awarded' : 'Award Round' }}
-                                        </button>
-                                    </div>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+            {{-- Round Navigation: Centered, Text-only, NO arrows --}}
+            <div class="round-nav" style="margin-top: 18px; display: flex; justify-content: center; align-items: center; gap: 14px;">
+                <button type="button" class="button button-secondary" id="btn-prev-round" {{ $currentRoundIndex === 0 ? 'disabled' : '' }}>
+                    Previous
+                </button>
+                <div class="round-dots" id="round-dots-container">
+                    @foreach ($rounds as $idx => $r)
+                        <span class="{{ $currentRoundIndex === $idx ? 'active' : '' }}" data-index="{{ $idx }}"></span>
+                    @endforeach
                 </div>
-
-                <div class="round-nav">
-                    <button type="button" class="button button-secondary" id="btn-prev-round" {{ $currentRoundIndex === 0 ? 'disabled' : '' }}>
-                        ← Previous
-                    </button>
-                    <div class="round-dots" id="round-dots-container">
-                        @foreach ($rounds as $idx => $r)
-                            <span class="{{ $currentRoundIndex === $idx ? 'active' : '' }}" data-index="{{ $idx }}"></span>
-                        @endforeach
-                    </div>
-                    <button type="button" class="button button-primary" id="btn-next-round" {{ $currentRoundIndex >= count($rounds) - 1 ? 'disabled' : '' }}>
-                        Next →
-                    </button>
-                </div>
+                <button type="button" class="button button-primary" id="btn-next-round" {{ $currentRoundIndex >= count($rounds) - 1 ? 'disabled' : '' }}>
+                    Next
+                </button>
             </div>
         @else
             <div style="padding: 40px; text-align: center; background: #14223a; border-radius: 20px;">
-                <p>No survey questions available.</p>
-                @if(Auth::check() && Auth::user()->isAdmin())
-                    <button type="button" class="button button-primary" id="btn-open-editor-empty">+ Add Survey Question</button>
-                @endif
+                <p style="color: var(--muted); font-size: 16px; margin: 0;">No survey questions currently available for BYC Growth 100.</p>
             </div>
         @endif
     </main>
 </div>
-
-{{-- CRUD Editor Modal --}}
-@include('partials.growth-100-editor')
-
-{{-- Team Configuration Modal --}}
-@include('partials.team-config-modal')
 
 <script>
     window.BYC_GAME2 = {
@@ -198,7 +146,7 @@
         state: @json($game2State),
         teams: @json($teams),
         currentIndex: {{ $currentRoundIndex }},
-        isAdmin: {{ Auth::check() && Auth::user()->isAdmin() ? 'true' : 'false' }}
+        isAdmin: false
     };
 </script>
 @endsection

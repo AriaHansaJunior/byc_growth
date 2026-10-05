@@ -1,6 +1,6 @@
 <header class="global-header">
     <div class="header-container">
-        <a href="{{ route('home') }}" class="header-brand-link" aria-label="BYC Growth Home">
+        <a href="{{ (auth()->check() && auth()->user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="header-brand-link" aria-label="BYC Growth Home">
             <x-brand :compact="true" />
             <span class="header-brand-divider" aria-hidden="true"></span>
             <span class="header-brand-tagline">Bethany Youth Community</span>
@@ -37,6 +37,11 @@
                         <x-icon name="chevron-down" />
                     </button>
                     <div class="nav-user-dropdown-menu" id="nav-user-dropdown-menu" role="menu" style="display: none;">
+                        @if(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="nav-user-logout-item" style="text-decoration: none; border-bottom: 1px solid var(--line); display: block;" role="menuitem">
+                                Admin Dashboard
+                            </a>
+                        @endif
                         <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
                             @csrf
                             <button type="submit" class="nav-user-logout-item" id="btn-header-logout" role="menuitem">

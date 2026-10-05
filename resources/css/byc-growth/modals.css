@@ -21,6 +21,13 @@
   box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
 }
 
+.modal-scroll-body {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+
 /* How to Play Modal (Contained in Viewport with Distinct Scrollable Content) */
 .how-to-play-modal {
   width: min(860px, 92vw);

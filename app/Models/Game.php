@@ -16,10 +16,12 @@ class Game extends Model
         'title',
         'description',
         'is_active',
+        'is_hidden',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_hidden' => 'boolean',
     ];
 
     /**

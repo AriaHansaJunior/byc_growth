@@ -663,8 +663,9 @@ body:has(.modal-backdrop[style*="display: flex"]) .admin-topbar {
 
 .crop-viewport-container {
   position: relative;
-  width: 280px;
-  height: 280px;
+  width: 320px;
+  height: 240px;
+  aspect-ratio: 4 / 3;
   max-width: 100%;
   margin: 0 auto 10px;
   border-radius: 16px;

@@ -173,18 +173,20 @@
 .score-pair {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .team-score {
-  min-width: 120px;
-  padding: 10px 14px;
+  min-width: 110px;
+  max-width: 170px;
+  padding: 8px 14px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 14px;
   border: 1px solid transparent;
   transition: transform .2s ease, box-shadow .2s ease;
 }
@@ -192,10 +194,14 @@
 .team-score span {
   font-size: 13px;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .team-score strong {
-  font: 800 24px "Manrope", sans-serif;
+  font: 800 22px "Manrope", sans-serif;
+  flex-shrink: 0;
 }
 
 /* Universal Dynamic Team Color Badges (Earth Tone Palette) */
@@ -240,13 +246,42 @@
   color: var(--muted);
 }
 
+.score-pair-compact {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 4px;
+  gap: 8px;
+}
+
+.score-pair-compact::-webkit-scrollbar {
+  display: none;
+}
+
 .score-pair-compact .team-score {
-  min-width: 110px;
-  padding: 6px 10px;
+  min-width: 78px;
+  max-width: 125px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.score-pair-compact .team-score span {
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 75px;
 }
 
 .score-pair-compact .team-score strong {
-  font-size: 20px;
+  font-size: 17px;
+  line-height: 1;
 }
 
 /* Score Animation Feedback */
@@ -339,4 +374,199 @@
   transform: translateY(-1px);
   color: var(--white);
 }
+
+/* Scores Trigger Button (Center-aligned with premium theme colors) */
+.btn-scores-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f7faef 0%, #eaf3db 100%);
+  border: 1.5px solid #bdd29b;
+  color: var(--forest-dark);
+  font: 800 13px/1 'Manrope', sans-serif;
+  letter-spacing: .02em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(40, 78, 59, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-left: 10px;
+  text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.btn-scores-pill:hover {
+  background: var(--forest);
+  color: #ffffff;
+  border-color: var(--forest);
+  box-shadow: 0 4px 14px rgba(40, 78, 59, 0.22);
+  transform: translateY(-1px);
+}
+
+.btn-scores-pill:active {
+  transform: translateY(0);
+}
+
+.btn-scores-pill svg,
+.btn-scores-pill .icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.btn-scores-pill span {
+  display: inline-block;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Universal Select Dropdown Styling (Theme: BYC Growth)
+   Replaces default browser select with custom themed appearance across admin and user roles
+   ========================================================================== */
+select,
+select.form-input,
+select.input-field,
+.form-select,
+.filter-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-color: var(--white, #ffffff) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23224229' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 14px 14px !important;
+  padding-right: 40px !important;
+  padding-left: 14px !important;
+  border: 1px solid var(--line, #e2ded5) !important;
+  border-radius: 10px !important;
+  font-family: 'DM Sans', 'Manrope', -apple-system, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  color: var(--ink, #141f17) !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
+}
+
+select:hover,
+select.form-input:hover,
+select.input-field:hover {
+  border-color: var(--forest, #224229) !important;
+  background-color: #fafcf7 !important;
+}
+
+select:focus,
+select.form-input:focus,
+select.input-field:focus {
+  outline: none !important;
+  border-color: var(--forest, #224229) !important;
+  box-shadow: 0 0 0 3px rgba(186, 210, 89, 0.35) !important;
+  background-color: var(--white, #ffffff) !important;
+}
+
+select:disabled,
+select.form-input:disabled,
+select.input-field:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background-color: var(--paper, #fbf8ef) !important;
+}
+
+select option {
+  background: #ffffff !important;
+  color: var(--ink, #141f17) !important;
+  font-weight: 500 !important;
+  padding: 10px 14px !important;
+}
+
+/* ==========================================================================
+   Universal Pagination Styling (Theme: BYC Growth)
+   ========================================================================== */
+nav[role="navigation"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+  padding: 18px 0 !important;
+  font-family: 'DM Sans', 'Manrope', -apple-system, sans-serif !important;
+}
+
+nav[role="navigation"] p,
+nav[role="navigation"] .text-sm {
+  color: var(--muted, #667669) !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+nav[role="navigation"] .font-medium {
+  color: var(--forest-dark, #162e1c) !important;
+  font-weight: 800 !important;
+}
+
+nav[role="navigation"] .relative.inline-flex,
+.pagination {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+nav[role="navigation"] a,
+nav[role="navigation"] span.relative,
+.pagination li a,
+.pagination li span {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 38px !important;
+  height: 38px !important;
+  padding: 0 12px !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: var(--ink, #141f17) !important;
+  background: var(--white, #ffffff) !important;
+  border: 1px solid var(--line, #e2ded5) !important;
+  border-radius: 10px !important;
+  text-decoration: none !important;
+  transition: all 0.15s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+nav[role="navigation"] a:hover,
+.pagination li a:hover {
+  background: rgba(186, 210, 89, 0.25) !important;
+  border-color: var(--lime, #bad259) !important;
+  color: var(--forest-dark, #162e1c) !important;
+}
+
+nav[role="navigation"] span[aria-current="page"] > span,
+nav[role="navigation"] .z-10,
+.pagination li.active span {
+  background: var(--forest, #224229) !important;
+  border-color: var(--forest, #224229) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  box-shadow: 0 3px 10px rgba(34, 66, 41, 0.25) !important;
+}
+
+nav[role="navigation"] span[aria-disabled="true"] span,
+.pagination li.disabled span {
+  color: #b5beb6 !important;
+  background: var(--paper, #fbf8ef) !important;
+  border-color: var(--line, #e2ded5) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
 

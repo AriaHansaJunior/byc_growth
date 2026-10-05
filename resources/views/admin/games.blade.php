@@ -26,17 +26,19 @@
 @section('content')
     {{-- Overall Scoreboard Section --}}
     <section class="gc-scoreboard" style="margin-bottom: 36px;">
-        <div class="gc-scoreboard-info">
+        <div class="gc-scoreboard-info" style="flex: 0 1 300px; min-width: 220px;">
             <span class="eyebrow">Overall Standings</span>
             <h2 style="margin: 0; font: 800 28px 'Manrope', sans-serif;">Team Scoreboard</h2>
             <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">Combined cumulative scores across all games in live database.</p>
         </div>
-        <x-score-pair :scores="['red' => $finalScores['final_red'] ?? 0, 'blue' => $finalScores['final_blue'] ?? 0]" />
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <div class="gc-scoreboard-teams">
+            <x-score-pair :teams="$finalScores['teams'] ?? $teams ?? []" />
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex-shrink: 0;">
             <button type="button" class="button button-ghost" id="btn-open-teams-modal" style="border: 1px solid var(--line); font-size: 13.5px;">
                 Configure Teams
             </button>
-            <a href="{{ route('game.final') }}" class="button button-ghost" target="_blank" style="border: 1px solid var(--line); font-size: 13.5px;">
+            <a href="{{ route('game.final') }}" class="button button-ghost" style="border: 1px solid var(--line); font-size: 13.5px;">
                 View Final Results
             </a>
         </div>
@@ -55,15 +57,27 @@
         <div class="game-center-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px;">
             @foreach($games as $game)
                 @php
-                    $routeExists = !empty($game['route']) && \Illuminate\Support\Facades\Route::has($game['route']);
-                    $playUrl = $routeExists ? route($game['route']) : '#';
+                    $adminRoute = ($game['code'] ?? '') === 'game1' ? 'admin.games.guess-me.host' : 'admin.games.growth-100.host';
+                    $playUrl = \Illuminate\Support\Facades\Route::has($adminRoute) ? route($adminRoute) : '#';
+                    $isHidden = !empty($game['is_hidden']);
                 @endphp
-                <article class="gc-card gc-card--{{ $game['theme'] ?? 'forest' }}" id="admin-game-card-{{ $game['id'] }}" style="padding: 32px 32px 28px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 24px;">
-                    <div class="gc-card-header" style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
+                <article class="gc-card gc-card--{{ $game['theme'] ?? 'forest' }}" id="admin-game-card-{{ $game['id'] }}" style="padding: 32px 32px 28px; display: flex; flex-direction: column; justify-content: space-between; border-radius: 24px; position: relative;">
+                    <div class="gc-card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px;">
                         <div class="gc-meta-tags" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; flex: 1;">
                             <span class="gc-order-badge">Game {{ $game['order'] }}</span>
                             <span class="gc-category-tag">{{ $game['tag'] }}</span>
+                            <span class="game-hidden-badge" id="badge-game-hidden-{{ $game['id'] }}" style="{{ $isHidden ? 'display: inline-block;' : 'display: none;' }} background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-size: 11.5px; font-weight: 700; padding: 2px 10px; border-radius: 999px;">
+                                Hidden from Users
+                            </span>
                         </div>
+                        {{-- HIDE / UNHIDE GAME BUTTON (No icons, text only with styled color) --}}
+                        <button type="button" 
+                                class="btn-toggle-game-hide" 
+                                data-game-id="{{ $game['id'] }}" 
+                                id="btn-toggle-game-{{ $game['id'] }}"
+                                style="{{ $isHidden ? 'background: #ecfdf5; color: #065f46; border: 1px solid #6ee7b7;' : 'background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5;' }} font-size: 12.5px; font-weight: 700; padding: 5px 14px; border-radius: 999px; cursor: pointer; transition: all 0.2s ease;">
+                            {{ $isHidden ? 'Unhide' : 'Hide' }}
+                        </button>
                     </div>
 
                     <div class="gc-card-body" style="flex: 1; display: flex; flex-direction: column; margin-bottom: 20px;">
@@ -72,7 +86,7 @@
                     </div>
 
                     <div class="gc-card-footer" style="margin-top: auto;">
-                        <a href="{{ $playUrl }}" class="button button-primary gc-play-btn" style="width: 100%; display: flex; align-items: center; justify-content: center; height: 44px; font-weight: 800; border-radius: 12px;" target="_blank">
+                        <a href="{{ $playUrl }}" class="button button-primary gc-play-btn" style="width: 100%; display: flex; align-items: center; justify-content: center; height: 44px; font-weight: 800; border-radius: 12px;">
                             Launch Game
                         </a>
                     </div>
@@ -134,13 +148,13 @@
                             </div>
 
                             {{-- Card Image Preview --}}
-                            <div style="width: 100%; height: 160px; border-radius: 14px; overflow: hidden; background: var(--paper); border: 1px solid var(--line); position: relative; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 100%; aspect-ratio: 4 / 3; border-radius: 14px; overflow: hidden; background: var(--paper); border: 1px solid var(--line); position: relative; display: flex; align-items: center; justify-content: center;">
                                 @php
                                     $imgSrc = !empty($round['image_url']) ? $round['image_url'] : asset('assets/images/' . $round['image']);
                                 @endphp
                                 <img src="{{ $imgSrc }}" alt="Visual Clue Round {{ $round['round_number'] }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='{{ asset('assets/images/BYC_Growth.jpg') }}';">
                                 <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
-                                    Clue Image
+                                    Clue Image (4:3)
                                 </span>
                             </div>
 
@@ -320,23 +334,71 @@
 
                 {{-- Scrollable Form Body --}}
                 <div class="modal-scroll-body" style="padding: 24px 28px; overflow-y: auto; flex: 1; min-height: 0;">
-                    {{-- Image Preview & Upload --}}
+                    {{-- Visual Clue Image with 4:3 Crop Studio --}}
                     <div style="margin-bottom: 18px;">
                         <label style="display: block; font-weight: 700; font-size: 13.5px; color: var(--ink); margin-bottom: 8px;">
-                            Visual Clue Image
+                            Visual Clue Image (4:3)
                         </label>
-                        <div id="guess-image-preview-container" style="display: none; margin-bottom: 10px; width: 100%; height: 160px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--paper);">
-                            <img id="guess-image-preview" src="" alt="Clue Preview" style="width: 100%; height: 100%; object-fit: cover;">
+
+                        {{-- Existing Image Preview (For edit mode before replacing) --}}
+                        <div id="guess-existing-preview-wrap" style="display: none; margin-bottom: 12px; text-align: center;">
+                            <div style="width: 280px; height: 210px; aspect-ratio: 4 / 3; margin: 0 auto; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--paper); box-shadow: 0 4px 14px rgba(0,0,0,0.06); position: relative;">
+                                <img id="guess-existing-img" src="" alt="Current clue image" style="width: 100%; height: 100%; object-fit: cover;">
+                                <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 600;">Current Clue Image</span>
+                            </div>
                         </div>
-                        <label class="upload-box" id="guess-upload-trigger" style="display: block; cursor: pointer; border: 2px dashed var(--line); border-radius: 14px; padding: 18px; text-align: center; background: var(--paper);">
-                            <input type="file" name="image" id="guess-image-input" accept="image/jpeg,image/png,image/webp,image/jpg" style="display: none;">
-                            <span id="guess-upload-text" style="font-weight: 700; color: var(--forest); font-size: 13.5px; display: block;">
+
+                        {{-- File Dropzone --}}
+                        <div id="guess-dropzone" class="crop-dropzone" style="padding: 20px 16px; border: 2px dashed var(--line); border-radius: 14px; text-align: center; background: var(--paper); cursor: pointer;">
+                            <div class="crop-dropzone-icon" style="font-size: 28px; margin-bottom: 6px;">📷</div>
+                            <div style="font-weight: 700; color: var(--forest); font-size: 13.5px; margin-bottom: 4px;" id="guess-dropzone-title">
                                 Click or drag image to upload or replace
-                            </span>
-                            <small style="color: var(--muted); font-size: 11.5px; display: block; margin-top: 4px;">
-                                Supported formats: JPG, PNG, WEBP (Max: 5 MB)
+                            </div>
+                            <small style="color: var(--muted); font-size: 11.5px; display: block;">
+                                Supported formats: JPG, PNG, WEBP, GIF (Max: 5 MB)
                             </small>
-                        </label>
+                        </div>
+                        <input type="file" name="image" id="guess-image-input" accept="image/jpeg,image/png,image/webp,image/jpg,image/gif" style="display: none;">
+
+                        {{-- Selected File Info Bar (Hidden until selected) --}}
+                        <div id="guess-crop-file-info" style="display: none; align-items: center; justify-content: space-between; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 10px 0;">
+                            <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                                <span>📷</span>
+                                <span id="guess-crop-file-name" style="font-weight: 700; font-size: 12.5px; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">image.jpg</span>
+                                <span id="guess-crop-file-size" style="font-size: 11.5px; color: var(--muted); white-space: nowrap;">(1.2 MB)</span>
+                            </div>
+                            <button type="button" id="btn-guess-change-photo" class="button button-ghost button-sm" style="padding: 3px 8px; font-size: 11.5px; height: 26px;">
+                                Change
+                            </button>
+                        </div>
+
+                        {{-- 4:3 Crop Studio --}}
+                        <div id="guess-crop-studio" class="crop-studio-wrap" style="display: none; padding: 14px; border-radius: 16px; margin-top: 10px;">
+                            <div id="guess-crop-viewport" class="crop-viewport-container">
+                                <img id="guess-crop-image-element" class="crop-viewport-image" alt="Crop preview" src="">
+                                <div class="crop-grid-overlay">
+                                    <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
+                                    <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
+                                    <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
+                                </div>
+                                <span class="crop-badge-overlay">4:3 Aspect Ratio</span>
+                            </div>
+
+                            <div class="crop-controls-bar">
+                                <div class="crop-zoom-bar">
+                                    <span id="guess-crop-zoom-label" style="white-space: nowrap; font-size: 12px;">Zoom: 1.0x</span>
+                                    <input type="range" id="guess-crop-zoom-range" min="1" max="2.5" step="0.05" value="1">
+                                    <button type="button" id="btn-guess-reset-crop" class="crop-preset-btn" style="padding: 3px 8px; font-size: 11px;">Reset</button>
+                                </div>
+                                <div class="crop-preset-group">
+                                    <button type="button" class="crop-preset-btn guess-preset-btn" data-align="center">Center</button>
+                                    <button type="button" class="crop-preset-btn guess-preset-btn" data-align="top">Top</button>
+                                    <button type="button" class="crop-preset-btn guess-preset-btn" data-align="bottom">Bottom</button>
+                                    <button type="button" class="crop-preset-btn guess-preset-btn" data-align="left">Left</button>
+                                    <button type="button" class="crop-preset-btn guess-preset-btn" data-align="right">Right</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Correct Answer --}}
@@ -493,23 +555,73 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------------------------------------
     // GUESS ME MODAL HANDLING
     // ------------------------------------------------------------------
+    // GUESS ME MODAL HANDLING (WITH 4:3 CROP STUDIO)
+    // ------------------------------------------------------------------
     const guessModal = document.getElementById('modal-admin-guess-round');
     const btnAddGuess = document.getElementById('btn-admin-add-guess-round');
     const btnCloseGuess = document.getElementById('btn-close-guess-modal');
     const btnCancelGuess = document.getElementById('btn-cancel-guess-modal');
     const formGuess = document.getElementById('form-admin-guess-round');
+    const btnSubmitGuess = document.getElementById('btn-submit-guess-modal');
     const guessFormId = document.getElementById('guess-form-id');
     const guessInputAnswer = document.getElementById('guess-input-answer');
     const guessInputClue = document.getElementById('guess-input-clue');
     const guessInputScore = document.getElementById('guess-input-score');
-    const guessImgInput = document.getElementById('guess-image-input');
-    const guessImgPreview = document.getElementById('guess-image-preview');
-    const guessImgContainer = document.getElementById('guess-image-preview-container');
     const guessTitle = document.getElementById('guess-modal-title');
     const guessFeedback = document.getElementById('guess-clue-validation-feedback');
 
+    // Clue Image Elements
+    const guessDropzone = document.getElementById('guess-dropzone');
+    const guessDropzoneTitle = document.getElementById('guess-dropzone-title');
+    const guessImgInput = document.getElementById('guess-image-input');
+    const guessFileInfo = document.getElementById('guess-crop-file-info');
+    const guessFileNameEl = document.getElementById('guess-crop-file-name');
+    const guessFileSizeEl = document.getElementById('guess-crop-file-size');
+    const btnGuessChangePhoto = document.getElementById('btn-guess-change-photo');
+    const guessStudio = document.getElementById('guess-crop-studio');
+    const guessViewport = document.getElementById('guess-crop-viewport');
+    const guessCropImg = document.getElementById('guess-crop-image-element');
+    const guessZoomRange = document.getElementById('guess-crop-zoom-range');
+    const guessZoomLabel = document.getElementById('guess-crop-zoom-label');
+    const btnGuessResetCrop = document.getElementById('btn-guess-reset-crop');
+    const guessExistingWrap = document.getElementById('guess-existing-preview-wrap');
+    const guessExistingImg = document.getElementById('guess-existing-img');
+
+    // Cropping State
+    let guessOriginalFile = null;
+    let guessImgNaturalW = 0;
+    let guessImgNaturalH = 0;
+    let guessCurrentZoom = 1.0;
+    let guessCurrentOffsetX = 0;
+    let guessCurrentOffsetY = 0;
+    const guessViewportW = 320; // 4:3 ratio
+    const guessViewportH = 240;
+    let guessIsDragging = false;
+    let guessStartX = 0;
+    let guessStartY = 0;
+    let guessStartOffsetX = 0;
+    let guessStartOffsetY = 0;
+
+    function resetGuessCropper() {
+        guessOriginalFile = null;
+        if (guessImgInput) guessImgInput.value = '';
+        if (guessDropzone) guessDropzone.style.display = 'block';
+        if (guessFileInfo) guessFileInfo.style.display = 'none';
+        if (guessStudio) guessStudio.style.display = 'none';
+        if (guessCropImg) guessCropImg.src = '';
+        guessCurrentZoom = 1.0;
+        if (guessZoomRange) guessZoomRange.value = '1';
+        if (guessZoomLabel) guessZoomLabel.textContent = 'Zoom: 1.0x';
+        if (btnSubmitGuess) {
+            btnSubmitGuess.disabled = false;
+            btnSubmitGuess.textContent = 'Save Round';
+        }
+    }
+
     function openGuessModal(isEdit = false, data = {}) {
         if (!guessModal) return;
+        resetGuessCropper();
+
         guessTitle.textContent = isEdit ? 'Edit Guess Me Round' : 'Add Guess Me Round';
         guessFormId.value = isEdit ? (data.id || '') : '';
         guessInputAnswer.value = isEdit ? (data.answer || '') : '';
@@ -517,15 +629,16 @@ document.addEventListener('DOMContentLoaded', () => {
         guessInputScore.value = isEdit ? (data.score || 20) : 20;
 
         if (isEdit && data.imageUrl) {
-            guessImgPreview.src = data.imageUrl;
-            guessImgContainer.style.display = 'block';
+            guessExistingImg.src = data.imageUrl;
+            guessExistingWrap.style.display = 'block';
+            guessDropzoneTitle.textContent = 'Click or drag image to replace current image';
         } else {
-            guessImgPreview.src = '';
-            guessImgContainer.style.display = 'none';
+            guessExistingImg.src = '';
+            guessExistingWrap.style.display = 'none';
+            guessDropzoneTitle.textContent = 'Click or drag image to upload';
         }
-        if (guessImgInput) guessImgInput.value = '';
-        validateClueLive();
 
+        validateClueLive();
         guessModal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         document.body.classList.add('modal-open');
@@ -536,6 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         guessModal.style.display = 'none';
         document.body.style.overflow = '';
         document.body.classList.remove('modal-open');
+        resetGuessCropper();
     }
 
     if (btnAddGuess) {
@@ -556,16 +670,248 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Dropzone & File Input Handlers
+    if (guessDropzone && guessImgInput) {
+        guessDropzone.addEventListener('click', () => guessImgInput.click());
+    }
+    if (btnGuessChangePhoto && guessImgInput) {
+        btnGuessChangePhoto.addEventListener('click', () => guessImgInput.click());
+    }
+
+    if (guessDropzone) {
+        ['dragenter', 'dragover'].forEach(name => {
+            guessDropzone.addEventListener(name, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                guessDropzone.classList.add('dragover');
+            });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            guessDropzone.addEventListener(name, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                guessDropzone.classList.remove('dragover');
+            });
+        });
+        guessDropzone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                handleGuessFileSelect(files[0]);
+            }
+        });
+    }
+
     if (guessImgInput) {
-        guessImgInput.addEventListener('change', (e) => {
-            const file = e.target.files && e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    guessImgPreview.src = ev.target.result;
-                    guessImgContainer.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
+        guessImgInput.addEventListener('change', () => {
+            if (guessImgInput.files && guessImgInput.files.length > 0) {
+                handleGuessFileSelect(guessImgInput.files[0]);
+            }
+        });
+    }
+
+    function handleGuessFileSelect(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            alert('Please select a valid image file (JPEG, PNG, WEBP, or GIF).');
+            return;
+        }
+
+        guessOriginalFile = file;
+        guessFileNameEl.textContent = file.name;
+        guessFileSizeEl.textContent = `(${ (file.size / 1024).toFixed(1) } KB)`;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            guessCropImg.onload = () => {
+                guessImgNaturalW = guessCropImg.naturalWidth;
+                guessImgNaturalH = guessCropImg.naturalHeight;
+                guessCurrentZoom = 1.0;
+                if (guessZoomRange) guessZoomRange.value = '1';
+                if (guessZoomLabel) guessZoomLabel.textContent = 'Zoom: 1.0x';
+
+                if (guessDropzone) guessDropzone.style.display = 'none';
+                if (guessExistingWrap) guessExistingWrap.style.display = 'none';
+                if (guessFileInfo) guessFileInfo.style.display = 'flex';
+                if (guessStudio) guessStudio.style.display = 'block';
+
+                alignGuessPosition('center');
+            };
+            guessCropImg.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function getGuessDimensions() {
+        const baseScale = Math.max(guessViewportW / guessImgNaturalW, guessViewportH / guessImgNaturalH);
+        const scale = baseScale * guessCurrentZoom;
+        const displayW = guessImgNaturalW * scale;
+        const displayH = guessImgNaturalH * scale;
+
+        const minOffsetX = guessViewportW - displayW;
+        const maxOffsetX = 0;
+        const minOffsetY = guessViewportH - displayH;
+        const maxOffsetY = 0;
+
+        return { scale, displayW, displayH, minOffsetX, maxOffsetX, minOffsetY, maxOffsetY };
+    }
+
+    function clampGuessOffsets() {
+        const { minOffsetX, maxOffsetX, minOffsetY, maxOffsetY } = getGuessDimensions();
+        guessCurrentOffsetX = Math.min(maxOffsetX, Math.max(minOffsetX, guessCurrentOffsetX));
+        guessCurrentOffsetY = Math.min(maxOffsetY, Math.max(minOffsetY, guessCurrentOffsetY));
+    }
+
+    function updateGuessImageStyle() {
+        const { displayW, displayH } = getGuessDimensions();
+        guessCropImg.style.width = `${displayW}px`;
+        guessCropImg.style.height = `${displayH}px`;
+        guessCropImg.style.left = `${guessCurrentOffsetX}px`;
+        guessCropImg.style.top = `${guessCurrentOffsetY}px`;
+    }
+
+    function alignGuessPosition(align) {
+        const { displayW, displayH, minOffsetX, minOffsetY } = getGuessDimensions();
+        if (align === 'center') {
+            guessCurrentOffsetX = (guessViewportW - displayW) / 2;
+            guessCurrentOffsetY = (guessViewportH - displayH) / 2;
+        } else if (align === 'top') {
+            guessCurrentOffsetY = 0;
+        } else if (align === 'bottom') {
+            guessCurrentOffsetY = minOffsetY;
+        } else if (align === 'left') {
+            guessCurrentOffsetX = 0;
+        } else if (align === 'right') {
+            guessCurrentOffsetX = minOffsetX;
+        }
+        clampGuessOffsets();
+        updateGuessImageStyle();
+    }
+
+    if (guessModal) {
+        guessModal.querySelectorAll('.guess-preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                alignGuessPosition(btn.getAttribute('data-align'));
+            });
+        });
+    }
+
+    if (guessZoomRange) {
+        guessZoomRange.addEventListener('input', () => {
+            guessCurrentZoom = parseFloat(guessZoomRange.value);
+            if (guessZoomLabel) guessZoomLabel.textContent = `Zoom: ${guessCurrentZoom.toFixed(1)}x`;
+            clampGuessOffsets();
+            updateGuessImageStyle();
+        });
+    }
+
+    if (btnGuessResetCrop) {
+        btnGuessResetCrop.addEventListener('click', () => {
+            guessCurrentZoom = 1.0;
+            if (guessZoomRange) guessZoomRange.value = '1';
+            if (guessZoomLabel) guessZoomLabel.textContent = 'Zoom: 1.0x';
+            alignGuessPosition('center');
+        });
+    }
+
+    if (guessViewport) {
+        guessViewport.addEventListener('pointerdown', (e) => {
+            guessIsDragging = true;
+            guessStartX = e.clientX;
+            guessStartY = e.clientY;
+            guessStartOffsetX = guessCurrentOffsetX;
+            guessStartOffsetY = guessCurrentOffsetY;
+            guessViewport.setPointerCapture(e.pointerId);
+        });
+
+        guessViewport.addEventListener('pointermove', (e) => {
+            if (!guessIsDragging) return;
+            const dx = e.clientX - guessStartX;
+            const dy = e.clientY - guessStartY;
+            guessCurrentOffsetX = guessStartOffsetX + dx;
+            guessCurrentOffsetY = guessStartOffsetY + dy;
+            clampGuessOffsets();
+            updateGuessImageStyle();
+        });
+
+        const endGuessDrag = (e) => {
+            if (!guessIsDragging) return;
+            guessIsDragging = false;
+            try { guessViewport.releasePointerCapture(e.pointerId); } catch (_) {}
+        };
+        guessViewport.addEventListener('pointerup', endGuessDrag);
+        guessViewport.addEventListener('pointercancel', endGuessDrag);
+    }
+
+    function getGuessCroppedBlob() {
+        return new Promise((resolve, reject) => {
+            try {
+                const { scale } = getGuessDimensions();
+                const cropX = -guessCurrentOffsetX / scale;
+                const cropY = -guessCurrentOffsetY / scale;
+                const cropW = guessViewportW / scale;
+                const cropH = guessViewportH / scale;
+
+                const targetW = Math.min(1600, Math.max(800, Math.round(cropW)));
+                const targetH = Math.round(targetW * 3 / 4);
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d');
+
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(
+                    guessCropImg,
+                    cropX, cropY, cropW, cropH,
+                    0, 0, targetW, targetH
+                );
+
+                const mimeType = (guessOriginalFile && guessOriginalFile.type) ? guessOriginalFile.type : 'image/jpeg';
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error('Canvas export failed'));
+                }, mimeType.includes('png') ? 'image/png' : 'image/jpeg', 0.92);
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    // Guess Me Form Submit with 4:3 Cropped File
+    if (formGuess) {
+        formGuess.addEventListener('submit', async (e) => {
+            if (guessOriginalFile) {
+                e.preventDefault();
+                if (btnSubmitGuess) {
+                    btnSubmitGuess.disabled = true;
+                    btnSubmitGuess.textContent = 'Saving...';
+                }
+                try {
+                    const blob = await getGuessCroppedBlob();
+                    const croppedFile = new File([blob], guessOriginalFile.name, {
+                        type: blob.type || guessOriginalFile.type,
+                        lastModified: Date.now()
+                    });
+
+                    if (window.DataTransfer) {
+                        const dt = new DataTransfer();
+                        dt.items.add(croppedFile);
+                        guessImgInput.files = dt.files;
+                        guessOriginalFile = null; // Prevent re-interception
+                        formGuess.submit();
+                    } else {
+                        const formData = new FormData(formGuess);
+                        formData.set('image', croppedFile, guessOriginalFile.name);
+                        await fetch(formGuess.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        window.location.reload();
+                    }
+                } catch (err) {
+                    console.warn('Fallback submit due to:', err);
+                    formGuess.submit();
+                }
             }
         });
     }
@@ -842,7 +1188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.style.cssText = 'display: grid; grid-template-columns: 28px 1fr 140px 32px; gap: 8px; align-items: center; background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line);';
 
             const colorOpts = COLOR_PALETTE.map(c => `
-                <option value="${c.code}" ${team.color === c.code ? 'selected' : ''}>
+                <option value="${c.code}" ${(team.color === c.code || team.color === c.color || team.code === c.code) ? 'selected' : ''}>
                     ${c.name}
                 </option>
             `).join('');
@@ -986,6 +1332,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Toggle Game Visibility Handler
+    document.querySelectorAll('.btn-toggle-game-hide').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const gameId = btn.dataset.gameId;
+            if (!gameId) return;
+
+            btn.disabled = true;
+            const originalText = btn.textContent;
+            btn.textContent = 'Updating...';
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch(`/admin/games/${gameId}/toggle-visibility`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    const isHidden = Boolean(data.is_hidden);
+                    btn.textContent = isHidden ? 'Unhide' : 'Hide';
+                    btn.style.background = isHidden ? '#ecfdf5' : '#fef2f2';
+                    btn.style.color = isHidden ? '#065f46' : '#991b1b';
+                    btn.style.border = isHidden ? '1px solid #6ee7b7' : '1px solid #fca5a5';
+
+                    const badge = document.getElementById(`badge-game-hidden-${gameId}`);
+                    if (badge) {
+                        badge.style.display = isHidden ? 'inline-block' : 'none';
+                    }
+                } else {
+                    alert(data.error || 'Failed to toggle game visibility.');
+                    btn.textContent = originalText;
+                }
+            } catch (err) {
+                alert('Network error while toggling game visibility: ' + err.message);
+                btn.textContent = originalText;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
 });
 </script>
 @endpush

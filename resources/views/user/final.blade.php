@@ -30,7 +30,7 @@
     <div class="confetti confetti-three"></div>
     <div class="confetti confetti-four"></div>
 
-    <a href="{{ route('game.center') }}" class="brand-button" style="align-self: flex-start;" aria-label="Back to Game Center" title="Back to Game Center">
+    <a href="{{ (Auth::check() && Auth::user()->isAdmin()) ? route('admin.games') : route('game.center') }}" class="brand-button" style="align-self: flex-start;" aria-label="{{ (Auth::check() && Auth::user()->isAdmin()) ? 'Back to Admin Games' : 'Back to Game Center' }}" title="{{ (Auth::check() && Auth::user()->isAdmin()) ? 'Back to Admin Games' : 'Back to Game Center' }}">
         <x-brand compact="true" />
     </a>
 
@@ -50,8 +50,9 @@
         @foreach ($teams as $t)
             @php
                 $isWinner = ($maxScore > 0 && ($t['total_score'] ?? 0) === $maxScore);
+                $theme = !empty($t['theme']) ? $t['theme'] : (!empty($t['code']) ? $t['code'] : 'forest');
             @endphp
-            <div class="final-team final-{{ $t['theme'] }} {{ $isWinner ? 'is-winner' : '' }}" style="flex: 1 1 200px; min-width: 170px;">
+            <div class="final-team final-{{ $theme }} {{ $isWinner ? 'is-winner' : '' }}" style="flex: 1 1 200px; min-width: 170px;">
                 @if ($isWinner)
                     <span class="winner-crown">👑</span>
                 @endif
@@ -66,7 +67,7 @@
         @endforeach
     </section>
 
-    <a href="{{ route('home') }}" class="button button-secondary" style="min-height: 48px; padding: 0 28px; font-size: 15px;">
+    <a href="{{ (Auth::check() && Auth::user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="button button-secondary" style="min-height: 48px; padding: 0 28px; font-size: 15px;">
         <x-icon name="home" /> Return to Home
     </a>
 </main>

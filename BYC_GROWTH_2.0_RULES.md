@@ -289,23 +289,50 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 
 ## 23. Zero Dummy Data Policy (Clean Slate Foundation)
 - **Zero Dummy Data Mandate**:
-  - The live application database must remain clean and free of mock or dummy records.
+  - The live application database must remain clean and completely free of mock or dummy records.
   - The following domains must start completely empty (clean slate) upon initial deployment:
     1. **Members** (zero dummy members, zero placeholder avatars)
     2. **Activities** (zero placeholder events, zero dummy gallery photos)
-    3. **Cash Management** (zero dummy cash transactions, zero mock transfer proof slips)
+    3. **Cash Management** (zero dummy cash transactions, zero mock transfer proof slips or fake cash proof images)
     4. **Birthday Wishes** (zero dummy or placeholder wishes)
   - All community records must be entered genuinely through the Admin Portal and public user interactions.
+  - **No Fake Files in Storage/Public**: Never generate or leave dummy files (such as `cash_proof_*`, `activity_*`, or `member_*`) in `public/assets/images/uploads/` or `storage/`.
 - **Permitted Foundation Data Only**:
   - The ONLY pre-seeded foundations permitted in the database and seeders are:
     1. **Homepage Slideshow** (baseline hero slides and media)
     2. **Games** (game rounds, questions, clues, answers, teams, and default scores for Guess Me! and BYC Growth 100)
     3. **Initial Accounts** (baseline administrator credentials in `users`)
-- **Automated Test Isolation**:
-  - Automated tests must maintain strict fixture hygiene. Any temporary test models created during test execution must be cleaned up immediately, ensuring the database remains in a zero-dummy-data state.
 - **Clean Slate Invariant**:
   - Keep strictly the baseline foundations: Games (Guess Me, BYC Growth 100), Administrator Accounts (`admin_utama`, `rilbiezzz`), and Homepage Slideshow photos.
   - All other domains (Members, Activities, Cash Management, Birthday Wishes) must remain in their authentic, clean empty state with properly styled empty state UI until real records are created by administrators.
   - Never introduce dummy/fake/sample data or hardcoded placeholder cards merely to make a UI section look populated.
+
+---
+
+## 24. Revision Efficiency & Minimal Scope Execution Protocol
+- **Strict Isolation for Revisions**:
+  - When the user requests a revision, revise ONLY the exact points instructed.
+  - Strictly inspect and modify ONLY the directly related files (the specific Blade view, specific CSS/JS, or specific controller/model/database table).
+  - Agents and developers must NOT:
+    1. Perform repository-wide grep searches or full architectural audits.
+    2. Check or verify unrelated backend services, models, migrations, or database logic.
+    3. Read or touch unrelated views, styles, or modules.
+    4. Propose or run irrelevant background audits or diagnostic loops.
+  - Fast turnaround: Minor UI and functional revisions should be completed swiftly (within 1–3 minutes), without burning tokens or asking unnecessary multi-step confirmations.
+
+---
+
+## 25. Absolute Ban on Testing Code & Test Execution During Development
+- **No Test Files or Test Code**:
+  - Do NOT create or maintain testing code (e.g. `tests/Feature/Scope*Test.php`, `AdminUiCleanupTest.php`, or any other test files).
+  - All existing Scope 1 to Final test files have been removed.
+  - Do NOT write test code for minor jobs, UI fixes, or standard revisions.
+- **No PHPUnit / Test Suite Execution**:
+  - Do NOT run PHPUnit, `php artisan test`, or test runners during revisions.
+  - Testing is explicitly banned during the active iteration and revision phase because it wastes tokens, creates dummy data/proof files, and slows down development.
+- **Testing Deferred to Final Completion**:
+  - Comprehensive testing is deferred until the entire application is 100% finished and only when the user explicitly commands a full test.
+
+
 
 

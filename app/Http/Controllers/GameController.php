@@ -29,33 +29,7 @@ class GameController extends Controller
         $scores = $this->storageService->getFinalScores();
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores();
-
-        $games = [
-            [
-                'id' => 'guess-me',
-                'order' => '01',
-                'title' => 'Guess Me!',
-                'tag' => 'Visual Word Clues',
-                'description' => 'Test your team speed and intuition by decoding secret words from custom visual clues and letter slot hints.',
-                'icon' => '?',
-                'route' => 'game.guess-me',
-                'theme' => 'forest',
-                'status' => 'available',
-                'features' => ['Picture Clues', 'Letter Slots', 'Team vs Team'],
-            ],
-            [
-                'id' => 'growth-100',
-                'order' => '02',
-                'title' => 'BYC GROWTH 100',
-                'tag' => 'Survey Trivia',
-                'description' => 'Discover the top survey answers, rack up to 100 points per round, and steal points when the opposing team strikes out.',
-                'icon' => '100',
-                'route' => 'game.growth-100',
-                'theme' => 'cream',
-                'status' => 'available',
-                'features' => ['Top Survey Answers', 'Card Reveal', '3-Strike Steal'],
-            ],
-        ];
+        $games = $this->storageService->getGames(true); // Visible games only
 
         return view('user.game-center', [
             'finalScores' => $scores,
@@ -66,11 +40,16 @@ class GameController extends Controller
     }
 
     /**
-     * Game 1 — Guess Me! Page
+     * Game 1 — Guess Me! Page (Participant / Audience View)
      */
     public function guessMe()
     {
-        $rounds = $this->storageService->getGuessMeRounds();
+        $game1 = $this->storageService->getGame('game1');
+        if ($game1->is_hidden) {
+            return redirect()->route('game.center')->with('info', 'This game is currently not available.');
+        }
+
+        $rounds = $this->storageService->getGuessMeRounds(true); // Only visible rounds
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores('game1');
 
@@ -82,14 +61,19 @@ class GameController extends Controller
     }
 
     /**
-     * Game 2 — BYC Growth 100 Page
+     * Game 2 — BYC Growth 100 Page (Participant / Audience View)
      */
     public function growth100()
     {
-        // Whenever a user/admin enters, refreshes, or returns to Growth 100, answers return to hidden state
+        $game2 = $this->storageService->getGame('game2');
+        if ($game2->is_hidden) {
+            return redirect()->route('game.center')->with('info', 'This game is currently not available.');
+        }
+
+        // Whenever a user enters or refreshes Growth 100, answers return to hidden state
         $this->storageService->resetGame2Revealed();
 
-        $rounds = $this->storageService->getGrowth100Rounds();
+        $rounds = $this->storageService->getGrowth100Rounds(true); // Only visible rounds
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores('game2');
 

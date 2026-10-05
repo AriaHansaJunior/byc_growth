@@ -71,43 +71,48 @@ export function updateScoreboard(teams, gameCode = null) {
     if (!teams || !Array.isArray(teams)) return;
 
     teams.forEach((team) => {
+        const gameScoreVal = (gameCode && team.scores && team.scores[gameCode] !== undefined)
+            ? team.scores[gameCode]
+            : (team.score ?? 0);
+        const totalScoreVal = team.total_score ?? team.score ?? 0;
+
         // Scoreboard in topbar
         const scoreEl = document.getElementById(`score-team-${team.id}`);
         if (scoreEl) {
-            scoreEl.textContent = team.score;
+            scoreEl.textContent = gameScoreVal;
         }
 
         const scoreValEl = document.getElementById(`team-score-val-${team.id}`);
         if (scoreValEl) {
-            scoreValEl.textContent = team.score;
+            scoreValEl.textContent = gameScoreVal;
         }
 
         // Legacy / code based fallback
         const codeScoreEl = document.getElementById(`score-team-code-${team.code}`);
         if (codeScoreEl) {
-            codeScoreEl.textContent = team.score;
+            codeScoreEl.textContent = gameScoreVal;
         }
 
         const codeScoreValEl = document.getElementById(`team-score-val-${team.code}`);
         if (codeScoreValEl) {
-            codeScoreValEl.textContent = team.score;
+            codeScoreValEl.textContent = gameScoreVal;
         }
 
         // Host card specific game score
         const hostGameScoreEl = document.getElementById(`host-team-score-${team.id}`);
-        if (hostGameScoreEl && team.scores) {
-            hostGameScoreEl.textContent = gameCode ? (team.scores[gameCode] ?? team.score) : team.score;
+        if (hostGameScoreEl) {
+            hostGameScoreEl.textContent = gameScoreVal;
         }
 
         const growthScoreEl = document.getElementById(`growth-team-score-${team.id}`);
-        if (growthScoreEl && team.scores) {
-            growthScoreEl.textContent = team.scores.game2 ?? team.score;
+        if (growthScoreEl) {
+            growthScoreEl.textContent = gameScoreVal;
         }
 
         // Host card total score
         const hostTotalScoreEl = document.getElementById(`host-team-total-${team.id}`);
         if (hostTotalScoreEl) {
-            hostTotalScoreEl.textContent = team.total_score ?? team.score;
+            hostTotalScoreEl.textContent = totalScoreVal;
         }
     });
 }

@@ -45,7 +45,7 @@
                 <div class="footer-col">
                     <span class="footer-col-heading">Explore</span>
                     <ul class="footer-nav-list">
-                        <li><a href="{{ route('home') }}" class="footer-link">Home</a></li>
+                        <li><a href="{{ (auth()->check() && auth()->user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="footer-link">Home</a></li>
                         <li><a href="{{ route('about') }}" class="footer-link">About Us</a></li>
                         <li><a href="{{ route('activity') }}" class="footer-link">Activity</a></li>
                         <li><a href="{{ route('members') }}" class="footer-link">Members</a></li>
@@ -58,7 +58,7 @@
         {{-- Footer Bottom: Brand & Copyright --}}
         <div class="footer-bottom">
             <div class="footer-brand-lockup">
-                <a href="{{ route('home') }}" class="footer-brand-link">
+                <a href="{{ (auth()->check() && auth()->user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="footer-brand-link">
                     <x-brand :compact="true" />
                 </a>
                 <span class="footer-tagline">Faith &bull; Purpose &bull; Fellowship</span>

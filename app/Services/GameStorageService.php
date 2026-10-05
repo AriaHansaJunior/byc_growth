@@ -30,7 +30,7 @@ class GameStorageService
     /**
      * Get or create Game model by code.
      */
-    protected function getGame(string $code): Game
+    public function getGame(string $code): Game
     {
         return Game::firstOrCreate(
             ['code' => $code],
@@ -99,16 +99,39 @@ class GameStorageService
             $teams = $this->getActiveTeams($gameCode);
             $result = [];
 
+            $paletteByCode = collect($palette)->keyBy('code')->toArray();
+            $paletteByColor = collect($palette)->keyBy('color')->toArray();
+
             foreach ($teams as $idx => $team) {
                 $score = GameScore::firstOrCreate(['game_id' => $game->id, 'team_id' => $team->id], ['score' => 0]);
-                $theme = $team->color ?: ($palette[$idx % count($palette)]['theme'] ?? 'forest');
+                $paletteItem = $palette[$idx % count($palette)];
+
+                // Resolve theme (must be valid css theme code: red, blue, forest, gold, purple, teal)
+                $theme = $paletteItem['theme'];
+                if (!empty($team->code) && isset($paletteByCode[$team->code])) {
+                    $theme = $team->code;
+                } elseif (!empty($team->color) && isset($paletteByCode[$team->color])) {
+                    $theme = $team->color;
+                } elseif (!empty($team->color) && isset($paletteByColor[$team->color])) {
+                    $theme = $paletteByColor[$team->color]['theme'];
+                }
+
+                // Resolve hex color
+                $color = $paletteItem['color'];
+                if (!empty($team->color) && str_starts_with($team->color, '#')) {
+                    $color = $team->color;
+                } elseif (!empty($team->color) && isset($paletteByCode[$team->color])) {
+                    $color = $paletteByCode[$team->color]['color'];
+                } elseif (!empty($team->code) && isset($paletteByCode[$team->code])) {
+                    $color = $paletteByCode[$team->code]['color'];
+                }
 
                 $result[] = [
                     'id' => (int) $team->id,
                     'game_id' => (int) $team->game_id,
                     'code' => $team->code,
                     'name' => $team->name,
-                    'color' => $team->color ?: ($palette[$idx % count($palette)]['color'] ?? '#284e3b'),
+                    'color' => $color,
                     'theme' => $theme,
                     'sort_order' => (int) $team->sort_order,
                     'scores' => [
@@ -124,11 +147,157 @@ class GameStorageService
             return $result;
         }
 
-        // Combined for both games
+        // Combined overall teams for both games
+        return $this->getOverallTeamsWithScores();
+    }
+
+    /**
+     * Get combined overall teams with cumulative scores across all games.
+     */
+    public function getOverallTeamsWithScores(): array
+    {
         $g1Teams = $this->getTeamsWithScores('game1');
         $g2Teams = $this->getTeamsWithScores('game2');
 
-        return array_merge($g1Teams, $g2Teams);
+        if (empty($g1Teams) && empty($g2Teams)) {
+            return [];
+        }
+
+        if (empty($g2Teams)) {
+            return $g1Teams;
+        }
+
+        if (empty($g1Teams)) {
+            return $g2Teams;
+        }
+
+        // 1. Check if teams match by normalized name
+        $g2ByName = [];
+        foreach ($g2Teams as $t2) {
+            $key = mb_strtolower(trim($t2['name']));
+            $g2ByName[$key] = $t2;
+        }
+
+        $allMatchByName = true;
+        foreach ($g1Teams as $t1) {
+            $key = mb_strtolower(trim($t1['name']));
+            if (!isset($g2ByName[$key])) {
+                $allMatchByName = false;
+                break;
+            }
+        }
+
+        $overall = [];
+        $g2MatchedIds = [];
+
+        if ($allMatchByName) {
+            foreach ($g1Teams as $t1) {
+                $key = mb_strtolower(trim($t1['name']));
+                $t2 = $g2ByName[$key];
+                $g2MatchedIds[] = $t2['id'];
+
+                $g1Score = $t1['scores']['game1'] ?? $t1['score'] ?? 0;
+                $g2Score = $t2['scores']['game2'] ?? $t2['score'] ?? 0;
+                $total = $g1Score + $g2Score;
+
+                $overall[] = [
+                    'id' => $t1['id'],
+                    'game_id' => $t1['game_id'],
+                    'code' => $t1['code'],
+                    'name' => $t1['name'],
+                    'color' => $t1['color'],
+                    'theme' => $t1['theme'],
+                    'sort_order' => $t1['sort_order'],
+                    'scores' => [
+                        'game1' => $g1Score,
+                        'game2' => $g2Score,
+                    ],
+                    'score' => $total,
+                    'total_score' => $total,
+                ];
+            }
+        } elseif (count($g1Teams) === count($g2Teams)) {
+            foreach ($g1Teams as $idx => $t1) {
+                $t2 = $g2Teams[$idx];
+                $g2MatchedIds[] = $t2['id'];
+
+                $g1Score = $t1['scores']['game1'] ?? $t1['score'] ?? 0;
+                $g2Score = $t2['scores']['game2'] ?? $t2['score'] ?? 0;
+                $total = $g1Score + $g2Score;
+
+                $overall[] = [
+                    'id' => $t1['id'],
+                    'game_id' => $t1['game_id'],
+                    'code' => $t1['code'],
+                    'name' => $t1['name'],
+                    'color' => $t1['color'],
+                    'theme' => $t1['theme'],
+                    'sort_order' => $t1['sort_order'],
+                    'scores' => [
+                        'game1' => $g1Score,
+                        'game2' => $g2Score,
+                    ],
+                    'score' => $total,
+                    'total_score' => $total,
+                ];
+            }
+        } else {
+            foreach ($g1Teams as $idx => $t1) {
+                $key = mb_strtolower(trim($t1['name']));
+                $t2 = $g2ByName[$key] ?? null;
+
+                if (!$t2 && isset($g2Teams[$idx]) && !in_array($g2Teams[$idx]['id'], $g2MatchedIds)) {
+                    $t2 = $g2Teams[$idx];
+                }
+
+                $g1Score = $t1['scores']['game1'] ?? $t1['score'] ?? 0;
+                $g2Score = 0;
+                if ($t2) {
+                    $g2MatchedIds[] = $t2['id'];
+                    $g2Score = $t2['scores']['game2'] ?? $t2['score'] ?? 0;
+                }
+                $total = $g1Score + $g2Score;
+
+                $overall[] = [
+                    'id' => $t1['id'],
+                    'game_id' => $t1['game_id'],
+                    'code' => $t1['code'],
+                    'name' => $t1['name'],
+                    'color' => $t1['color'],
+                    'theme' => $t1['theme'],
+                    'sort_order' => $t1['sort_order'],
+                    'scores' => [
+                        'game1' => $g1Score,
+                        'game2' => $g2Score,
+                    ],
+                    'score' => $total,
+                    'total_score' => $total,
+                ];
+            }
+
+            foreach ($g2Teams as $t2) {
+                if (!in_array($t2['id'], $g2MatchedIds)) {
+                    $g2Score = $t2['scores']['game2'] ?? $t2['score'] ?? 0;
+                    $overall[] = [
+                        'id' => $t2['id'],
+                        'game_id' => $t2['game_id'],
+                        'code' => $t2['code'],
+                        'name' => $t2['name'],
+                        'color' => $t2['color'],
+                        'theme' => $t2['theme'],
+                        'sort_order' => $t2['sort_order'],
+                        'scores' => [
+                            'game1' => 0,
+                            'game2' => $g2Score,
+                        ],
+                        'score' => $g2Score,
+                        'total_score' => $g2Score,
+                    ];
+                }
+            }
+        }
+
+        return $overall;
     }
 
     /**
@@ -302,16 +471,120 @@ class GameStorageService
     }
 
     /**
+     * Get Game definitions with database visibility status.
+     */
+    public function getGames(bool $onlyVisible = false): array
+    {
+        $g1 = $this->getGame('game1');
+        $g2 = $this->getGame('game2');
+
+        $games = [
+            [
+                'id' => 'guess-me',
+                'code' => 'game1',
+                'order' => '01',
+                'title' => 'Guess Me!',
+                'tag' => 'Visual Word Clues',
+                'description' => 'Test your team speed and intuition by decoding secret words from custom visual clues and letter slot hints.',
+                'icon' => '?',
+                'user_route' => 'game.guess-me',
+                'admin_route' => 'admin.games.guess-me.host',
+                'route' => 'game.guess-me',
+                'theme' => 'forest',
+                'status' => 'available',
+                'features' => ['Picture Clues', 'Letter Slots', 'Team vs Team'],
+                'is_hidden' => (bool) $g1->is_hidden,
+                'db_id' => $g1->id,
+            ],
+            [
+                'id' => 'growth-100',
+                'code' => 'game2',
+                'order' => '02',
+                'title' => 'BYC GROWTH 100',
+                'tag' => 'Survey Trivia',
+                'description' => 'Discover the top survey answers, rack up to 100 points per round, and steal points when the opposing team strikes out.',
+                'icon' => '100',
+                'user_route' => 'game.growth-100',
+                'admin_route' => 'admin.games.growth-100.host',
+                'route' => 'game.growth-100',
+                'theme' => 'cream',
+                'status' => 'available',
+                'features' => ['Top Survey Answers', 'Card Reveal', '3-Strike Steal'],
+                'is_hidden' => (bool) $g2->is_hidden,
+                'db_id' => $g2->id,
+            ],
+        ];
+
+        if ($onlyVisible) {
+            $games = array_values(array_filter($games, fn($g) => !$g['is_hidden']));
+        }
+
+        return $games;
+    }
+
+    /**
+     * Toggle visibility of an entire game.
+     */
+    public function toggleGameVisibility(string|int $gameIdOrCode): array
+    {
+        if (is_numeric($gameIdOrCode)) {
+            $game = Game::find((int) $gameIdOrCode);
+        } else {
+            $code = in_array($gameIdOrCode, ['guess-me', 'game1'], true) ? 'game1' : 'game2';
+            $game = $this->getGame($code);
+        }
+
+        if (!$game) {
+            return ['success' => false, 'error' => 'Game not found.'];
+        }
+
+        $game->is_hidden = !$game->is_hidden;
+        $game->save();
+
+        return [
+            'success' => true,
+            'game_id' => $game->id,
+            'code' => $game->code,
+            'is_hidden' => (bool) $game->is_hidden,
+        ];
+    }
+
+    /**
+     * Toggle visibility of an individual round.
+     */
+    public function toggleRoundVisibility(int $roundId): array
+    {
+        $round = GameRound::find($roundId);
+        if (!$round) {
+            return ['success' => false, 'error' => 'Round not found.'];
+        }
+
+        $round->is_hidden = !$round->is_hidden;
+        $round->save();
+
+        return [
+            'success' => true,
+            'round_id' => $round->id,
+            'is_hidden' => (bool) $round->is_hidden,
+        ];
+    }
+
+    /**
      * Get Guess Me Rounds from MySQL with point assignment.
      */
-    public function getGuessMeRounds(): array
+    public function getGuessMeRounds(bool $onlyVisible = false): array
     {
         $game1 = $this->getGame('game1');
 
-        $rounds = GameRound::with('mediaFile')
+        $query = GameRound::with('mediaFile')
             ->where('game_id', $game1->id)
-            ->orderBy('round_number')
-            ->get();
+            ->orderBy('round_number');
+
+        if ($onlyVisible) {
+            $query->where('is_hidden', false);
+        }
+
+        $rounds = $query->get();
 
         return $rounds->map(function (GameRound $round) {
             $imageName = $round->image_path ?: ($round->mediaFile ? $round->mediaFile->original_name : 'BYC_Growth.jpg');
@@ -326,23 +599,29 @@ class GameStorageService
                 'score' => (int) $round->score,
                 'awarded_team_id' => $round->awarded_team_id ? (int) $round->awarded_team_id : null,
                 'awarded_points' => (int) $round->awarded_points,
+                'is_hidden' => (bool) $round->is_hidden,
             ];
-        })->toArray();
+        })->values()->toArray();
     }
 
     /**
      * Get Growth 100 Rounds from MySQL with point assignment.
      */
-    public function getGrowth100Rounds(): array
+    public function getGrowth100Rounds(bool $onlyVisible = false): array
     {
         $game2 = $this->getGame('game2');
 
-        $rounds = GameRound::with(['answers' => function ($query) {
+        $query = GameRound::with(['answers' => function ($query) {
             $query->orderByDesc('points')->orderBy('sort_order');
         }])
             ->where('game_id', $game2->id)
-            ->orderBy('round_number')
-            ->get();
+            ->orderBy('round_number');
+
+        if ($onlyVisible) {
+            $query->where('is_hidden', false);
+        }
+
+        $rounds = $query->get();
 
         return $rounds->map(function (GameRound $round) {
             return [
@@ -351,6 +630,7 @@ class GameStorageService
                 'question' => $round->question,
                 'awarded_team_id' => $round->awarded_team_id ? (int) $round->awarded_team_id : null,
                 'awarded_points' => (int) $round->awarded_points,
+                'is_hidden' => (bool) $round->is_hidden,
                 'answers' => $round->answers->map(function (GameAnswer $ans) {
                     return [
                         'id' => (int) $ans->id,
@@ -360,7 +640,7 @@ class GameStorageService
                     ];
                 })->toArray(),
             ];
-        })->toArray();
+        })->values()->toArray();
     }
 
     /**
@@ -408,7 +688,7 @@ class GameStorageService
                 'blue' => $g2Blue,
                 'teams' => $g2Teams,
             ],
-            'teams' => array_merge($g1Teams, $g2Teams),
+            'teams' => $this->getOverallTeamsWithScores(),
             'teams_by_game' => [
                 'game1' => $g1Teams,
                 'game2' => $g2Teams,
@@ -1039,7 +1319,7 @@ class GameStorageService
             $points = (int) $round->score;
         }
 
-        return DB::transaction(function () use ($game, $round, $teamId, $points) {
+        return DB::transaction(function () use ($game, $round, $teamId, $points, $gameCode) {
             $prevTeamId = $round->awarded_team_id;
             $prevPoints = (int) $round->awarded_points;
 
@@ -1090,7 +1370,8 @@ class GameStorageService
                 'awarded_team_id' => $awardedTeamId,
                 'awarded_points' => $pointsAwarded,
                 'transferred_from_team_id' => ($action === 'transferred') ? $prevTeamId : null,
-                'teams' => $this->getTeamsWithScores(),
+                'teams' => $this->getTeamsWithScores($game->code),
+                'overall_teams' => $this->getTeamsWithScores(),
                 'final_scores' => $this->getFinalScores(),
             ];
         });

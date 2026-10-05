@@ -27,38 +27,19 @@ class GameController extends Controller
         $scores = $this->storageService->getFinalScores();
         $gameState = $this->storageService->getGameState();
         $teams = $this->storageService->getTeamsWithScores();
-        $guessMeRounds = $this->storageService->getGuessMeRounds();
-        $growth100Rounds = $this->storageService->getGrowth100Rounds();
+        $guessMeRounds = $this->storageService->getGuessMeRounds(false); // All rounds
+        $growth100Rounds = $this->storageService->getGrowth100Rounds(false); // All rounds
 
         $activeTab = $request->query('tab', 'guess-me');
         if (!in_array($activeTab, ['guess-me', 'growth-100', 'overview'], true)) {
             $activeTab = 'guess-me';
         }
 
-        $games = [
-            [
-                'id' => 'guess-me',
-                'order' => '01',
-                'title' => 'Guess Me!',
-                'tag' => 'Visual Word Clues',
-                'description' => 'Test speed and teamwork by decoding secret words from custom visual clues and letter slot hints.',
-                'route' => 'game.guess-me',
-                'theme' => 'forest',
-                'status' => 'active',
-                'rounds_count' => count($guessMeRounds),
-            ],
-            [
-                'id' => 'growth-100',
-                'order' => '02',
-                'title' => 'BYC GROWTH 100',
-                'tag' => 'Survey Trivia',
-                'description' => 'Uncover top survey answers, rack up points, and manage card reveals with 3-strike point steals.',
-                'route' => 'game.growth-100',
-                'theme' => 'cream',
-                'status' => 'active',
-                'rounds_count' => count($growth100Rounds),
-            ],
-        ];
+        $games = $this->storageService->getGames(false); // All games with is_hidden flag
+        foreach ($games as &$g) {
+            $g['rounds_count'] = $g['code'] === 'game1' ? count($guessMeRounds) : count($growth100Rounds);
+        }
+        unset($g);
 
         return view('admin.games', [
             'finalScores' => $scores,
@@ -69,6 +50,57 @@ class GameController extends Controller
             'growth100Rounds' => $growth100Rounds,
             'activeTab' => $activeTab,
         ]);
+    }
+
+    /**
+     * Admin Host Session for Game 1 — Guess Me!
+     */
+    public function guessMeHost(): View
+    {
+        $rounds = $this->storageService->getGuessMeRounds(false); // All rounds (with is_hidden status)
+        $gameState = $this->storageService->getGameState();
+        $teams = $this->storageService->getTeamsWithScores('game1');
+
+        return view('admin.game-guess-me', [
+            'rounds' => $rounds,
+            'game1State' => $gameState['game1'],
+            'teams' => $teams,
+        ]);
+    }
+
+    /**
+     * Admin Host Session for Game 2 — BYC Growth 100
+     */
+    public function growth100Host(): View
+    {
+        $this->storageService->resetGame2Revealed();
+        $rounds = $this->storageService->getGrowth100Rounds(false); // All rounds (with is_hidden status)
+        $gameState = $this->storageService->getGameState();
+        $teams = $this->storageService->getTeamsWithScores('game2');
+
+        return view('admin.game-growth-100', [
+            'rounds' => $rounds,
+            'game2State' => $gameState['game2'],
+            'teams' => $teams,
+        ]);
+    }
+
+    /**
+     * Toggle visibility of an entire game from Admin Game Center.
+     */
+    public function toggleGameVisibility(string|int $id): JsonResponse
+    {
+        $result = $this->storageService->toggleGameVisibility($id);
+        return response()->json($result);
+    }
+
+    /**
+     * Toggle visibility of a round from within the round's admin page.
+     */
+    public function toggleRoundVisibility(int $id): JsonResponse
+    {
+        $result = $this->storageService->toggleRoundVisibility($id);
+        return response()->json($result);
     }
 
     /**

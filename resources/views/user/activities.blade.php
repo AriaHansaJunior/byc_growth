@@ -231,7 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             formEdit.action = `/admin/activities/${id}`;
             document.getElementById('edit-activity-name').value = name;
-            document.getElementById('edit-activity-date').value = date;
+            if (window.setDatePickerValue) {
+                window.setDatePickerValue('edit-activity-date', date || '');
+            } else {
+                document.getElementById('edit-activity-date').value = date;
+            }
             document.getElementById('edit-activity-description').value = description;
 
             const container = document.getElementById('edit-activity-photos-container');

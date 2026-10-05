@@ -135,19 +135,51 @@
 }
 
 .final-red {
-  background: #6e302f;
+  background: #72322f;
 }
 
 .final-red.is-winner {
-  background: #803736;
+  background: #883a37;
 }
 
 .final-blue {
-  background: #24496b;
+  background: #234b73;
 }
 
 .final-blue.is-winner {
-  background: #2c567e;
+  background: #2b5d8f;
+}
+
+.final-forest {
+  background: #1f4935;
+}
+
+.final-forest.is-winner {
+  background: #265c43;
+}
+
+.final-gold {
+  background: #795316;
+}
+
+.final-gold.is-winner {
+  background: #95661b;
+}
+
+.final-purple {
+  background: #4c287a;
+}
+
+.final-purple.is-winner {
+  background: #5f339b;
+}
+
+.final-teal {
+  background: #134e4a;
+}
+
+.final-teal.is-winner {
+  background: #18635e;
 }
 
 .final-details {

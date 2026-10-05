@@ -22,12 +22,14 @@ class GameRound extends Model
         'awarded_points',
         'media_file_id',
         'image_path',
+        'is_hidden',
     ];
 
     protected $casts = [
         'round_number' => 'integer',
         'score' => 'integer',
         'awarded_points' => 'integer',
+        'is_hidden' => 'boolean',
     ];
 
     /**

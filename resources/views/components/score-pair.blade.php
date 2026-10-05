@@ -2,10 +2,26 @@
 
 @php
     if (!$teams && $scores) {
-        $teams = [
-            ['id' => 1, 'code' => 'red', 'name' => 'Team Red', 'theme' => 'red', 'color' => '#bd4c42', 'score' => $scores['red'] ?? $scores['final_red'] ?? 0],
-            ['id' => 2, 'code' => 'blue', 'name' => 'Team Blue', 'theme' => 'blue', 'color' => '#315e89', 'score' => $scores['blue'] ?? $scores['final_blue'] ?? 0],
-        ];
+        $dbTeams = app(\App\Services\GameStorageService::class)->getTeamsWithScores($game);
+        if (!empty($dbTeams)) {
+            $teams = $dbTeams;
+            foreach ($teams as $idx => &$t) {
+                $code = $t['code'] ?? ($idx === 0 ? 'red' : ($idx === 1 ? 'blue' : ''));
+                if (isset($scores[$code])) {
+                    $t['score'] = $scores[$code];
+                } elseif ($code === 'red' && isset($scores['final_red'])) {
+                    $t['score'] = $scores['final_red'];
+                } elseif ($code === 'blue' && isset($scores['final_blue'])) {
+                    $t['score'] = $scores['final_blue'];
+                }
+            }
+            unset($t);
+        } else {
+            $teams = [
+                ['id' => 1, 'code' => 'red', 'name' => 'Team Red', 'theme' => 'red', 'color' => '#bd4c42', 'score' => $scores['red'] ?? $scores['final_red'] ?? 0],
+                ['id' => 2, 'code' => 'blue', 'name' => 'Team Blue', 'theme' => 'blue', 'color' => '#315e89', 'score' => $scores['blue'] ?? $scores['final_blue'] ?? 0],
+            ];
+        }
     } elseif (!$teams) {
         $teams = app(\App\Services\GameStorageService::class)->getTeamsWithScores($game);
     }
