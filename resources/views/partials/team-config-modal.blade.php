@@ -1,5 +1,5 @@
-<div class="modal-backdrop" id="modal-team-config" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;" role="dialog" aria-modal="true" aria-labelledby="team-config-modal-title">
-    <section class="editor-panel" style="width: min(620px, 94vw); max-height: calc(100vh - 40px); display: flex; flex-direction: column; background: var(--white); border-radius: 24px; box-shadow: var(--shadow); border: 1px solid var(--line); overflow: hidden; margin: auto;">
+<div class="modal-backdrop" id="modal-team-config" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;" role="dialog" aria-modal="true" aria-labelledby="team-config-modal-title">
+    <section class="editor-panel" style="width: min(560px, 92vw); max-height: min(560px, 75vh); display: flex; flex-direction: column; background: var(--white); border-radius: 22px; box-shadow: var(--shadow); border: 1px solid var(--line); overflow: hidden; margin: auto;">
         {{-- Fixed Header --}}
         <div class="modal-heading" style="padding: 22px 28px 18px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; background: var(--white);">
             <div>

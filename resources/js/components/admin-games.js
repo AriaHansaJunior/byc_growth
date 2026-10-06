@@ -453,13 +453,13 @@ export function initAdminGames() {
     function createAnswerRow(text = '', score = 25, index = 0) {
         const row = document.createElement('div');
         row.className = 'growth-answer-editor-row';
-        row.style.cssText = 'display: grid; grid-template-columns: 28px 1fr 90px 32px; gap: 8px; align-items: center;';
+        row.style.cssText = 'display: grid; grid-template-columns: 28px 1fr 85px 32px; gap: 8px; align-items: center; width: 100%; box-sizing: border-box;';
 
         row.innerHTML = `
-            <span class="row-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; color: var(--forest);">${index + 1}</span>
-            <input type="text" name="answers[${index}][text]" value="${text.replace(/"/g, '&quot;')}" placeholder="Answer choice..." required style="height: 38px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; font-weight: 600;">
-            <input type="number" name="answers[${index}][score]" value="${score}" min="1" max="100" required class="growth-score-input" style="height: 38px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; font-weight: 800; text-align: center;">
-            <button type="button" class="btn-remove-answer-row" style="background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; border-radius: 6px;" title="Remove row">✕</button>
+            <span class="row-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; color: var(--forest); flex-shrink: 0;">${index + 1}</span>
+            <input type="text" name="answers[${index}][text]" value="${text.replace(/"/g, '&quot;')}" placeholder="Answer choice..." required style="height: 38px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; font-weight: 600; width: 100%; box-sizing: border-box;">
+            <input type="number" name="answers[${index}][score]" value="${score}" min="1" max="100" required class="growth-score-input" style="height: 38px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 13.5px; font-weight: 800; text-align: center; width: 85px; box-sizing: border-box;">
+            <button type="button" class="btn-remove-answer-row" style="background: none; border: none; color: var(--red); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; height: 32px; width: 32px; border-radius: 6px; flex-shrink: 0; padding: 0;" title="Remove row">✕</button>
         `;
 
         const removeBtn = row.querySelector('.btn-remove-answer-row');
@@ -667,21 +667,21 @@ export function initAdminGames() {
 
         workingTeams.forEach((team, idx) => {
             const row = document.createElement('div');
-            row.style.cssText = 'display: grid; grid-template-columns: 28px 1fr 140px 32px; gap: 8px; align-items: center; background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line);';
+            row.style.cssText = 'display: grid; grid-template-columns: 28px 1fr 140px 32px; gap: 8px; align-items: center; background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); box-sizing: border-box;';
 
             const colorOpts = COLOR_PALETTE.map(c => `
-                <option value="${c.code}" ${(team.color === c.code || team.color === c.color || team.code === c.code) ? 'selected' : ''}>
+                <option value="${c.code}" ${(team.color === c.code || team.color === c.color || team.code === c.code) ? 'selected' : ''} style="font-size: 11px; font-weight: 600;">
                     ${c.name}
                 </option>
             `).join('');
 
             row.innerHTML = `
                 <span style="font-weight: 800; color: var(--forest); font-size: 13px; text-align: center;">${idx + 1}</span>
-                <input type="text" class="team-name-input" value="${(team.name || '').replace(/"/g, '&quot;')}" placeholder="Team Name" required style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13.5px; font-weight: 600;">
-                <select class="team-color-select" style="border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 13px; font-weight: 600; background: var(--paper); cursor: pointer;">
+                <input type="text" class="team-name-input" value="${(team.name || '').replace(/"/g, '&quot;')}" placeholder="Team Name" required style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13.5px; font-weight: 600; height: 38px; box-sizing: border-box;">
+                <select class="team-color-select" style="border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 11px; font-weight: 600; background: var(--paper); cursor: pointer; height: 38px; box-sizing: border-box; width: 100%;">
                     ${colorOpts}
                 </select>
-                <button type="button" class="btn-remove-team-row" style="border: 0; background: transparent; color: var(--red); font-size: 18px; font-weight: 700; cursor: pointer; display: grid; place-items: center;" ${workingTeams.length <= 2 ? 'disabled' : ''}>
+                <button type="button" class="btn-remove-team-row" style="border: 0; background: transparent; color: var(--red); font-size: 18px; font-weight: 700; cursor: pointer; display: grid; place-items: center; width: 32px; height: 32px; padding: 0;" ${workingTeams.length <= 2 ? 'disabled' : ''}>
                     ×
                 </button>
             `;

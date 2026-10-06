@@ -55,11 +55,11 @@
                     <div class="admin-profile-menu-divider"></div>
 
                     <div class="admin-profile-menu-actions">
-                        <a href="{{ route('home') }}" class="admin-profile-logout-btn" style="text-decoration: none; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;" role="menuitem">
+                        <a href="{{ route('admin.roles', ['edit' => $admin->id]) }}" class="admin-profile-logout-btn" style="text-decoration: none; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;" role="menuitem">
                             <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                             </svg>
-                            <span>View Public Site</span>
+                            <span>Edit Your Account</span>
                         </a>
                         <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0; width: 100%;">
                             @csrf
@@ -79,6 +79,31 @@
 
 <script>
     (function() {
+        // Maintain quick-nav scroll position across page navigation
+        var quickNav = document.querySelector('.admin-quick-nav');
+        if (quickNav) {
+            var savedScroll = sessionStorage.getItem('admin_quick_nav_scroll');
+            if (savedScroll !== null) {
+                quickNav.scrollLeft = parseInt(savedScroll, 10);
+            }
+            var activeTab = quickNav.querySelector('.admin-nav-item.active');
+            if (activeTab) {
+                var navRect = quickNav.getBoundingClientRect();
+                var activeRect = activeTab.getBoundingClientRect();
+                if (savedScroll === null || activeRect.left < navRect.left || activeRect.right > navRect.right) {
+                    activeTab.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'auto' });
+                }
+            }
+            quickNav.addEventListener('scroll', function() {
+                sessionStorage.setItem('admin_quick_nav_scroll', String(quickNav.scrollLeft));
+            }, { passive: true });
+            quickNav.querySelectorAll('.admin-nav-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    sessionStorage.setItem('admin_quick_nav_scroll', String(quickNav.scrollLeft));
+                });
+            });
+        }
+
         var wrap = document.getElementById('admin-profile-dropdown-wrap');
         var btn = document.getElementById('btn-admin-profile-dropdown');
         if (!btn || !wrap) return;

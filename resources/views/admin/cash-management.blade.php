@@ -302,7 +302,7 @@
                     </h3>
                     <small style="color: var(--muted); font-size: 12.5px; display: block; margin-top: 2px;">File an official cash transfer or cash deposit into fellowship records.</small>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-record-tx" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                <button type="button" class="btn-close-modal" data-target="modal-record-tx" aria-label="Close dialog" style="width: 36px; height: 36px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">&times;</button>
             </div>
 
             <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-record-tx" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
@@ -411,7 +411,7 @@
                         Edit Cash Transaction
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-edit-tx" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                <button type="button" class="btn-close-modal" data-target="modal-edit-tx" aria-label="Close dialog" style="width: 36px; height: 36px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">&times;</button>
             </div>
             <form id="form-edit-tx" method="POST" action="" enctype="multipart/form-data" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf

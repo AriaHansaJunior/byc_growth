@@ -161,7 +161,7 @@
 
     {{-- Add Activity Modal --}}
     <div id="modal-add-activity" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-add-activity-title">
-        <div class="info-modal" style="width: min(800px, 95vw); max-height: calc(100vh - 40px); overflow-y: auto; padding: 24px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
+        <div class="info-modal" style="width: min(800px, 100%); max-width: 100%; box-sizing: border-box; max-height: calc(100vh - 32px); overflow-y: auto; padding: 24px 24px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
             <button type="button" class="icon-button btn-close-modal" id="btn-close-add-activity" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
                 <x-icon name="x" />
             </button>
@@ -180,7 +180,7 @@
                 </div>
 
                 {{-- Start Date & End Date (End Date unlocked upon choosing Start Date) --}}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div class="activity-date-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label class="form-label" for="add-start-date" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 4px;">
                             Event Start Date <span style="color: var(--red);">*</span>
@@ -234,7 +234,7 @@
 
     {{-- Edit Activity Modal --}}
     <div id="modal-edit-activity" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-edit-activity-title">
-        <div class="info-modal" style="width: min(800px, 95vw); max-height: calc(100vh - 40px); overflow-y: auto; padding: 24px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
+        <div class="info-modal" style="width: min(800px, 100%); max-width: 100%; box-sizing: border-box; max-height: calc(100vh - 32px); overflow-y: auto; padding: 24px 24px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
             <button type="button" class="icon-button btn-close-modal" id="btn-close-edit-activity" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
                 <x-icon name="x" />
             </button>
@@ -254,7 +254,7 @@
                 </div>
 
                 {{-- Start Date & End Date (Locked until Start Date is valid) --}}
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div class="activity-date-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label class="form-label" for="edit-start-date" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 4px;">
                             Event Start Date <span style="color: var(--red);">*</span>

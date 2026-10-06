@@ -298,7 +298,7 @@ export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
         workingTeams.forEach((team, idx) => {
             const row = document.createElement('div');
             row.className = 'team-config-row';
-            row.style.cssText = 'display: grid; grid-template-columns: 32px 1fr 150px 36px; gap: 8px; align-items: center; background: var(--white); padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line);';
+            row.style.cssText = 'display: grid; grid-template-columns: 24px 1fr 115px 28px; gap: 6px; align-items: center; background: var(--white); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--line); box-sizing: border-box;';
 
             const colorOptions = TEAM_COLOR_PALETTE.map((c) => `
                 <option value="${c.code}" ${team.color === c.code ? 'selected' : ''}>
@@ -307,12 +307,12 @@ export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
             `).join('');
 
             row.innerHTML = `
-                <span style="font-weight: 800; color: var(--forest); font-size: 14px; text-align: center;">${idx + 1}</span>
-                <input type="text" class="team-name-input" value="${(team.name || '').replace(/"/g, '&quot;')}" placeholder="Team Name" required style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 14px; font-weight: 600;">
-                <select class="team-color-select" style="border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-size: 13px; font-weight: 600; background: var(--paper); cursor: pointer;">
+                <span style="font-weight: 800; color: var(--forest); font-size: 12px; text-align: center;">${idx + 1}</span>
+                <input type="text" class="team-name-input" value="${(team.name || '').replace(/"/g, '&quot;')}" placeholder="Team Name" required style="width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; font-size: 12.5px; font-weight: 600; height: 32px; box-sizing: border-box;">
+                <select class="team-color-select" style="border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; font-size: 12px; font-weight: 600; background: var(--paper); cursor: pointer; height: 32px; box-sizing: border-box;">
                     ${colorOptions}
                 </select>
-                <button type="button" class="btn-remove-team" aria-label="Remove team" style="border: 0; background: transparent; color: var(--red); font-size: 20px; font-weight: 700; cursor: pointer; display: grid; place-items: center;" ${workingTeams.length <= 2 ? 'disabled' : ''}>
+                <button type="button" class="btn-remove-team" aria-label="Remove team" style="border: 0; background: transparent; color: var(--red); font-size: 18px; font-weight: 700; cursor: pointer; display: grid; place-items: center; width: 26px; height: 26px; padding: 0;" ${workingTeams.length <= 2 ? 'disabled' : ''}>
                     ×
                 </button>
             `;

@@ -249,23 +249,23 @@
     </div>
 
     {{-- Modal: Create Account --}}
-    <div class="admin-modal-backdrop modal-backdrop" id="modal-add-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 20px;">👤</span>
-                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
+    <div class="admin-modal-backdrop modal-backdrop" id="modal-add-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px; overscroll-behavior: contain;">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 16px; max-width: 450px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 12px 18px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">👤</span>
+                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink);">
                         Create New User Account
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-add-user" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                <button type="button" class="btn-close-modal" data-target="modal-add-user" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
             </div>
 
             <form method="POST" action="{{ route('admin.roles.store') }}" id="form-add-user" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
-                <div style="padding: 20px 22px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 13px;">
-                    <div class="form-group">
-                        <label class="form-label" for="add-user-username">Username *</label>
+                <div style="padding: 12px 18px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="add-user-username" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Username *</label>
                         <input
                             type="text"
                             name="username"
@@ -274,27 +274,29 @@
                             value="{{ old('username') }}"
                             placeholder="e.g. john_doe"
                             maxlength="60"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                         @error('username')
-                            <div class="form-field-error" data-for="add-user-username">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-username" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
                         @enderror
-                        <small style="color: var(--muted); font-size: 11px;">Alphanumeric and underscores only (used for login & identity).</small>
+                        <small style="color: var(--muted); font-size: 10px; line-height: 1.25; display: block; margin-top: 1px;">Alphanumeric and underscores only.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="add-user-name">Full Name</label>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="add-user-name" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Full Name</label>
                         <input
                             type="text"
                             name="name"
                             id="add-user-name"
                             value="{{ old('name') }}"
                             class="form-input"
-                            placeholder="e.g. John Doe (optional, defaults to username)"
+                            placeholder="e.g. John Doe (optional)"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="add-user-email">Email Address *</label>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="add-user-email" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Email Address *</label>
                         <input
                             type="email"
                             name="email"
@@ -302,55 +304,57 @@
                             value="{{ old('email') }}"
                             class="form-input @error('email') input-invalid @enderror"
                             placeholder="e.g. user@bycgrowth.org"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                         @error('email')
-                            <div class="form-field-error" data-for="add-user-email">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-email" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="add-user-password">Password *</label>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="add-user-password" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Password *</label>
                         <input
                             type="password"
                             name="password"
                             id="add-user-password"
                             class="form-input @error('password') input-invalid @enderror"
                             placeholder="Minimum 6 characters"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                         @error('password')
-                            <div class="form-field-error" data-for="add-user-password">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-password" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
                         @enderror
-                        <small style="color: var(--muted); font-size: 11px;">Securely encrypted using bcrypt before database storage.</small>
+                        <small style="color: var(--muted); font-size: 10px; line-height: 1.25; display: block; margin-top: 1px;">Securely encrypted using bcrypt.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="add-user-role">Access Role *</label>
-                        <select name="role" id="add-user-role" class="form-input @error('role') input-invalid @enderror">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="add-user-role" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Access Role *</label>
+                        <select name="role" id="add-user-role" class="form-input @error('role') input-invalid @enderror" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
                             <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>User (Standard Fellowship Member)</option>
                             <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin (Full Administrator)</option>
                         </select>
                         @error('role')
-                            <div class="form-field-error" data-for="add-user-role">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-role" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="add-user-member-id">Linked Fellowship Member</label>
-                        <select name="member_id" id="add-user-member-id" class="form-input">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="add-user-member-id" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Linked Fellowship Member</label>
+                        <select name="member_id" id="add-user-member-id" class="form-input" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
                             <option value="">-- No Linked Member Profile --</option>
                             @foreach($members as $m)
                                 <option value="{{ $m->id }}" {{ old('member_id') == $m->id ? 'selected' : '' }}>{{ $m->full_name }}</option>
                             @endforeach
                         </select>
-                        <small style="color: var(--muted); font-size: 11px;">Links this authentication credential to their public fellowship directory profile.</small>
+                        <small style="color: var(--muted); font-size: 10px; line-height: 1.25; display: block; margin-top: 1px;">Links credential to fellowship directory.</small>
                     </div>
                 </div>
 
-                <div style="padding: 14px 22px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user">
+                <div style="padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user" style="padding: 4px 12px; font-size: 12px;">
                         Cancel
                     </button>
-                    <button type="submit" class="button button-primary button-sm" style="min-width: 140px;">
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 120px; padding: 4px 14px; font-size: 12px;">
                         Create Account
                     </button>
                 </div>
@@ -359,57 +363,60 @@
     </div>
 
     {{-- Modal: Edit Account --}}
-    <div class="admin-modal-backdrop modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <span style="font-size: 20px;">✏️</span>
-                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
+    <div class="admin-modal-backdrop modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px; overscroll-behavior: contain;">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 16px; max-width: 450px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 12px 18px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">✏️</span>
+                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink);">
                         Edit User Account
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-edit-user" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                <button type="button" class="btn-close-modal" data-target="modal-edit-user" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
             </div>
 
             <form method="POST" id="form-edit-user" action="" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
                 @method('PUT')
-                <div style="padding: 20px 22px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 13px;">
-                    <div class="form-group">
-                        <label class="form-label" for="edit-user-username">Username *</label>
+                <div style="padding: 12px 18px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="edit-user-username" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Username *</label>
                         <input
                             type="text"
                             name="username"
                             id="edit-user-username"
                             class="form-input"
                             maxlength="60"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="edit-user-name">Full Name</label>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="edit-user-name" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Full Name</label>
                         <input
                             type="text"
                             name="name"
                             id="edit-user-name"
                             class="form-input"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="edit-user-email">Email Address *</label>
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="edit-user-email" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Email Address *</label>
                         <input
                             type="email"
                             name="email"
                             id="edit-user-email"
                             class="form-input"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="edit-user-password">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="edit-user-password" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">
                             Change Password
-                            <small style="color: var(--muted); font-weight: normal;">(Leave empty to preserve existing password)</small>
+                            <small style="color: var(--muted); font-weight: normal; font-size: 10px;">(Leave empty to preserve current)</small>
                         </label>
                         <input
                             type="password"
@@ -417,20 +424,21 @@
                             id="edit-user-password"
                             class="form-input"
                             placeholder="Leave blank to keep current password"
+                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="edit-user-role">Access Role *</label>
-                        <select name="role" id="edit-user-role" class="form-input">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="edit-user-role" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Access Role *</label>
+                        <select name="role" id="edit-user-role" class="form-input" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
                             <option value="user">User (Standard Fellowship Member)</option>
                             <option value="admin">Admin (Full Administrator)</option>
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="edit-user-member-id">Linked Fellowship Member</label>
-                        <select name="member_id" id="edit-user-member-id" class="form-input">
+                    <div class="form-group" style="margin: 0;">
+                        <label class="form-label" for="edit-user-member-id" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Linked Fellowship Member</label>
+                        <select name="member_id" id="edit-user-member-id" class="form-input" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
                             <option value="">-- No Linked Member Profile --</option>
                             @foreach($members as $m)
                                 <option value="{{ $m->id }}">{{ $m->full_name }}</option>
@@ -439,11 +447,11 @@
                     </div>
                 </div>
 
-                <div style="padding: 14px 22px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user">
+                <div style="padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user" style="padding: 4px 12px; font-size: 12px;">
                         Cancel
                     </button>
-                    <button type="submit" class="button button-primary button-sm" style="min-width: 140px;">
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 120px; padding: 4px 14px; font-size: 12px;">
                         Save Changes
                     </button>
                 </div>
@@ -766,6 +774,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+    }
+
+    // Auto-open Edit User Modal if ?edit=ID is in URL (e.g. from header "Edit Your Account")
+    const urlParams = new URLSearchParams(window.location.search);
+    const editUserId = urlParams.get('edit');
+    if (editUserId) {
+        const targetBtn = document.querySelector(`.btn-edit-user[data-id="${editUserId}"]`);
+        if (targetBtn) {
+            targetBtn.click();
+        } else {
+            fetch('/admin/roles/' + encodeURIComponent(editUserId))
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.id && formEdit) {
+                        clearAllErrors(formEdit);
+                        formEdit.action = '/admin/roles/' + data.id;
+                        document.getElementById('edit-user-username').value = data.username || '';
+                        document.getElementById('edit-user-name').value = data.name || '';
+                        document.getElementById('edit-user-email').value = data.email || '';
+                        document.getElementById('edit-user-password').value = '';
+                        document.getElementById('edit-user-role').value = data.role || 'admin';
+                        const memberSelect = document.getElementById('edit-user-member-id');
+                        if (memberSelect) memberSelect.value = data.member_id || '';
+                        openModal(editModal);
+                    }
+                }).catch(() => {});
+        }
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('edit');
+        window.history.replaceState({}, document.title, cleanUrl.pathname + (cleanUrl.search ? cleanUrl.search : ''));
     }
 });
 </script>

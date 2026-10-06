@@ -147,17 +147,55 @@
     padding: 16px 14px !important;
   }
 
-  /* Admin Modals */
-  .admin-modal-backdrop {
-    padding: 12px !important;
+  /* Admin Welcome Card (Screenshot 1: prevent squashed text on mobile) */
+  .admin-welcome-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 24px 20px !important;
+    gap: 16px !important;
+    border-radius: 20px !important;
+    margin-bottom: 24px !important;
   }
 
-  .admin-modal-card {
+  .admin-welcome-card h1 {
+    font-size: clamp(22px, 6vw, 28px) !important;
+    line-height: 1.25 !important;
+    letter-spacing: normal !important;
+    margin: 6px 0 10px !important;
+    word-break: break-word !important;
+  }
+
+  .admin-welcome-card p {
+    font-size: 14.5px !important;
+    line-height: 1.55 !important;
+  }
+
+  .admin-stamp {
+    display: none !important; /* Hide decorative circle on mobile so text has 100% width and is never squashed */
+  }
+
+  /* Admin Modals & Popups (Screenshot 2: prevent modal from sticking out) */
+  .admin-modal-backdrop,
+  .modal-backdrop {
+    padding: 12px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .admin-modal-card,
+  .info-modal {
     width: 100% !important;
-    max-width: 100% !important;
-    max-height: calc(100vh - 24px) !important;
-    padding: 18px 16px !important;
-    border-radius: 16px !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: min(600px, 80vh) !important;
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+    box-sizing: border-box !important;
+    margin: auto !important;
+  }
+
+  .activity-date-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
 
   .admin-modal-header {
