@@ -71,6 +71,23 @@ function dismissToast(toast) {
     }, 420);
 }
 
+window.showAdminToast = function(message, type = 'success') {
+    const container = document.getElementById('admin-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `admin-toast-item toast-${type} alert-box-${type}`;
+    toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    toast.innerHTML = `
+        <div class="toast-icon">${type === 'error' ? '⚠️' : '✓'}</div>
+        <div class="toast-content">${message}</div>
+        <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+    `;
+
+    container.appendChild(toast);
+    initAdminToasts();
+};
+
 export function initAdminShell() {
     initAdminProfileDropdown();
     initAdminToasts();

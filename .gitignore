@@ -3,6 +3,8 @@
 /public/build
 /public/hot
 /public/storage
+/public/assets/images/uploads/*
+!/public/assets/images/uploads/.gitkeep
 /storage/*.key
 !/storage/app/game/
 !/storage/app/game/**

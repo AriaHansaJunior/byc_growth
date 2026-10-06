@@ -1,11 +1,11 @@
 # BYC GROWTH 2.0 — Global Project Rules & Architectural Reference
 
-This document serves as the **single general reference and source of truth** for all development and implementation sessions for BYC GROWTH 2.0. Every future implementation session or AI agent prompt **must read and adhere to this file** before making any architectural or code changes.
+This document serves as the **single general reference and source of truth** for all development, refactoring, and maintenance sessions for BYC GROWTH 2.0. Every future implementation session or AI agent prompt **must read and adhere to this file** before making any architectural or code changes.
 
 ---
 
 ## 1. Language Rules
-- **UI & Content Language**: All website UI text, buttons, headings, descriptions, labels, placeholders, tooltips, modals, notifications, and error messages must be written in **English**.
+- **UI & Content Language**: All website UI text, buttons, headings, descriptions, labels, placeholders, tooltips, modals, notifications, dialogs, and error messages must be written strictly in **English**.
 - **Tone & Quality**: Grammar and wording must be natural, clear, professional, and consistent across all pages.
 - **Developer Communication**: Developers and agents may communicate in Indonesian (or English) during planning and discussions, but any implemented UI, public-facing copy, or user-visible content must strictly be in English.
 
@@ -57,54 +57,55 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Cards & Surfaces**:
   - Crisp border (`1px solid var(--line)`), rounded corners (`16px` to `24px`), soft elevation shadow (`var(--shadow)`), and white/cream backgrounds.
 - **Modals & Overlays**:
-  - Backdrop: `rgba(32, 48, 41, 0.45)` with subtle blur or clean opacity.
-  - Centered dialog container, consistent padding (`28px` to `36px`), clear title, structured actions, and explicit dismissal (close button / backdrop click / ESC key).
+  - Backdrop: `rgba(32, 48, 41, 0.45)` to `rgba(18, 30, 23, 0.75)` with `backdrop-filter: blur(8px)`.
+  - Body scroll lock (`overflow: hidden`) must always be applied to prevent page background scrolling, even if mouse is outside dialog.
+  - Centered dialog container, consistent padding (`28px` to `36px`), clear title, structured actions, and explicit dismissal.
 - **Animations**:
   - Consistent micro-interactions: `.2s ease` transitions on buttons, cards, and interactive elements.
-  - Specific interactions (card reveals, score increments, strikes) may have tailored keyframe animations, but must strictly conform to the visual earth-tone identity.
+  - Specific interactions (card reveals, score increments, strikes) may have tailored keyframe animations conforming to the visual earth-tone identity.
 
 ---
 
 ## 4. Navigation & Flow
-- **Back Navigation**: Every relevant subpage, gameplay screen, management screen, and settings page must provide an intuitive "Back" button or link so users never have to manually edit the URL or return to the homepage from scratch.
+- **Back Navigation**: Every relevant subpage, gameplay screen, management screen, and settings page must provide an intuitive "Back" button or link so users never have to manually edit the URL.
 - **Explicit Routes**: Routes must be structured logically, use clear naming conventions, and avoid dead routes or redundant endpoints.
 - **Predictable Flow**: Users and game hosts should have seamless breadcrumbs or back-action targets based on their entry route.
 
 ---
 
-## 5. Code Organization & Modularity
+## 5. Code Organization & 1000-Line Limit
 - **Separation of Concerns**: Keep files organized strictly by their domain of responsibility (Controllers, Services, Models, Blade views, CSS, JS components).
-- **Flat & Clean Directory Structure**: Avoid unnecessary deeply nested folders. Do not create a single-file folder unless required by a framework convention or backed by a clear scalability justification.
-- **1000-Line Limit**: If any file (Controller, Service, CSS file, JavaScript module, Blade template) approaches or exceeds approximately 1000 lines, it must be proactively refactored into logical, smaller, maintainable modules or partials.
-- **Asset Structure**:
-  - Stylesheet modularity: `resources/css/byc-growth/*.css` imported cleanly into `resources/css/app.css`.
-  - Scripts modularity: `resources/js/components/*.js` imported into `resources/js/app.js`.
-  - Blade templates: Common layout in `layouts/app.blade.php`, Admin shell in `layouts/admin.blade.php`, reusable UI in `resources/views/components/`, sub-sections in `resources/views/partials/`, public screens in `resources/views/user/`, and admin management screens in `resources/views/admin/`.
+- **Flat & Clean Directory Structure**: Avoid unnecessary deeply nested folders. Never create single-file folders without architectural justification.
+- **Strict 1,000-Line Limit**: Every file across the codebase (PHP controller, Service class, Blade view, CSS stylesheet, JavaScript component) must strictly remain **under 1,000 lines**.
+  - When modularizing Blade views: extract into `resources/views/admin/partials/` or `resources/views/partials/` with clear, intuitive names (e.g. `homepage-add-modal.blade.php`, `games-guess-modal.blade.php`, `team-config-modal.blade.php`). Never use generic names like `body_admin1`.
+  - When modularizing JavaScript: extract into `resources/js/components/` (e.g. `admin-homepage.js`, `admin-games.js`) and register in `resources/js/app.js`.
+  - When modularizing CSS: extract related styles into their respective family directory (e.g. `resources/css/admin/shell.css` imported into `admin.css`), avoiding random new folders.
+  - When modularizing complex Services: use standard Laravel Trait Concerns under `app/Services/{Domain}/Concerns/` (e.g. `GameStorageService` composed with `ManagesTeams`, `ManagesGuessMe`, `ManagesGrowth100`, `ManagesGameSession`).
 
 ---
 
 ## 6. Code Comments & Documentation
 - **Concise & Meaningful**: Comments must explain the "why" (architectural intent, business constraints, non-obvious algorithms) rather than restating the obvious syntax.
-- **No Clutter**: Avoid verbose, line-by-line narrative comments that merely repeat what the code obviously does.
+- **No Clutter**: Avoid verbose, line-by-line narrative comments that merely repeat what the code obviously does. Delete outdated or unnecessary comments during refactoring.
 - **Docblocks**: Standard PHPDoc / JSDoc for public service methods, complex helper functions, and custom API interfaces.
 
 ---
 
 ## 7. Error Handling & Resilience
-- **Input Validation**: Every form submission, JSON payload, and route parameter must have strict server-side validation (Laravel FormRequests or `$request->validate()`).
+- **Input Validation**: Every form submission, JSON payload, and route parameter must have strict server-side validation.
 - **No Silent Logic Failures**: Catch and handle exceptions properly; do not use empty catch blocks or ignore critical failures.
-- **No Raw Exception Exposure**: User-facing exceptions, catch blocks, and HTTP error handlers must never expose raw SQL queries, database credentials, server stack traces, or internal filesystem paths. Generic, understandable English error messaging must be provided to the client while logging full traces internally via `Log::error()`.
-- **Graceful UI Errors**: User-facing actions (AJAX requests, file uploads, score submissions) must display clear, non-intrusive feedback (e.g. toast notification, inline error message) when an error occurs.
+- **No Raw Exception Exposure**: User-facing exceptions must never expose raw SQL queries, database credentials, server stack traces, or internal filesystem paths.
+- **Graceful UI Feedback**: User-facing actions (AJAX requests, file uploads, score submissions, reordering) must display clear, non-intrusive feedback (toasts, dialog alerts).
 
 ---
 
 ## 8. Security & Routing Discipline
-- **Server-Side Enforcement**: Authentication, authorization, permissions, and validation must always be verified and enforced at the backend level (middleware, policies, controllers).
+- **Server-Side Enforcement**: Authentication, authorization, permissions, and validation must always be verified and enforced at the backend level (`auth`, `admin` middleware).
 - **No Security Through Obscurity**: Never rely solely on hiding frontend buttons or menus for access control.
 - **Direct Access Prevention**: Prevent unauthorized direct URL access to restricted features, admin screens, or internal actions.
 - **CSRF & Injection Protection**: Always verify CSRF tokens on state-modifying requests (`POST`, `PUT`, `DELETE`), use parameterized Eloquent / query builders, and sanitize rendered outputs.
-- **Path Traversal & Upload Isolation**: File serving endpoints and media deletions must strictly sanitize filenames (e.g. `basename()`) and disallow directory traversal sequences (`..`, `/`, `\`). File uploads must restrict dangerous executable extensions and enforce server-authoritative MIME validation.
-- **XSS & Template Escaping**: All dynamic data in Blade views must be escaped by default using `{{ }}`. When injecting dynamic server state into client-side `<script>` blocks, the `@json()` directive must always be used instead of unescaped `{!! json_encode() !!}` to prevent script breakout attacks.
+- **Path Traversal & Upload Isolation**: File serving endpoints and media deletions must strictly sanitize filenames (`basename()`) and disallow directory traversal sequences (`..`, `/`, `\`). File uploads must restrict dangerous extensions and enforce server MIME validation.
+- **XSS & Template Escaping**: All dynamic data in Blade views must be escaped by default using `{{ }}`. When injecting dynamic server state into client-side scripts, `@json()` directive must always be used.
 
 ---
 
@@ -119,7 +120,7 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **Strict Scope Execution**: Implement ONLY what is explicitly specified for the active scope/session.
 - **No Speculative Features**: Do not anticipate, pre-code, or inject speculative features for future phases.
 - **Preserve Completed Work**: Do not redesign, rewrite, or break completed, working features without an explicit user requirement.
-- **Zero Unrelated Refactoring**: Do not touch unrelated files, rename existing working routes, or restructure working logic outside the current session scope.
+- **Zero Unrelated Refactoring**: Do not touch unrelated files or restructure working logic outside the current session scope.
 
 ---
 
@@ -136,18 +137,18 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 ---
 
 ## 12. Modal Dialog Discipline & Text Normalization
-- **Single Close/Cancel Control**: Host tools and dialog modals must provide exactly ONE clear close/dismiss control to avoid redundant controls (e.g. avoid having both a top-right 'X' button and a separate 'Cancel' button when they perform the exact same action).
+- **Single Close/Cancel Control**: Modals must provide ONE clear close/dismiss control to avoid redundant controls (e.g. avoid having both a top-right 'X' button and a separate 'Cancel' button when they perform the exact same action).
 - **Guess Me Text Normalization**:
   - Clues and correct answers must always be uppercase.
   - Normalization must occur on the frontend in real-time for immediate visual feedback.
-  - Normalization must also be enforced at the backend service layer and Eloquent model mutators before database persistence.
+  - Normalization must also be enforced at the backend service layer before database persistence.
 
 ---
 
 ## 13. Game Scoreboard & Survey Scoring Discipline
 - **Single Source of Truth for Scoreboards**:
   - The Universal Game System topbar scoreboard is the single authoritative source of truth for team scores.
-  - Individual games must NOT implement duplicate, redundant scoreboards or team score badges on gameplay action cards.
+  - Individual games must NOT implement duplicate scoreboards on gameplay cards.
 - **Authoritative Survey-Based Scoring**:
   - Growth 100 scoring is strictly derived from revealed survey answers: `sum(points of revealed answers)`.
   - Manual score adjustment buttons (+5, -5, or arbitrary score inputs) are forbidden in the Growth 100 host interface.
@@ -159,89 +160,81 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 ---
 
 ## 14. Community Member Equality & Privacy Rules
-- **Absolute Member Equality on Public Directory**: All fellowship members are equal. The public Members page must display ONLY member photo and full name. It is strictly forbidden to publicly display or imply member hierarchy, position, role, rank, status, or date of birth.
-- **Internal Date of Birth Confidentiality**: Member `date_of_birth` is strictly internal application data used exclusively for the automated Birthday Popup system. It must never be exposed on public interfaces, member cards, or directory rosters.
+- **Absolute Member Equality on Public Directory**: All fellowship members are equal. The public Members page displays ONLY member photo and full name. It is strictly forbidden to publicly display member hierarchy, position, role, rank, status, or date of birth.
+- **Internal Date of Birth Confidentiality**: Member `date_of_birth` is strictly internal application data used exclusively for the automated Birthday Popup system. It must never be exposed on public interfaces.
 
 ---
 
 ## 15. Birthday Popup & Multi-Member Sequence Discipline
 - **Local Timezone Authority**: Birthday calculations are determined strictly by the application server based on Surabaya, Indonesia (`Asia/Jakarta`). Matching is performed by comparing `month + day`, ignoring the birth year.
-- **Strict Conditional Rendering**: The birthday popup exists and renders ONLY when at least one active BYC member has a birthday today. When no celebrants exist, zero popup markup, zero empty modal, and zero DOM layout space are rendered.
-- **Auto-Slide & Close-Lock Formula (N × 5s)**: For $N$ birthday members, each celebrant is displayed for 5 seconds during the initial automatic sequence (total lock duration = $N \times 5$ seconds). After cycling through all celebrants and returning to the first member, autoplay permanently stops, and manual controls (Prev, Next, Close, Write a Letter) unlock.
-- **Popup Cooldown Decoupled from Auth**: A 3-hour display cooldown governs popup reappearance on the same browser/user context. Normal client navigation does not trigger repeated popups. Deleting popup state resets popup eligibility without logging the user out or altering the authentication session lifetime.
-- **Date-Derived Presentation Ordering on Members Page**: Today's birthday celebrants appear first on the public Members directory, followed by non-birthday members, ordered deterministically. This ordering and the subtle birthday visual ring/badge are purely date-derived presentation states that never alter underlying database records.
-- **Post-Popup Birthday Interaction**: Closing the birthday popup does not terminate birthday actions for the day; celebrant cards on the Members page continue to provide a direct letter-writing interaction. Unauthenticated users selecting "Write a Letter" are routed through login and returned directly to the birthday context.
+- **Strict Conditional Rendering**: The birthday popup renders ONLY when at least one active BYC member has a birthday today. When no celebrants exist, zero popup markup is rendered.
+- **Auto-Slide & Close-Lock Formula (N × 5s)**: For $N$ birthday members, each celebrant is displayed for 5 seconds during the initial automatic sequence (total lock duration = $N \times 5$ seconds). After cycling through all celebrants, manual controls unlock.
+- **Popup Cooldown Decoupled from Auth**: A 3-hour display cooldown governs popup reappearance on the same browser context.
+- **Date-Derived Presentation Ordering on Members Page**: Today's birthday celebrants appear first on the public Members directory, followed by non-birthday members.
+- **Post-Popup Birthday Interaction**: Celebrant cards on the Members page provide a direct letter-writing interaction. Unauthenticated users selecting "Write a Letter" are routed through login and returned directly to the birthday context.
 
 ---
 
 ## 16. Cash Management & Financial Privacy Discipline
-- **Strict Administrator Boundary**: Cash Management is accessible only to authenticated users with the `admin` role. Public visitors and standard users must never access financial ledgers or treasury statistics.
-- **Internal Contribution Amount Confidentiality**: The internal fellowship monthly contribution amount (30k / 30,000) must NEVER be exposed or mentioned on any public-facing page or component. Public homepage cash cards must remain disabled with the English message: `Contact the admin to view your cash contribution.`.
-- **Image Proof Integrity**: Payment proof uploads must be strictly validated as image formats (JPEG, PNG, JPG, WEBP). Non-image files (PDF, DOC, ZIP, etc.) must be rejected at the backend level.
+- **Strict Administrator Boundary**: Cash Management is accessible only to authenticated users with the `admin` role via `/admin/cash-management`. Public visitors and standard users must never access financial ledgers or treasury statistics.
+- **Internal Contribution Amount Confidentiality**: The internal fellowship monthly contribution amount (30k / 30,000) must NEVER be exposed or mentioned on any public-facing page. Public homepage cash cards must remain disabled with the English message: `Contact the admin to view your cash contribution.`.
+- **Image Proof Integrity**: Payment proof uploads must be strictly validated as image formats (JPEG, PNG, JPG, WEBP). Non-image files (PDF, DOC, ZIP, etc.) must be rejected.
 - **Shortcut Flexibility**: Member payment shortcuts (auto-filling previous account type and amount) must always leave fields completely editable by the administrator.
-- **Proof Freshness & Shortcut Isolation**: Member payment shortcuts populate ONLY the previous account type and amount. Shortcuts must NEVER auto-fill, reuse, or copy previous transfer proof images. Every new cash transaction strictly requires a fresh proof image upload.
-- **Searchable Member Roster**: The transaction input provides a real-time searchable member selector filtering by member full name without exposing confidential financial history.
-- **Authoritative Ledger & Dataset Aggregation**: Total cash contribution calculations must reflect the entire active filtered dataset from the database server, never restricted to the current paginated view slice. Filter changes must reset pagination to page 1 while preserving active page sizes (5, 10, 25, 50).
+- **Proof Freshness & Shortcut Isolation**: Member payment shortcuts populate ONLY the previous account type and amount. Shortcuts must NEVER auto-fill or reuse previous transfer proof images.
+- **Authoritative Ledger Aggregation**: Total cash contribution calculations must reflect the entire active filtered dataset from the database server, never restricted to the current paginated view slice. Filter changes must reset pagination to page 1 while preserving active page sizes.
 
 ---
 
-## 17. Relational Persistence & Legacy Elimination
-- **MySQL/Eloquent as Single Source of Truth**: All game states, rounds, survey answers, scores, teams, member profiles, cash transactions, activities, and birthday letters are strictly persisted in the relational MySQL database via Eloquent models.
-- **No JSON Persistence**: Filesystem storage must never be used for authoritative application data, round definitions, or game state. Filesystem directories (`storage/app/game/images/`, `public/assets/images/uploads/`) exist exclusively for uploaded binary media assets.
-- **Dead & Legacy Code Elimination**: Obsolete endpoints, dead controller actions, unrendered legacy templates, and old JSON persistence remnants must remain completely eliminated from the codebase.
+## 17. Database-Backed Media & Photo Storage Standards
+- **Relational Photo Tables**: Media assets (e.g. homepage slideshow photos, member photos, activity photos, transfer proofs) are tracked in dedicated database tables (`homepage_slide_photos`, `members`, `media_files`, `cash_transactions`) via `MediaUploadService`.
+- **Clean DB-Filesystem Sync**: Uploading, updating, or deleting photos updates both the database record and cleans up replaced files on disk, avoiding orphan image accumulation.
+- **No Direct Folder Dumping**: Assets must be organized by domain context (`assets/images/uploads/`, `storage/app/`), sanitized, and referenced via database IDs.
 
 ---
 
-## 18. Birthday System Foundation & Access Control
-- **One User Account = One Member**: Each user account maps to at most one fellowship member via a unique foreign key constraint (`users.member_id`). The `Member` model remains the single source of member identity and profile data, while `User` represents authentication credentials.
-- **Server-Authoritative Sender Identity**: Birthday letter sender identity is derived strictly from the authenticated user (`Auth::id()`). Client payloads cannot spoof or override the sender identity.
-- **One-Letter Invariant**: A sender can submit only ONE birthday letter to a specific recipient member for a given birthday year (`unique(user_id, member_id, birthday_year)`).
+## 18. Drag-and-Drop & Sequence Architecture
+- **In-Place Drag and Drop**: Photo slideshows and round sequences support direct drag-and-drop reordering without obsolete up/down step buttons.
+- **Zero Page Refresh on Reorder**: Reordering sends an asynchronous AJAX request (`reorderSlides`, `reorderGuessMeRounds`, `reorderGrowth100Rounds`) and preserves the admin's exact scroll position without reloading the page or snapping back to top view.
+- **Zero Page Refresh on Filter Switches**: Switching tabs or year filters (e.g. Birthday Wishes "Current Year" vs "All Years") updates data asynchronously via AJAX without resetting viewport scroll.
+
+---
+
+## 19. Birthday System Foundation & Access Control
+- **One User Account = One Member**: Each user account maps to at most one fellowship member via `users.member_id`.
+- **Server-Authoritative Sender Identity**: Birthday letter sender identity is derived strictly from `Auth::id()`.
+- **One-Letter Invariant**: A sender can submit only ONE birthday letter to a specific recipient member for a given birthday year.
 - **Self-Wish Prevention**: A user associated with a member is strictly prevented from submitting a birthday letter to themselves.
-- **Anonymous Display with Administrator Traceability**: Anonymity is strictly a display preference for the birthday person. The underlying `user_id` is always persisted, allowing administrators to audit and identify senders while presenting "Anonymous" to the recipient.
-- **Birthday Date Editing Discipline**: Normal users may edit their submitted letter ONLY while the recipient's birthday is still active today in Surabaya (`Asia/Jakarta`). Administrators retain full privileges to edit letters at any time.
-
----
-
-## 19. Birthday Wishes & Archive Discipline
-- **Three-Tier Role-Based Authorization**:
-  - **Administrators**: Full access at any time to browse all members, all years, and edit any wish.
-  - **Birthday Celebrants**: Granted access to `/birthday-wishes` strictly on their birthday date in `Asia/Jakarta`. Restricted solely to their own received letters across current and previous years. Viewing another member's letters is rejected server-side.
-  - **Logged-in Senders**: Granted access to review and edit only their own sent wish(es) for today's celebrant while today is still that celebrant's birthday. Cannot view other senders' wishes or celebrant archives.
-  - **Non-Birthday Users**: Access is strictly denied (HTTP 403). Unauthenticated visitors are redirected to login.
-- **Automatic Year-Based Archiving**: Archiving is fully automatic and derived from `birthday_year`. No manual archive flags or actions exist. Celebrants may browse their own current and previous years. Future years are strictly forbidden and rejected server-side.
-- **Privacy Enforcement**: Anonymity is preserved on all recipient views. The recipient never sees the real sender user account for anonymous letters, while administrators maintain full auditability.
+- **Anonymous Display with Traceability**: Anonymity is strictly a display preference for the recipient. The underlying `user_id` is always persisted for administrator auditability.
+- **Birthday Date Editing Discipline**: Normal users may edit their letter ONLY while the recipient's birthday is still active today in Surabaya (`Asia/Jakarta`). Administrators retain full privileges at any time.
 
 ---
 
 ## 20. Admin Architecture, Global User Identity & Hidden Entry Discipline
 - **Hidden Admin Login Entry (`/admin-ganteng`)**:
   - The hidden entrance `/admin-ganteng` is strictly the direct entrance to the Admin Login page and must NEVER be exposed in public navigation, headers, footers, homepage, members, games, or activities.
-  - The route serves the Admin Login page directly to any visitor; authentication is the authoritative protection mechanism (do not return 404).
-  - After authentication, the administrator is redirected to `/admin/dashboard`. Internal management routes use descriptive names (`/admin/dashboard`, `/admin/roles`, etc.).
+  - Serves the Admin Login page directly; authentication is the authoritative protection mechanism.
+  - After authentication, the administrator is redirected to `/admin/dashboard`.
 - **Global Dual-Identifier Authentication (Email or Username)**:
-  - Both normal user login (`/login`) and admin login (`/admin-ganteng`) support authentication via either email address OR unique username.
-  - The `username` field is persisted as a unique, required column in the database `users` table as the authoritative source of truth.
+  - Both `/login` and `/admin-ganteng` support authentication via either email address OR unique username.
 - **Strict Role Verification for Admin Access**:
-  - Authenticating at `/admin-ganteng` strictly requires the `admin` role. Authenticated non-admin users attempting to enter or log in via the admin entrance are rejected at the server level.
+  - Authenticating at `/admin-ganteng` strictly requires the `admin` role.
 - **Global Header State & Single-Action Logout**:
-  - When unauthenticated, the public header displays the standard `[ Login ]` button.
-  - When authenticated, the Login button is replaced with the user's `username` from the database.
-  - Clicking the authenticated username reveals a compact popover containing ONLY `[ Logout ]`. Profile editing, account settings, and admin navigation are strictly forbidden from this dropdown.
+  - When unauthenticated: `[ Login ]` button.
+  - When authenticated: Displays the user's `username`.
+  - Clicking the username reveals a popover containing ONLY `[ Logout ]`.
 - **Self-Deletion Invariant**:
-  - An authenticated administrator is strictly prevented from deleting their own active account (`user.id !== Auth::id()`). This rule must be enforced server-side.
+  - An authenticated administrator is strictly prevented from deleting their own active account (`user.id !== Auth::id()`).
 - **Admin God Mode vs Design System Boundary**:
-  - Admin God Mode provides comprehensive control over website **DATA and CONTENT** (slideshow images, members, activities, games, questions, cash records, accounts).
-  - Administrators are strictly forbidden from modifying the underlying website **UI design system** (typography, color tokens, layout grids, CSS variables, animation systems, component spacing, or responsiveness).
+  - Administrators control website **DATA and CONTENT**.
+  - Administrators are strictly forbidden from modifying the underlying website **UI design system**.
 
 ---
 
 ## 21. Admin Shell & Page-Based Management Architecture
 - **Reusable Admin Shell (`layouts/admin.blade.php`)**:
-  - All admin management pages must extend the unified Admin Shell layout.
-  - The shell provides a standardized topbar header, brand link to public website (`View Site`), admin identity display (`name`, `username`, `email`, role badge), `Sign Out` action, page header area (title, eyebrow, description, and action controls), consistent content container (`.admin-container`), feedback alerts (success, error, validation), and reusable confirmation dialog foundation (`#admin-confirm-modal`).
-  - Admin header/navigation markup must never be duplicated across individual admin views.
+  - All admin management pages must extend the unified Admin Shell layout with standard topbar, brand link, identity display, and reusable confirmation dialog (`#admin-confirm-modal`).
 - **Admin-Only Navigation Architecture**:
-  - The Admin Topbar provides direct navigation across all 8 core management domains:
+  - Topbar provides direct navigation across all 8 core management domains:
     1. Dashboard (`/admin/dashboard`)
     2. Homepage (`/admin/homepage`)
     3. Members (`/admin/members`)
@@ -250,89 +243,43 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
     6. Birthday Wishes (`/admin/birthday-wishes`)
     7. Cash Management (`/admin/cash-management`)
     8. Roles / Accounts (`/admin/roles`)
-  - These management links must NEVER be exposed in public/user navigation.
-- **Page-Based Management Discipline**:
-  - Admin management follows the actual website pages and domains, providing administrators with direct context for managing website data.
-  - Management actions adhere to standard visual patterns (`[ + Add ]`, `[ ✎ Edit ]`, `[ Delete ]`, `[ Manage ]`, `[ View ]`) rendered using the existing BYC Growth earth-tone visual system.
-- **Destructive Action & Batch Deletion Architecture**:
-  - All single and multi-record destructive actions (e.g. member deletion, account removal, activity deletion, wish deletion, transaction deletion) must require explicit confirmation through the reusable Admin Confirmation Modal (`#admin-confirm-modal`) with server-side validation and CSRF protection.
-  - **Batch Deletion Standards across Core Domains** (Activities, Members, Birthday Wishes, Cash Management, and Roles / Accounts):
-    - Checkbox selection with select-all toggle, selection counter badge, and dedicated batch action toolbar.
-    - Transactional execution: multi-record deletions safely remove or disassociate relational dependencies (e.g. activity gallery media cleanup, member photo removal, cash transfer proof file deletion, account links).
-    - **Self-Deletion Invariant**: An authenticated administrator cannot select or batch-delete their own active account (`Auth::id()`). The UI renders disabled indicators, and the server-side controller explicitly filters out `Auth::id()` before execution.
-- **Tailored Domain-Specific Search, Filtering & Sorting**:
-  - Each admin management domain must provide search and filtering controls tailored to its specific data structure:
-    - **Activities**: Search query (title/description), event date filter, and chronological/alphabetical sorting (`Newest First`, `Oldest First`, `Activity Name A - Z`, `Activity Name Z - A`).
-    - **Members**: Search query (name/nickname), status/birthday filter (`All Members`, `Birthday Celebrants Today`), and alphabetical/DOB/registration sorting (`Name A - Z`, `Name Z - A`, `Date of Birth Earliest`, `Date of Birth Latest`, `Newest Registered`).
-    - **Birthday Wishes**: Search query (keyword/message), recipient member filter, birthday year filter, and date/recipient sorting (`Newest First`, `Oldest First`, `Celebrant A - Z`, `Celebrant Z - A`).
-    - **Cash Management**: Contributor search, account type filter, exact amount filter, input date filter, and date/amount/contributor sorting (`Date Newest First`, `Date Oldest First`, `Amount Highest First`, `Amount Lowest First`, `Contributor A - Z`, `Contributor Z - A`).
-    - **Roles / Accounts**: Keyword search (name/username/email), role filter (`All Roles`, `Administrator`, `Standard User`), and registration/alphabetical sorting (`Newest Registered`, `Oldest Registered`, `Username A - Z`, `Username Z - A`, `Name A - Z`, `Name Z - A`).
-- **Activity Presentation & Modal Gallery Sizing Standards**:
-  - **Zero Artificial Whitespace**: Activity card descriptions and titles must maintain natural visual proximity (`margin-bottom: 6px;` on header, single-line trimmed description rendering without blade whitespace padding).
-  - **Expansive Modal Gallery Workspace**: Activity Add/Edit dialogs must use wide modal containers (`max-width: min(800px, 95vw);`) with comfortable scrollable gallery management viewports (`max-height: 280px;`, thumbnail height `120px`), preserving native aspect ratios and smooth scrolling behavior.
-- **Strict Separation of Public UI & Admin Controls**:
-  - The public user-facing website must remain a pure user experience. Visiting public pages via "View Site" does not inject or display admin editing controls.
-  - Admin controls are rendered strictly within authorized `/admin/*` routes protected by the `EnsureUserIsAdmin` middleware.
+- **Destructive Action & Batch Deletion**:
+  - Destructive actions require explicit confirmation through `#admin-confirm-modal` with server-side validation and CSRF protection.
+  - Batch deletion available across Activities, Members, Birthday Wishes, Cash Management, and Roles/Accounts.
 
 ---
 
 ## 22. Visual Calmness & Anti-Clutter Discipline (Clean UI Standards)
-- **Clear Functional Purpose**: Every visible UI element (badge, chip, button, counter, status pill, or label) must serve an explicit, unambiguous functional purpose. Never add decorative UI elements merely to create a "feature-rich" or artificial dashboard appearance.
-- **No Redundant User Navigation in Admin**: Admin management pages must NOT contain direct-link buttons or CTAs (e.g. `Live Guess Me →`, `Public Game Center →`, `View Public Wishes →`, `Open Public Portal →`) that merely navigate to public user-facing pages. Administrators can manually visit public URLs when needed.
-- **No In-Page Scroll Duplication**: Action cards must NOT provide redundant buttons (such as `Manage Data`) that merely duplicate smooth-scrolling to another section lower on the same page. Action cards should display only distinct, authoritative actions.
-- **Single Action Entry Point**: Do not duplicate action buttons or entry points on the same screen. Specifically, table-driven management interfaces (such as Homepage Slideshow Management) must have exactly ONE authoritative action button (e.g. `[ + Add Photo ]` located directly on the management table), avoiding redundant buttons in the page header or floating across content previews.
-- **No Decorative Overlay Clutter**: Content previews (e.g. hero slideshow, game artwork frames, clue images) must remain clean representations of the real asset. Do not place floating status pills, active count badges, camera icons, or decorative metadata over preview surfaces when that information is already authoritative in the accompanying management table or scoreboard.
-- **Admin Modal Scroll Architecture**: Admin editor and configuration modals must employ a fixed header with an accessible close button, a dedicated scrollable body (`overflow-y: auto; flex: 1; min-height: 0;`), and a fixed footer with reachable submit/cancel actions. Modals must remain within the viewport (`max-height: calc(100vh - 40px)`), lock the body scroll (`modal-open`), and never allow page scrolling behind the backdrop.
-- **Intentional Whitespace**: Layouts must maintain natural breathing room without excessive empty vertical gaps. Viewport-height rules (`min-height: 100vh` or `calc(100vh - ...)`) designed for public landing screens must never be blindly applied inside constrained admin containers.
+- **Clear Functional Purpose**: Every visible UI element must serve an explicit, unambiguous functional purpose. Never add decorative UI elements merely to create an artificial dashboard look.
+- **No Redundant User Navigation in Admin**: Admin management pages must NOT contain direct-link buttons that navigate to public user-facing pages.
+- **No In-Page Scroll Duplication**: Action cards must NOT provide redundant buttons that merely duplicate scrolling to another section on the same page.
+- **Single Action Entry Point**: Table-driven interfaces have exactly ONE authoritative action button (e.g. `[ + Add Photo ]` located directly on the management table).
+- **No Decorative Overlay Clutter**: Content previews must remain clean representations of the real asset.
+- **Admin Modal Scroll Architecture**: Admin editor modals must employ a fixed header, a scrollable body (`overflow-y: auto; flex: 1; min-height: 0;`), and a fixed footer. Modals must lock body scroll (`overflow: hidden`), blur the background, and prevent scrolling outside the modal.
+- **Intentional Whitespace**: Layouts maintain natural breathing room without excessive empty vertical gaps.
 
 ---
 
 ## 23. Zero Dummy Data Policy (Clean Slate Foundation)
 - **Zero Dummy Data Mandate**:
   - The live application database must remain clean and completely free of mock or dummy records.
-  - The following domains must start completely empty (clean slate) upon initial deployment:
-    1. **Members** (zero dummy members, zero placeholder avatars)
-    2. **Activities** (zero placeholder events, zero dummy gallery photos)
-    3. **Cash Management** (zero dummy cash transactions, zero mock transfer proof slips or fake cash proof images)
-    4. **Birthday Wishes** (zero dummy or placeholder wishes)
-  - All community records must be entered genuinely through the Admin Portal and public user interactions.
-  - **No Fake Files in Storage/Public**: Never generate or leave dummy files (such as `cash_proof_*`, `activity_*`, or `member_*`) in `public/assets/images/uploads/` or `storage/`.
+  - Clean slate foundations for Members, Activities, Cash Management, and Birthday Wishes.
 - **Permitted Foundation Data Only**:
-  - The ONLY pre-seeded foundations permitted in the database and seeders are:
-    1. **Homepage Slideshow** (baseline hero slides and media)
-    2. **Games** (game rounds, questions, clues, answers, teams, and default scores for Guess Me! and BYC Growth 100)
-    3. **Initial Accounts** (baseline administrator credentials in `users`)
-- **Clean Slate Invariant**:
-  - Keep strictly the baseline foundations: Games (Guess Me, BYC Growth 100), Administrator Accounts (`admin_utama`, `rilbiezzz`), and Homepage Slideshow photos.
-  - All other domains (Members, Activities, Cash Management, Birthday Wishes) must remain in their authentic, clean empty state with properly styled empty state UI until real records are created by administrators.
-  - Never introduce dummy/fake/sample data or hardcoded placeholder cards merely to make a UI section look populated.
+  - Baseline Homepage hero slides and media.
+  - Baseline Games (Guess Me! and BYC Growth 100 questions/answers/teams).
+  - Baseline Administrator credentials (`admin_utama`, `rilbiezzz`).
 
 ---
 
 ## 24. Revision Efficiency & Minimal Scope Execution Protocol
 - **Strict Isolation for Revisions**:
-  - When the user requests a revision, revise ONLY the exact points instructed.
-  - Strictly inspect and modify ONLY the directly related files (the specific Blade view, specific CSS/JS, or specific controller/model/database table).
-  - Agents and developers must NOT:
-    1. Perform repository-wide grep searches or full architectural audits.
-    2. Check or verify unrelated backend services, models, migrations, or database logic.
-    3. Read or touch unrelated views, styles, or modules.
-    4. Propose or run irrelevant background audits or diagnostic loops.
-  - Fast turnaround: Minor UI and functional revisions should be completed swiftly (within 1–3 minutes), without burning tokens or asking unnecessary multi-step confirmations.
+  - Revise ONLY the exact points instructed by the user.
+  - Modify only directly related files.
+  - Fast turnaround: Complete tasks swiftly without burning tokens or asking unnecessary multi-step confirmations.
 
 ---
 
 ## 25. Absolute Ban on Testing Code & Test Execution During Development
-- **No Test Files or Test Code**:
-  - Do NOT create or maintain testing code (e.g. `tests/Feature/Scope*Test.php`, `AdminUiCleanupTest.php`, or any other test files).
-  - All existing Scope 1 to Final test files have been removed.
-  - Do NOT write test code for minor jobs, UI fixes, or standard revisions.
-- **No PHPUnit / Test Suite Execution**:
-  - Do NOT run PHPUnit, `php artisan test`, or test runners during revisions.
-  - Testing is explicitly banned during the active iteration and revision phase because it wastes tokens, creates dummy data/proof files, and slows down development.
-- **Testing Deferred to Final Completion**:
-  - Comprehensive testing is deferred until the entire application is 100% finished and only when the user explicitly commands a full test.
-
-
-
-
+- **No Test Files or Test Code**: Do NOT create or maintain testing code during active revision iterations.
+- **No PHPUnit / Test Suite Execution**: Do NOT run test suites during development.
+- **Testing Deferred to Final Completion**: Full testing is deferred until the entire project is completed and only when the user explicitly requests it.

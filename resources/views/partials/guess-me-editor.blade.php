@@ -17,7 +17,7 @@
                     {{-- Populated via JS --}}
                 </div>
                 <button type="button" class="button button-primary" id="btn-add-guess-round" style="margin-top: 10px; width: 100%;">
-                    + Add Round
+                    Add Round
                 </button>
             </nav>
 

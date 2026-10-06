@@ -3,6 +3,8 @@
    Owned styles for Admin Shell, Management Controls & God Mode Overlays
    ========================================================================== */
 
+@import './shell.css';
+
 /* Admin Shell Topbar & Header Navigation */
 .admin-topbar {
   background: var(--white);
@@ -18,12 +20,26 @@
   box-shadow: 0 2px 8px rgba(32, 48, 41, 0.04);
 }
 
-body.modal-open .admin-topbar,
-body:has(.modal-backdrop[style*="display: grid"]) .admin-topbar,
-body:has(.modal-backdrop[style*="display: block"]) .admin-topbar,
-body:has(.modal-backdrop[style*="display: flex"]) .admin-topbar {
-  display: none !important;
+/* Prevent background scrolling when any modal is active */
+body.modal-open {
+  overflow: hidden !important;
 }
+
+/* Unified Admin Modal Backdrop (blur effect & centered positioning) */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(18, 30, 23, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overscroll-behavior: contain;
+}
+
 
 .admin-brand-wrap {
   display: flex;
@@ -776,5 +792,68 @@ body:has(.modal-backdrop[style*="display: flex"]) .admin-topbar {
   accent-color: var(--forest);
   cursor: pointer;
 }
+
+.button-edit,
+.btn-edit-slide {
+  padding: 4px 14px;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 8px;
+  background: #dbebe0;
+  color: #1a452d;
+  border: 1px solid #b8dac2;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.button-edit:hover:not(:disabled),
+.btn-edit-slide:hover:not(:disabled) {
+  background: #cbe3d2;
+  border-color: #9eccaa;
+  color: #123621;
+  transform: translateY(-1px);
+}
+
+/* Drag-and-Drop Table Reorder Styling */
+.draggable-slide-row {
+  transition: background 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.draggable-slide-row.is-dragging {
+  opacity: 0.45;
+  background: #f0f7ef !important;
+}
+
+.draggable-slide-row.drag-over-above {
+  box-shadow: inset 0 3px 0 0 var(--forest);
+}
+
+.draggable-slide-row.drag-over-below {
+  box-shadow: inset 0 -3px 0 0 var(--forest);
+}
+
+.slide-drag-handle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transition: all 0.15s ease;
+}
+
+.slide-drag-handle:hover {
+  background: #eef5eb !important;
+  border-color: var(--forest) !important;
+  color: var(--forest) !important;
+}
+
+.slide-drag-handle:active {
+  cursor: grabbing !important;
+}
+
+
 
 

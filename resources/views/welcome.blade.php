@@ -161,7 +161,7 @@
 
             {{-- 4. Cash Management (Visible Only to Admin Role) --}}
             @if(auth()->check() && auth()->user()->isAdmin())
-                <a href="{{ route('cash-management') }}" class="destination-card dest-cash">
+                <a href="{{ route('admin.cash-management') }}" class="destination-card dest-cash">
                     <div class="destination-card-top">
                         <div class="destination-icon-box">
                             <x-icon name="cash" />

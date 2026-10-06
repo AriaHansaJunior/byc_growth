@@ -16,20 +16,20 @@
 
 @section('content')
     {{-- Quick Year Archive Tabs --}}
-    <div class="admin-card" style="padding: 16px 20px; margin-bottom: 20px;">
+    <div class="admin-card" id="wishes-archive-years-card" style="padding: 16px 20px; margin-bottom: 20px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-right: 6px;">
                     Archive Years:
                 </span>
                 <a href="{{ route('admin.birthday-wishes', array_merge(request()->except(['year', 'page']), ['year' => 'all'])) }}"
-                   class="button button-sm {{ $selectedYear === null ? 'button-primary' : 'button-ghost' }}"
+                   class="button button-sm wish-year-link {{ $selectedYear === null ? 'button-primary' : 'button-ghost' }}"
                    style="border-radius: 99px; padding: 4px 12px; font-size: 12.5px;">
                     All Years
                 </a>
                 @foreach($years as $yr)
                     <a href="{{ route('admin.birthday-wishes', array_merge(request()->except(['year', 'page']), ['year' => $yr])) }}"
-                       class="button button-sm {{ (string)$selectedYear === (string)$yr ? 'button-primary' : 'button-ghost' }}"
+                       class="button button-sm wish-year-link {{ (string)$selectedYear === (string)$yr ? 'button-primary' : 'button-ghost' }}"
                        style="border-radius: 99px; padding: 4px 12px; font-size: 12.5px;">
                         {{ $yr }} @if($yr === $currentYear)<span style="opacity: 0.8; font-size: 11px;">(Current)</span>@endif
                     </a>
@@ -43,13 +43,13 @@
     </div>
 
     {{-- Filtering & Search Controls --}}
-    <div class="admin-card" style="padding: 18px 24px; margin-bottom: 24px;">
-        <form method="GET" action="{{ route('admin.birthday-wishes') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+    <div class="admin-card" id="wishes-filter-card" style="padding: 18px 24px; margin-bottom: 24px;">
+        <form id="form-wishes-filter" method="GET" action="{{ route('admin.birthday-wishes') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
             <input type="hidden" name="year" value="{{ $selectedYear === null ? 'all' : $selectedYear }}">
 
             <div style="flex: 1; min-width: 200px;">
                 <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Filter by Celebrant</label>
-                <select name="member_id" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;" onchange="this.form.submit()">
+                <select name="member_id" id="filter-wishes-member" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="">All Birthday Celebrants</option>
                     @foreach($members as $m)
                         <option value="{{ $m->id }}" {{ (string)$selectedMemberId === (string)$m->id ? 'selected' : '' }}>
@@ -78,7 +78,7 @@
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.birthday-wishes') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.birthday-wishes') }}" class="button button-danger button-sm wish-reset-link" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Reset
                 </a>
             </div>
@@ -86,7 +86,7 @@
     </div>
 
     {{-- Letters Ledger Table --}}
-    <div class="admin-card">
+    <div class="admin-card" id="wishes-ledger-card">
         <div class="admin-card-header">
             <div>
                 <h2>
@@ -248,7 +248,7 @@
     </div>
 
     {{-- View Wish Detail Modal --}}
-    <div id="modal-view-wish" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div id="modal-view-wish" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 540px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 20px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -298,7 +298,7 @@
     </div>
 
     {{-- Edit Wish Modal --}}
-    <div id="modal-edit-wish" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div id="modal-edit-wish" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 520px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <form id="form-edit-wish" method="POST" action="">
                 @csrf
@@ -360,83 +360,228 @@
 
 @push('scripts')
 <script>
-document += function() {}; // safety
 document.addEventListener('DOMContentLoaded', function () {
-    // View Modal Logic
-    document.querySelectorAll('.btn-view-wish').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const data = this.dataset;
-            document.getElementById('view-recipient').textContent = data.recipient;
-            document.getElementById('view-year').textContent = data.year;
-            document.getElementById('view-sender').textContent = data.sender;
-            document.getElementById('view-email').textContent = data.email !== '-' ? data.email : '';
-            document.getElementById('view-message').textContent = data.message;
-            document.getElementById('view-date').textContent = 'Sent on ' + data.date;
+    let isWishesLoading = false;
+
+    // Smooth AJAX data loader (Zero page reload, preserves scroll position)
+    async function loadWishesAjax(url, pushState = true) {
+        if (isWishesLoading) return;
+        isWishesLoading = true;
+
+        const ledgerCard = document.getElementById('wishes-ledger-card');
+        const yearsCard = document.getElementById('wishes-archive-years-card');
+        const filterCard = document.getElementById('wishes-filter-card');
+
+        if (ledgerCard) {
+            ledgerCard.style.transition = 'opacity 0.2s ease';
+            ledgerCard.style.opacity = '0.45';
+            ledgerCard.style.pointerEvents = 'none';
+        }
+
+        try {
+            const res = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!res.ok) throw new Error('Network error: ' + res.status);
+
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // 1. Update Archive Years Bar
+            const newYearsCard = doc.getElementById('wishes-archive-years-card');
+            if (newYearsCard && yearsCard) {
+                yearsCard.innerHTML = newYearsCard.innerHTML;
+            }
+
+            // 2. Update Filter Bar
+            const newFilterCard = doc.getElementById('wishes-filter-card');
+            if (newFilterCard && filterCard) {
+                filterCard.innerHTML = newFilterCard.innerHTML;
+            }
+
+            // 3. Update Ledger Table Card
+            const newLedgerCard = doc.getElementById('wishes-ledger-card');
+            if (newLedgerCard && ledgerCard) {
+                ledgerCard.innerHTML = newLedgerCard.innerHTML;
+            }
+
+            if (pushState) {
+                window.history.pushState({ wishesAjax: true }, '', url);
+            }
+
+            updateBatchDeleteState();
+        } catch (err) {
+            console.error('Failed to load birthday wishes via AJAX:', err);
+            // Fallback to normal navigation if fetch fails
+            window.location.href = url;
+        } finally {
+            if (ledgerCard) {
+                ledgerCard.style.opacity = '1';
+                ledgerCard.style.pointerEvents = '';
+            }
+            isWishesLoading = false;
+        }
+    }
+
+    // Intercept clicks on Year links, Reset link, and Pagination links
+    document.addEventListener('click', function (e) {
+        const yearLink = e.target.closest('.wish-year-link');
+        if (yearLink) {
+            e.preventDefault();
+            loadWishesAjax(yearLink.href);
+            return;
+        }
+
+        const resetLink = e.target.closest('.wish-reset-link');
+        if (resetLink) {
+            e.preventDefault();
+            loadWishesAjax(resetLink.href);
+            return;
+        }
+
+        const pageLink = e.target.closest('#wishes-ledger-card nav a, #wishes-ledger-card .pagination a');
+        if (pageLink) {
+            e.preventDefault();
+            loadWishesAjax(pageLink.href);
+            return;
+        }
+
+        // View Modal Logic (Delegated)
+        const viewBtn = e.target.closest('.btn-view-wish');
+        if (viewBtn) {
+            const data = viewBtn.dataset;
+            document.getElementById('view-recipient').textContent = data.recipient || 'Unknown';
+            document.getElementById('view-year').textContent = data.year || '';
+            document.getElementById('view-sender').textContent = data.sender || '';
+            document.getElementById('view-email').textContent = (data.email && data.email !== '-') ? data.email : '';
+            document.getElementById('view-message').textContent = data.message || '';
+            document.getElementById('view-date').textContent = 'Sent on ' + (data.date || '');
 
             const badge = document.getElementById('view-status-badge');
-            if (data.anonymous === '1') {
-                badge.style.background = '#fdf0ee';
-                badge.style.color = 'var(--red)';
-                badge.textContent = 'Anonymous to Recipient';
-            } else {
-                badge.style.background = '#eaf3dc';
-                badge.style.color = 'var(--forest)';
-                badge.textContent = 'Public to Recipient';
+            if (badge) {
+                if (data.anonymous === '1') {
+                    badge.style.background = '#fdf0ee';
+                    badge.style.color = 'var(--red)';
+                    badge.textContent = 'Anonymous to Recipient';
+                } else {
+                    badge.style.background = '#eaf3dc';
+                    badge.style.color = 'var(--forest)';
+                    badge.textContent = 'Public to Recipient';
+                }
             }
 
             const modal = document.getElementById('modal-view-wish');
-            modal.style.display = 'flex';
-        });
-    });
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.classList.add('modal-open');
+                document.body.style.overflow = 'hidden';
+            }
+            return;
+        }
 
-    // Edit Modal Logic
-    document.querySelectorAll('.btn-edit-wish').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const id = this.dataset.id;
-            const recipient = this.dataset.recipient;
-            const message = this.dataset.message;
-            const anonymous = this.dataset.anonymous === '1';
+        // Edit Modal Logic (Delegated)
+        const editBtn = e.target.closest('.btn-edit-wish');
+        if (editBtn) {
+            const id = editBtn.dataset.id;
+            const recipient = editBtn.dataset.recipient || 'Unknown';
+            const message = editBtn.dataset.message || '';
+            const anonymous = editBtn.dataset.anonymous === '1';
 
             document.getElementById('edit-recipient').textContent = recipient;
             document.getElementById('edit-message-input').value = message;
             document.getElementById('edit-anonymous-checkbox').checked = anonymous;
 
             const form = document.getElementById('form-edit-wish');
-            form.action = '/admin/birthday-wishes/' + id;
+            if (form) form.action = '/admin/birthday-wishes/' + id;
 
             const modal = document.getElementById('modal-edit-wish');
-            modal.style.display = 'flex';
-        });
-    });
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.classList.add('modal-open');
+                document.body.style.overflow = 'hidden';
+            }
+            return;
+        }
 
-    // Close Modals
-    document.querySelectorAll('.btn-close-modal').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const targetId = this.dataset.target;
+        // Close Modal buttons
+        const closeBtn = e.target.closest('.btn-close-modal');
+        if (closeBtn) {
+            const targetId = closeBtn.dataset.target;
             if (targetId) {
-                document.getElementById(targetId).style.display = 'none';
+                const targetModal = document.getElementById(targetId);
+                if (targetModal) targetModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
             }
-        });
+            return;
+        }
+
+        // Close on Backdrop click
+        if (e.target.classList.contains('admin-modal-backdrop')) {
+            e.target.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            return;
+        }
     });
 
-    // Close on backdrop click
-    document.querySelectorAll('.admin-modal-backdrop').forEach(function (backdrop) {
-        backdrop.addEventListener('click', function (e) {
-            if (e.target === this) {
-                this.style.display = 'none';
-            }
-        });
+    // Close Modals on Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.admin-modal-backdrop').forEach(modal => {
+                if (modal.style.display !== 'none') {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
     });
 
-    // Batch Delete Wishes Selection & Confirmation
-    const selectAllCheckbox = document.getElementById('check-select-all-wishes');
-    const batchCheckboxes = document.querySelectorAll('.wish-batch-checkbox');
-    const batchCountSpan = document.getElementById('batch-selected-count-wishes');
-    const btnBatchDelete = document.getElementById('btn-batch-delete-wishes');
-    const batchForm = document.getElementById('form-batch-delete-wishes');
+    // Intercept Filter Form Submit
+    document.addEventListener('submit', function (e) {
+        if (e.target && e.target.id === 'form-wishes-filter') {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            for (const [key, value] of formData.entries()) {
+                if (value !== '' && value !== null) {
+                    params.append(key, value);
+                }
+            }
+            const queryStr = params.toString();
+            const url = form.action + (queryStr ? '?' + queryStr : '');
+            loadWishesAjax(url);
+        }
+    });
 
+    // Trigger filter submit on Celebrant change
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.id === 'filter-wishes-member') {
+            const form = e.target.form;
+            if (form) {
+                form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+            }
+        }
+    });
+
+    // Support Browser Back / Forward buttons without full refresh
+    window.addEventListener('popstate', function () {
+        loadWishesAjax(window.location.href, false);
+    });
+
+    // Batch Delete Wishes State
     function updateBatchDeleteState() {
+        const selectAllCheckbox = document.getElementById('check-select-all-wishes');
+        const batchCheckboxes = document.querySelectorAll('.wish-batch-checkbox');
         const checkedBoxes = document.querySelectorAll('.wish-batch-checkbox:checked');
+        const batchCountSpan = document.getElementById('batch-selected-count-wishes');
+        const btnBatchDelete = document.getElementById('btn-batch-delete-wishes');
         const count = checkedBoxes.length;
 
         if (batchCountSpan) {
@@ -461,23 +606,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function () {
-            batchCheckboxes.forEach(cb => {
-                cb.checked = selectAllCheckbox.checked;
+    // Batch checkbox selection delegation
+    document.addEventListener('change', function (e) {
+        if (e.target && e.target.id === 'check-select-all-wishes') {
+            const checked = e.target.checked;
+            document.querySelectorAll('.wish-batch-checkbox').forEach(cb => {
+                cb.checked = checked;
             });
             updateBatchDeleteState();
-        });
-    }
-
-    batchCheckboxes.forEach(cb => {
-        cb.addEventListener('change', updateBatchDeleteState);
+        } else if (e.target && e.target.classList.contains('wish-batch-checkbox')) {
+            updateBatchDeleteState();
+        }
     });
 
-    if (btnBatchDelete && batchForm) {
-        btnBatchDelete.addEventListener('click', function () {
+    // Batch Delete confirmation
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.id === 'btn-batch-delete-wishes') {
+            const batchForm = document.getElementById('form-batch-delete-wishes');
             const count = document.querySelectorAll('.wish-batch-checkbox:checked').length;
-            if (count === 0) return;
+            if (count === 0 || !batchForm) return;
 
             if (typeof window.openAdminConfirm === 'function') {
                 window.openAdminConfirm({
@@ -494,8 +641,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     batchForm.submit();
                 }
             }
-        });
-    }
+        }
+    });
 });
 </script>
 @endpush

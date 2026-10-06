@@ -225,7 +225,7 @@
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--line);">
                     <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
                     <button type="submit" class="button button-primary button-sm" id="btn-submit-add-activity">
-                        <x-icon name="plus" /> Save Activity
+                        Save Activity
                     </button>
                 </div>
             </form>

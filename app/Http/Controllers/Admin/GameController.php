@@ -330,4 +330,50 @@ class GameController extends Controller
 
         return redirect()->route('admin.games', ['tab' => 'growth-100'])->with('success', 'Answer removed successfully.');
     }
+
+    /**
+     * Batch save multiple Guess Me rounds in one atomic transaction.
+     */
+    public function saveGuessMeBatchRounds(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'rounds' => 'required|array|min:1',
+            'rounds.*.id' => 'nullable|integer',
+            'rounds.*.correct_answer' => 'required|string',
+            'rounds.*.clue' => 'required|string',
+            'rounds.*.score' => 'required|integer|min:1',
+            'rounds.*.image' => 'nullable|string',
+        ]);
+
+        $result = $this->storageService->saveGuessMeBatchRounds($validated['rounds']);
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Batch save multiple Growth 100 rounds in one atomic transaction.
+     */
+    public function saveGrowth100BatchRounds(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'rounds' => 'required|array|min:1',
+            'rounds.*.id' => 'nullable|integer',
+            'rounds.*.question' => 'required|string',
+            'rounds.*.answers' => 'required|array|min:1',
+            'rounds.*.answers.*.text' => 'required|string',
+            'rounds.*.answers.*.score' => 'required|integer|min:1',
+        ]);
+
+        $result = $this->storageService->saveGrowth100BatchRounds($validated['rounds']);
+
+        if (!$result['success']) {
+            return response()->json($result, 422);
+        }
+
+        return response()->json($result);
+    }
 }

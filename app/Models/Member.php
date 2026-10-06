@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Member extends Model
 {
@@ -26,6 +27,14 @@ class Member extends Model
     ];
 
     /**
+     * Get the dedicated database-stored photo for this member.
+     */
+    public function memberPhoto(): HasOne
+    {
+        return $this->hasOne(MemberPhoto::class, 'member_id');
+    }
+
+    /**
      * Get the uploaded photo metadata for this member.
      */
     public function photo(): BelongsTo
@@ -38,6 +47,10 @@ class Member extends Model
      */
     public function getPhotoUrlAttribute(): ?string
     {
+        if ($this->memberPhoto && !empty($this->memberPhoto->photo_data)) {
+            return $this->memberPhoto->photo_data;
+        }
+
         return $this->photo ? $this->photo->getUrl() : null;
     }
 

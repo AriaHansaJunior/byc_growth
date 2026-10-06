@@ -132,9 +132,7 @@ class CashManagementController extends Controller
             ->orderBy('account_type', 'asc')
             ->pluck('account_type');
 
-        $viewName = $request->is('admin/*') ? 'admin.cash-management' : 'user.cash-management';
-
-        return view($viewName, [
+        return view('admin.cash-management', [
             'transactions' => $transactions,
             'totalCash' => $totalCash,
             'members' => $members,
@@ -149,14 +147,6 @@ class CashManagementController extends Controller
                 'sort' => $sort,
             ],
         ]);
-    }
-
-    /**
-     * Dedicated Admin Portal Cash Management endpoint.
-     */
-    public function adminIndex(Request $request): View
-    {
-        return $this->index($request);
     }
 
     /**

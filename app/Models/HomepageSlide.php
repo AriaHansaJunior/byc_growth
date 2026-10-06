@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class HomepageSlide extends Model
 {
@@ -25,6 +26,14 @@ class HomepageSlide extends Model
     ];
 
     /**
+     * Get the dedicated database-stored photo for this slide.
+     */
+    public function slidePhoto(): HasOne
+    {
+        return $this->hasOne(HomepageSlidePhoto::class, 'homepage_slide_id');
+    }
+
+    /**
      * Get the associated media file for this slide.
      */
     public function media(): BelongsTo
@@ -37,6 +46,10 @@ class HomepageSlide extends Model
      */
     public function getImageUrlAttribute(): string
     {
+        if ($this->slidePhoto && !empty($this->slidePhoto->image_data)) {
+            return $this->slidePhoto->image_data;
+        }
+
         if ($this->media) {
             return $this->media->getUrl();
         }

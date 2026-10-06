@@ -9,6 +9,8 @@ import { initScrollReveal } from './components/scroll-reveal';
 import { initUserIdentity } from './components/user-identity';
 import { initAdminShell } from './components/admin-shell';
 import { initDatepickers } from './components/datepicker';
+import { initAdminHomepage } from './components/admin-homepage';
+import { initAdminGames } from './components/admin-games';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize universal enhanced datepickers
@@ -44,4 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Admin Shell confirmation modal & controls
     initAdminShell();
+
+    // Initialize Admin Homepage management
+    initAdminHomepage();
+
+    // Initialize Admin Games management
+    initAdminGames();
 });

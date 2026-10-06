@@ -249,7 +249,7 @@
     </div>
 
     {{-- Modal: Create Account --}}
-    <div class="admin-modal-backdrop" id="modal-add-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div class="admin-modal-backdrop modal-backdrop" id="modal-add-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -359,7 +359,7 @@
     </div>
 
     {{-- Modal: Edit Account --}}
-    <div class="admin-modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div class="admin-modal-backdrop modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 500px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -462,14 +462,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!modalEl) return;
         modalEl.style.display = 'flex';
         document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeModal(modalEl) {
         if (!modalEl) return;
         modalEl.style.display = 'none';
-        const anyOpen = document.querySelectorAll('.admin-modal-backdrop[style*="display: flex"], .modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: block"]');
+        const anyOpen = document.querySelectorAll('.admin-modal-backdrop[style*="display: flex"], .admin-modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: flex"], .modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: block"]');
         if (anyOpen.length === 0) {
             document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
         }
     }
 

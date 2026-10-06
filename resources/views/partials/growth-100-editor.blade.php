@@ -17,7 +17,7 @@
                     {{-- Populated via JS --}}
                 </div>
                 <button type="button" class="button button-primary" id="btn-add-growth-round" style="margin-top: 10px; width: 100%;">
-                    + Add Round
+                    Add Round
                 </button>
             </nav>
 
@@ -39,7 +39,7 @@
                 </div>
 
                 <button type="button" class="button button-secondary" id="btn-add-answer-row" style="margin-top: 12px;">
-                    + Add Answer
+                    Add Answer
                 </button>
                 <small style="display: block; color: var(--muted); margin-top: 6px;">
                     * Answers are automatically sorted by highest score upon saving. Sum of answers must equal exactly 100.

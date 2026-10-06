@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\HomepageSlide;
+use App\Models\HomepageSlidePhoto;
 use App\Services\MediaUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -27,7 +28,7 @@ class HomepageController extends Controller
      */
     public function index(): View
     {
-        $slides = HomepageSlide::with('media')
+        $slides = HomepageSlide::with(['slidePhoto', 'media'])
             ->ordered()
             ->get();
 
@@ -37,7 +38,7 @@ class HomepageController extends Controller
     }
 
     /**
-     * Store a newly uploaded slideshow photo.
+     * Store a newly uploaded slideshow photo directly in the database.
      */
     public function storeSlide(Request $request): RedirectResponse
     {
@@ -46,8 +47,6 @@ class HomepageController extends Controller
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
-
-        $media = null;
 
         try {
             DB::beginTransaction();
@@ -60,6 +59,10 @@ class HomepageController extends Controller
             $title = !empty($validated['title']) ? $validated['title'] : $originalName;
             $caption = $validated['caption'] ?? null;
 
+            $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            $content = file_get_contents($file->getRealPath());
+            $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
+
             $slide = HomepageSlide::create([
                 'title' => $title,
                 'caption' => $caption,
@@ -67,37 +70,126 @@ class HomepageController extends Controller
                 'is_active' => true,
             ]);
 
-            $media = $this->mediaService->storeImage(
-                $request->file('image'),
-                'hero_slide',
-                HomepageSlide::class,
-                $slide->id
-            );
-
-            $slide->update(['media_file_id' => $media->id]);
+            HomepageSlidePhoto::create([
+                'homepage_slide_id' => $slide->id,
+                'image_data' => $base64,
+                'original_name' => $originalName,
+                'mime_type' => $mime,
+                'file_size' => strlen($content),
+            ]);
 
             DB::commit();
 
-            return redirect()->route('admin.homepage')->with('success', 'Slideshow photo added successfully.');
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Slideshow photo added successfully.',
+                    'slide' => [
+                        'id' => $slide->id,
+                        'title' => $slide->title,
+                        'image_url' => $base64,
+                        'sort_order' => $slide->sort_order,
+                    ],
+                ]);
+            }
+
+            return redirect()->to(route('admin.homepage') . '#slideshow-management')->with('success', 'Slideshow photo added successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
 
-            if ($media) {
-                $this->mediaService->deleteMediaFile($media);
-            }
-
             Log::error('Failed to upload slideshow photo: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Failed to upload slideshow photo. Please try again.'], 500);
+            }
 
             return back()->withInput()->withErrors(['error' => 'Failed to upload slideshow photo. Please try again.']);
         }
     }
 
     /**
+     * Update an existing slideshow photo's image / position directly in the database.
+     */
+    public function updateSlide(Request $request, int $id): RedirectResponse|JsonResponse
+    {
+        $slide = HomepageSlide::with(['slidePhoto', 'media'])->findOrFail($id);
+
+        $validated = $request->validate([
+            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'title' => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $file = $request->file('image');
+            $originalName = $file->getClientOriginalName();
+            $title = !empty($validated['title']) ? $validated['title'] : ($slide->title ?: $originalName);
+
+            $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            $content = file_get_contents($file->getRealPath());
+            $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
+
+            $slide->update([
+                'title' => $title,
+                'caption' => $validated['caption'] ?? $slide->caption,
+            ]);
+
+            $slidePhoto = $slide->slidePhoto;
+            if ($slidePhoto) {
+                $slidePhoto->update([
+                    'image_data' => $base64,
+                    'original_name' => $originalName,
+                    'mime_type' => $mime,
+                    'file_size' => strlen($content),
+                ]);
+            } else {
+                HomepageSlidePhoto::create([
+                    'homepage_slide_id' => $slide->id,
+                    'image_data' => $base64,
+                    'original_name' => $originalName,
+                    'mime_type' => $mime,
+                    'file_size' => strlen($content),
+                ]);
+            }
+
+            // Clean up old media file from disk if legacy record existed
+            if ($slide->media && $slide->media->fileable_type === HomepageSlide::class) {
+                $this->mediaService->deleteMediaFile($slide->media);
+                $slide->update(['media_file_id' => null]);
+            }
+
+            DB::commit();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Slideshow photo updated successfully.',
+                    'image_url' => $base64,
+                ]);
+            }
+
+            return redirect()->to(route('admin.homepage') . '#slideshow-management')->with('success', 'Slideshow photo updated successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            Log::error('Failed to update slideshow photo: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Failed to update slideshow photo. Please try again.'], 500);
+            }
+
+            return back()->withErrors(['error' => 'Failed to update slideshow photo. Please try again.']);
+        }
+    }
+
+    /**
      * Delete an existing slideshow image and clean up associated media.
      */
-    public function destroySlide(int $id): RedirectResponse
+    public function destroySlide(Request $request, int $id): RedirectResponse|JsonResponse
     {
-        $slide = HomepageSlide::with('media')->findOrFail($id);
+        $slide = HomepageSlide::with(['slidePhoto', 'media'])->findOrFail($id);
 
         try {
             DB::beginTransaction();
@@ -114,10 +206,21 @@ class HomepageController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.homepage')->with('success', 'Slideshow image deleted successfully.');
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Slideshow image deleted successfully.',
+                ]);
+            }
+
+            return redirect()->to(route('admin.homepage') . '#slideshow-management')->with('success', 'Slideshow image deleted successfully.');
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Failed to delete slideshow slide: ' . $e->getMessage(), ['exception' => $e]);
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => 'Failed to delete slideshow image.'], 500);
+            }
 
             return back()->withErrors(['error' => 'Failed to delete slideshow image. Please try again.']);
         }
@@ -164,58 +267,9 @@ class HomepageController extends Controller
             ]);
         }
 
-        return redirect()->route('admin.homepage')->with('success', 'Slides reordered successfully.');
+        return redirect()->to(route('admin.homepage') . '#slideshow-management')->with('success', 'Slides reordered successfully.');
     }
 
-    /**
-     * Move a slide one position up in the sequence.
-     */
-    public function moveSlideUp(int $id): RedirectResponse
-    {
-        $this->normalizeSlideOrders();
-
-        $slide = HomepageSlide::findOrFail($id);
-        $prevSlide = HomepageSlide::where('sort_order', '<', $slide->sort_order)
-            ->orderBy('sort_order', 'desc')
-            ->first();
-
-        if ($prevSlide) {
-            DB::transaction(function () use ($slide, $prevSlide) {
-                $prevOrder = $prevSlide->sort_order;
-                $slideOrder = $slide->sort_order;
-
-                $slide->update(['sort_order' => $prevOrder]);
-                $prevSlide->update(['sort_order' => $slideOrder]);
-            });
-        }
-
-        return redirect()->route('admin.homepage')->with('success', 'Slide order updated successfully.');
-    }
-
-    /**
-     * Move a slide one position down in the sequence.
-     */
-    public function moveSlideDown(int $id): RedirectResponse
-    {
-        $this->normalizeSlideOrders();
-
-        $slide = HomepageSlide::findOrFail($id);
-        $nextSlide = HomepageSlide::where('sort_order', '>', $slide->sort_order)
-            ->orderBy('sort_order', 'asc')
-            ->first();
-
-        if ($nextSlide) {
-            DB::transaction(function () use ($slide, $nextSlide) {
-                $nextOrder = $nextSlide->sort_order;
-                $slideOrder = $slide->sort_order;
-
-                $slide->update(['sort_order' => $nextOrder]);
-                $nextSlide->update(['sort_order' => $slideOrder]);
-            });
-        }
-
-        return redirect()->route('admin.homepage')->with('success', 'Slide order updated successfully.');
-    }
 
     /**
      * Helper to keep sort orders normalized sequentially (1, 2, 3...).

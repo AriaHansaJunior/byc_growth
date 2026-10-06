@@ -151,51 +151,6 @@ class GameController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * Batch save multiple Guess Me rounds in one atomic transaction
-     */
-    public function saveGuessMeBatchRounds(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'rounds' => 'required|array|min:1',
-            'rounds.*.id' => 'nullable|integer',
-            'rounds.*.correct_answer' => 'required|string',
-            'rounds.*.clue' => 'required|string',
-            'rounds.*.score' => 'required|integer|min:1',
-            'rounds.*.image' => 'nullable|string',
-        ]);
-
-        $result = $this->storageService->saveGuessMeBatchRounds($validated['rounds']);
-
-        if (!$result['success']) {
-            return response()->json($result, 422);
-        }
-
-        return response()->json($result);
-    }
-
-    /**
-     * Batch save multiple Growth 100 rounds in one atomic transaction
-     */
-    public function saveGrowth100BatchRounds(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'rounds' => 'required|array|min:1',
-            'rounds.*.id' => 'nullable|integer',
-            'rounds.*.question' => 'required|string',
-            'rounds.*.answers' => 'required|array|min:1',
-            'rounds.*.answers.*.text' => 'required|string',
-            'rounds.*.answers.*.score' => 'required|integer|min:1',
-        ]);
-
-        $result = $this->storageService->saveGrowth100BatchRounds($validated['rounds']);
-
-        if (!$result['success']) {
-            return response()->json($result, 422);
-        }
-
-        return response()->json($result);
-    }
 
     /**
      * Update scores for Game 1 or Game 2 for any dynamic team
@@ -241,42 +196,6 @@ class GameController extends Controller
         return response()->json($result);
     }
 
-    /**
-     * Add or edit Guess Me round
-     */
-    public function saveGuessMeRound(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'id' => 'nullable|integer',
-            'correct_answer' => 'required|string',
-            'clue' => 'required|string',
-            'score' => 'required|integer|min:1',
-            'image' => 'nullable|image|max:5120',
-        ]);
-
-        $imageFile = $request->file('image');
-        $result = $this->storageService->saveGuessMeRound($validated, $imageFile);
-
-        if (!$result['success']) {
-            return response()->json($result, 422);
-        }
-
-        return response()->json($result);
-    }
-
-    /**
-     * Delete Guess Me round
-     */
-    public function deleteGuessMeRound(int $id): JsonResponse
-    {
-        $result = $this->storageService->deleteGuessMeRound($id);
-
-        if (!$result['success']) {
-            return response()->json($result, 422);
-        }
-
-        return response()->json($result);
-    }
 
     /**
      * Update Game 2 active round, revealed answer status, crosses, or revealAll
@@ -315,41 +234,6 @@ class GameController extends Controller
         ]);
     }
 
-    /**
-     * Add or edit Growth 100 round
-     */
-    public function saveGrowth100Round(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'id' => 'nullable|integer',
-            'question' => 'required|string',
-            'answers' => 'required|array|min:1',
-            'answers.*.text' => 'required|string',
-            'answers.*.score' => 'required|integer|min:1',
-        ]);
-
-        $result = $this->storageService->saveGrowth100Round($validated);
-
-        if (!$result['success']) {
-            return response()->json($result, 422);
-        }
-
-        return response()->json($result);
-    }
-
-    /**
-     * Delete Growth 100 round
-     */
-    public function deleteGrowth100Round(int $id): JsonResponse
-    {
-        $result = $this->storageService->deleteGrowth100Round($id);
-
-        if (!$result['success']) {
-            return response()->json($result, 422);
-        }
-
-        return response()->json($result);
-    }
 
     /**
      * Reset Game state to initial

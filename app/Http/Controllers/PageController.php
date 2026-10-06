@@ -23,7 +23,7 @@ class PageController extends Controller
     public function home(): View
     {
         $finalScores = $this->storageService->getFinalScores();
-        $slides = HomepageSlide::with('media')
+        $slides = HomepageSlide::with(['slidePhoto', 'media'])
             ->active()
             ->ordered()
             ->get();
@@ -50,7 +50,7 @@ class PageController extends Controller
     {
         $today = \Carbon\Carbon::now('Asia/Jakarta')->format('m-d');
 
-        $members = Member::with('photo')
+        $members = Member::with(['photo', 'memberPhoto'])
             ->where('is_active', true)
             ->orderByRaw("CASE WHEN date_of_birth IS NOT NULL AND DATE_FORMAT(date_of_birth, '%m-%d') = ? THEN 0 ELSE 1 END ASC", [$today])
             ->orderBy('full_name', 'asc')

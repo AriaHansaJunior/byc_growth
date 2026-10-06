@@ -267,7 +267,7 @@
     </div>
 
     {{-- Proof Image Viewer Modal --}}
-    <div id="modal-proof-viewer" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div id="modal-proof-viewer" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 600px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 16px 20px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
                 <div>
@@ -293,7 +293,7 @@
     </div>
 
     {{-- Modal: Record New Transaction --}}
-    <div id="modal-record-tx" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div id="modal-record-tx" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 580px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div>
@@ -402,7 +402,7 @@
     </div>
 
     {{-- Edit Transaction Modal --}}
-    <div id="modal-edit-tx" class="admin-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.65); z-index: 999; align-items: center; justify-content: center; padding: 20px;">
+    <div id="modal-edit-tx" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 540px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -473,14 +473,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!modalEl) return;
         modalEl.style.display = 'flex';
         document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
     }
 
     function closeModal(modalEl) {
         if (!modalEl) return;
         modalEl.style.display = 'none';
-        const anyOpen = document.querySelectorAll('.admin-modal-backdrop[style*="display: flex"], .modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: block"]');
+        const anyOpen = document.querySelectorAll('.admin-modal-backdrop[style*="display: flex"], .admin-modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: flex"], .modal-backdrop[style*="display: grid"], .modal-backdrop[style*="display: block"]');
         if (anyOpen.length === 0) {
             document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
         }
     }
 

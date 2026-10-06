@@ -29,7 +29,7 @@ export function initResetGame() {
         btnConfirm.addEventListener('click', async () => {
             try {
                 btnConfirm.disabled = true;
-                btnConfirm.textContent = 'Mereset...';
+                btnConfirm.textContent = 'Resetting...';
 
                 const res = await postJson('/game/reset', {});
                 if (res.success) {
@@ -38,11 +38,11 @@ export function initResetGame() {
             } catch (err) {
                 showGameAlert({
                     title: 'Reset Game',
-                    message: 'Gagal mereset permainan: ' + err.message,
+                    message: 'Failed to reset game: ' + err.message,
                     icon: '⚠️',
                 });
                 btnConfirm.disabled = false;
-                btnConfirm.textContent = 'Ya, Reset Game';
+                btnConfirm.textContent = 'Yes, Reset Game';
             }
         });
     }

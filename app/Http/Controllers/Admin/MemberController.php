@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MediaFile;
 use App\Models\Member;
+use App\Models\MemberPhoto;
 use App\Services\MediaUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class MemberController extends Controller
     {
         $request = $request ?? request();
 
-        $query = Member::with('photo');
+        $query = Member::with(['photo', 'memberPhoto']);
 
         // Search: Full Name
         if ($request->filled('search')) {
@@ -92,28 +93,25 @@ class MemberController extends Controller
             'date_of_birth.before_or_equal' => 'Date of birth cannot be in the future (maximum date is today).',
         ]);
 
-        $photoFileId = null;
-        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
-            $media = $this->mediaService->storeImage(
-                $request->file('photo'),
-                'member',
-                Member::class
-            );
-            $photoFileId = $media->id;
-        }
-
         $member = Member::create([
             'full_name' => $validated['full_name'],
             'date_of_birth' => $validated['date_of_birth'] ?? null,
-            'photo_file_id' => $photoFileId,
             'is_active' => true,
         ]);
 
-        if ($photoFileId) {
-            $media = MediaFile::find($photoFileId);
-            if ($media) {
-                $media->update(['fileable_id' => $member->id]);
-            }
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $file = $request->file('photo');
+            $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            $content = file_get_contents($file->getRealPath());
+            $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
+
+            MemberPhoto::create([
+                'member_id' => $member->id,
+                'photo_data' => $base64,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $mime,
+                'file_size' => strlen($content),
+            ]);
         }
 
         $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
@@ -128,7 +126,7 @@ class MemberController extends Controller
      */
     public function update(Request $request, int $id): RedirectResponse
     {
-        $member = Member::findOrFail($id);
+        $member = Member::with(['photo', 'memberPhoto'])->findOrFail($id);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
@@ -139,37 +137,48 @@ class MemberController extends Controller
             'date_of_birth.before_or_equal' => 'Date of birth cannot be in the future (maximum date is today).',
         ]);
 
-        $photoFileId = $member->photo_file_id;
-
-        if ($request->boolean('remove_photo') && $photoFileId) {
-            $oldMedia = MediaFile::find($photoFileId);
-            if ($oldMedia) {
-                $this->mediaService->deleteMediaFile($oldMedia);
+        if ($request->boolean('remove_photo')) {
+            if ($member->memberPhoto) {
+                $member->memberPhoto->delete();
             }
-            $photoFileId = null;
+            if ($member->photo) {
+                $this->mediaService->deleteMediaFile($member->photo);
+                $member->update(['photo_file_id' => null]);
+            }
         }
 
         if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
-            // Delete old photo if exists
-            if ($photoFileId) {
-                $oldMedia = MediaFile::find($photoFileId);
-                if ($oldMedia) {
-                    $this->mediaService->deleteMediaFile($oldMedia);
-                }
+            $file = $request->file('photo');
+            $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            $content = file_get_contents($file->getRealPath());
+            $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
+
+            $memberPhoto = $member->memberPhoto;
+            if ($memberPhoto) {
+                $memberPhoto->update([
+                    'photo_data' => $base64,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $mime,
+                    'file_size' => strlen($content),
+                ]);
+            } else {
+                MemberPhoto::create([
+                    'member_id' => $member->id,
+                    'photo_data' => $base64,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type' => $mime,
+                    'file_size' => strlen($content),
+                ]);
             }
 
-            $media = $this->mediaService->storeImage(
-                $request->file('photo'),
-                'member',
-                Member::class,
-                $member->id
-            );
-            $photoFileId = $media->id;
+            if ($member->photo) {
+                $this->mediaService->deleteMediaFile($member->photo);
+                $member->update(['photo_file_id' => null]);
+            }
         }
 
         $updateData = [
             'full_name' => $validated['full_name'],
-            'photo_file_id' => $photoFileId,
         ];
 
         if (array_key_exists('date_of_birth', $validated)) {
