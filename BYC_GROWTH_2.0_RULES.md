@@ -11,14 +11,15 @@ This document serves as the **single general reference and source of truth** for
 
 ---
 
-## 2. Device & Responsiveness Rules
-- **Primary Optimization Target**: **2560 × 1600** (user's primary laptop resolution).
-- **Target Device Class**: Desktop and laptop displays only for now.
-- **Excluded Devices**: Mobile and tablet responsiveness are **NOT** part of the current scope.
-- **Viewport Adaptation**: Layouts must still adapt reasonably to other standard desktop and laptop screen viewports (e.g. 1024px, 1280px, 1440px, 1920px up to 2560px+).
-- **No-Scroll Rule for Gameplay**: Gameplay screens (e.g. Guess Me!, BYC Growth 100, and any future gameplay arenas) must remain compact and fit within the viewport so the host/game master does not need to scroll during an active game session.
-- **Scroll Allowance for Long Content**: The Homepage, Members page, and Cash Management transaction tables are explicitly permitted to scroll vertically, as their records and content naturally grow in length.
-- **Scope Discipline**: Do not redesign unrelated UI components while maintaining responsiveness.
+## 2. Device & Responsiveness Rules (Full RWD)
+- **Universal Multi-Device Support**: The entire website must naturally and intentionally adapt across all device tiers: **Mobile phones**, **Laptops**, and **Desktops**.
+- **Mobile Reference Dimensions**: Current flagship smartphones (e.g. Samsung Galaxy S26 Ultra, Apple iPhone 17 Pro Max) serve as the upper reference (~480 CSS px width). Common mobile viewports (~320px, 360px, 375px, 390px, 414px, 430px, 480px) must all render cleanly without horizontal overflow, clipping, or text collisions.
+- **Laptop & Desktop Tier**: Preserves the rich aesthetic across standard laptop and desktop viewports (~768px, 1024px, 1280px, 1440px, 1920px up to 2560px+ user primary resolution).
+- **Natural Responsive Adaptation (Not Squeezed Desktop)**: Mobile layouts must be intentionally adapted with mobile-appropriate typography, touch target sizing, stacked grids, mobile navigation, fluid card placements, and scroll containers.
+- **Gameplay Viewport Adaptation**:
+  - On desktop/laptop: gameplay screens remain compact and fit cleanly without unnecessary vertical scrolling.
+  - On mobile: gameplay must prioritize usability, accessible controls, and touch readability; natural vertical scrolling is explicitly permitted where necessary so controls and content never clip or overlap.
+- **Scroll Allowance for Long Content**: Content pages (Homepage, Members, Activities, Admin tables, Ledgers) naturally scroll vertically. Modals fit within the mobile viewport (`max-height: calc(100vh - 24px)`) with dedicated internal scroll bodies.
 
 ---
 

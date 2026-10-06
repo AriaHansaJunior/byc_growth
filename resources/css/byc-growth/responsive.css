@@ -1,75 +1,722 @@
-/* Responsive & Height Adaptation */
+/* ==========================================================================
+   BYC GROWTH 2.0 — Responsive Web Design (RWD) Stylesheet
+   Supports Mobile (~320px–480px), Laptop (1024px–1440px), Desktop (1920px–2560px)
+   ========================================================================== */
 
-@media (max-height: 960px) {
-  .game-content, .growth-content {
-    padding-top: 14px;
-    padding-bottom: 16px;
-  }
-  .guess-stage {
-    min-height: 360px;
-  }
-  .guess-image img {
-    max-height: 310px;
-  }
-  .host-panel {
-    margin-top: 14px;
-    padding: 10px 18px;
-  }
-  .answers-grid {
-    margin-top: 12px;
-  }
-  .answer-tile {
-    height: 66px;
-  }
-  .round-nav {
-    margin-top: 14px;
-  }
+/* --------------------------------------------------------------------------
+   1. Mobile Navigation Drawer & Hamburger Toggle
+   -------------------------------------------------------------------------- */
+.mobile-nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  z-index: 910;
 }
 
-@media (max-height: 800px) {
-  .growth-content, .game-content {
-    padding-top: 10px;
-    padding-bottom: 12px;
-  }
-  .growth-title, .game-titlebar {
-    margin-bottom: 12px;
-  }
-  .answer-tile {
-    height: 58px;
-  }
-  .survey-question {
-    padding: 12px 20px;
-  }
-  .survey-question h2 {
-    font-size: 20px;
-  }
-  .home-hero {
-    min-height: calc(100vh - 76px);
-    padding: 36px max(7vw, 72px) 44px;
-  }
+.mobile-nav-toggle:hover {
+  background: rgba(40, 78, 59, 0.08);
 }
 
+.hamburger-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background-color: var(--forest);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.mobile-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 30, 23, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-nav-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 86vw);
+  background: var(--paper);
+  border-left: 1px solid var(--line);
+  box-shadow: -8px 0 32px rgba(18, 30, 23, 0.2);
+  z-index: 1001;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-nav-drawer.is-open {
+  transform: translateX(0);
+}
+
+body.mobile-nav-open {
+  overflow: hidden !important;
+}
+
+.mobile-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mobile-nav-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.mobile-nav-close:hover {
+  color: var(--ink);
+  background: rgba(40, 78, 59, 0.08);
+}
+
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  gap: 6px;
+  flex: 1;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: 12px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.mobile-nav-link:hover {
+  background: rgba(40, 78, 59, 0.07);
+  color: var(--forest);
+}
+
+.mobile-nav-link.active {
+  background: rgba(40, 78, 59, 0.12);
+  color: var(--forest);
+  font-weight: 800;
+}
+
+.mobile-nav-footer {
+  padding: 20px 22px;
+  border-top: 1px solid var(--line);
+  background: var(--white);
+}
+
+.mobile-nav-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  text-decoration: none;
+}
+
+.mobile-nav-user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mobile-nav-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.mobile-nav-user-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.mobile-nav-username {
+  font-size: 15px;
+  color: var(--forest-dark);
+}
+
+/* --------------------------------------------------------------------------
+   2. Large Tablets & Small Laptops (<= 1024px)
+   -------------------------------------------------------------------------- */
 @media (max-width: 1024px) {
   body {
     min-width: 100%;
   }
+
   .home-hero {
     grid-template-columns: 1fr;
     gap: 40px;
     text-align: center;
+    padding: clamp(36px, 5vh, 60px) max(5vw, 36px);
   }
+
+  .home-copy {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
   .home-actions {
     justify-content: center;
   }
-  .game-grid {
+
+  .about-hero-showcase {
     grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 32px 30px;
   }
-  .overall {
-    flex-direction: column;
-    gap: 20px;
-    text-align: center;
+
+  .game-center-hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 36px 32px;
   }
+
+  .game-center-art-frame img {
+    height: 260px;
+  }
+
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .footer-columns {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Tablets & Mobile Viewports (<= 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Navigation switch */
+  .header-nav {
+    display: none !important;
+  }
+
+  .mobile-nav-toggle {
+    display: flex !important;
+  }
+
+  .header-container {
+    padding: 12px 20px !important;
+  }
+
+  .header-brand-divider,
+  .header-brand-tagline {
+    display: none !important;
+  }
+
+  /* Global Containers padding adaptation */
+  .page-shell {
+    padding: 28px 18px 56px !important;
+    min-height: calc(100vh - 120px) !important;
+  }
+
+  .page-header {
+    margin-bottom: 24px !important;
+  }
+
+  .page-header h1 {
+    font-size: clamp(28px, 6.5vw, 40px) !important;
+    margin: 8px 0 12px !important;
+  }
+
+  .page-header p {
+    font-size: 15px !important;
+  }
+
+  .user-page-container {
+    padding: 20px 16px 48px !important;
+  }
+
+  /* Homepage */
+  .home-hero {
+    padding: 28px 18px 44px !important;
+    min-height: auto !important;
+    gap: 28px !important;
+  }
+
+  .home-copy h1 {
+    font-size: clamp(32px, 8.5vw, 48px) !important;
+    margin: 12px 0 16px !important;
+  }
+
+  .home-copy > p {
+    font-size: 15px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .home-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+
+  .home-actions .button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .hero-photo-wrap {
+    max-width: 100% !important;
+  }
+
+  .scripture-card {
+    padding: 24px 20px !important;
+  }
+
+  .scripture-verse {
+    font-size: 17px !important;
+    line-height: 1.5 !important;
+  }
+
+  .destinations-grid {
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+
+  .destination-card {
+    min-height: auto !important;
+    padding: 24px 20px !important;
+  }
+
+  /* About Page */
+  .about-hero-showcase {
+    padding: 24px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  .about-location-city {
+    font-size: 26px !important;
+  }
+
+  .about-location-details {
+    white-space: normal !important;
+  }
+
+  .about-contact-channels {
+    grid-template-columns: 1fr !important;
+  }
+
+  .feature-grid-3 {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .placeholder-card {
+    padding: 24px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  .placeholder-card h2 {
+    font-size: 22px !important;
+  }
+
+  /* Activities Page */
+  .activity-card {
+    padding: 20px 18px !important;
+    border-radius: 16px !important;
+  }
+
+  .activity-header h2 {
+    font-size: 20px !important;
+  }
+
+  .activity-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  /* Game Center Hub */
+  .game-center-hub {
+    padding: 24px 18px 48px !important;
+  }
+
+  .game-center-hero {
+    padding: 24px 20px !important;
+    border-radius: 20px !important;
+    margin-bottom: 32px !important;
+  }
+
+  .game-center-hero-content h1 {
+    font-size: 30px !important;
+  }
+
+  .game-center-art-frame img {
+    height: 200px !important;
+  }
+
+  .game-center-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+
+  .gc-card {
+    min-height: auto !important;
+    padding: 24px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 44px 20px 24px !important;
+  }
+
+  .footer-cta-card {
+    padding: 24px 20px !important;
+    border-radius: 18px !important;
+  }
+
+  .footer-cta-card h2 {
+    font-size: 24px !important;
+  }
+
+  .footer-columns {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+  }
+
+  .footer-legal {
+    text-align: left !important;
+  }
+
+  /* ------------------------------------------------------------------------
+     Gameplay Responsive Adaptation (Controlled vertical scroll on mobile)
+     ------------------------------------------------------------------------ */
+  /* Guess Me */
+  .game-shell {
+    height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .topbar {
+    height: auto !important;
+    min-height: 56px !important;
+    padding: 10px 14px !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+
+  .topbar-scores-wrap {
+    order: 3;
+    width: 100% !important;
+    margin: 4px 0 0 !important;
+    justify-content: center !important;
+  }
+
+  .game-content {
+    width: 100% !important;
+    padding: 16px 16px 32px !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    justify-content: flex-start !important;
+    gap: 20px !important;
+  }
+
+  .game-titlebar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .game-titlebar h1 {
+    font-size: 24px !important;
+  }
+
   .guess-stage {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+    min-height: auto !important;
+  }
+
+  .guess-image {
+    min-height: 220px !important;
+    height: auto !important;
+  }
+
+  .guess-image img {
+    max-height: 260px !important;
+    width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .host-panel {
+    padding: 16px !important;
+    border-radius: 16px !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  .host-controls {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .round-nav {
+    margin-top: 10px !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  /* Growth 100 */
+  .growth-content {
+    width: calc(100% - 24px) !important;
+    padding: 16px 0 32px !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  .growth-title {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+
+  .growth-title h1 {
+    font-size: 26px !important;
+  }
+
+  .growth-title .round-total {
+    justify-self: center !important;
+  }
+
+  .answers-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .answer-tile {
+    height: auto !important;
+    min-height: 60px !important;
+    padding: 12px 14px !important;
+  }
+
+  .strikes-row {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  .growth-bottom {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 14px !important;
+  }
+
+  /* Final Screen */
+  html:has(.final-screen),
+  body:has(.final-screen) {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+  }
+
+  body:has(.final-screen) .site-wrapper,
+  body:has(.final-screen) .site-main {
+    height: auto !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    min-height: 100vh !important;
+  }
+
+  .final-screen {
+    height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    padding: 68px 16px 36px !important;
+    justify-content: flex-start !important;
+    gap: 24px !important;
+  }
+
+  .winner-podium {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 16px !important;
+  }
+
+  .podium-slot {
+    width: 100% !important;
+    max-width: 320px !important;
+  }
+
+  .final-breakdown {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .final-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .final-actions .button {
+    width: 100% !important;
+  }
+
+  /* Modals on Mobile */
+  .modal-card,
+  .admin-modal-card,
+  .dialog-card {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(100vh - 24px) !important;
+    margin: auto !important;
+    padding: 20px 18px !important;
+    border-radius: 18px !important;
+  }
+
+  .modal-header,
+  .admin-modal-header {
+    margin-bottom: 14px !important;
+  }
+
+  .modal-body,
+  .admin-modal-body {
+    max-height: calc(100vh - 140px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Flagship Smartphone Upper Bound & Mobile Grid (~320px–480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .header-container {
+    padding: 10px 14px !important;
+  }
+
+  .page-shell {
+    padding: 20px 14px 44px !important;
+  }
+
+  .home-hero {
+    padding: 20px 14px 36px !important;
+  }
+
+  /* Members 2-column mobile optimization */
+  .members-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .member-card {
+    padding: 14px 10px !important;
+    border-radius: 16px !important;
+  }
+
+  .member-photo-frame {
+    width: 96px !important;
+    height: 96px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .member-photo-fallback {
+    font-size: 28px !important;
+  }
+
+  .member-name {
+    font-size: 14px !important;
+    line-height: 1.25 !important;
+  }
+
+  .birthday-badge-pin {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 12px !important;
+  }
+
+  /* Form & Input usability */
+  .input,
+  .form-control,
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
+  }
+
+  .button {
+    min-height: 44px; /* Touch target accessibility */
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. Compact Mobile Viewports (<= 360px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 360px) {
+  .members-grid {
+    gap: 8px !important;
+  }
+
+  .member-photo-frame {
+    width: 82px !important;
+    height: 82px !important;
+  }
+
+  .home-copy h1 {
+    font-size: 28px !important;
+  }
+
+  .game-titlebar h1 {
+    font-size: 20px !important;
   }
 }

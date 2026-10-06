@@ -11,11 +11,15 @@ import { initAdminShell } from './components/admin-shell';
 import { initDatepickers } from './components/datepicker';
 import { initAdminHomepage } from './components/admin-homepage';
 import { initAdminGames } from './components/admin-games';
+import { initMobileNav } from './components/mobile-nav';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize mobile navigation drawer
+    initMobileNav();
+
     // Initialize universal enhanced datepickers
     initDatepickers();
-    // Initialize Cara Bermain modal & tabs
+    // Initialize How to Play modal & tabs
     initModal('btn-how-to-play', 'modal-how-to-play', 'btn-close-how-to-play');
     initHowToPlayTabs();
 

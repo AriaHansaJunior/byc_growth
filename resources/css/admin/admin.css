@@ -4,6 +4,7 @@
    ========================================================================== */
 
 @import './shell.css';
+@import './admin-responsive.css';
 
 /* Admin Shell Topbar & Header Navigation */
 .admin-topbar {
