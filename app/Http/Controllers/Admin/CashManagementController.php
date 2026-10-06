@@ -105,7 +105,7 @@ class CashManagementController extends Controller
         // Calculate total cash for filtered query across all matching records (not just current page)
         $totalCash = (clone $query)->sum('amount');
 
-        $transactions = $query->paginate($perPage)->withQueryString();
+        $transactions = $query->paginate($perPage)->appends($request->query());
 
         // Get members for dropdown and shortcuts
         $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();

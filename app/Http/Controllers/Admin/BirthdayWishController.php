@@ -78,7 +78,7 @@ class BirthdayWishController extends Controller
             });
         }
 
-        $letters = $query->paginate(15)->withQueryString();
+        $letters = $query->paginate(15)->appends($request->query());
 
         $members = Member::where('is_active', true)
             ->whereNotNull('date_of_birth')
