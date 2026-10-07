@@ -18,12 +18,34 @@ class HomepageSlide extends Model
         'caption',
         'sort_order',
         'is_active',
+        'last_action_by',
+        'last_action_type',
+        'last_action_at',
     ];
 
     protected $casts = [
         'sort_order' => 'integer',
         'is_active' => 'boolean',
+        'last_action_at' => 'datetime',
     ];
+
+    /**
+     * Get the formatted audit trail text.
+     */
+    public function getAuditTrailTextAttribute(): ?string
+    {
+        if (!$this->last_action_by || !$this->last_action_at) {
+            return null;
+        }
+
+        $formattedTime = \Carbon\Carbon::parse($this->last_action_at)
+            ->setTimezone('Asia/Jakarta')
+            ->format('l, j F Y H.i') . ' WIB';
+
+        $action = $this->last_action_type === 'created' ? 'created' : 'edited';
+
+        return "{$action} by {$this->last_action_by} - {$formattedTime}";
+    }
 
     /**
      * Get the dedicated database-stored photo for this slide.

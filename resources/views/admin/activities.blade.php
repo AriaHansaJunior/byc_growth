@@ -588,14 +588,6 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', closeAllModals);
     });
 
-    [addModal, editModal].forEach(m => {
-        if (m) {
-            m.addEventListener('click', (e) => {
-                if (e.target === m) closeAllModals();
-            });
-        }
-    });
-
     // Batch Delete Activities Selection & Confirmation
     const selectAllCheckbox = document.getElementById('check-select-all-activities');
     const batchCheckboxes = document.querySelectorAll('.activity-batch-checkbox');

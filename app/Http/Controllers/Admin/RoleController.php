@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -79,6 +80,7 @@ class RoleController extends Controller
                 'role' => $role,
                 'sort' => $sort,
             ],
+            'availablePermissions' => User::AVAILABLE_PERMISSIONS,
         ]);
     }
 
@@ -95,6 +97,7 @@ class RoleController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'role' => $user->role,
+            'permissions' => $user->permissions ?? [],
             'member_id' => $user->member_id,
             'member_name' => $user->member ? $user->member->full_name : null,
             'created_at' => $user->created_at ? $user->created_at->format('M j, Y H:i') : null,
@@ -127,6 +130,7 @@ class RoleController extends Controller
             'email' => strtolower($validated['email']),
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'permissions' => $validated['role'] === 'admin' ? [] : null,
             'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ];
 
@@ -135,6 +139,8 @@ class RoleController extends Controller
         }
 
         $user = User::create($userData);
+
+        AuditLog::record(Auth::user(), 'created', 'roles', $user->id, "Created account '{$user->email}' with role {$user->role}");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -173,6 +179,8 @@ class RoleController extends Controller
             ],
             'password' => ['nullable', 'string', 'min:6'],
             'role' => ['required', Rule::in(['admin', 'user'])],
+            'permissions' => ['nullable', 'array'],
+            'permissions.*' => ['string', Rule::in(array_keys(User::AVAILABLE_PERMISSIONS))],
             'member_id' => [
                 'nullable',
                 'exists:members,id',
@@ -185,6 +193,12 @@ class RoleController extends Controller
             'role' => $validated['role'],
             'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ];
+
+        if ($validated['role'] === 'admin') {
+            $updateData['permissions'] = array_values(array_unique($request->input('permissions', [])));
+        } else {
+            $updateData['permissions'] = null;
+        }
 
         if (!empty($validated['name'])) {
             $updateData['name'] = $validated['name'];
@@ -200,6 +214,8 @@ class RoleController extends Controller
         }
 
         $user->update($updateData);
+
+        AuditLog::record(Auth::user(), 'edited', 'roles', $user->id, "Updated account '{$user->email}'");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -232,7 +248,11 @@ class RoleController extends Controller
             return redirect()->route('admin.roles')->with('error', 'Cannot delete your own active administrator account.');
         }
 
+        $userEmail = $user->email;
+        $userId = $user->id;
         $user->delete();
+
+        AuditLog::record(Auth::user(), 'deleted', 'roles', $userId, "Deleted account '{$userEmail}'");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -278,6 +298,8 @@ class RoleController extends Controller
             $user->delete();
             $deletedCount++;
         }
+
+        AuditLog::record(Auth::user(), 'batch_deleted', 'roles', null, "Batch deleted {$deletedCount} accounts");
 
         $message = "Successfully deleted {$deletedCount} account" . ($deletedCount === 1 ? '' : 's') . '.';
 

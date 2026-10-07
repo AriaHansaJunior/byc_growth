@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\HomepageSlide;
 use App\Models\HomepageSlidePhoto;
 use App\Services\MediaUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
@@ -63,12 +65,20 @@ class HomepageController extends Controller
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
+            $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+            $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+
             $slide = HomepageSlide::create([
                 'title' => $title,
                 'caption' => $caption,
                 'sort_order' => $nextOrder,
                 'is_active' => true,
+                'last_action_by' => $adminEmail,
+                'last_action_type' => 'created',
+                'last_action_at' => now(),
             ]);
+
+            AuditLog::record($adminUser, 'created', 'homepage_slide', $slide->id, "Added homepage slide '{$slide->title}'");
 
             HomepageSlidePhoto::create([
                 'homepage_slide_id' => $slide->id,
@@ -131,10 +141,18 @@ class HomepageController extends Controller
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
+            $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+            $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+
             $slide->update([
                 'title' => $title,
                 'caption' => $validated['caption'] ?? $slide->caption,
+                'last_action_by' => $adminEmail,
+                'last_action_type' => 'edited',
+                'last_action_at' => now(),
             ]);
+
+            AuditLog::record($adminUser, 'edited', 'homepage_slide', $slide->id, "Updated homepage slide '{$slide->title}'");
 
             $slidePhoto = $slide->slidePhoto;
             if ($slidePhoto) {
@@ -190,6 +208,9 @@ class HomepageController extends Controller
     public function destroySlide(Request $request, int $id): RedirectResponse|JsonResponse
     {
         $slide = HomepageSlide::with(['slidePhoto', 'media'])->findOrFail($id);
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $slideTitle = $slide->title;
+        $slideId = $slide->id;
 
         try {
             DB::beginTransaction();
@@ -197,6 +218,8 @@ class HomepageController extends Controller
             $media = $slide->media;
 
             $slide->delete();
+
+            AuditLog::record($adminUser, 'deleted', 'homepage_slide', $slideId, "Deleted homepage slide '{$slideTitle}'");
 
             if ($media && $media->fileable_type === HomepageSlide::class) {
                 $this->mediaService->deleteMediaFile($media);

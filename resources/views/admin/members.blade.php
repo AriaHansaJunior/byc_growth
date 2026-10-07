@@ -130,9 +130,21 @@
                     </h2>
 
                     {{-- Admin-Only Birthdate & Status Context --}}
-                    <small style="color: var(--muted); font-size: 12px; margin-bottom: 12px; display: block;">
+                    <small style="color: var(--muted); font-size: 12px; margin-bottom: 2px; display: block;">
                         🎂 {{ $member->date_of_birth ? $member->date_of_birth->format('M j, Y') : 'DOB not set' }}
                     </small>
+
+                    <small style="color: var(--forest); font-size: 12px; margin-bottom: 6px; display: block; font-weight: 600;">
+                        User Account: {{ $member->user ? ($member->user->email ?: $member->user->username) : 'Not linked' }}
+                    </small>
+
+                    @if($member->audit_trail_text)
+                        <div class="member-audit-trail" style="font-size: 11px; color: var(--muted); font-style: italic; margin-bottom: 12px; line-height: 1.35; padding: 0 4px; word-break: break-word;">
+                            {{ $member->audit_trail_text }}
+                        </div>
+                    @else
+                        <div style="margin-bottom: 12px;"></div>
+                    @endif
 
                     {{-- Administrative Controls (Edit / Delete) --}}
                     <div class="admin-action-group" style="display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: auto;">
@@ -143,6 +155,7 @@
                             data-name="{{ $member->full_name }}"
                             data-dob="{{ $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '' }}"
                             data-photo="{{ $member->photo_url }}"
+                            data-user-id="{{ $member->user ? $member->user->id : '' }}"
                             style="font-size: 12px; padding: 4px 10px; height: 32px;"
                         >
                             ✎ Edit
@@ -166,180 +179,9 @@
         </div>
     @endif
 
-    {{-- Add Member Modal --}}
-    <div id="modal-add-member" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-add-member-title">
-        <div class="info-modal" style="width: min(720px, 94vw); max-height: calc(100vh - 40px); overflow: visible; padding: 22px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
-            <button type="button" class="icon-button btn-close-modal" id="btn-close-add-member" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
-                <x-icon name="x" />
-            </button>
-            <div style="margin-bottom: 14px; padding-right: 32px;">
-                <span class="eyebrow" style="color: var(--forest); font-size: 11px; display: block; text-transform: uppercase;">Community Directory</span>
-                <h3 id="modal-add-member-title" style="font: 800 20px 'Manrope', sans-serif; color: var(--ink); margin: 2px 0 0;">Add New Member</h3>
-            </div>
-
-            <form method="POST" action="{{ route('admin.members.store') }}" enctype="multipart/form-data" id="form-add-member" class="member-modal-grid" novalidate>
-                @csrf
-
-                {{-- Left Column: Photo Picker & Live Large Preview --}}
-                <div style="text-align: center;">
-                    <label class="form-label" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 8px; text-align: left;">
-                        Profile Photo
-                    </label>
-
-                    {{-- Empty Dropzone --}}
-                    <div id="add-member-dropzone" class="crop-dropzone" style="height: 240px; width: 240px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 50%;">
-                        <div class="crop-dropzone-icon" style="font-size: 38px; margin-bottom: 6px;">👤</div>
-                        <div style="font-weight: 700; color: var(--ink); font-size: 13.5px; margin-bottom: 4px;">Choose Photo</div>
-                        <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.3;">Click or drag photo<br>Any size supported</small>
-                    </div>
-
-                    <input type="file" id="add-photo" name="photo" accept="image/*" style="display: none;">
-
-                    {{-- Live Large Preview Studio --}}
-                    <div id="add-member-studio" style="display: none;">
-                        <div class="crop-viewport-container member-crop-viewport" id="add-member-viewport" style="width: 240px; height: 240px; margin: 0 auto 10px; border-radius: 50%;">
-                            <img id="add-member-preview-img" class="crop-viewport-image" alt="Member Photo Preview" src="">
-                            <div class="crop-grid-overlay" style="border-radius: 50%;">
-                                <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
-                                <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
-                                <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 240px; margin: 0 auto;">
-                            <div class="crop-zoom-bar" style="flex: 1; padding: 4px 8px; font-size: 11px; border-radius: 8px;">
-                                <span id="add-member-zoom-label" style="white-space: nowrap; font-size: 11px;">1.0x</span>
-                                <input type="range" id="add-member-zoom-range" min="1" max="2.5" step="0.05" value="1" style="height: 4px;">
-                                <button type="button" id="add-member-btn-reset" class="crop-preset-btn" style="padding: 2px 6px; font-size: 10px;">Reset</button>
-                            </div>
-                            <button type="button" id="add-member-btn-change" class="button button-ghost button-sm" style="padding: 3px 8px; font-size: 11px; height: 28px;">
-                                Change
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Right Column: Member Details --}}
-                <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-                    <div>
-                        <div class="form-group" style="margin-bottom: 14px;">
-                            <label class="form-label" for="add-full-name" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 6px;">
-                                Full Name <span style="color: var(--red);">*</span>
-                            </label>
-                            <input type="text" id="add-full-name" name="full_name" class="form-input" required placeholder="e.g. Jonathan Wijaya" style="height: 38px; font-size: 13.5px;">
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 14px;">
-                            <label class="form-label" for="add-dob" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 6px;">
-                                Date of Birth
-                            </label>
-                            <input type="date" id="add-dob" name="date_of_birth" max="{{ date('Y-m-d') }}" class="form-input" style="height: 38px; font-size: 13.5px;">
-                            <small style="color: var(--muted); font-size: 11.5px; display: block; margin-top: 4px;">Used for community birthday celebrations.</small>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line);">
-                        <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
-                        <button type="submit" class="button button-primary button-sm" id="btn-submit-add-member">
-                             Save Member
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Edit Member Modal --}}
-    <div id="modal-edit-member" class="modal-backdrop" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="modal-edit-member-title">
-        <div class="info-modal" style="width: min(720px, 94vw); max-height: calc(100vh - 40px); overflow: visible; padding: 22px 28px; background: var(--white); border-radius: 22px; position: relative; box-shadow: var(--shadow);">
-            <button type="button" class="icon-button btn-close-modal" id="btn-close-edit-member" style="position: absolute; top: 16px; right: 16px; width: 32px; height: 32px;">
-                <x-icon name="x" />
-            </button>
-            <div style="margin-bottom: 14px; padding-right: 32px;">
-                <span class="eyebrow" style="color: var(--forest); font-size: 11px; display: block; text-transform: uppercase;">Community Directory</span>
-                <h3 id="modal-edit-member-title" style="font: 800 20px 'Manrope', sans-serif; color: var(--ink); margin: 2px 0 0;">Edit Member</h3>
-            </div>
-
-            <form id="form-edit-member" method="POST" action="" enctype="multipart/form-data" class="member-modal-grid" novalidate>
-                @csrf
-                @method('PUT')
-
-                {{-- Left Column: Photo Preview & Editor Studio --}}
-                <div style="text-align: center;">
-                    <label class="form-label" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 8px; text-align: left;">
-                        Profile Photo
-                    </label>
-
-                    {{-- Empty Dropzone when no photo --}}
-                    <div id="edit-member-dropzone" class="crop-dropzone" style="height: 240px; width: 240px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; border-radius: 50%;">
-                        <div class="crop-dropzone-icon" style="font-size: 38px; margin-bottom: 6px;">👤</div>
-                        <div style="font-weight: 700; color: var(--ink); font-size: 13.5px; margin-bottom: 4px;">Choose Photo</div>
-                        <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.3;">Click or drag photo<br>Any size supported</small>
-                    </div>
-
-                    <input type="file" id="edit-photo" name="photo" accept="image/*" style="display: none;">
-
-                    {{-- Photo Preview & Crop Studio --}}
-                    <div id="edit-member-studio" style="display: none;">
-                        <div class="crop-viewport-container member-crop-viewport" id="edit-member-viewport" style="width: 240px; height: 240px; margin: 0 auto 10px; border-radius: 50%;">
-                            <img id="edit-member-preview-img" class="crop-viewport-image" alt="Edit Photo Preview" src="">
-                            <div class="crop-grid-overlay" style="border-radius: 50%;">
-                                <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
-                                <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
-                                <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 240px; margin: 0 auto 10px;">
-                            <div class="crop-zoom-bar" style="flex: 1; padding: 4px 8px; font-size: 11px; border-radius: 8px;">
-                                <span id="edit-member-zoom-label" style="white-space: nowrap; font-size: 11px;">1.0x</span>
-                                <input type="range" id="edit-member-zoom-range" min="1" max="2.5" step="0.05" value="1" style="height: 4px;">
-                                <button type="button" id="edit-member-btn-reset" class="crop-preset-btn" style="padding: 2px 6px; font-size: 10px;">Reset</button>
-                            </div>
-                            <button type="button" id="edit-member-btn-change" class="button button-ghost button-sm" style="padding: 3px 8px; font-size: 11px; height: 28px;">
-                                Change
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Remove Photo Option --}}
-                    <div id="edit-member-remove-photo-wrap" style="display: none; margin-top: 8px;">
-                        <label style="font-size: 12px; color: var(--red); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-                            <input type="checkbox" id="edit-remove-photo" name="remove_photo" value="1">
-                            Remove current photo
-                        </label>
-                    </div>
-                </div>
-
-                {{-- Right Column: Member Details --}}
-                <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
-                    <div>
-                        <div class="form-group" style="margin-bottom: 14px;">
-                            <label class="form-label" for="edit-full-name" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 6px;">
-                                Full Name <span style="color: var(--red);">*</span>
-                            </label>
-                            <input type="text" id="edit-full-name" name="full_name" class="form-input" required style="height: 38px; font-size: 13.5px;">
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 14px;">
-                            <label class="form-label" for="edit-dob" style="font-weight: 700; font-size: 12.5px; display: block; margin-bottom: 6px;">
-                                Date of Birth
-                            </label>
-                            <input type="date" id="edit-dob" name="date_of_birth" max="{{ date('Y-m-d') }}" class="form-input" style="height: 38px; font-size: 13.5px;">
-                            <small style="color: var(--muted); font-size: 11.5px; display: block; margin-top: 4px;">Used for community birthday celebrations.</small>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--line);">
-                        <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
-                        <button type="submit" class="button button-primary button-sm" id="btn-submit-edit-member">
-                            Update Member
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('admin.partials.member-add-modal')
+    @include('admin.partials.member-edit-modal')
+    @include('admin.partials.member-quick-account-modal')
 @endsection
 
 @push('scripts')
@@ -485,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let currentZoom = 1.0;
         let currentOffsetX = 0;
         let currentOffsetY = 0;
-        const viewportSize = 240;
+        const viewportSize = config.viewportSize || 200;
         let isDragging = false;
         let startX = 0;
         let startY = 0;
@@ -717,6 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize Add Member Cropper
     const addCropper = setupCropper({
+        viewportSize: 200,
         dropzone: document.getElementById('add-member-dropzone'),
         fileInput: document.getElementById('add-photo'),
         studio: document.getElementById('add-member-studio'),
@@ -732,6 +575,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize Edit Member Cropper
     const editCropper = setupCropper({
+        viewportSize: 200,
         dropzone: document.getElementById('edit-member-dropzone'),
         fileInput: document.getElementById('edit-photo'),
         studio: document.getElementById('edit-member-studio'),
@@ -745,13 +589,186 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn: document.getElementById('btn-submit-edit-member')
     });
 
+    // Quick Create User Account Modal Controller
+    let quickAccountTarget = 'add';
+    const quickUserModal = document.getElementById('modal-quick-create-user');
+    const formQuickUser = document.getElementById('form-quick-create-user');
+    const quickUserError = document.getElementById('quick-user-alert-error');
+    const btnSubmitQuickUser = document.getElementById('btn-submit-quick-user');
+    const addUserSelect = document.getElementById('add-user-id');
+    const editUserSelect = document.getElementById('edit-user-id');
+
+    function openQuickCreateUser(target) {
+        quickAccountTarget = target;
+        const sourceNameInput = target === 'edit'
+            ? document.getElementById('edit-full-name')
+            : document.getElementById('add-full-name');
+        const quickNameInput = document.getElementById('quick-user-name');
+        if (sourceNameInput && quickNameInput && !quickNameInput.value) {
+            quickNameInput.value = sourceNameInput.value.trim();
+        }
+
+        if (quickUserError) {
+            quickUserError.style.display = 'none';
+            quickUserError.textContent = '';
+        }
+
+        if (quickUserModal) {
+            quickUserModal.style.display = 'flex';
+        }
+    }
+
+    function closeQuickCreateUser() {
+        if (quickUserModal) {
+            quickUserModal.style.display = 'none';
+        }
+        if (formQuickUser) {
+            formQuickUser.reset();
+        }
+        if (quickUserError) {
+            quickUserError.style.display = 'none';
+            quickUserError.textContent = '';
+        }
+
+        const sel = quickAccountTarget === 'edit' ? editUserSelect : addUserSelect;
+        if (sel && sel.value === '__new__') {
+            sel.value = sel.dataset.prevValue || '';
+        }
+    }
+
+    document.querySelectorAll('.btn-close-quick-user').forEach(btn => {
+        btn.addEventListener('click', closeQuickCreateUser);
+    });
+
+    document.querySelectorAll('.btn-trigger-quick-account').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const target = this.getAttribute('data-target') || 'add';
+            openQuickCreateUser(target);
+        });
+    });
+
+    if (addUserSelect) {
+        addUserSelect.dataset.prevValue = '';
+        addUserSelect.addEventListener('change', function () {
+            if (this.value === '__new__') {
+                openQuickCreateUser('add');
+            } else {
+                this.dataset.prevValue = this.value;
+            }
+        });
+    }
+
+    if (editUserSelect) {
+        editUserSelect.dataset.prevValue = '';
+        editUserSelect.addEventListener('change', function () {
+            if (this.value === '__new__') {
+                openQuickCreateUser('edit');
+            } else {
+                this.dataset.prevValue = this.value;
+            }
+        });
+    }
+
+    if (formQuickUser) {
+        formQuickUser.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            if (quickUserError) {
+                quickUserError.style.display = 'none';
+                quickUserError.textContent = '';
+            }
+
+            const formData = new FormData(formQuickUser);
+            if (btnSubmitQuickUser) {
+                btnSubmitQuickUser.disabled = true;
+                btnSubmitQuickUser.textContent = 'Creating...';
+            }
+
+            try {
+                const response = await fetch(formQuickUser.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (!response.ok || !data || !data.success) {
+                    let errorMsg = 'Failed to create user account.';
+                    if (data && data.errors) {
+                        errorMsg = Object.values(data.errors).flat().join(' ');
+                    } else if (data && data.message) {
+                        errorMsg = data.message;
+                    }
+                    if (quickUserError) {
+                        quickUserError.textContent = errorMsg;
+                        quickUserError.style.display = 'block';
+                    }
+                    if (btnSubmitQuickUser) {
+                        btnSubmitQuickUser.disabled = false;
+                        btnSubmitQuickUser.textContent = 'Create Account';
+                    }
+                    return;
+                }
+
+                const newUser = data.user;
+                const newOptionLabel = `${newUser.email} (${newUser.username})`;
+
+                [addUserSelect, editUserSelect].forEach(sel => {
+                    if (!sel) return;
+                    let opt = sel.querySelector(`option[value="${newUser.id}"]`);
+                    if (!opt) {
+                        opt = document.createElement('option');
+                        opt.value = newUser.id;
+                        opt.textContent = newOptionLabel;
+                        const existingGroup = sel.querySelector('optgroup[label="Existing Accounts"]');
+                        if (existingGroup) {
+                            existingGroup.appendChild(opt);
+                        } else {
+                            sel.appendChild(opt);
+                        }
+                    }
+                });
+
+                const activeSel = quickAccountTarget === 'edit' ? editUserSelect : addUserSelect;
+                if (activeSel) {
+                    activeSel.value = newUser.id;
+                    activeSel.dataset.prevValue = newUser.id;
+                    activeSel.focus();
+                }
+
+                closeQuickCreateUser();
+
+                if (typeof window.showAdminToast === 'function') {
+                    window.showAdminToast('Account created and linked successfully!', 'success');
+                }
+            } catch (err) {
+                if (quickUserError) {
+                    quickUserError.textContent = 'Network or server error while creating account.';
+                    quickUserError.style.display = 'block';
+                }
+            } finally {
+                if (btnSubmitQuickUser) {
+                    btnSubmitQuickUser.disabled = false;
+                    btnSubmitQuickUser.textContent = 'Create Account';
+                }
+            }
+        });
+    }
+
     // Open Add Modal
     if (btnOpenAdd && addModal) {
         btnOpenAdd.addEventListener('click', () => {
             clearAllErrors(formAdd);
             addCropper.reset();
             if (window.setDatePickerValue) window.setDatePickerValue('add-dob', '');
-            addModal.style.display = 'grid';
+            if (addUserSelect) {
+                addUserSelect.value = '';
+                addUserSelect.dataset.prevValue = '';
+            }
+            addModal.style.display = 'flex';
             document.body.classList.add('modal-open');
             document.body.style.overflow = 'hidden';
         });
@@ -765,6 +782,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const name = this.getAttribute('data-name');
             const dob = this.getAttribute('data-dob');
             const photo = this.getAttribute('data-photo');
+            const userId = this.getAttribute('data-user-id') || '';
 
             if (formEdit) {
                 formEdit.action = `/admin/members/${id}`;
@@ -776,6 +794,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (removeCb) removeCb.checked = false;
 
+            if (editUserSelect) {
+                editUserSelect.value = userId;
+                editUserSelect.dataset.prevValue = userId;
+            }
+
             if (photo) {
                 editCropper.loadExistingUrl(photo);
                 if (removeWrap) removeWrap.style.display = 'block';
@@ -785,7 +808,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (editModal) {
-                editModal.style.display = 'grid';
+                editModal.style.display = 'flex';
                 document.body.classList.add('modal-open');
                 document.body.style.overflow = 'hidden';
             }
@@ -809,20 +832,13 @@ document.addEventListener('DOMContentLoaded', function () {
         clearAllErrors(formEdit);
         if (addModal) addModal.style.display = 'none';
         if (editModal) editModal.style.display = 'none';
+        closeQuickCreateUser();
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
     }
 
     document.querySelectorAll('.btn-close-modal').forEach(btn => {
         btn.addEventListener('click', closeAllModals);
-    });
-
-    [addModal, editModal].forEach(m => {
-        if (m) {
-            m.addEventListener('click', (e) => {
-                if (e.target === m) closeAllModals();
-            });
-        }
     });
 
     // Batch Delete Members Selection & Confirmation

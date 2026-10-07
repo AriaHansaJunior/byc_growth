@@ -17,18 +17,16 @@ class AdminAuthController extends Controller
      */
     public function showLoginForm(Request $request): View|RedirectResponse
     {
-        if (Auth::check()) {
-            if ($request->filled('redirect')) {
-                return redirect($request->input('redirect'));
-            }
-
+        if (Auth::guard('admin')->check()) {
             /** @var User $user */
-            $user = Auth::user();
-            if ($user->isAdmin()) {
+            $user = Auth::guard('admin')->user();
+            if ($user && $user->isAdmin()) {
+                if ($request->filled('redirect')) {
+                    return redirect($request->input('redirect'));
+                }
+
                 return redirect()->route('admin.dashboard');
             }
-
-            return redirect()->route('home');
         }
 
         if ($request->filled('redirect')) {
@@ -40,7 +38,7 @@ class AdminAuthController extends Controller
 
     /**
      * Handle an incoming admin authentication request.
-     * Supports both email and username.
+     * Supports both email and username. Strictly restricted to administrator accounts.
      */
     public function login(Request $request): RedirectResponse
     {
@@ -52,7 +50,6 @@ class AdminAuthController extends Controller
                 ->withInput($request->only('login', 'email'))
                 ->withErrors([
                     'login' => 'Email or username and password are required.',
-                    'email' => 'Email or username and password are required.',
                 ]);
         }
 
@@ -66,28 +63,19 @@ class AdminAuthController extends Controller
                 ->withInput($request->only('login', 'email'))
                 ->withErrors([
                     'login' => 'These credentials do not match our records.',
-                    'email' => 'These credentials do not match our records.',
                 ]);
         }
 
-        // Enforce administrator role requirement unless returning to a non-admin redirect target
+        // Strictly reject standard users from logging in to the admin portal
         if (!$user->isAdmin()) {
-            if ($request->filled('redirect') && !str_starts_with($request->input('redirect'), '/admin')) {
-                Auth::login($user, true);
-                $request->session()->regenerate();
-                session()->flash('welcome_user', $user->username);
-                return redirect($request->input('redirect'));
-            }
-
             return back()
                 ->withInput($request->only('login', 'email'))
                 ->withErrors([
-                    'login' => 'These credentials do not have administrator access.',
-                    'email' => 'These credentials do not have administrator access.',
+                    'login' => 'Standard user accounts do not have administrator access.',
                 ]);
         }
 
-        Auth::login($user, true);
+        Auth::guard('admin')->login($user, true);
         $request->session()->regenerate();
         session()->flash('welcome_user', $user->username);
 
@@ -108,7 +96,7 @@ class AdminAuthController extends Controller
      */
     public function logout(Request $request): RedirectResponse
     {
-        Auth::logout();
+        Auth::guard('admin')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

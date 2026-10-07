@@ -71,10 +71,6 @@ export function initAdminHomepage() {
         openBtns.forEach(btn => btn.addEventListener('click', openModal));
         closeBtns.forEach(btn => btn.addEventListener('click', closeModal));
 
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
         });
@@ -367,10 +363,6 @@ export function initAdminHomepage() {
         }
 
         closeEditBtns.forEach(btn => btn.addEventListener('click', closeEditModal));
-
-        editModal.addEventListener('click', (e) => {
-            if (e.target === editModal) closeEditModal();
-        });
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && editModal.style.display !== 'none') {

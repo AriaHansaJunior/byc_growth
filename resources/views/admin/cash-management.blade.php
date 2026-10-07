@@ -770,15 +770,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Close on backdrop click
-    document.querySelectorAll('.admin-modal-backdrop').forEach(function (backdrop) {
-        backdrop.addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeModal(this);
-            }
-        });
-    });
-
     // Close on Escape key
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {

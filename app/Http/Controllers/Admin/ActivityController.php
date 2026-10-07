@@ -116,6 +116,9 @@ class ActivityController extends BaseActivityController
             $activity->delete();
         }
 
+        $adminUser = \Illuminate\Support\Facades\Auth::guard('admin')->user() ?? \Illuminate\Support\Facades\Auth::guard('web')->user() ?? \Illuminate\Support\Facades\Auth::user();
+        \App\Models\AuditLog::record($adminUser, 'batch_deleted', 'activity', null, "Batch deleted {$count} activities");
+
         return redirect()->route('admin.activities')
             ->with('success', "Selected {$count} " . ($count === 1 ? 'activity has' : 'activities have') . ' been deleted successfully.');
     }

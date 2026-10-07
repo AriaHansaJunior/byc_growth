@@ -1,6 +1,6 @@
 <header class="global-header">
     <div class="header-container">
-        <a href="{{ (auth()->check() && auth()->user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="header-brand-link" aria-label="BYC Growth Home">
+        <a href="{{ route('home') }}" class="header-brand-link" aria-label="BYC Growth Home">
             <x-brand :compact="true" />
             <span class="header-brand-divider" aria-hidden="true"></span>
             <span class="header-brand-tagline">Bethany Youth Community</span>
@@ -21,12 +21,6 @@
                 Game Center
             </a>
 
-            @if(auth()->check() && auth()->user()->member && auth()->user()->member->isBirthdayToday())
-                <a href="{{ route('birthday.wishes') }}" class="nav-item {{ request()->routeIs('birthday.wishes*') ? 'active' : '' }}" style="color: var(--gold); font-weight: 700;">
-                    🎂 My Wishes
-                </a>
-            @endif
-
             @if(auth()->guest())
                 <a href="{{ route('login') }}" class="nav-login-btn" id="btn-header-login" title="Member Sign In">
                     Login
@@ -37,11 +31,12 @@
                         <span class="nav-user-username">{{ auth()->user()->username }}</span>
                         <x-icon name="chevron-down" />
                     </button>
-                    <div class="nav-user-dropdown-menu" id="nav-user-dropdown-menu" role="menu" style="display: none;">
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="nav-user-logout-item" style="text-decoration: none; border-bottom: 1px solid var(--line); display: block;" role="menuitem">
-                                Admin Dashboard
+                    <div class="nav-user-dropdown-menu" id="nav-user-dropdown-menu" role="menu" style="display: none; min-width: 180px;">
+                        @if(auth()->user()->member)
+                            <a href="{{ route('birthday.wishes') }}" class="nav-user-dropdown-item" role="menuitem">
+                                My Birthday Wishes
                             </a>
+                            <div style="height: 1px; background: var(--line); margin: 4px 6px;"></div>
                         @endif
                         <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
                             @csrf
@@ -61,10 +56,11 @@
             <span class="hamburger-bar"></span>
         </button>
     </div>
+</header>
 
-    {{-- Mobile Navigation Drawer & Backdrop --}}
-    <div class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-hidden="true"></div>
-    <div class="mobile-nav-drawer" id="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+{{-- Mobile Navigation Drawer & Backdrop (Independent Viewport Overlay) --}}
+<div class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-hidden="true"></div>
+<div class="mobile-nav-drawer" id="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
         <div class="mobile-nav-header">
             <x-brand :compact="true" />
             <button type="button" class="mobile-nav-close" id="btn-mobile-nav-close" aria-label="Close menu">&times;</button>
@@ -85,12 +81,6 @@
             <a href="{{ route('game.center') }}" class="mobile-nav-link {{ request()->routeIs('game.*') ? 'active' : '' }}">
                 Game Center
             </a>
-
-            @if(auth()->check() && auth()->user()->member && auth()->user()->member->isBirthdayToday())
-                <a href="{{ route('birthday.wishes') }}" class="mobile-nav-link {{ request()->routeIs('birthday.wishes*') ? 'active' : '' }}" style="color: var(--gold); font-weight: 700;">
-                    🎂 My Wishes
-                </a>
-            @endif
         </nav>
 
         <div class="mobile-nav-footer">
@@ -104,9 +94,9 @@
                         <span class="mobile-nav-user-label">Signed in as</span>
                         <strong class="mobile-nav-username">{{ auth()->user()->username }}</strong>
                     </div>
-                    @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="button button-secondary button-sm" style="margin-top: 8px; width: 100%; text-align: center;">
-                            Admin Dashboard
+                    @if(auth()->user()->member)
+                        <a href="{{ route('birthday.wishes') }}" class="button button-ghost button-sm" style="width: 100%; margin-top: 10px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
+                            My Birthday Wishes
                         </a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}" style="margin-top: 8px; width: 100%;">
@@ -119,4 +109,3 @@
             @endif
         </div>
     </div>
-</header>

@@ -49,10 +49,6 @@ export function showGameAlert({
         closeBtn.onclick = closeModal;
     }
 
-    modal.onclick = (e) => {
-        if (e.target === modal) closeModal();
-    };
-
     document.addEventListener('keydown', handleKey);
 }
 

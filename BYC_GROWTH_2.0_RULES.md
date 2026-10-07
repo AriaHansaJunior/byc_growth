@@ -284,3 +284,29 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 - **No Test Files or Test Code**: Do NOT create or maintain testing code during active revision iterations.
 - **No PHPUnit / Test Suite Execution**: Do NOT run test suites during development.
 - **Testing Deferred to Final Completion**: Full testing is deferred until the entire project is completed and only when the user explicitly requests it.
+
+---
+
+## 26. Admin Granular Access Control & Discord-Style Permissions
+- **Account-Level Permissions (No Separate Roles Table)**: Administrator module access is managed directly on the user account record via the `users.permissions` JSON column.
+- **Default Blank Privileges on Creation**: When a new administrator account is created, permissions default to empty (`[]`). The new administrator can only access the dashboard with a restricted notice until an authorized admin explicitly activates permissions.
+- **Discord-Style Permissions UI**:
+  - Located exclusively on the Edit User modal in `/admin/roles`.
+  - Discord-inspired toggle switches: green `#23a55a` with checkmark `✓` when active, grey `#80848e` with cross `✕` when inactive.
+  - Granular control over the 7 core modules (`homepage`, `activities`, `members`, `games`, `birthday_wishes`, `cash_management`, `roles`).
+  - Single privilege level: "View and Access [Module]" granting view, add, edit, and delete capabilities for the permitted module.
+- **Dynamic Header & Dashboard Adaptation**:
+  - The Admin Topbar quick-navigation links and Dashboard module cards render only modules permitted for the authenticated administrator.
+  - Zero permitted modules: Header displays only Dashboard; Dashboard presents the restricted notice.
+- **Backend Route Protection**: Protected by `EnsureAdminPermission` middleware (`admin.permission:{module}`) preventing direct URL manipulation.
+
+---
+
+## 27. History Track Log & Audit Trail Discipline
+- **Centralized Audit Logging**: Every administrative mutation (create, edit, delete, batch-delete) across modules is persisted in `audit_logs` with admin email, entity type, entity ID, action, and timestamp.
+- **Record-Level Stamp**: Key entities (`members`, `activities`, `cash_transactions`, `homepage_slides`, `birthday_letters`) maintain `last_action_by`, `last_action_type`, and `last_action_at`.
+- **Formatted Presentation**: Entity cards (such as fellowship members) display the audit record formatted in italics with Asia/Jakarta (GMT+7) local time:
+  `edited by {admin_email} - {l, j F Y H.i} WIB` (or `added by...`).
+- **Strict English UI**: All audit descriptions, timestamps, and status notices must strictly be in English.
+- **Strict Admin-Only Visibility**: Track logs and audit trail stamps (such as *edited by {admin_email} - {time} WIB*) are rendered strictly within the Admin Portal (e.g. `/admin/members`). They must NEVER be displayed or exposed to public visitors or standard fellowship members on public directories (such as `/members`).
+

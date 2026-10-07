@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\CashTransaction;
 use App\Models\Member;
 use App\Services\MediaUploadService;
@@ -176,6 +177,8 @@ class CashManagementController extends Controller
 
             // Server-side timestamp authority (Asia/Jakarta timezone)
             $now = Carbon::now('Asia/Jakarta');
+            $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+            $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
 
             $transaction = CashTransaction::create([
                 'user_id' => Auth::id(),
@@ -187,11 +190,16 @@ class CashManagementController extends Controller
                 'description' => 'Monthly Cash Contribution - ' . $member->full_name,
                 'proof_file_id' => $media->id,
                 'transaction_date' => $now->toDateString(),
+                'last_action_by' => $adminEmail,
+                'last_action_type' => 'created',
+                'last_action_at' => $now,
                 'created_at' => $now,
                 'updated_at' => $now,
             ]);
 
             $media->update(['fileable_id' => $transaction->id]);
+
+            AuditLog::record($adminUser, 'created', 'cash_transaction', $transaction->id, "Recorded transaction Rp " . number_format($transaction->amount, 0, ',', '.') . " for '{$transaction->contributor_name}'");
 
             DB::commit();
 
@@ -286,7 +294,14 @@ class CashManagementController extends Controller
 
             $transaction->account_type = $validated['account_type'];
             $transaction->amount = $validated['amount'];
+            $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+            $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+            $transaction->last_action_by = $adminEmail;
+            $transaction->last_action_type = 'edited';
+            $transaction->last_action_at = Carbon::now('Asia/Jakarta');
             $transaction->save();
+
+            AuditLog::record($adminUser, 'edited', 'cash_transaction', $transaction->id, "Updated transaction #{$transaction->id} for '{$transaction->contributor_name}'");
 
             // Safely delete old proof after successful update
             if ($newMedia && $oldMedia) {
@@ -317,6 +332,7 @@ class CashManagementController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Failed to update cash transaction.',
+                    'error' => 'Failed to update cash transaction.',
                 ], 500);
             }
 
@@ -330,6 +346,9 @@ class CashManagementController extends Controller
     public function destroy(Request $request, int $id)
     {
         $transaction = CashTransaction::with('proof')->findOrFail($id);
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $txId = $transaction->id;
+        $contributor = $transaction->contributor_name;
 
         try {
             DB::beginTransaction();
@@ -339,6 +358,8 @@ class CashManagementController extends Controller
             }
 
             $transaction->delete();
+
+            AuditLog::record($adminUser, 'deleted', 'cash_transaction', $txId, "Deleted transaction #{$txId} for '{$contributor}'");
 
             DB::commit();
 
@@ -422,6 +443,9 @@ class CashManagementController extends Controller
                 }
                 $transaction->delete();
             }
+
+            $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+            AuditLog::record($adminUser, 'batch_deleted', 'cash_transaction', null, "Batch deleted {$count} transactions");
 
             DB::commit();
 

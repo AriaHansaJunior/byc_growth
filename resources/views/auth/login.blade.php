@@ -33,7 +33,7 @@
         @if ($errors->any())
             <div class="alert alert-danger" role="alert">
                 <ul style="margin: 0; padding-left: 18px;">
-                    @foreach ($errors->all() as $error)
+                    @foreach (array_unique($errors->all()) as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>

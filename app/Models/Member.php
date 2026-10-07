@@ -19,12 +19,34 @@ class Member extends Model
         'date_of_birth',
         'photo_file_id',
         'is_active',
+        'last_action_by',
+        'last_action_type',
+        'last_action_at',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
         'is_active' => 'boolean',
+        'last_action_at' => 'datetime',
     ];
+
+    /**
+     * Get the formatted audit trail text (e.g. 'edited by jojo_ganteng@gmail.com - Saturday, 1 January 2026 19.20 WIB').
+     */
+    public function getAuditTrailTextAttribute(): ?string
+    {
+        if (!$this->last_action_by || !$this->last_action_at) {
+            return null;
+        }
+
+        $formattedTime = Carbon::parse($this->last_action_at)
+            ->setTimezone('Asia/Jakarta')
+            ->format('l, j F Y H.i') . ' WIB';
+
+        $action = $this->last_action_type === 'created' ? 'created' : 'edited';
+
+        return "{$action} by {$this->last_action_by} - {$formattedTime}";
+    }
 
     /**
      * Get the dedicated database-stored photo for this member.

@@ -369,14 +369,6 @@ export function initGrowth100() {
         btnCloseScoreboard.addEventListener('click', closeScoreboard);
     }
 
-    if (modalScoreboard) {
-        modalScoreboard.addEventListener('click', (e) => {
-            if (e.target === modalScoreboard) {
-                closeScoreboard();
-            }
-        });
-    }
-
     // ==========================================
     // CRUD Editor Modal Logic with Batch Save
     // ==========================================
@@ -595,11 +587,8 @@ export function initGrowth100() {
     if (btnCloseEditor) btnCloseEditor.addEventListener('click', closeModal);
     if (btnAddRound) btnAddRound.addEventListener('click', newEditorRound);
 
-    // Close on backdrop click or ESC key
+    // Close on ESC key
     if (modalEditor) {
-        modalEditor.addEventListener('click', (e) => {
-            if (e.target === modalEditor) closeModal();
-        });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modalEditor.style.display !== 'none') {
                 closeModal();

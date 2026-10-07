@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Services\GameStorageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class GameController extends Controller
@@ -129,6 +131,10 @@ class GameController extends Controller
                 ->withInput();
         }
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $action = !empty($validated['id']) ? 'edited' : 'created';
+        AuditLog::record($adminUser, $action, 'game', $validated['id'] ?? null, "Saved Guess Me round");
+
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json($result);
         }
@@ -151,6 +157,9 @@ class GameController extends Controller
             }
             return redirect()->route('admin.games', ['tab' => 'guess-me'])->with('error', $result['error']);
         }
+
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        AuditLog::record($adminUser, 'deleted', 'game', $id, "Deleted Guess Me round #{$id}");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json($result);
@@ -203,6 +212,10 @@ class GameController extends Controller
                 ->withInput();
         }
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $action = !empty($validated['id']) ? 'edited' : 'created';
+        AuditLog::record($adminUser, $action, 'game', $validated['id'] ?? null, "Saved Growth 100 round '{$validated['question']}'");
+
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json($result);
         }
@@ -225,6 +238,9 @@ class GameController extends Controller
             }
             return redirect()->route('admin.games', ['tab' => 'growth-100'])->with('error', $result['error']);
         }
+
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        AuditLog::record($adminUser, 'deleted', 'game', $id, "Deleted Growth 100 round #{$id}");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json($result);

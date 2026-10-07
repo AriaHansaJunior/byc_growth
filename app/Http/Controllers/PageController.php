@@ -48,16 +48,30 @@ class PageController extends Controller
      */
     public function members(): View
     {
-        $today = \Carbon\Carbon::now('Asia/Jakarta')->format('m-d');
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
+        $today = $now->format('m-d');
+        $currentYear = (int) $now->year;
 
-        $members = Member::with(['photo', 'memberPhoto'])
+        $members = Member::with(['photo', 'memberPhoto', 'user'])
             ->where('is_active', true)
             ->orderByRaw("CASE WHEN date_of_birth IS NOT NULL AND DATE_FORMAT(date_of_birth, '%m-%d') = ? THEN 0 ELSE 1 END ASC", [$today])
             ->orderBy('full_name', 'asc')
             ->get();
 
+        $userLetters = collect();
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            $userLetters = \App\Models\BirthdayLetter::where('user_id', \Illuminate\Support\Facades\Auth::id())
+                ->where('birthday_year', $currentYear)
+                ->get()
+                ->keyBy('member_id');
+        }
+
+        $users = \App\Models\User::where('role', 'user')->orderBy('username')->get();
+
         return view('user.members', [
             'members' => $members,
+            'userLetters' => $userLetters,
+            'users' => $users,
         ]);
     }
 

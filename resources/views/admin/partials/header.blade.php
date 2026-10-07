@@ -13,13 +13,27 @@
 
     <nav class="admin-quick-nav" aria-label="Admin Navigation">
         <a href="{{ route('admin.dashboard') }}" class="admin-nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-        <a href="{{ route('admin.homepage') }}" class="admin-nav-item {{ request()->routeIs('admin.homepage*') ? 'active' : '' }}">Homepage</a>
-        <a href="{{ route('admin.activities') }}" class="admin-nav-item {{ request()->routeIs('admin.activities*') ? 'active' : '' }}">Activities</a>
-        <a href="{{ route('admin.members') }}" class="admin-nav-item {{ request()->routeIs('admin.members*') ? 'active' : '' }}">Members</a>
-        <a href="{{ route('admin.games') }}" class="admin-nav-item {{ request()->routeIs('admin.games*') ? 'active' : '' }}">Games</a>
-        <a href="{{ route('admin.birthday-wishes') }}" class="admin-nav-item {{ request()->routeIs('admin.birthday-wishes*') ? 'active' : '' }}">Birthday Wishes</a>
-        <a href="{{ route('admin.cash-management') }}" class="admin-nav-item {{ request()->routeIs('admin.cash-management*') ? 'active' : '' }}">Cash Management</a>
-        <a href="{{ route('admin.roles') }}" class="admin-nav-item {{ request()->routeIs('admin.roles*') ? 'active' : '' }}">Roles / Accounts</a>
+        @if($admin && $admin->hasPermission('homepage'))
+            <a href="{{ route('admin.homepage') }}" class="admin-nav-item {{ request()->routeIs('admin.homepage*') ? 'active' : '' }}">Homepage</a>
+        @endif
+        @if($admin && $admin->hasPermission('activities'))
+            <a href="{{ route('admin.activities') }}" class="admin-nav-item {{ request()->routeIs('admin.activities*') ? 'active' : '' }}">Activities</a>
+        @endif
+        @if($admin && $admin->hasPermission('members'))
+            <a href="{{ route('admin.members') }}" class="admin-nav-item {{ request()->routeIs('admin.members*') ? 'active' : '' }}">Members</a>
+        @endif
+        @if($admin && $admin->hasPermission('games'))
+            <a href="{{ route('admin.games') }}" class="admin-nav-item {{ request()->routeIs('admin.games*') ? 'active' : '' }}">Games</a>
+        @endif
+        @if($admin && $admin->hasPermission('birthday_wishes'))
+            <a href="{{ route('admin.birthday-wishes') }}" class="admin-nav-item {{ request()->routeIs('admin.birthday-wishes*') ? 'active' : '' }}">Birthday Wishes</a>
+        @endif
+        @if($admin && $admin->hasPermission('cash_management'))
+            <a href="{{ route('admin.cash-management') }}" class="admin-nav-item {{ request()->routeIs('admin.cash-management*') ? 'active' : '' }}">Cash Management</a>
+        @endif
+        @if($admin && $admin->hasPermission('roles'))
+            <a href="{{ route('admin.roles') }}" class="admin-nav-item {{ request()->routeIs('admin.roles*') ? 'active' : '' }}">Roles / Accounts</a>
+        @endif
     </nav>
 
     <div class="admin-user-nav">
@@ -55,12 +69,14 @@
                     <div class="admin-profile-menu-divider"></div>
 
                     <div class="admin-profile-menu-actions">
-                        <a href="{{ route('admin.roles', ['edit' => $admin->id]) }}" class="admin-profile-logout-btn" style="text-decoration: none; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;" role="menuitem">
-                            <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            <span>Edit Your Account</span>
-                        </a>
+                        @if($admin->hasPermission('roles'))
+                            <a href="{{ route('admin.roles', ['edit' => $admin->id]) }}" class="admin-profile-logout-btn" style="text-decoration: none; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;" role="menuitem">
+                                <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                </svg>
+                                <span>Edit Your Account</span>
+                            </a>
+                        @endif
                         <form method="POST" action="{{ route('admin.logout') }}" style="margin: 0; width: 100%;">
                             @csrf
                             <button type="submit" class="admin-profile-logout-btn" id="btn-admin-logout" role="menuitem">

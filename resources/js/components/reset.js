@@ -21,10 +21,6 @@ export function initResetGame() {
 
     if (btnCancel) btnCancel.addEventListener('click', closeModal);
 
-    modalReset.addEventListener('click', (e) => {
-        if (e.target === modalReset) closeModal();
-    });
-
     if (btnConfirm) {
         btnConfirm.addEventListener('click', async () => {
             try {

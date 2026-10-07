@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\MediaFile;
 use App\Models\Member;
 use App\Models\MemberPhoto;
+use App\Models\User;
 use App\Services\MediaUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class MemberController extends Controller
 {
@@ -26,7 +30,7 @@ class MemberController extends Controller
     {
         $request = $request ?? request();
 
-        $query = Member::with(['photo', 'memberPhoto']);
+        $query = Member::with(['photo', 'memberPhoto', 'user']);
 
         // Search: Full Name
         if ($request->filled('search')) {
@@ -66,9 +70,11 @@ class MemberController extends Controller
         }
 
         $members = $query->get();
+        $users = User::where('role', 'user')->orderBy('username')->get();
 
         return view('admin.members', [
             'members' => $members,
+            'users' => $users,
             'totalCount' => Member::count(),
             'filteredCount' => $members->count(),
             'activeCount' => Member::where('is_active', true)->count(),
@@ -89,15 +95,27 @@ class MemberController extends Controller
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'user_id' => 'nullable',
+            'new_user_email' => 'nullable|string|email|max:255',
+            'new_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/',
+            'new_user_password' => 'nullable|string|min:6',
         ], [
             'date_of_birth.before_or_equal' => 'Date of birth cannot be in the future (maximum date is today).',
         ]);
+
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
 
         $member = Member::create([
             'full_name' => $validated['full_name'],
             'date_of_birth' => $validated['date_of_birth'] ?? null,
             'is_active' => true,
+            'last_action_by' => $adminEmail,
+            'last_action_type' => 'created',
+            'last_action_at' => now(),
         ]);
+
+        AuditLog::record($adminUser, 'created', 'member', $member->id, "Created member '{$member->full_name}'");
 
         if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             $file = $request->file('photo');
@@ -114,7 +132,9 @@ class MemberController extends Controller
             ]);
         }
 
-        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
+        $this->handleUserLinking($request, $member);
+
+        $target = ($request->is('admin/*') || ($request->header('referer') && str_contains($request->header('referer'), '/admin/members')))
             ? route('admin.members')
             : route('members');
 
@@ -126,13 +146,17 @@ class MemberController extends Controller
      */
     public function update(Request $request, int $id): RedirectResponse
     {
-        $member = Member::with(['photo', 'memberPhoto'])->findOrFail($id);
+        $member = Member::with(['photo', 'memberPhoto', 'user'])->findOrFail($id);
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
             'remove_photo' => 'nullable|boolean',
+            'user_id' => 'nullable',
+            'new_user_email' => 'nullable|string|email|max:255',
+            'new_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/',
+            'new_user_password' => 'nullable|string|min:6',
         ], [
             'date_of_birth.before_or_equal' => 'Date of birth cannot be in the future (maximum date is today).',
         ]);
@@ -177,8 +201,14 @@ class MemberController extends Controller
             }
         }
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+
         $updateData = [
             'full_name' => $validated['full_name'],
+            'last_action_by' => $adminEmail,
+            'last_action_type' => 'edited',
+            'last_action_at' => now(),
         ];
 
         if (array_key_exists('date_of_birth', $validated)) {
@@ -187,11 +217,57 @@ class MemberController extends Controller
 
         $member->update($updateData);
 
-        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
+        AuditLog::record($adminUser, 'edited', 'member', $member->id, "Updated member '{$member->full_name}'");
+
+        $this->handleUserLinking($request, $member);
+
+        $target = ($request->is('admin/*') || ($request->header('referer') && str_contains($request->header('referer'), '/admin/members')))
             ? route('admin.members')
             : route('members');
 
         return redirect($target)->with('success', 'Member updated successfully.');
+    }
+
+    /**
+     * Handle user account linking or creating a new user account for a member.
+     */
+    protected function handleUserLinking(Request $request, Member $member): void
+    {
+        $userId = $request->input('user_id');
+        $newEmail = trim((string) $request->input('new_user_email', ''));
+
+        if ($userId === '__new__' || (!empty($newEmail) && empty($userId))) {
+            // Unlink any currently linked user
+            User::where('member_id', $member->id)->update(['member_id' => null]);
+
+            $request->validate([
+                'new_user_email' => 'required|email|max:255|unique:users,email',
+                'new_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/|unique:users,username',
+                'new_user_password' => 'nullable|string|min:6',
+            ]);
+
+            $email = strtolower($newEmail);
+            $password = $request->filled('new_user_password') ? $request->input('new_user_password') : 'password123';
+            $username = $request->filled('new_user_username') ? strtolower($request->input('new_user_username')) : null;
+
+            User::create([
+                'name' => $member->full_name,
+                'username' => $username,
+                'email' => $email,
+                'password' => Hash::make($password),
+                'role' => 'user',
+                'member_id' => $member->id,
+            ]);
+        } elseif (!empty($userId) && is_numeric($userId)) {
+            $chosenId = (int) $userId;
+            // Unlink any other user attached to this member
+            User::where('member_id', $member->id)->where('id', '!=', $chosenId)->update(['member_id' => null]);
+            // Attach chosen user
+            User::where('id', $chosenId)->update(['member_id' => $member->id]);
+        } elseif ($request->has('user_id') && empty($userId)) {
+            // Unlink account
+            User::where('member_id', $member->id)->update(['member_id' => null]);
+        }
     }
 
     /**
@@ -200,6 +276,9 @@ class MemberController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         $member = Member::findOrFail($id);
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $memberName = $member->full_name;
+        $memberId = $member->id;
 
         if ($member->photo_file_id) {
             $media = MediaFile::find($member->photo_file_id);
@@ -228,7 +307,9 @@ class MemberController extends Controller
 
         $member->delete();
 
-        $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/members'))
+        AuditLog::record($adminUser, 'deleted', 'member', $memberId, "Deleted member '{$memberName}'");
+
+        $target = ($request->is('admin/*') || ($request->header('referer') && str_contains($request->header('referer'), '/admin/members')))
             ? route('admin.members')
             : route('members');
 
@@ -248,6 +329,7 @@ class MemberController extends Controller
         $ids = $validated['ids'];
         $members = Member::whereIn('id', $ids)->get();
         $count = $members->count();
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
 
         foreach ($members as $member) {
             if ($member->photo_file_id) {
@@ -276,6 +358,8 @@ class MemberController extends Controller
         }
 
         Member::whereIn('id', $ids)->delete();
+
+        AuditLog::record($adminUser, 'batch_deleted', 'member', null, "Batch deleted {$count} members");
 
         return redirect()->route('admin.members')
             ->with('success', "Selected {$count} " . ($count === 1 ? 'member has' : 'members have') . ' been removed successfully.');

@@ -136,11 +136,6 @@ export function initAdminGames() {
     if (btnAddGuess) btnAddGuess.addEventListener('click', () => openGuessModal(false));
     if (btnCloseGuess) btnCloseGuess.addEventListener('click', closeGuessModal);
     if (btnCancelGuess) btnCancelGuess.addEventListener('click', closeGuessModal);
-    if (guessModal) {
-        guessModal.addEventListener('click', (e) => {
-            if (e.target === guessModal) closeGuessModal();
-        });
-    }
 
     document.querySelectorAll('.btn-edit-guess-round').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -553,11 +548,6 @@ export function initAdminGames() {
     if (btnAddGrowth) btnAddGrowth.addEventListener('click', () => openGrowthModal(false));
     if (btnCloseGrowth) btnCloseGrowth.addEventListener('click', closeGrowthModal);
     if (btnCancelGrowth) btnCancelGrowth.addEventListener('click', closeGrowthModal);
-    if (growthModal) {
-        growthModal.addEventListener('click', (e) => {
-            if (e.target === growthModal) closeGrowthModal();
-        });
-    }
 
     if (btnAddAnswerRow && growthAnswersList) {
         btnAddAnswerRow.addEventListener('click', () => {
@@ -730,11 +720,6 @@ export function initAdminGames() {
 
     if (btnCloseTeamConfig) btnCloseTeamConfig.addEventListener('click', closeTeamModal);
     if (btnCancelTeamConfig) btnCancelTeamConfig.addEventListener('click', closeTeamModal);
-    if (teamConfigModal) {
-        teamConfigModal.addEventListener('click', (e) => {
-            if (e.target === teamConfigModal) closeTeamModal();
-        });
-    }
 
     presetTeamBtns.forEach(btn => {
         btn.addEventListener('click', () => {

@@ -55,8 +55,8 @@ Route::prefix('game')->name('game.')->group(function () {
     Route::match(['get', 'post'], '/growth-100/reset-revealed', [GameController::class, 'resetGrowth100Revealed'])->name('growth-100.reset-revealed');
 });
 
-// Protected Game Management Endpoints (Requires Auth & Admin Role)
-Route::middleware(['auth', 'admin'])->prefix('game')->name('game.')->group(function () {
+// Protected Game Management Endpoints (Requires Auth, Admin Role & Games Permission)
+Route::middleware(['auth', 'admin', 'admin.permission:games'])->prefix('game')->name('game.')->group(function () {
     Route::post('/update-score', [GameController::class, 'updateScore'])->name('update-score');
     Route::post('/assign-round-points', [GameController::class, 'assignRoundPoints'])->name('assign-round-points');
     Route::post('/teams/configure', [GameController::class, 'configureTeams'])->name('teams.configure');
@@ -96,70 +96,84 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
         // Homepage Data & Slideshow Management
-        Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage');
-        Route::post('/homepage/slides/reorder', [HomepageController::class, 'reorderSlides'])->name('homepage.slides.reorder');
-        Route::post('/homepage/slides', [HomepageController::class, 'storeSlide'])->name('homepage.slides.store');
-        Route::match(['put', 'post'], '/homepage/slides/{id}', [HomepageController::class, 'updateSlide'])->whereNumber('id')->name('homepage.slides.update');
-        Route::delete('/homepage/slides/{id}', [HomepageController::class, 'destroySlide'])->whereNumber('id')->name('homepage.slides.destroy');
+        Route::middleware('admin.permission:homepage')->group(function () {
+            Route::get('/homepage', [HomepageController::class, 'index'])->name('homepage');
+            Route::post('/homepage/slides/reorder', [HomepageController::class, 'reorderSlides'])->name('homepage.slides.reorder');
+            Route::post('/homepage/slides', [HomepageController::class, 'storeSlide'])->name('homepage.slides.store');
+            Route::match(['put', 'post'], '/homepage/slides/{id}', [HomepageController::class, 'updateSlide'])->whereNumber('id')->name('homepage.slides.update');
+            Route::delete('/homepage/slides/{id}', [HomepageController::class, 'destroySlide'])->whereNumber('id')->name('homepage.slides.destroy');
+        });
 
         // Member Management CRUD
-        Route::get('/members', [MemberController::class, 'index'])->name('members');
-        Route::post('/members', [MemberController::class, 'store'])->name('members.store');
-        Route::post('/members/batch-delete', [MemberController::class, 'batchDestroy'])->name('members.batch-delete');
-        Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->name('members.update');
-        Route::delete('/members/{id}', [MemberController::class, 'destroy'])->name('members.destroy');
+        Route::middleware('admin.permission:members')->group(function () {
+            Route::get('/members', [MemberController::class, 'index'])->name('members');
+            Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+            Route::post('/members/batch-delete', [MemberController::class, 'batchDestroy'])->name('members.batch-delete');
+            Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->name('members.update');
+            Route::delete('/members/{id}', [MemberController::class, 'destroy'])->name('members.destroy');
+        });
 
         // Activity Management CRUD
-        Route::get('/activities', [AdminActivityController::class, 'index'])->name('activities');
-        Route::post('/activities', [AdminActivityController::class, 'store'])->name('activities.store');
-        Route::post('/activities/batch-delete', [AdminActivityController::class, 'batchDestroy'])->name('activities.batch-delete');
-        Route::match(['put', 'post'], '/activities/{id}', [AdminActivityController::class, 'update'])->name('activities.update');
-        Route::delete('/activities/{id}', [AdminActivityController::class, 'destroy'])->name('activities.destroy');
+        Route::middleware('admin.permission:activities')->group(function () {
+            Route::get('/activities', [AdminActivityController::class, 'index'])->name('activities');
+            Route::post('/activities', [AdminActivityController::class, 'store'])->name('activities.store');
+            Route::post('/activities/batch-delete', [AdminActivityController::class, 'batchDestroy'])->name('activities.batch-delete');
+            Route::match(['put', 'post'], '/activities/{id}', [AdminActivityController::class, 'update'])->name('activities.update');
+            Route::delete('/activities/{id}', [AdminActivityController::class, 'destroy'])->name('activities.destroy');
+        });
 
         // Games Management (Scope 4)
-        Route::get('/games', [AdminGameController::class, 'index'])->name('games');
-        Route::get('/games/guess-me', [AdminGameController::class, 'guessMeHost'])->name('games.guess-me.host');
-        Route::get('/games/growth-100', [AdminGameController::class, 'growth100Host'])->name('games.growth-100.host');
-        Route::post('/games/{id}/toggle-visibility', [AdminGameController::class, 'toggleGameVisibility'])->name('games.toggle-visibility');
-        Route::post('/games/rounds/{id}/toggle-visibility', [AdminGameController::class, 'toggleRoundVisibility'])->name('games.rounds.toggle-visibility');
+        Route::middleware('admin.permission:games')->group(function () {
+            Route::get('/games', [AdminGameController::class, 'index'])->name('games');
+            Route::get('/games/guess-me', [AdminGameController::class, 'guessMeHost'])->name('games.guess-me.host');
+            Route::get('/games/growth-100', [AdminGameController::class, 'growth100Host'])->name('games.growth-100.host');
+            Route::post('/games/{id}/toggle-visibility', [AdminGameController::class, 'toggleGameVisibility'])->name('games.toggle-visibility');
+            Route::post('/games/rounds/{id}/toggle-visibility', [AdminGameController::class, 'toggleRoundVisibility'])->name('games.rounds.toggle-visibility');
 
-        Route::post('/games/guess-me/round', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.save-round');
-        Route::match(['put', 'patch', 'post'], '/games/guess-me/round/{id}', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.update-round');
-        Route::delete('/games/guess-me/round/{id}', [AdminGameController::class, 'deleteGuessMeRound'])->name('games.guess-me.delete-round');
-        Route::post('/games/guess-me/reorder', [AdminGameController::class, 'reorderGuessMeRounds'])->name('games.guess-me.reorder');
+            Route::post('/games/guess-me/round', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.save-round');
+            Route::match(['put', 'patch', 'post'], '/games/guess-me/round/{id}', [AdminGameController::class, 'saveGuessMeRound'])->name('games.guess-me.update-round');
+            Route::delete('/games/guess-me/round/{id}', [AdminGameController::class, 'deleteGuessMeRound'])->name('games.guess-me.delete-round');
+            Route::post('/games/guess-me/reorder', [AdminGameController::class, 'reorderGuessMeRounds'])->name('games.guess-me.reorder');
 
-        Route::post('/games/growth-100/round', [AdminGameController::class, 'saveGrowth100Round'])->name('games.growth-100.save-round');
-        Route::match(['put', 'patch', 'post'], '/games/growth-100/round/{id}', [AdminGameController::class, 'saveGrowth100Round'])->name('games.growth-100.update-round');
-        Route::delete('/games/growth-100/round/{id}', [AdminGameController::class, 'deleteGrowth100Round'])->name('games.growth-100.delete-round');
-        Route::post('/games/growth-100/reorder', [AdminGameController::class, 'reorderGrowth100Rounds'])->name('games.growth-100.reorder');
+            Route::post('/games/growth-100/round', [AdminGameController::class, 'saveGrowth100Round'])->name('games.growth-100.save-round');
+            Route::match(['put', 'patch', 'post'], '/games/growth-100/round/{id}', [AdminGameController::class, 'saveGrowth100Round'])->name('games.growth-100.update-round');
+            Route::delete('/games/growth-100/round/{id}', [AdminGameController::class, 'deleteGrowth100Round'])->name('games.growth-100.delete-round');
+            Route::post('/games/growth-100/reorder', [AdminGameController::class, 'reorderGrowth100Rounds'])->name('games.growth-100.reorder');
 
-        Route::post('/games/growth-100/round/{roundId}/answers', [AdminGameController::class, 'addGrowth100Answer'])->name('games.growth-100.add-answer');
-        Route::match(['put', 'patch', 'post'], '/games/growth-100/answers/{id}', [AdminGameController::class, 'updateGrowth100Answer'])->name('games.growth-100.update-answer');
-        Route::delete('/games/growth-100/answers/{id}', [AdminGameController::class, 'deleteGrowth100Answer'])->name('games.growth-100.delete-answer');
+            Route::post('/games/growth-100/round/{roundId}/answers', [AdminGameController::class, 'addGrowth100Answer'])->name('games.growth-100.add-answer');
+            Route::match(['put', 'patch', 'post'], '/games/growth-100/answers/{id}', [AdminGameController::class, 'updateGrowth100Answer'])->name('games.growth-100.update-answer');
+            Route::delete('/games/growth-100/answers/{id}', [AdminGameController::class, 'deleteGrowth100Answer'])->name('games.growth-100.delete-answer');
+        });
 
         // Birthday Wishes Administration (Scope 5)
-        Route::get('/birthday-wishes', [BirthdayWishController::class, 'index'])->name('birthday-wishes');
-        Route::post('/birthday-wishes/batch-delete', [BirthdayWishController::class, 'batchDestroy'])->name('birthday-wishes.batch-delete');
-        Route::get('/birthday-wishes/{id}', [BirthdayWishController::class, 'show'])->name('birthday-wishes.show');
-        Route::match(['put', 'patch', 'post'], '/birthday-wishes/{id}', [BirthdayWishController::class, 'update'])->name('birthday-wishes.update');
-        Route::delete('/birthday-wishes/{id}', [BirthdayWishController::class, 'destroy'])->name('birthday-wishes.destroy');
+        Route::middleware('admin.permission:birthday_wishes')->group(function () {
+            Route::get('/birthday-wishes', [BirthdayWishController::class, 'index'])->name('birthday-wishes');
+            Route::post('/birthday-wishes/batch-delete', [BirthdayWishController::class, 'batchDestroy'])->name('birthday-wishes.batch-delete');
+            Route::get('/birthday-wishes/{id}', [BirthdayWishController::class, 'show'])->name('birthday-wishes.show');
+            Route::match(['put', 'patch', 'post'], '/birthday-wishes/{id}', [BirthdayWishController::class, 'update'])->name('birthday-wishes.update');
+            Route::delete('/birthday-wishes/{id}', [BirthdayWishController::class, 'destroy'])->name('birthday-wishes.destroy');
+        });
 
         // Cash Management Portal (Scope 5)
-        Route::get('/cash-management', [CashManagementController::class, 'index'])->name('cash-management');
-        Route::post('/cash-management', [CashManagementController::class, 'store'])->name('cash.store');
-        Route::post('/cash-management/batch-delete', [CashManagementController::class, 'batchDestroy'])->name('cash.batch-delete');
-        Route::get('/cash-management/transaction/{id}', [CashManagementController::class, 'show'])->name('cash.show');
-        Route::match(['put', 'patch', 'post'], '/cash-management/{id}', [CashManagementController::class, 'update'])->name('cash.update');
-        Route::delete('/cash-management/{id}', [CashManagementController::class, 'destroy'])->name('cash.destroy');
-        Route::get('/cash-management/shortcut/{memberId}', [CashManagementController::class, 'shortcut'])->name('cash.shortcut');
+        Route::middleware('admin.permission:cash_management')->group(function () {
+            Route::get('/cash-management', [CashManagementController::class, 'index'])->name('cash-management');
+            Route::post('/cash-management', [CashManagementController::class, 'store'])->name('cash.store');
+            Route::post('/cash-management/batch-delete', [CashManagementController::class, 'batchDestroy'])->name('cash.batch-delete');
+            Route::get('/cash-management/transaction/{id}', [CashManagementController::class, 'show'])->name('cash.show');
+            Route::match(['put', 'patch', 'post'], '/cash-management/{id}', [CashManagementController::class, 'update'])->name('cash.update');
+            Route::delete('/cash-management/{id}', [CashManagementController::class, 'destroy'])->name('cash.destroy');
+            Route::get('/cash-management/shortcut/{memberId}', [CashManagementController::class, 'shortcut'])->name('cash.shortcut');
+        });
 
         // Role & Account Management (Scope 6)
-        Route::get('/roles', [RoleController::class, 'index'])->name('roles');
-        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-        Route::post('/roles/batch-delete', [RoleController::class, 'batchDestroy'])->name('roles.batch-delete');
-        Route::get('/roles/{id}', [RoleController::class, 'show'])->name('roles.show');
-        Route::match(['put', 'patch', 'post'], '/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
-        Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
+        Route::middleware('admin.permission:roles')->group(function () {
+            Route::get('/roles', [RoleController::class, 'index'])->name('roles');
+            Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+            Route::post('/roles/batch-delete', [RoleController::class, 'batchDestroy'])->name('roles.batch-delete');
+            Route::get('/roles/{id}', [RoleController::class, 'show'])->name('roles.show');
+            Route::match(['put', 'patch', 'post'], '/roles/{id}', [RoleController::class, 'update'])->name('roles.update');
+            Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
+        });
     });
 
     // Cash Management Portal Redirect (Direct root URL redirects safely to admin portal)

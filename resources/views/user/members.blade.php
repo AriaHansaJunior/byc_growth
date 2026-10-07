@@ -4,27 +4,27 @@
 
 @section('content')
 <div class="page-shell">
-    @if(auth()->check() && (auth()->user()->isAdmin() || (auth()->user()->member && auth()->user()->member->isBirthdayToday())))
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
-            @if(auth()->user()->isAdmin())
+    {{-- Page Header --}}
+    <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 28px;">
+        <div>
+            <span class="eyebrow">Community & Fellowship</span>
+            <h1 style="margin: 0;">Members Directory</h1>
+            <p style="margin-top: 8px; margin-bottom: 0;">
+                Connected in fellowship, growing together in faith, love, and unity across BYC Growth.
+            </p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            @if(auth()->check() && auth()->user()->isAdmin())
                 <button type="button" class="button button-primary button-sm" id="btn-open-add-member">
-                    <x-icon name="users" /> Add New Member
+                    Add New Member
                 </button>
-            @elseif(auth()->user()->member && auth()->user()->member->isBirthdayToday())
-                <a href="{{ route('birthday.wishes') }}" class="button button-primary button-sm">
-                    🎁 View My Birthday Wishes
+            @endif
+            @if(auth()->check() && auth()->user()->member)
+                <a href="{{ route('birthday.wishes') }}" class="button button-secondary button-sm" style="font-weight: 700; white-space: nowrap; text-decoration: none;">
+                    My Birthday Wishes
                 </a>
             @endif
         </div>
-    @endif
-
-    {{-- Page Header --}}
-    <header class="page-header">
-        <span class="eyebrow">Community & Fellowship</span>
-        <h1>Members Directory</h1>
-        <p>
-            Connected in fellowship, growing together in faith, love, and unity across BYC Growth.
-        </p>
     </header>
 
     @if(session('success'))
@@ -94,14 +94,22 @@
 
                     {{-- Birthday Interaction Action (Available on birthday date, even after popup is closed) --}}
                     @if($isBirthday)
+                        @php
+                            $existingLetter = isset($userLetters) ? $userLetters->get($member->id) : (isset($userBirthdayLetters) ? $userBirthdayLetters->get($member->id) : null);
+                            $hasLetter = (bool) $existingLetter;
+                        @endphp
                         <button
                             type="button"
                             class="button button-sm btn-member-send-wishes"
                             data-id="{{ $member->id }}"
                             data-name="{{ $member->full_name }}"
+                            data-has-letter="{{ $hasLetter ? '1' : '0' }}"
+                            data-letter-id="{{ $hasLetter ? $existingLetter->id : '' }}"
+                            data-letter-message="{{ $hasLetter ? e($existingLetter->message) : '' }}"
+                            data-letter-anonymous="{{ $hasLetter && $existingLetter->is_anonymous ? '1' : '0' }}"
                             style="margin-top: 10px; background: #fdf5d7; border: 1px solid var(--gold); color: #8e680a; font-weight: 700; font-size: 12px; border-radius: 20px; padding: 4px 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(231, 189, 82, 0.2);"
                         >
-                            🎂 Send Wishes
+                            {{ $hasLetter ? 'Edit Wish' : 'Send Wishes' }}
                         </button>
                     @endif
 
@@ -115,6 +123,7 @@
                                 data-name="{{ $member->full_name }}"
                                 data-dob="{{ $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '' }}"
                                 data-photo="{{ $member->photo_url }}"
+                                data-user-id="{{ $member->user ? $member->user->id : '' }}"
                                 style="font-size: 12px; padding: 4px 10px; height: 32px;"
                             >
                                 Edit
@@ -165,6 +174,37 @@
                     <small style="color: var(--muted); font-size: 12px;">Only images (JPG, PNG, WEBP) accepted. Max 5MB.</small>
                 </div>
 
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">User Account</label>
+                    <select name="user_id" id="user-add-user-id" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                        <option value="">None (Unlinked)</option>
+                        <option value="__new__">+ Create New User Account</option>
+                        @if(isset($users) && $users->isNotEmpty())
+                            <optgroup label="Existing Accounts">
+                                @foreach($users as $u)
+                                    <option value="{{ $u->id }}">{{ $u->email }} ({{ $u->username }}){{ $u->member_id ? ' [Linked]' : '' }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                </div>
+
+                <div id="user-add-new-account-fields" style="display: none; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 12px;">
+                    <div style="font-weight: 700; font-size: 12px; color: var(--forest); margin-bottom: 8px;">New User Account</div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Email *</label>
+                        <input type="email" name="new_user_email" class="input-field" placeholder="member@example.com" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Username (Optional)</label>
+                        <input type="text" name="new_user_username" class="input-field" placeholder="Auto-generated if blank" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Password (Optional)</label>
+                        <input type="password" name="new_user_password" class="input-field" placeholder="Default: password123" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                    </div>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
                     <button type="submit" class="button button-primary">Save Member</button>
                 </div>
@@ -208,6 +248,37 @@
                         <input type="checkbox" name="remove_photo" value="1">
                         Remove current photo
                     </label>
+                </div>
+
+                <div>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">User Account</label>
+                    <select name="user_id" id="user-edit-user-id" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                        <option value="">None (Unlinked)</option>
+                        <option value="__new__">+ Create New User Account</option>
+                        @if(isset($users) && $users->isNotEmpty())
+                            <optgroup label="Existing Accounts">
+                                @foreach($users as $u)
+                                    <option value="{{ $u->id }}">{{ $u->email }} ({{ $u->username }}){{ $u->member_id ? ' [Linked]' : '' }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                </div>
+
+                <div id="user-edit-new-account-fields" style="display: none; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 12px;">
+                    <div style="font-weight: 700; font-size: 12px; color: var(--forest); margin-bottom: 8px;">New User Account</div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Email *</label>
+                        <input type="email" name="new_user_email" class="input-field" placeholder="member@example.com" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Username (Optional)</label>
+                        <input type="text" name="new_user_username" class="input-field" placeholder="Auto-generated if blank" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Password (Optional)</label>
+                        <input type="password" name="new_user_password" class="input-field" placeholder="Default: password123" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                    </div>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
@@ -339,6 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openAddBtn && addModal) {
         openAddBtn.addEventListener('click', () => {
             clearAllErrors(formAdd);
+            const addAcc = document.getElementById('user-add-user-id');
+            const addAccFields = document.getElementById('user-add-new-account-fields');
+            if (addAcc) addAcc.value = '';
+            if (addAccFields) addAccFields.style.display = 'none';
             addModal.style.display = 'flex';
         });
     }
@@ -366,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = btn.dataset.name;
             const dob = btn.dataset.dob;
             const photo = btn.dataset.photo;
+            const userId = btn.dataset.userId || '';
 
             formEdit.action = `/admin/members/${id}`;
             document.getElementById('edit-member-name').value = name;
@@ -374,6 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 document.getElementById('edit-member-dob').value = dob;
             }
+
+            const editAcc = document.getElementById('user-edit-user-id');
+            const editAccFields = document.getElementById('user-edit-new-account-fields');
+            if (editAcc) editAcc.value = userId;
+            if (editAccFields) editAccFields.style.display = 'none';
 
             const removeWrap = document.getElementById('edit-member-remove-photo-wrap');
             if (photo) {
@@ -385,6 +466,22 @@ document.addEventListener('DOMContentLoaded', () => {
             editModal.style.display = 'flex';
         });
     });
+
+    const addAcc = document.getElementById('user-add-user-id');
+    const addAccFields = document.getElementById('user-add-new-account-fields');
+    if (addAcc && addAccFields) {
+        addAcc.addEventListener('change', function () {
+            addAccFields.style.display = this.value === '__new__' ? 'block' : 'none';
+        });
+    }
+
+    const editAcc = document.getElementById('user-edit-user-id');
+    const editAccFields = document.getElementById('user-edit-new-account-fields');
+    if (editAcc && editAccFields) {
+        editAcc.addEventListener('change', function () {
+            editAccFields.style.display = this.value === '__new__' ? 'block' : 'none';
+        });
+    }
 });
 </script>
 @endif
@@ -393,19 +490,27 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-member-send-wishes').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
             const memberId = btn.dataset.id;
             const memberName = btn.dataset.name;
+            const hasLetter = btn.dataset.hasLetter === '1';
+            const letterData = hasLetter ? {
+                id: btn.dataset.letterId,
+                message: btn.dataset.letterMessage,
+                is_anonymous: btn.dataset.letterAnonymous === '1'
+            } : null;
 
-            if (typeof window.openBirthdayLetter === 'function') {
-                window.openBirthdayLetter(memberId, memberName);
-            } else {
-                @auth
-                    window.location.href = '/members?birthday_letter=1&member_id=' + memberId;
-                @else
-                    window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent('/members?birthday_letter=1&member_id=' + memberId);
-                @endauth
-            }
+            @auth
+                if (typeof window.openBirthdayLetter === 'function') {
+                    window.openBirthdayLetter(memberId, memberName, letterData);
+                } else {
+                    const modal = document.getElementById('modal-birthday-popup');
+                    if (modal) modal.style.display = 'flex';
+                }
+            @else
+                window.location.href = "{{ route('login') }}?redirect=" + encodeURIComponent('/members?birthday_letter=1&member_id=' + memberId);
+            @endauth
         });
     });
 });

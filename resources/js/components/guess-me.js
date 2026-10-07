@@ -244,14 +244,6 @@ export function initGuessMe() {
         btnCloseScoreboard.addEventListener('click', closeScoreboard);
     }
 
-    if (modalScoreboard) {
-        modalScoreboard.addEventListener('click', (e) => {
-            if (e.target === modalScoreboard) {
-                closeScoreboard();
-            }
-        });
-    }
-
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             if (modalScoreboard && modalScoreboard.style.display === 'flex') {
@@ -484,11 +476,8 @@ export function initGuessMe() {
     if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeModal);
     if (btnAddRound) btnAddRound.addEventListener('click', newEditorRound);
 
-    // Close on backdrop click or ESC key
+    // Close on ESC key
     if (modalEditor) {
-        modalEditor.addEventListener('click', (e) => {
-            if (e.target === modalEditor) closeModal();
-        });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modalEditor.style.display !== 'none') {
                 closeModal();

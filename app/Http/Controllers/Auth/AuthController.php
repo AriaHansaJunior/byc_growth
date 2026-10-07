@@ -17,7 +17,7 @@ class AuthController extends Controller
      */
     public function showLoginForm(Request $request): View|RedirectResponse
     {
-        if (Auth::check()) {
+        if (Auth::guard('web')->check()) {
             if ($request->filled('redirect')) {
                 return redirect($request->input('redirect'));
             }
@@ -34,7 +34,7 @@ class AuthController extends Controller
 
     /**
      * Handle incoming normal user authentication.
-     * Supports both email and username.
+     * Supports both email and username. Strictly restricted to non-admin accounts.
      */
     public function login(Request $request): RedirectResponse
     {
@@ -46,7 +46,6 @@ class AuthController extends Controller
                 ->withInput($request->only('login', 'email'))
                 ->withErrors([
                     'login' => 'Email or username and password are required.',
-                    'email' => 'Email or username and password are required.',
                 ]);
         }
 
@@ -60,11 +59,19 @@ class AuthController extends Controller
                 ->withInput($request->only('login', 'email'))
                 ->withErrors([
                     'login' => 'These credentials do not match our records.',
-                    'email' => 'These credentials do not match our records.',
                 ]);
         }
 
-        Auth::login($user, true);
+        // Strictly reject Administrator accounts from logging in to User website
+        if ($user->isAdmin()) {
+            return back()
+                ->withInput($request->only('login', 'email'))
+                ->withErrors([
+                    'login' => 'Administrator accounts cannot log in to the User portal.',
+                ]);
+        }
+
+        Auth::guard('web')->login($user, true);
         $request->session()->regenerate();
         session()->flash('welcome_user', $user->username);
 
@@ -80,7 +87,7 @@ class AuthController extends Controller
      */
     public function logout(Request $request): RedirectResponse
     {
-        Auth::logout();
+        Auth::guard('web')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -263,7 +263,7 @@ class BirthdayController extends Controller
         }
 
         $isAdmin = $user->isAdmin();
-        $isRecipientCelebrating = $user->member && $user->member->isBirthdayToday($today);
+        $isRecipientMember = (bool) $user->member;
 
         // Find active celebrants today
         $todayCelebrants = Member::where('is_active', true)->birthdayToday($today)->get();
@@ -277,8 +277,8 @@ class BirthdayController extends Controller
             ->get();
         $isSenderToday = $senderLettersToday->isNotEmpty();
 
-        // Access Rule: Non-admin, non-celebrant, and non-sender today cannot access
-        if (!$isAdmin && !$isRecipientCelebrating && !$isSenderToday) {
+        // Access Rule: Non-admin, non-member recipient, and non-sender today cannot access
+        if (!$isAdmin && !$isRecipientMember && !$isSenderToday) {
             abort(403, 'Access denied. You do not have permission to view birthday wishes at this time.');
         }
 
@@ -326,8 +326,8 @@ class BirthdayController extends Controller
             ]);
         }
 
-        // ARCHETYPE 2: BIRTHDAY RECIPIENT CELEBRATING TODAY
-        if ($isRecipientCelebrating) {
+        // ARCHETYPE 2: BIRTHDAY RECIPIENT (MEMBER ACCOUNT)
+        if ($isRecipientMember) {
             $recipientMember = $user->member;
 
             // Strict security: ignore/override any member_id query to prevent viewing others' archive

@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class SystemVerificationTest extends TestCase
 {
-    protected function createAdminUser(): User
+    protected function createAdminUser(array $permissions = null): User
     {
         return User::create([
             'name' => 'System Auditor Admin',
@@ -17,6 +17,7 @@ class SystemVerificationTest extends TestCase
             'email' => 'admin_' . uniqid() . '@bycgrowth.test',
             'password' => Hash::make('Secret123!'),
             'role' => 'admin',
+            'permissions' => $permissions ?? array_keys(User::AVAILABLE_PERMISSIONS),
         ]);
     }
 
@@ -257,7 +258,59 @@ class SystemVerificationTest extends TestCase
             'password' => $password,
         ]);
         $response->assertRedirect('/admin/dashboard');
-        $this->assertAuthenticatedAs($admin);
+        $this->assertAuthenticatedAs($admin, 'admin');
+    }
+
+    /**
+     * Test admin cannot login via normal user portal.
+     */
+    public function test_admin_cannot_login_at_user_portal(): void
+    {
+        $password = 'AdminPass123!';
+        $admin = User::create([
+            'name' => 'Admin Separation Test',
+            'username' => 'admin_sep_' . uniqid(),
+            'email' => 'admin_sep_' . uniqid() . '@bycgrowth.test',
+            'password' => Hash::make($password),
+            'role' => 'admin',
+        ]);
+
+        $response = $this->post('/login', [
+            'login' => $admin->username,
+            'password' => $password,
+        ]);
+        $response->assertSessionHasErrors([
+            'login' => 'Administrator accounts cannot log in to the User portal.',
+        ]);
+        $errors = session('errors')->get('login');
+        $this->assertCount(1, $errors);
+        $this->assertGuest('web');
+    }
+
+    /**
+     * Test standard user cannot login via admin entrance.
+     */
+    public function test_user_cannot_login_at_admin_ganteng(): void
+    {
+        $password = 'UserPass123!';
+        $user = User::create([
+            'name' => 'User Gate Test',
+            'username' => 'user_sep_' . uniqid(),
+            'email' => 'user_sep_' . uniqid() . '@bycgrowth.test',
+            'password' => Hash::make($password),
+            'role' => 'user',
+        ]);
+
+        $response = $this->post('/admin-ganteng', [
+            'login' => $user->username,
+            'password' => $password,
+        ]);
+        $response->assertSessionHasErrors([
+            'login' => 'Standard user accounts do not have administrator access.',
+        ]);
+        $errors = session('errors')->get('login');
+        $this->assertCount(1, $errors);
+        $this->assertGuest('admin');
     }
 
     /**
@@ -280,5 +333,151 @@ class SystemVerificationTest extends TestCase
         $response = $this->getJson('/birthday/today');
         $response->assertStatus(200);
         $response->assertJsonStructure(['date', 'count', 'members']);
+    }
+
+    /**
+     * Test creating a member with a newly created user account.
+     */
+    public function test_member_creation_with_new_user_account(): void
+    {
+        $admin = $this->createAdminUser();
+        $name = 'Member Account Test ' . uniqid();
+        $email = 'newmember_' . uniqid() . '@bycgrowth.test';
+
+        $response = $this->actingAs($admin, 'admin')->post('/admin/members', [
+            'full_name' => $name,
+            'date_of_birth' => '2001-08-20',
+            'user_id' => '__new__',
+            'new_user_email' => $email,
+            'new_user_password' => 'password123',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $member = Member::where('full_name', $name)->first();
+        $this->assertNotNull($member);
+
+        $user = User::where('email', $email)->first();
+        $this->assertNotNull($user);
+        $this->assertEquals($member->id, $user->member_id);
+        $this->assertEquals('user', $user->role);
+    }
+
+    /**
+     * Test updating a member to link an existing user account.
+     */
+    public function test_member_update_linking_existing_user_account(): void
+    {
+        $admin = $this->createAdminUser();
+        $user = User::create([
+            'name' => 'Standalone User',
+            'username' => 'stand_user_' . uniqid(),
+            'email' => 'stand_' . uniqid() . '@bycgrowth.test',
+            'password' => Hash::make('password123'),
+            'role' => 'user',
+        ]);
+
+        $member = Member::create([
+            'full_name' => 'Member To Link ' . uniqid(),
+            'date_of_birth' => '1999-11-12',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin, 'admin')->put("/admin/members/{$member->id}", [
+            'full_name' => $member->full_name,
+            'user_id' => $user->id,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $user->refresh();
+        $this->assertEquals($member->id, $user->member_id);
+    }
+
+    /**
+     * Test birthday recipient with linked user account can access wishes.
+     */
+    public function test_birthday_recipient_can_access_wishes(): void
+    {
+        $member = Member::create([
+            'full_name' => 'Aria Celebrant ' . uniqid(),
+            'date_of_birth' => '1995-10-07',
+            'is_active' => true,
+        ]);
+
+        $user = User::create([
+            'name' => $member->full_name,
+            'username' => 'aria_' . uniqid(),
+            'email' => 'aria_' . uniqid() . '@bycgrowth.test',
+            'password' => Hash::make('password123'),
+            'role' => 'user',
+            'member_id' => $member->id,
+        ]);
+
+        $response = $this->actingAs($user, 'web')->get('/birthday-wishes');
+        $response->assertStatus(200);
+        $response->assertSee('Birthday Wishes for ' . $member->full_name);
+    }
+
+    /**
+     * Test one-letter limit per recipient per year, multi-recipient capability, and letter update.
+     */
+    public function test_letter_limits_and_update_flow(): void
+    {
+        $sender = User::create([
+            'name' => 'Sender User',
+            'username' => 'sender_' . uniqid(),
+            'email' => 'sender_' . uniqid() . '@bycgrowth.test',
+            'password' => Hash::make('password123'),
+            'role' => 'user',
+        ]);
+
+        $today = \Carbon\Carbon::now('Asia/Jakarta');
+        $memberA = Member::create([
+            'full_name' => 'Celebrant A ' . uniqid(),
+            'date_of_birth' => $today->copy()->subYears(20)->format('Y-m-d'),
+            'is_active' => true,
+        ]);
+        $memberB = Member::create([
+            'full_name' => 'Celebrant B ' . uniqid(),
+            'date_of_birth' => $today->copy()->subYears(22)->format('Y-m-d'),
+            'is_active' => true,
+        ]);
+
+        // 1. Send to Member A -> Success
+        $resA = $this->actingAs($sender, 'web')->postJson('/birthday/letter', [
+            'member_id' => $memberA->id,
+            'message' => 'Happy birthday Celebrant A!',
+        ]);
+        $resA->assertStatus(200);
+        $resA->assertJson(['success' => true]);
+        $letterIdA = $resA->json('letter_id');
+
+        // 2. Send again to Member A in same year -> Fails (422)
+        $resA2 = $this->actingAs($sender, 'web')->postJson('/birthday/letter', [
+            'member_id' => $memberA->id,
+            'message' => 'Another wish for A',
+        ]);
+        $resA2->assertStatus(422);
+        $resA2->assertJson(['success' => false]);
+
+        // 3. Send to Member B -> Success (different person celebrating)
+        $resB = $this->actingAs($sender, 'web')->postJson('/birthday/letter', [
+            'member_id' => $memberB->id,
+            'message' => 'Happy birthday Celebrant B!',
+        ]);
+        $resB->assertStatus(200);
+        $resB->assertJson(['success' => true]);
+
+        // 4. Update wish for Member A on birthday -> Success
+        $resUpdate = $this->actingAs($sender, 'web')->postJson("/birthday/letter/{$letterIdA}", [
+            'message' => 'Updated heartfelt blessing for A!',
+            'is_anonymous' => 1,
+        ]);
+        $resUpdate->assertStatus(200);
+        $resUpdate->assertJson(['success' => true]);
+        $this->assertDatabaseHas('birthday_letters', [
+            'id' => $letterIdA,
+            'message' => 'Updated heartfelt blessing for A!',
+            'is_anonymous' => 1,
+        ]);
     }
 }

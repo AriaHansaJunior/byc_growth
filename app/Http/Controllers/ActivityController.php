@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\AuditLog;
 use App\Models\MediaFile;
 use App\Services\MediaUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class ActivityController extends Controller
@@ -54,13 +56,21 @@ class ActivityController extends Controller
             $endDate = $startDate;
         }
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+
         $activity = Activity::create([
             'name' => $validated['name'],
             'start_date' => $startDate,
             'end_date' => $endDate,
             'event_date' => $startDate,
             'description' => $validated['description'],
+            'last_action_by' => $adminEmail,
+            'last_action_type' => 'created',
+            'last_action_at' => now(),
         ]);
+
+        AuditLog::record($adminUser, 'created', 'activity', $activity->id, "Created activity '{$activity->name}'");
 
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $photoFile) {
@@ -108,13 +118,21 @@ class ActivityController extends Controller
             $endDate = $startDate;
         }
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+
         $activity->update([
             'name' => $validated['name'],
             'start_date' => $startDate,
             'end_date' => $endDate,
             'event_date' => $startDate,
             'description' => $validated['description'],
+            'last_action_by' => $adminEmail,
+            'last_action_type' => 'edited',
+            'last_action_at' => now(),
         ]);
+
+        AuditLog::record($adminUser, 'edited', 'activity', $activity->id, "Updated activity '{$activity->name}'");
 
         // Delete requested photos
         if (!empty($validated['remove_photo_ids'])) {
@@ -155,6 +173,9 @@ class ActivityController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         $activity = Activity::findOrFail($id);
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $activityName = $activity->name;
+        $activityId = $activity->id;
 
         // Delete associated photos
         foreach ($activity->photos as $photo) {
@@ -170,6 +191,8 @@ class ActivityController extends Controller
         }
 
         $activity->delete();
+
+        AuditLog::record($adminUser, 'deleted', 'activity', $activityId, "Deleted activity '{$activityName}'");
 
         $target = ($request->header('referer') && str_contains($request->header('referer'), '/admin/activities'))
             ? route('admin.activities')

@@ -193,6 +193,31 @@
   animation: dropIn 0.18s ease-out;
 }
 
+.nav-user-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+
+.nav-user-dropdown-item:hover {
+  background: var(--cream);
+  color: var(--forest);
+}
+
 .nav-user-logout-item {
   width: 100%;
   display: flex;

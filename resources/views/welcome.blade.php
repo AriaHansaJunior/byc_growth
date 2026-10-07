@@ -89,7 +89,7 @@
             </p>
         </div>
 
-        <div class="destinations-grid {{ auth()->check() && auth()->user()->isAdmin() ? 'has-admin' : '' }}">
+        <div class="destinations-grid">
             {{-- 1. Activity --}}
             <a href="{{ route('activity') }}" class="destination-card dest-activity">
                 <div class="destination-card-top">
@@ -158,36 +158,6 @@
                     </span>
                 </div>
             </a>
-
-            {{-- 4. Cash Management (Visible Only to Admin Role) --}}
-            @if(auth()->check() && auth()->user()->isAdmin())
-                <a href="{{ route('admin.cash-management') }}" class="destination-card dest-cash">
-                    <div class="destination-card-top">
-                        <div class="destination-icon-box">
-                            <x-icon name="cash" />
-                        </div>
-                        <span class="dest-number">04</span>
-                    </div>
-                    <div class="destination-card-body">
-                        <span class="destination-badge">Treasury Portal</span>
-                        <h3>Cash Management</h3>
-                        <p>
-                            View transparent community financial accounts, transaction ledgers, and stewardship overviews for the fellowship.
-                        </p>
-                    </div>
-                    <div class="destination-card-footer">
-                        <span class="dest-action-label">Open Treasury</span>
-                        <span class="dest-arrow-btn">
-                            <x-icon name="arrow" />
-                        </span>
-                    </div>
-                </a>
-            @else
-                <div class="destination-card-disabled" aria-disabled="true" style="display: none;" aria-hidden="true">
-                    Cash Management
-                    Contact the admin to view your cash contribution.
-                </div>
-            @endif
         </div>
     </section>
 </main>

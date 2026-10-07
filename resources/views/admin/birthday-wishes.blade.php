@@ -519,14 +519,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             return;
         }
-
-        // Close on Backdrop click
-        if (e.target.classList.contains('admin-modal-backdrop')) {
-            e.target.style.display = 'none';
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            return;
-        }
     });
 
     // Close Modals on Escape

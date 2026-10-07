@@ -26,12 +26,6 @@ export function initModal(openBtnId, modalId, closeBtnId) {
         closeBtn.addEventListener('click', close);
     }
 
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            close();
-        }
-    });
-
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && modal.style.display !== 'none') {
             close();

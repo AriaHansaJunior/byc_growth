@@ -168,11 +168,6 @@
                                     <div style="display: inline-flex; align-items: center; gap: 6px; background: #eee8d3; color: var(--ink); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">
                                         <span>🕶️</span> Anonymous
                                     </div>
-                                    @if(auth()->check() && auth()->user()->isAdmin())
-                                        <div style="font-size: 11px; color: var(--forest); margin-top: 4px; font-weight: 600;">
-                                            (Audit: {{ $wish->user ? ($wish->user->member ? $wish->user->member->full_name : $wish->user->name) : 'User #' . $wish->user_id }})
-                                        </div>
-                                    @endif
                                 @else
                                     <div style="font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink);">
                                         {{ $wish->display_name }}
@@ -255,7 +250,7 @@
                     Send Anonymously
                 </label>
                 <small style="color: var(--muted); font-size: 11px; display: block; margin-top: 4px;">
-                    Recipient sees "Anonymous", while administrator preserves audit trail.
+                    Your identity will be displayed as "Anonymous" to the recipient.
                 </small>
             </div>
 
@@ -304,12 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeBtn) closeBtn.addEventListener('click', hideEditModal);
     if (cancelBtn) cancelBtn.addEventListener('click', hideEditModal);
-
-    if (editModal) {
-        editModal.addEventListener('click', (e) => {
-            if (e.target === editModal) hideEditModal();
-        });
-    }
 
     document.querySelectorAll('.btn-open-edit-wish').forEach(btn => {
         btn.addEventListener('click', () => {

@@ -2,13 +2,159 @@
 
 @section('title', 'Role & Account Management — BYC GROWTH')
 
+@push('styles')
+<style>
+/* Discord-Style Permissions Toggle Card */
+.discord-perm-box {
+    background: #f7f9fa;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+}
+.discord-perm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+}
+.discord-perm-header-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+}
+.discord-perm-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.discord-perm-action-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--forest);
+    cursor: pointer;
+    text-decoration: underline;
+    transition: opacity 0.15s ease;
+}
+.discord-perm-action-link:hover {
+    opacity: 0.8;
+}
+.discord-perm-action-link.btn-clear {
+    color: #da373c;
+}
+.discord-perm-action-link.btn-clear:hover {
+    color: #a1282c;
+}
+.discord-perm-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.discord-perm-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.discord-perm-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.discord-perm-info {
+    flex: 1;
+    min-width: 0;
+}
+.discord-perm-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0 0 2px 0;
+    display: block;
+    cursor: pointer;
+}
+.discord-perm-desc {
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.35;
+    margin: 0;
+}
+/* Discord Switch */
+.discord-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 28px;
+    flex-shrink: 0;
+    cursor: pointer;
+    margin-top: 2px;
+}
+.discord-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.discord-switch-track {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #80848e;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 28px;
+}
+.discord-switch-track::before {
+    position: absolute;
+    content: "✕";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1;
+    color: #80848e;
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #ffffff;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+.discord-switch input:checked + .discord-switch-track {
+    background-color: #23a55a;
+}
+.discord-switch input:checked + .discord-switch-track::before {
+    content: "✓";
+    transform: translateX(20px);
+    color: #23a55a;
+    font-size: 12px;
+}
+.discord-switch input:focus-visible + .discord-switch-track {
+    outline: 2px solid var(--forest);
+    outline-offset: 2px;
+}
+</style>
+@endpush
+
 @section('page-header')
 <div class="admin-page-header">
     <div class="admin-header-title">
         <span class="eyebrow">Security & Access Governance</span>
         <h1>Role & Account Management</h1>
         <p>
-            Manage application credentials, allocate administrator privileges, link accounts to fellowship member profiles, and secure access permissions.
+            Manage application credentials, allocate administrator privileges, and secure access permissions.
         </p>
     </div>
     <div class="admin-header-actions">
@@ -132,7 +278,6 @@
                             <th>Username & Name</th>
                             <th>Email Address</th>
                             <th>Access Role</th>
-                            <th>Linked Member</th>
                             <th>Created At</th>
                             <th style="text-align: right;">Actions</th>
                         </tr>
@@ -171,23 +316,27 @@
                             </td>
                             <td>
                                 @if($user->role === 'admin')
-                                    <span class="role-badge" style="background: #eaf3dc; color: var(--forest); font-weight: 700;">
-                                        Admin
-                                    </span>
+                                    <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                        <span class="role-badge" style="background: #eaf3dc; color: var(--forest); font-weight: 700;">
+                                            Admin
+                                        </span>
+                                        @php
+                                            $userPerms = is_array($user->permissions) ? $user->permissions : [];
+                                            $permCount = count($userPerms);
+                                        @endphp
+                                        <small style="color: var(--muted); font-size: 11px; line-height: 1.2;">
+                                            @if($permCount === 7)
+                                                Full Access (7/7)
+                                            @elseif($permCount > 0)
+                                                {{ $permCount }} module{{ $permCount === 1 ? '' : 's' }}
+                                            @else
+                                                <span style="color: var(--danger); font-weight: 600;">No active modules</span>
+                                            @endif
+                                        </small>
+                                    </div>
                                 @else
                                     <span class="role-badge" style="background: #dfe9f2; color: #315e89; font-weight: 700;">
                                         User
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($user->member)
-                                    <span style="font-size: 13px; color: var(--forest); font-weight: 600;">
-                                        👤 {{ $user->member->full_name }}
-                                    </span>
-                                @else
-                                    <span style="font-size: 12.5px; color: var(--muted); font-style: italic;">
-                                        Unlinked
                                     </span>
                                 @endif
                             </td>
@@ -206,7 +355,7 @@
                                         data-name="{{ $user->name }}"
                                         data-email="{{ $user->email }}"
                                         data-role="{{ $user->role }}"
-                                        data-member-id="{{ $user->member_id ?? '' }}"
+                                        data-permissions='@json($user->permissions ?? [])'
                                         style="font-size: 12px; padding: 4px 10px; height: 32px;"
                                         title="Edit User"
                                     >
@@ -337,17 +486,6 @@
                             <div class="form-field-error" data-for="add-user-role" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
                         @enderror
                     </div>
-
-                    <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="add-user-member-id" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Linked Fellowship Member</label>
-                        <select name="member_id" id="add-user-member-id" class="form-input" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
-                            <option value="">-- No Linked Member Profile --</option>
-                            @foreach($members as $m)
-                                <option value="{{ $m->id }}" {{ old('member_id') == $m->id ? 'selected' : '' }}>{{ $m->full_name }}</option>
-                            @endforeach
-                        </select>
-                        <small style="color: var(--muted); font-size: 10px; line-height: 1.25; display: block; margin-top: 1px;">Links credential to fellowship directory.</small>
-                    </div>
                 </div>
 
                 <div style="padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0;">
@@ -364,7 +502,7 @@
 
     {{-- Modal: Edit Account --}}
     <div class="admin-modal-backdrop modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px; overscroll-behavior: contain;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 16px; max-width: 450px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 16px; max-width: 580px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
             <div style="padding: 12px 18px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="font-size: 18px;">✏️</span>
@@ -436,14 +574,42 @@
                         </select>
                     </div>
 
-                    <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="edit-user-member-id" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Linked Fellowship Member</label>
-                        <select name="member_id" id="edit-user-member-id" class="form-input" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
-                            <option value="">-- No Linked Member Profile --</option>
-                            @foreach($members as $m)
-                                <option value="{{ $m->id }}">{{ $m->full_name }}</option>
+                    {{-- Administrator Module Permissions (Discord-style Switches) --}}
+                    <div id="edit-permissions-section" class="discord-perm-box" style="display: none;">
+                        <div class="discord-perm-header">
+                            <div>
+                                <span class="discord-perm-header-title">Module Access Control</span>
+                                <small style="display: block; font-size: 11px; color: var(--muted); margin-top: 2px;">
+                                    Configure which management panels this administrator can view and access.
+                                </small>
+                            </div>
+                            <div class="discord-perm-header-actions">
+                                <button type="button" class="discord-perm-action-link" id="btn-perm-select-all">Select all</button>
+                                <span style="color: var(--line);">&bull;</span>
+                                <button type="button" class="discord-perm-action-link btn-clear" id="btn-perm-clear-all">Clear permissions</button>
+                            </div>
+                        </div>
+
+                        <div class="discord-perm-list">
+                            @foreach($availablePermissions as $permKey => $permData)
+                                <div class="discord-perm-item">
+                                    <div class="discord-perm-info">
+                                        <label class="discord-perm-label" for="perm-switch-{{ $permKey }}">{{ $permData['name'] }}</label>
+                                        <p class="discord-perm-desc">{{ $permData['description'] }}</p>
+                                    </div>
+                                    <label class="discord-switch" for="perm-switch-{{ $permKey }}" title="Toggle {{ $permData['name'] }}">
+                                        <input
+                                            type="checkbox"
+                                            id="perm-switch-{{ $permKey }}"
+                                            name="permissions[]"
+                                            value="{{ $permKey }}"
+                                            class="discord-switch-input"
+                                        >
+                                        <span class="discord-switch-track"></span>
+                                    </label>
+                                </div>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
                 </div>
 
@@ -585,6 +751,43 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const editModal = document.getElementById('modal-edit-user');
     const formEdit = document.getElementById('form-edit-user');
+    const editPermSection = document.getElementById('edit-permissions-section');
+    const permInputs = document.querySelectorAll('.discord-switch-input');
+    const btnPermSelectAll = document.getElementById('btn-perm-select-all');
+    const btnPermClearAll = document.getElementById('btn-perm-clear-all');
+
+    function updatePermissionsUi(role, permissionsList) {
+        if (!editPermSection) return;
+        const perms = Array.isArray(permissionsList) ? permissionsList : [];
+        if (role === 'admin') {
+            editPermSection.style.display = 'block';
+            permInputs.forEach(input => {
+                input.checked = perms.includes(input.value);
+            });
+        } else {
+            editPermSection.style.display = 'none';
+            permInputs.forEach(input => {
+                input.checked = false;
+            });
+        }
+    }
+
+    if (btnPermSelectAll) {
+        btnPermSelectAll.addEventListener('click', function () {
+            permInputs.forEach(input => {
+                input.checked = true;
+            });
+        });
+    }
+
+    if (btnPermClearAll) {
+        btnPermClearAll.addEventListener('click', function () {
+            permInputs.forEach(input => {
+                input.checked = false;
+            });
+        });
+    }
+
     if (formEdit) {
         const editUsername = document.getElementById('edit-user-username');
         const editEmail = document.getElementById('edit-user-email');
@@ -596,6 +799,13 @@ document.addEventListener('DOMContentLoaded', function () {
             input.addEventListener('input', () => clearFieldError(input));
             input.addEventListener('change', () => clearFieldError(input));
         });
+
+        if (editRole) {
+            editRole.addEventListener('change', function () {
+                const currentChecked = Array.from(permInputs).filter(i => i.checked).map(i => i.value);
+                updatePermissionsUi(this.value, currentChecked);
+            });
+        }
 
         formEdit.addEventListener('submit', function (e) {
             clearAllErrors(formEdit);
@@ -668,6 +878,14 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('edit-user-password').value = '';
             document.getElementById('edit-user-role').value = data.role || 'user';
 
+            let userPerms = [];
+            try {
+                userPerms = JSON.parse(data.permissions || '[]');
+            } catch (e) {
+                userPerms = [];
+            }
+            updatePermissionsUi(data.role || 'user', userPerms);
+
             const memberSelect = document.getElementById('edit-user-member-id');
             if (memberSelect) {
                 memberSelect.value = data.memberId || '';
@@ -683,15 +901,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const targetId = this.dataset.target;
             if (targetId) {
                 closeModal(document.getElementById(targetId));
-            }
-        });
-    });
-
-    // Close on backdrop click
-    document.querySelectorAll('.admin-modal-backdrop').forEach(function (backdrop) {
-        backdrop.addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeModal(this);
             }
         });
     });
@@ -795,8 +1004,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         document.getElementById('edit-user-email').value = data.email || '';
                         document.getElementById('edit-user-password').value = '';
                         document.getElementById('edit-user-role').value = data.role || 'admin';
-                        const memberSelect = document.getElementById('edit-user-member-id');
-                        if (memberSelect) memberSelect.value = data.member_id || '';
+                        updatePermissionsUi(data.role || 'admin', data.permissions || []);
                         openModal(editModal);
                     }
                 }).catch(() => {});

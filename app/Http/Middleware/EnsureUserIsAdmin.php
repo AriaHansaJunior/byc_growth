@@ -18,7 +18,18 @@ class EnsureUserIsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::guard('admin')->user();
+
+        if (!$user && Auth::guard('web')->check()) {
+            $webUser = Auth::guard('web')->user();
+            if ($webUser && $webUser->isAdmin()) {
+                $user = $webUser;
+                Auth::guard('admin')->setUser($user);
+            }
+        }
+
+        if (!$user) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
@@ -26,8 +37,6 @@ class EnsureUserIsAdmin
             return redirect()->route('admin.ganteng')->with('error', 'Please sign in to access the administrator portal.');
         }
 
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
         if (!$user->isAdmin()) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Forbidden. Administrator role required.'], 403);
@@ -35,6 +44,8 @@ class EnsureUserIsAdmin
 
             abort(403, 'Unauthorized access. Administrator role is required.');
         }
+
+        Auth::shouldUse('admin');
 
         return $next($request);
     }

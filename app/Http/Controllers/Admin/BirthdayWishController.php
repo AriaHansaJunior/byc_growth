@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\BirthdayLetter;
 use App\Models\Member;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class BirthdayWishController extends Controller
@@ -154,7 +156,14 @@ class BirthdayWishController extends Controller
             $letter->is_anonymous = $request->boolean('is_anonymous');
         }
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
+        $letter->last_action_by = $adminEmail;
+        $letter->last_action_type = 'edited';
+        $letter->last_action_at = now();
         $letter->save();
+
+        AuditLog::record($adminUser, 'edited', 'birthday_wishes', $letter->id, "Moderated birthday letter #{$letter->id}");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -173,7 +182,11 @@ class BirthdayWishController extends Controller
     public function destroy(Request $request, int $id)
     {
         $letter = BirthdayLetter::findOrFail($id);
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
+        $letterId = $letter->id;
         $letter->delete();
+
+        AuditLog::record($adminUser, 'deleted', 'birthday_wishes', $letterId, "Deleted birthday letter #{$letterId}");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -195,7 +208,10 @@ class BirthdayWishController extends Controller
             'ids.*' => 'required|integer|exists:birthday_letters,id',
         ]);
 
+        $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
         $count = BirthdayLetter::whereIn('id', $validated['ids'])->delete();
+
+        AuditLog::record($adminUser, 'batch_deleted', 'birthday_wishes', null, "Batch deleted {$count} birthday letters");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([

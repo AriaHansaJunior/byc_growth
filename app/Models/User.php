@@ -22,7 +22,42 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'permissions',
         'member_id',
+    ];
+
+    /**
+     * Available management modules and their readable labels.
+     */
+    public const AVAILABLE_PERMISSIONS = [
+        'homepage' => [
+            'name' => 'View and Access Homepage',
+            'description' => 'Allows this admin to view, customize, and publish homepage slides and showcase content.',
+        ],
+        'activities' => [
+            'name' => 'View and Access Activities',
+            'description' => 'Allows this admin to view, create, edit, batch delete, and manage fellowship activities and recap photos.',
+        ],
+        'members' => [
+            'name' => 'View and Access Members',
+            'description' => 'Allows this admin to view, register, edit, batch delete, and manage fellowship member records.',
+        ],
+        'games' => [
+            'name' => 'View and Access Games',
+            'description' => 'Allows this admin to host games, manage rounds, questions, answers, and game system controls.',
+        ],
+        'birthday_wishes' => [
+            'name' => 'View and Access Birthday Wishes',
+            'description' => 'Allows this admin to browse archives, view member letters, and manage birthday wishes.',
+        ],
+        'cash_management' => [
+            'name' => 'View and Access Cash Management',
+            'description' => 'Allows this admin to view financial ledgers, record transactions, and manage treasury records.',
+        ],
+        'roles' => [
+            'name' => 'View and Access Roles & Accounts',
+            'description' => 'Allows this admin to view, create accounts, configure administrator permissions, and manage user roles.',
+        ],
     ];
 
     /**
@@ -65,6 +100,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'member_id' => 'integer',
+        'permissions' => 'array',
     ];
 
     /**
@@ -81,5 +117,30 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Check if the administrator has permission to access a specific module.
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if (!$this->isAdmin()) {
+            return false;
+        }
+
+        $perms = $this->permissions;
+        if (!is_array($perms)) {
+            return false;
+        }
+
+        return in_array($permission, $perms, true);
+    }
+
+    /**
+     * Check if the administrator has any active module permissions.
+     */
+    public function hasAnyPermission(): bool
+    {
+        return $this->isAdmin() && is_array($this->permissions) && count($this->permissions) > 0;
     }
 }
