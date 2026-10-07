@@ -22,7 +22,7 @@ class EnsureAdminPermission
         /** @var \App\Models\User|null $user */
         $user = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
 
-        if (!$user || !$user->isAdmin()) {
+        if (!$user instanceof \App\Models\User || !$user->isAdmin()) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'error' => 'Administrator authorization required.'], 403);
             }

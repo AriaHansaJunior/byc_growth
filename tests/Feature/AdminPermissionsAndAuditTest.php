@@ -267,4 +267,32 @@ class AdminPermissionsAndAuditTest extends TestCase
             'role' => 'user',
         ]);
     }
+
+    /**
+     * Test cash management ledger renders admin email in Recorded By column instead of username.
+     */
+    public function test_cash_management_displays_admin_email_for_recorded_by_column(): void
+    {
+        $superAdmin = $this->createSuperAdmin();
+
+        $tx = \App\Models\CashTransaction::create([
+            'user_id' => $superAdmin->id,
+            'contributor_name' => 'Testing Contributor',
+            'amount' => 50000,
+            'account_type' => 'BCA',
+            'type' => 'inflow',
+            'description' => 'Test Transaction',
+            'transaction_date' => now()->toDateString(),
+            'last_action_by' => $superAdmin->email,
+            'last_action_type' => 'created',
+            'last_action_at' => now(),
+        ]);
+
+        $response = $this->actingAs($superAdmin, 'admin')->get('/admin/cash-management');
+        $response->assertStatus(200);
+
+        // Verify Recorded By column displays email
+        $response->assertSee($superAdmin->email);
+        $this->assertNotEquals($superAdmin->email, $superAdmin->username);
+    }
 }

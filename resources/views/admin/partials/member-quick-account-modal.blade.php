@@ -85,11 +85,8 @@
             </div>
 
             {{-- Footer --}}
-            <div style="padding: 12px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0;">
-                <button type="button" class="button button-ghost button-sm btn-close-quick-user" style="padding: 6px 14px; font-size: 12.5px;">
-                    Cancel
-                </button>
-                <button type="submit" class="button button-primary button-sm" id="btn-submit-quick-user" style="min-width: 130px; padding: 6px 16px; font-size: 12.5px;">
+            <div style="padding: 12px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0;">
+                <button type="submit" class="button button-primary button-sm" id="btn-submit-quick-user" style="min-width: 130px; padding: 6px 16px; font-size: 12.5px; font-weight: 700;">
                     Create Account
                 </button>
             </div>

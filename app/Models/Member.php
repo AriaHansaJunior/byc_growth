@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -117,8 +118,12 @@ class Member extends Model
 
     /**
      * Scope query to only members celebrating a birthday on the given or current date.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  \Carbon\Carbon|null  $date
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeBirthdayToday($query, ?Carbon $date = null)
+    public function scopeBirthdayToday(Builder $query, ?Carbon $date = null): Builder
     {
         $targetDate = $date ?? Carbon::now('Asia/Jakarta');
 

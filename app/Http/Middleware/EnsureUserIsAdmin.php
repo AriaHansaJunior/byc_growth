@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,14 +23,15 @@ class EnsureUserIsAdmin
         $user = Auth::guard('admin')->user();
 
         if (!$user && Auth::guard('web')->check()) {
+            /** @var \App\Models\User|null $webUser */
             $webUser = Auth::guard('web')->user();
-            if ($webUser && $webUser->isAdmin()) {
+            if ($webUser instanceof \App\Models\User && $webUser->isAdmin()) {
                 $user = $webUser;
                 Auth::guard('admin')->setUser($user);
             }
         }
 
-        if (!$user) {
+        if (!$user instanceof \App\Models\User) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }

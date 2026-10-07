@@ -97,6 +97,9 @@
     {{-- Welcome Toast (if just authenticated) --}}
     @include('partials.welcome-toast')
 
+    {{-- Universal Scroll Position Preservation Engine --}}
+    @include('partials.preserve-scroll')
+
     @stack('scripts')
 </body>
 </html>

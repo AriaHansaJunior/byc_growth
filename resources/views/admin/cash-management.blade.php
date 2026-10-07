@@ -216,8 +216,8 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <small style="color: var(--muted); font-size: 12px;">
-                                        {{ $tx->user->username ?? $tx->user->name ?? 'System' }}
+                                    <small style="color: var(--muted); font-size: 12px;" @if($tx->audit_trail_text) title="{{ $tx->audit_trail_text }}" @endif>
+                                        {{ $tx->last_action_by ?: ($tx->user->email ?? $tx->user->username ?? 'System') }}
                                     </small>
                                 </td>
                                 <td style="text-align: right;">

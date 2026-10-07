@@ -7,6 +7,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * App\Models\User
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $username
+ * @property string $email
+ * @property string $role
+ * @property array|null $permissions
+ * @property int|null $member_id
+ * @method bool isAdmin()
+ * @method bool hasPermission(string $permission)
+ * @method bool hasAnyPermission()
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;

@@ -19,6 +19,67 @@
 </div>
 @endsection
 
+@push('styles')
+<style>
+.member-modal-card {
+    width: min(840px, 95vw);
+    min-height: 590px;
+}
+
+.member-modal-body {
+    padding: 22px 30px 48px;
+    flex: 1;
+    min-height: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+@media (min-width: 641px) and (min-height: 620px) {
+    .member-modal-body {
+        overflow: visible !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .member-modal-card {
+        width: min(94vw, 480px) !important;
+        min-height: auto !important;
+        max-height: calc(100vh - 32px) !important;
+    }
+    .member-modal-body {
+        padding: 16px 18px 36px !important;
+        min-height: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        gap: 14px !important;
+    }
+    .member-form-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+}
+
+.byc-select-trigger:hover {
+    border-color: var(--forest) !important;
+}
+
+.byc-select-options-list::-webkit-scrollbar {
+    width: 6px;
+}
+.byc-select-options-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.byc-select-options-list::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 4px;
+}
+.byc-select-options-list::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+}
+</style>
+@endpush
+
 @section('content')
     {{-- Search & Filtering Bar --}}
     <div class="admin-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; margin-bottom: 24px;">
@@ -559,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize Add Member Cropper
     const addCropper = setupCropper({
-        viewportSize: 200,
+        viewportSize: 124,
         dropzone: document.getElementById('add-member-dropzone'),
         fileInput: document.getElementById('add-photo'),
         studio: document.getElementById('add-member-studio'),
@@ -575,7 +636,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize Edit Member Cropper
     const editCropper = setupCropper({
-        viewportSize: 200,
+        viewportSize: 124,
         dropzone: document.getElementById('edit-member-dropzone'),
         fileInput: document.getElementById('edit-photo'),
         studio: document.getElementById('edit-member-studio'),
@@ -588,6 +649,246 @@ document.addEventListener('DOMContentLoaded', function () {
         form: formEdit,
         submitBtn: document.getElementById('btn-submit-edit-member')
     });
+
+    // Searchable Select Controller for User Accounts
+    function initSearchableSelect(selectId, wrapperId, triggerId, menuId) {
+        const select = document.getElementById(selectId);
+        const wrapper = document.getElementById(wrapperId);
+        const trigger = document.getElementById(triggerId);
+        const menu = document.getElementById(menuId);
+        if (!select || !wrapper || !trigger || !menu) return null;
+
+        const triggerText = trigger.querySelector('.byc-select-trigger-text');
+        const chevron = trigger.querySelector('.byc-select-chevron');
+        const searchInput = menu.querySelector('.byc-select-search-input');
+        const optionsList = menu.querySelector('.byc-select-options-list');
+
+        function buildOptions() {
+            if (!optionsList) return;
+            optionsList.innerHTML = '';
+            const options = Array.from(select.querySelectorAll('option'));
+
+            options.forEach(opt => {
+                const val = opt.value;
+                const text = opt.textContent.trim();
+                const email = opt.getAttribute('data-email') || '';
+                const username = opt.getAttribute('data-username') || '';
+                const isLinked = opt.getAttribute('data-linked') === '1' || text.includes('[Linked]');
+                const isSelected = String(select.value) === String(val);
+
+                const optItem = document.createElement('div');
+                optItem.className = 'byc-select-option' + (isSelected ? ' selected' : '');
+                optItem.setAttribute('data-value', val);
+                optItem.setAttribute('data-search', `${email} ${username} ${text}`.toLowerCase());
+                optItem.setAttribute('title', text);
+                optItem.style.cssText = 'padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink); user-select: none; transition: background 0.12s;';
+
+                if (!val) {
+                    optItem.innerHTML = `
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; color: var(--muted); font-style: italic;">
+                            ${text}
+                        </span>
+                        <span class="byc-select-check" style="color: var(--forest); font-weight: 800; font-size: 13px; ${isSelected ? '' : 'display: none;'}">✓</span>
+                    `;
+                } else {
+                    optItem.innerHTML = `
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;">
+                            <span style="font-weight: 600; color: var(--ink);">${email || text}</span>
+                            ${username ? `<span style="color: var(--muted); font-size: 12px; margin-left: 4px;">(${username})</span>` : ''}
+                        </div>
+                        ${isLinked ? `<span style="font-size: 10px; font-weight: 700; color: var(--forest); background: rgba(33, 77, 51, 0.08); padding: 2px 6px; border-radius: 4px; flex-shrink: 0;">Linked</span>` : ''}
+                        <span class="byc-select-check" style="color: var(--forest); font-weight: 800; font-size: 13px; ${isSelected ? '' : 'display: none;'}">✓</span>
+                    `;
+                }
+
+                optItem.addEventListener('mouseenter', () => {
+                    optItem.style.background = 'var(--cream)';
+                });
+                optItem.addEventListener('mouseleave', () => {
+                    optItem.style.background = optItem.classList.contains('selected') ? 'rgba(33, 77, 51, 0.08)' : 'transparent';
+                });
+
+                if (isSelected) {
+                    optItem.style.background = 'rgba(33, 77, 51, 0.08)';
+                }
+
+                optItem.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setValue(val);
+                    close();
+                });
+
+                optionsList.appendChild(optItem);
+            });
+
+            updateTrigger();
+        }
+
+        function updateTrigger() {
+            const selectedOpt = select.options[select.selectedIndex];
+            const text = selectedOpt ? selectedOpt.textContent.trim() : 'None (Unlinked)';
+            if (triggerText) {
+                triggerText.textContent = text;
+                triggerText.setAttribute('title', text);
+                if (!select.value) {
+                    triggerText.style.color = 'var(--muted)';
+                    triggerText.style.fontStyle = 'italic';
+                } else {
+                    triggerText.style.color = 'var(--ink)';
+                    triggerText.style.fontStyle = 'normal';
+                }
+            }
+        }
+
+        function setValue(val) {
+            select.value = val;
+            select.dataset.prevValue = val;
+            updateTrigger();
+            if (optionsList) {
+                optionsList.querySelectorAll('.byc-select-option').forEach(el => {
+                    const isMatch = el.getAttribute('data-value') === String(val);
+                    el.classList.toggle('selected', isMatch);
+                    el.style.background = isMatch ? 'rgba(33, 77, 51, 0.08)' : 'transparent';
+                    const check = el.querySelector('.byc-select-check');
+                    if (check) check.style.display = isMatch ? 'inline' : 'none';
+                });
+            }
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function open() {
+            document.querySelectorAll('.byc-select-dropdown').forEach(d => {
+                if (d !== menu) d.style.display = 'none';
+            });
+            document.querySelectorAll('.byc-select-chevron').forEach(c => {
+                if (c !== chevron) c.style.transform = 'none';
+            });
+
+            menu.style.display = 'flex';
+            trigger.setAttribute('aria-expanded', 'true');
+            trigger.style.borderColor = 'var(--forest)';
+            trigger.style.boxShadow = '0 0 0 3px rgba(33, 77, 51, 0.15)';
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+            if (searchInput) {
+                searchInput.value = '';
+                filterOptions('');
+                setTimeout(() => searchInput.focus(), 50);
+            }
+
+            if (window.innerWidth <= 640) {
+                setTimeout(() => {
+                    trigger.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+
+        function close() {
+            menu.style.display = 'none';
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.style.borderColor = 'var(--line)';
+            trigger.style.boxShadow = 'none';
+            if (chevron) chevron.style.transform = 'none';
+        }
+
+        function toggle() {
+            if (menu.style.display === 'flex') {
+                close();
+            } else {
+                open();
+            }
+        }
+
+        function filterOptions(query) {
+            if (!optionsList) return;
+            const q = (query || '').toLowerCase().trim();
+            const items = optionsList.querySelectorAll('.byc-select-option');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const val = item.getAttribute('data-value');
+                if (!val && !q) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                    return;
+                }
+                const searchData = item.getAttribute('data-search') || '';
+                if (!q || searchData.includes(q)) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            let noResultEl = optionsList.querySelector('.byc-select-no-results');
+            if (visibleCount === 0) {
+                if (!noResultEl) {
+                    noResultEl = document.createElement('div');
+                    noResultEl.className = 'byc-select-no-results';
+                    noResultEl.style.cssText = 'padding: 14px 10px; text-align: center; color: var(--muted); font-size: 12.5px;';
+                    optionsList.appendChild(noResultEl);
+                }
+                noResultEl.textContent = `No accounts found matching "${query}"`;
+                noResultEl.style.display = 'block';
+            } else if (noResultEl) {
+                noResultEl.style.display = 'none';
+            }
+        }
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggle();
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                filterOptions(e.target.value);
+            });
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    close();
+                    trigger.focus();
+                }
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) {
+                close();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menu.style.display === 'flex') {
+                close();
+            }
+        });
+
+        select.addEventListener('change', () => {
+            updateTrigger();
+            const curVal = select.value;
+            if (optionsList) {
+                optionsList.querySelectorAll('.byc-select-option').forEach(el => {
+                    const isMatch = el.getAttribute('data-value') === String(curVal);
+                    el.classList.toggle('selected', isMatch);
+                    el.style.background = isMatch ? 'rgba(33, 77, 51, 0.08)' : 'transparent';
+                    const check = el.querySelector('.byc-select-check');
+                    if (check) check.style.display = isMatch ? 'inline' : 'none';
+                });
+            }
+        });
+
+        buildOptions();
+
+        return {
+            rebuild: buildOptions,
+            setValue: setValue,
+            close: close
+        };
+    }
+
+    const searchableAdd = initSearchableSelect('add-user-id', 'searchable-add-user', 'btn-trigger-add-user', 'dropdown-menu-add-user');
+    const searchableEdit = initSearchableSelect('edit-user-id', 'searchable-edit-user', 'btn-trigger-edit-user', 'dropdown-menu-edit-user');
 
     // Quick Create User Account Modal Controller
     let quickAccountTarget = 'add';
@@ -629,11 +930,6 @@ document.addEventListener('DOMContentLoaded', function () {
             quickUserError.style.display = 'none';
             quickUserError.textContent = '';
         }
-
-        const sel = quickAccountTarget === 'edit' ? editUserSelect : addUserSelect;
-        if (sel && sel.value === '__new__') {
-            sel.value = sel.dataset.prevValue || '';
-        }
     }
 
     document.querySelectorAll('.btn-close-quick-user').forEach(btn => {
@@ -646,28 +942,6 @@ document.addEventListener('DOMContentLoaded', function () {
             openQuickCreateUser(target);
         });
     });
-
-    if (addUserSelect) {
-        addUserSelect.dataset.prevValue = '';
-        addUserSelect.addEventListener('change', function () {
-            if (this.value === '__new__') {
-                openQuickCreateUser('add');
-            } else {
-                this.dataset.prevValue = this.value;
-            }
-        });
-    }
-
-    if (editUserSelect) {
-        editUserSelect.dataset.prevValue = '';
-        editUserSelect.addEventListener('change', function () {
-            if (this.value === '__new__') {
-                openQuickCreateUser('edit');
-            } else {
-                this.dataset.prevValue = this.value;
-            }
-        });
-    }
 
     if (formQuickUser) {
         formQuickUser.addEventListener('submit', async function (e) {
@@ -723,7 +997,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         opt = document.createElement('option');
                         opt.value = newUser.id;
                         opt.textContent = newOptionLabel;
-                        const existingGroup = sel.querySelector('optgroup[label="Existing Accounts"]');
+                        opt.setAttribute('data-email', newUser.email);
+                        opt.setAttribute('data-username', newUser.username);
+                        let existingGroup = sel.querySelector('optgroup[label="Existing Accounts"]');
                         if (existingGroup) {
                             existingGroup.appendChild(opt);
                         } else {
@@ -732,11 +1008,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
-                const activeSel = quickAccountTarget === 'edit' ? editUserSelect : addUserSelect;
-                if (activeSel) {
-                    activeSel.value = newUser.id;
-                    activeSel.dataset.prevValue = newUser.id;
-                    activeSel.focus();
+                if (searchableAdd) searchableAdd.rebuild();
+                if (searchableEdit) searchableEdit.rebuild();
+
+                const activeSearchable = quickAccountTarget === 'edit' ? searchableEdit : searchableAdd;
+                if (activeSearchable) {
+                    activeSearchable.setValue(newUser.id);
                 }
 
                 closeQuickCreateUser();
@@ -764,7 +1041,9 @@ document.addEventListener('DOMContentLoaded', function () {
             clearAllErrors(formAdd);
             addCropper.reset();
             if (window.setDatePickerValue) window.setDatePickerValue('add-dob', '');
-            if (addUserSelect) {
+            if (searchableAdd) {
+                searchableAdd.setValue('');
+            } else if (addUserSelect) {
                 addUserSelect.value = '';
                 addUserSelect.dataset.prevValue = '';
             }
@@ -794,7 +1073,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             if (removeCb) removeCb.checked = false;
 
-            if (editUserSelect) {
+            if (searchableEdit) {
+                searchableEdit.setValue(userId);
+            } else if (editUserSelect) {
                 editUserSelect.value = userId;
                 editUserSelect.dataset.prevValue = userId;
             }
@@ -830,6 +1111,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function closeAllModals() {
         clearAllErrors(formAdd);
         clearAllErrors(formEdit);
+        if (searchableAdd) searchableAdd.close();
+        if (searchableEdit) searchableEdit.close();
         if (addModal) addModal.style.display = 'none';
         if (editModal) editModal.style.display = 'none';
         closeQuickCreateUser();

@@ -35,6 +35,7 @@
     @include('components.birthday-popup')
     @include('partials.alert-modal')
     @include('partials.welcome-toast')
+    @include('partials.preserve-scroll')
 
     @stack('scripts')
 </body>
