@@ -44,7 +44,12 @@
         @if ($currentRound)
             <section class="guess-stage">
                 <div class="guess-image">
-                    <img id="guess-image" src="{{ asset('assets/images/' . $currentRound['image']) }}" alt="Visual clue for active round">
+                    @php
+                        $gameClueSrc = !empty($currentRound['image_url']) ? $currentRound['image_url'] : asset('assets/images/' . $currentRound['image']);
+                    @endphp
+                    <a href="{{ $gameClueSrc }}" target="_blank" rel="noopener noreferrer" title="Click to view full size clue image in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                        <img id="guess-image" src="{{ $gameClueSrc }}" alt="Visual clue for active round">
+                    </a>
                 </div>
                 <div class="guess-content">
                     <span class="clue-label">Clue for Teams</span>

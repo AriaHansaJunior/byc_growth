@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\HomepageSlide;
 use App\Models\HomepageSlidePhoto;
+use App\Services\ImageOptimizerService;
 use App\Services\MediaUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,15 +14,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class HomepageController extends Controller
 {
     protected MediaUploadService $mediaService;
+    protected ImageOptimizerService $optimizer;
 
-    public function __construct(MediaUploadService $mediaService)
+    public function __construct(MediaUploadService $mediaService, ImageOptimizerService $optimizer)
     {
         $this->mediaService = $mediaService;
+        $this->optimizer = $optimizer;
     }
 
     /**
@@ -45,7 +49,7 @@ class HomepageController extends Controller
     public function storeSlide(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
@@ -80,13 +84,19 @@ class HomepageController extends Controller
 
             AuditLog::record($adminUser, 'created', 'homepage_slide', $slide->id, "Added homepage slide '{$slide->title}'");
 
-            HomepageSlidePhoto::create([
+            $photoData = [
                 'homepage_slide_id' => $slide->id,
                 'image_data' => $base64,
                 'original_name' => $originalName,
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
-            ]);
+            ];
+
+            if (Schema::hasColumn('homepage_slide_photos', 'compressed_image_data')) {
+                $photoData['compressed_image_data'] = $this->optimizer->compressBase64($base64, 1200, 82);
+            }
+
+            HomepageSlidePhoto::create($photoData);
 
             DB::commit();
 
@@ -125,7 +135,7 @@ class HomepageController extends Controller
         $slide = HomepageSlide::with(['slidePhoto', 'media'])->findOrFail($id);
 
         $validated = $request->validate([
-            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
@@ -154,22 +164,23 @@ class HomepageController extends Controller
 
             AuditLog::record($adminUser, 'edited', 'homepage_slide', $slide->id, "Updated homepage slide '{$slide->title}'");
 
+            $updateData = [
+                'image_data' => $base64,
+                'original_name' => $originalName,
+                'mime_type' => $mime,
+                'file_size' => strlen($content),
+            ];
+
+            if (Schema::hasColumn('homepage_slide_photos', 'compressed_image_data')) {
+                $updateData['compressed_image_data'] = $this->optimizer->compressBase64($base64, 1200, 82);
+            }
+
             $slidePhoto = $slide->slidePhoto;
             if ($slidePhoto) {
-                $slidePhoto->update([
-                    'image_data' => $base64,
-                    'original_name' => $originalName,
-                    'mime_type' => $mime,
-                    'file_size' => strlen($content),
-                ]);
+                $slidePhoto->update($updateData);
             } else {
-                HomepageSlidePhoto::create([
-                    'homepage_slide_id' => $slide->id,
-                    'image_data' => $base64,
-                    'original_name' => $originalName,
-                    'mime_type' => $mime,
-                    'file_size' => strlen($content),
-                ]);
+                $updateData['homepage_slide_id'] = $slide->id;
+                HomepageSlidePhoto::create($updateData);
             }
 
             // Clean up old media file from disk if legacy record existed

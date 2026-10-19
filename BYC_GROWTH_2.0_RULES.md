@@ -188,6 +188,10 @@ The existing BYC GROWTH earth-tone visual aesthetic is the primary design founda
 
 ## 17. Database-Backed Media & Photo Storage Standards
 - **Relational Photo Tables**: Media assets (e.g. homepage slideshow photos, member photos, activity photos, transfer proofs) are tracked in dedicated database tables (`homepage_slide_photos`, `members`, `media_files`, `cash_transactions`) via `MediaUploadService`.
+- **Dual-Tier Image Compression & Full Resolution Integrity**:
+  1. **Upload (Input)**: Accepts photos of any file size (5MB, 10MB, up to 50MB) without arbitrary low limits. The original full-resolution photo is always preserved intact.
+  2. **Web Output (Display)**: Images rendered on webpages (members directory, admin tables, activity galleries, homepage carousels) are served in lightweight compressed versions (sekian KB) to ensure lightning-fast page loading without blurriness.
+  3. **New Tab & Download (Full Size)**: Opening an image in a new tab (including browser right-click "Open image in new tab" via `Sec-Fetch-Dest: document` or dedicated links) and downloading assets (e.g. cash transaction nota/proof) returns the full-size original resolution image.
 - **Clean DB-Filesystem Sync**: Uploading, updating, or deleting photos updates both the database record and cleans up replaced files on disk, avoiding orphan image accumulation.
 - **No Direct Folder Dumping**: Assets must be organized by domain context (`assets/images/uploads/`, `storage/app/`), sanitized, and referenced via database IDs.
 

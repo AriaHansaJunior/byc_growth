@@ -149,8 +149,10 @@
                                 @php
                                     $imgSrc = !empty($round['image_url']) ? $round['image_url'] : asset('assets/images/' . $round['image']);
                                 @endphp
-                                <img src="{{ $imgSrc }}" alt="Visual Clue Round {{ $round['round_number'] }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='{{ asset('assets/images/BYC_Growth.jpg') }}';">
-                                <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                                <a href="{{ $imgSrc }}" target="_blank" rel="noopener noreferrer" title="Click to view full size clue image in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                                    <img src="{{ $imgSrc }}" alt="Visual Clue Round {{ $round['round_number'] }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='{{ asset('assets/images/BYC_Growth.jpg') }}';">
+                                </a>
+                                <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600; pointer-events: none;">
                                     Clue Image (4:3)
                                 </span>
                             </div>

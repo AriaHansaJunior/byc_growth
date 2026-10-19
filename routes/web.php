@@ -13,6 +13,7 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BirthdayController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\PageController;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +48,12 @@ Route::get('/guess-me', [GameController::class, 'guessMe'])->name('game.guess-me
 Route::get('/growth-100', [GameController::class, 'growth100'])->name('game.growth-100');
 Route::get('/final', [GameController::class, 'finalScore'])->name('game.final');
 Route::get('/game/image/{filename}', [GameController::class, 'getImage'])->name('game.image');
+
+// Optimized Media Delivery (Compressed for Web Output, Full Size on New Tab / Download)
+Route::get('/media/member/{id}/photo', [MediaController::class, 'memberPhoto'])->name('media.member.photo');
+Route::get('/media/slide/{id}/photo', [MediaController::class, 'slidePhoto'])->name('media.slide.photo');
+Route::get('/media/file/{id}', [MediaController::class, 'mediaFile'])->name('media.file');
+Route::get('/media/file/{id}/download', [MediaController::class, 'download'])->name('media.download');
 
 // Public Gameplay State Navigation
 Route::prefix('game')->name('game.')->group(function () {

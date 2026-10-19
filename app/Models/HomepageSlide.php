@@ -64,16 +64,32 @@ class HomepageSlide extends Model
     }
 
     /**
-     * Accessor for the publicly accessible image URL.
+     * Accessor for the publicly accessible image URL (serves compressed for web display, full size on new tab/document request).
      */
     public function getImageUrlAttribute(): string
     {
         if ($this->slidePhoto && !empty($this->slidePhoto->image_data)) {
-            return $this->slidePhoto->image_data;
+            return route('media.slide.photo', ['id' => $this->id]);
         }
 
         if ($this->media) {
             return $this->media->getUrl();
+        }
+
+        return asset('assets/images/group-photo-dummy.svg');
+    }
+
+    /**
+     * Accessor for the full-size original slide image URL.
+     */
+    public function getFullImageUrlAttribute(): string
+    {
+        if ($this->slidePhoto && !empty($this->slidePhoto->image_data)) {
+            return route('media.slide.photo', ['id' => $this->id, 'full' => 1]);
+        }
+
+        if ($this->media) {
+            return $this->media->getFullUrl();
         }
 
         return asset('assets/images/group-photo-dummy.svg');

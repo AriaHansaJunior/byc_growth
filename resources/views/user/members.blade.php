@@ -62,14 +62,16 @@
                     {{-- Photo Frame (With celebratory decoration for today's birthday celebrants) --}}
                     <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid {{ $isBirthday ? 'var(--gold)' : 'var(--line)' }}; {{ $isBirthday ? 'box-shadow: 0 0 0 3px var(--gold), 0 8px 24px rgba(231, 189, 82, 0.45);' : '' }} margin-bottom: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
                         @if($member->photo_url)
-                            <img
-                                src="{{ $member->photo_url }}"
-                                alt="{{ $member->full_name }}"
-                                class="member-photo-img"
-                                style="width: 100%; height: 100%; object-fit: cover;"
-                                loading="lazy"
-                                onerror="this.style.display='none'; document.getElementById('fallback-{{ $member->id }}').style.display='flex';"
-                            >
+                            <a href="{{ $member->full_photo_url }}" target="_blank" rel="noopener noreferrer" title="Click to view full size photo of {{ $member->full_name }}" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                                <img
+                                    src="{{ $member->photo_url }}"
+                                    alt="{{ $member->full_name }}"
+                                    class="member-photo-img"
+                                    style="width: 100%; height: 100%; object-fit: cover;"
+                                    loading="lazy"
+                                    onerror="this.parentElement.style.display='none'; document.getElementById('fallback-{{ $member->id }}').style.display='flex';"
+                                >
+                            </a>
                             <div id="fallback-{{ $member->id }}" class="member-photo-fallback" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; color: var(--forest); font-family: 'Manrope', sans-serif;">
                                 {{ strtoupper(substr($member->full_name, 0, 1)) }}
                             </div>

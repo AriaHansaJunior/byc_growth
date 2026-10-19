@@ -69,7 +69,7 @@
                                     data-name="{{ $activity->name }}"
                                     data-date="{{ $activity->event_date->format('Y-m-d') }}"
                                     data-description="{{ $activity->description }}"
-                                    data-photos="{{ json_encode($activity->photos->map(fn($p) => ['id' => $p->id, 'url' => $p->getUrl(), 'name' => $p->original_name])) }}"
+                                    data-photos="{{ json_encode($activity->photos->map(fn($p) => ['id' => $p->id, 'url' => $p->getUrl(), 'full_url' => $p->getFullUrl(), 'name' => $p->original_name])) }}"
                                 >
                                     Edit
                                 </button>
@@ -90,9 +90,9 @@
                     @if($activity->photos->isNotEmpty())
                         <div class="activity-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
                             @foreach($activity->photos as $photo)
-                                <a href="{{ $photo->getUrl() }}" target="_blank" rel="noopener noreferrer" class="activity-photo-item" style="display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 4/3; background: var(--cream); position: relative; transition: transform .2s ease;">
+                                <a href="{{ $photo->getFullUrl() }}" target="_blank" rel="noopener noreferrer" class="activity-photo-item" title="Click to open full size photo in new tab" style="display: block; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 4/3; background: var(--cream); position: relative; transition: transform .2s ease; cursor: pointer;">
                                     <img
-                                        src="{{ $photo->getUrl() }}"
+                                        src="{{ route('media.file', ['id' => $photo->id]) }}"
                                         alt="{{ $activity->name }} Photo"
                                         style="width: 100%; height: 100%; object-fit: cover; display: block;"
                                         loading="lazy"

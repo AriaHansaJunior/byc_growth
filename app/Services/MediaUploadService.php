@@ -5,14 +5,17 @@ namespace App\Services;
 use App\Models\MediaFile;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class MediaUploadService
 {
     protected string $uploadDir;
+    protected ImageOptimizerService $optimizer;
 
-    public function __construct()
+    public function __construct(ImageOptimizerService $optimizer)
     {
+        $this->optimizer = $optimizer;
         $this->uploadDir = public_path('assets/images/uploads');
         if (!File::isDirectory($this->uploadDir)) {
             File::makeDirectory($this->uploadDir, 0755, true, true);
@@ -20,7 +23,10 @@ class MediaUploadService
     }
 
     /**
-     * Store an uploaded image and create a MediaFile record.
+     * Store an uploaded image:
+     * - Keeps FULL-SIZE original untouched.
+     * - Creates a lightweight compressed version for web output.
+     * - Creates a MediaFile record.
      */
     public function storeImage(UploadedFile $file, ?string $prefix = 'media', ?string $fileableType = null, ?int $fileableId = null): MediaFile
     {
@@ -31,16 +37,26 @@ class MediaUploadService
         }
 
         $cleanPrefix = $prefix ? preg_replace('/[^a-zA-Z0-9_-]/', '', $prefix) . '_' : '';
-        $filename = $cleanPrefix . time() . '_' . Str::random(10) . '.' . $extension;
-        $file->move($this->uploadDir, $filename);
+        $baseName = $cleanPrefix . time() . '_' . Str::random(10);
+        $fullFilename = $baseName . '_full.' . $extension;
+        $compressedFilename = $baseName . '_thumb.' . $extension;
 
-        $filePath = $this->uploadDir . '/' . $filename;
-        $this->compressImageIfNeeded($filePath, $extension);
+        // Save original full-size file
+        $file->move($this->uploadDir, $fullFilename);
+        $fullPath = $this->uploadDir . '/' . $fullFilename;
+        $compressedPath = $this->uploadDir . '/' . $compressedFilename;
 
-        $relativePath = 'assets/images/uploads/' . $filename;
-        $fileSize = File::exists($filePath) ? File::size($filePath) : 0;
+        // Generate compressed web-optimized output version (e.g. max 900px, quality 80)
+        $compressedSuccess = $this->optimizer->compressImageFile($fullPath, $compressedPath, 900, 80);
 
-        return MediaFile::create([
+        $relativePath = 'assets/images/uploads/' . $fullFilename;
+        $compressedRelativePath = $compressedSuccess && File::exists($compressedPath)
+            ? 'assets/images/uploads/' . $compressedFilename
+            : $relativePath;
+
+        $fileSize = File::exists($fullPath) ? File::size($fullPath) : 0;
+
+        $data = [
             'disk' => 'public',
             'file_path' => $relativePath,
             'original_name' => $file->getClientOriginalName(),
@@ -48,93 +64,35 @@ class MediaUploadService
             'file_size' => $fileSize,
             'fileable_type' => $fileableType,
             'fileable_id' => $fileableId,
-        ]);
+        ];
+
+        // Only include compressed_path if the column exists in database schema
+        if (Schema::hasColumn('media_files', 'compressed_path')) {
+            $data['compressed_path'] = $compressedRelativePath;
+        }
+
+        return MediaFile::create($data);
     }
 
     /**
-     * Automatically compress and resize uploaded image if larger than standard bounds.
-     */
-    protected function compressImageIfNeeded(string $filePath, string $extension): void
-    {
-        if (!extension_loaded('gd') || !File::exists($filePath)) {
-            return;
-        }
-
-        try {
-            $info = @getimagesize($filePath);
-            if (!$info) {
-                return;
-            }
-
-            [$width, $height, $imageType] = $info;
-            $maxDimension = 1600;
-
-            $source = null;
-            switch ($imageType) {
-                case IMAGETYPE_JPEG:
-                    $source = @imagecreatefromjpeg($filePath);
-                    break;
-                case IMAGETYPE_PNG:
-                    $source = @imagecreatefrompng($filePath);
-                    break;
-                case IMAGETYPE_WEBP:
-                    if (function_exists('imagecreatefromwebp')) {
-                        $source = @imagecreatefromwebp($filePath);
-                    }
-                    break;
-            }
-
-            if (!$source) {
-                return;
-            }
-
-            $newWidth = $width;
-            $newHeight = $height;
-            if ($width > $maxDimension || $height > $maxDimension) {
-                if ($width > $height) {
-                    $newWidth = $maxDimension;
-                    $newHeight = (int) round(($height / $width) * $maxDimension);
-                } else {
-                    $newHeight = $maxDimension;
-                    $newWidth = (int) round(($width / $height) * $maxDimension);
-                }
-            }
-
-            $target = imagecreatetruecolor($newWidth, $newHeight);
-
-            if ($imageType === IMAGETYPE_PNG || $imageType === IMAGETYPE_WEBP) {
-                imagealphablending($target, false);
-                imagesavealpha($target, true);
-                $transparent = imagecolorallocatealpha($target, 255, 255, 255, 127);
-                imagefilledrectangle($target, 0, 0, $newWidth, $newHeight, $transparent);
-            }
-
-            imagecopyresampled($target, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-
-            if ($imageType === IMAGETYPE_JPEG) {
-                imagejpeg($target, $filePath, 85);
-            } elseif ($imageType === IMAGETYPE_PNG) {
-                imagepng($target, $filePath, 8);
-            } elseif ($imageType === IMAGETYPE_WEBP && function_exists('imagewebp')) {
-                imagewebp($target, $filePath, 85);
-            }
-
-            imagedestroy($source);
-            imagedestroy($target);
-        } catch (\Throwable $e) {
-            // Keep original if compression encountered any error
-        }
-    }
-
-    /**
-     * Delete an uploaded file and its MediaFile record.
+     * Delete an uploaded file (both full-size original and compressed version) and its MediaFile record.
      */
     public function deleteMediaFile(MediaFile $media): bool
     {
+        // 1. Delete original full-size file
         $filename = basename($media->file_path);
         $fullPath = $this->uploadDir . DIRECTORY_SEPARATOR . $filename;
         if (File::exists($fullPath) && is_file($fullPath)) {
             File::delete($fullPath);
+        }
+
+        // 2. Delete compressed version if distinct
+        if (!empty($media->compressed_path)) {
+            $compFilename = basename($media->compressed_path);
+            $compPath = $this->uploadDir . DIRECTORY_SEPARATOR . $compFilename;
+            if (File::exists($compPath) && is_file($compPath)) {
+                File::delete($compPath);
+            }
         }
 
         return $media->delete();

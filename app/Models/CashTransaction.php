@@ -82,10 +82,26 @@ class CashTransaction extends Model
     }
 
     /**
-     * Get proof file URL accessor.
+     * Get proof file URL accessor (compressed for web display).
      */
     public function getProofFileUrlAttribute(): ?string
     {
         return $this->proof ? $this->proof->getUrl() : null;
+    }
+
+    /**
+     * Get full-size proof file URL accessor (original full resolution).
+     */
+    public function getProofFileFullUrlAttribute(): ?string
+    {
+        return $this->proof ? $this->proof->getFullUrl() : null;
+    }
+
+    /**
+     * Get proof file download URL.
+     */
+    public function getProofDownloadUrlAttribute(): ?string
+    {
+        return $this->proof ? $this->proof->getDownloadUrl() : null;
     }
 }

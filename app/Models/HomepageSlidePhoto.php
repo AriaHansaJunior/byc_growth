@@ -15,6 +15,7 @@ class HomepageSlidePhoto extends Model
     protected $fillable = [
         'homepage_slide_id',
         'image_data',
+        'compressed_image_data',
         'original_name',
         'mime_type',
         'file_size',

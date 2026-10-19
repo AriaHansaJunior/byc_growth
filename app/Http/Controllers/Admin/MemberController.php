@@ -12,15 +12,19 @@ use App\Services\MediaUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ImageOptimizerService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class MemberController extends Controller
 {
     protected MediaUploadService $mediaService;
+    protected ImageOptimizerService $optimizer;
 
-    public function __construct(MediaUploadService $mediaService)
+    public function __construct(MediaUploadService $mediaService, ImageOptimizerService $optimizer)
     {
         $this->mediaService = $mediaService;
+        $this->optimizer = $optimizer;
     }
 
     /**
@@ -123,13 +127,19 @@ class MemberController extends Controller
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
-            MemberPhoto::create([
+            $data = [
                 'member_id' => $member->id,
                 'photo_data' => $base64,
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
-            ]);
+            ];
+
+            if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
+                $data['compressed_photo_data'] = $this->optimizer->compressBase64($base64, 550, 80);
+            }
+
+            MemberPhoto::create($data);
         }
 
         $this->handleUserLinking($request, $member);
@@ -177,22 +187,23 @@ class MemberController extends Controller
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
+            $updateData = [
+                'photo_data' => $base64,
+                'original_name' => $file->getClientOriginalName(),
+                'mime_type' => $mime,
+                'file_size' => strlen($content),
+            ];
+
+            if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
+                $updateData['compressed_photo_data'] = $this->optimizer->compressBase64($base64, 550, 80);
+            }
+
             $memberPhoto = $member->memberPhoto;
             if ($memberPhoto) {
-                $memberPhoto->update([
-                    'photo_data' => $base64,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime_type' => $mime,
-                    'file_size' => strlen($content),
-                ]);
+                $memberPhoto->update($updateData);
             } else {
-                MemberPhoto::create([
-                    'member_id' => $member->id,
-                    'photo_data' => $base64,
-                    'original_name' => $file->getClientOriginalName(),
-                    'mime_type' => $mime,
-                    'file_size' => strlen($content),
-                ]);
+                $updateData['member_id'] = $member->id;
+                MemberPhoto::create($updateData);
             }
 
             if ($member->photo) {

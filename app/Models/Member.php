@@ -66,15 +66,27 @@ class Member extends Model
     }
 
     /**
-     * Get member photo URL.
+     * Get member photo URL (serves compressed for web display, full size on new tab/document request).
      */
     public function getPhotoUrlAttribute(): ?string
     {
         if ($this->memberPhoto && !empty($this->memberPhoto->photo_data)) {
-            return $this->memberPhoto->photo_data;
+            return route('media.member.photo', ['id' => $this->id]);
         }
 
         return $this->photo ? $this->photo->getUrl() : null;
+    }
+
+    /**
+     * Get member full-size photo URL explicitly.
+     */
+    public function getFullPhotoUrlAttribute(): ?string
+    {
+        if ($this->memberPhoto && !empty($this->memberPhoto->photo_data)) {
+            return route('media.member.photo', ['id' => $this->id, 'full' => 1]);
+        }
+
+        return $this->photo ? $this->photo->getFullUrl() : null;
     }
 
     /**

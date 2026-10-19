@@ -15,6 +15,7 @@ class MemberPhoto extends Model
     protected $fillable = [
         'member_id',
         'photo_data',
+        'compressed_photo_data',
         'original_name',
         'mime_type',
         'file_size',

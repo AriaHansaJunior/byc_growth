@@ -203,11 +203,13 @@
                                             type="button"
                                             class="button button-ghost button-sm btn-open-proof"
                                             data-url="{{ $tx->proof_file_url }}"
+                                            data-full-url="{{ $tx->proof_file_full_url ?: $tx->proof_file_url }}"
+                                            data-download-url="{{ $tx->proof_download_url ?: ($tx->proof_file_full_url ?: $tx->proof_file_url) }}"
                                             data-contributor="{{ $tx->member ? $tx->member->full_name : $tx->contributor_name }}"
                                             data-amount="Rp {{ number_format($tx->amount, 0, ',', '.') }}"
                                             data-date="{{ $tx->created_at->format('M j, Y') }}"
                                             style="font-size: 11.5px; padding: 3px 10px; height: 28px; display: inline-flex; align-items: center; gap: 4px;"
-                                            title="View Transfer Proof"
+                                            title="View Transfer Proof (Full Resolution Available)"
                                         >
                                             📷 View Proof
                                         </button>
@@ -279,12 +281,19 @@
                 <button type="button" class="btn-close-modal" data-target="modal-proof-viewer" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
             </div>
             <div style="padding: 20px; text-align: center; background: #000; min-height: 250px; display: flex; align-items: center; justify-content: center;">
-                <img id="proof-viewer-img" src="" alt="Transfer Proof" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px;">
-            </div>
-            <div style="padding: 14px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center;">
-                <a id="proof-viewer-link" href="" target="_blank" class="button button-ghost button-sm" style="font-size: 12px;">
-                    Open Full Image &rarr;
+                <a id="proof-viewer-img-link" href="" target="_blank" rel="noopener noreferrer" title="Click to open full size photo in new tab" style="display: inline-block;">
+                    <img id="proof-viewer-img" src="" alt="Transfer Proof" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; cursor: pointer;">
                 </a>
+            </div>
+            <div style="padding: 14px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <a id="proof-viewer-link" href="" target="_blank" rel="noopener noreferrer" class="button button-ghost button-sm" style="font-size: 12px;">
+                        Open Full Size (New Tab) ↗
+                    </a>
+                    <a id="proof-viewer-download" href="" class="button button-ghost button-sm" style="font-size: 12px;">
+                        Download Full Size Nota 📥
+                    </a>
+                </div>
                 <button type="button" class="button button-primary button-sm btn-close-modal" data-target="modal-proof-viewer">
                     Done
                 </button>
@@ -712,6 +721,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.btn-open-proof').forEach(function (btn) {
         btn.addEventListener('click', function () {
             const url = this.dataset.url;
+            const fullUrl = this.dataset.fullUrl || url;
+            const downloadUrl = this.dataset.downloadUrl || fullUrl;
             const contributor = this.dataset.contributor;
             const amount = this.dataset.amount;
             const date = this.dataset.date;
@@ -719,7 +730,10 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('proof-viewer-title').textContent = 'Proof: ' + contributor + ' (' + amount + ')';
             document.getElementById('proof-viewer-sub').textContent = 'Transferred on ' + date;
             document.getElementById('proof-viewer-img').src = url;
-            document.getElementById('proof-viewer-link').href = url;
+            document.getElementById('proof-viewer-img-link').href = fullUrl;
+            document.getElementById('proof-viewer-link').href = fullUrl;
+            const downloadLink = document.getElementById('proof-viewer-download');
+            if (downloadLink) downloadLink.href = downloadUrl;
 
             const modal = document.getElementById('modal-proof-viewer');
             openModal(modal);

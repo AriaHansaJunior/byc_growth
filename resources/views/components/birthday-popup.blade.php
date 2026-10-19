@@ -7,6 +7,7 @@
             'id' => $m->id,
             'full_name' => $m->full_name,
             'photo_url' => $m->photo_url ?: asset('assets/images/group-photo-dummy.svg'),
+            'full_photo_url' => $m->full_photo_url ?: ($m->photo_url ?: asset('assets/images/group-photo-dummy.svg')),
         ];
     })->values();
 @endphp
@@ -52,12 +53,14 @@
                 {{-- Member Photo Container --}}
                 <div style="position: relative; width: 150px; height: 150px; margin: 0 auto 20px; border-radius: 50%; padding: 5px; background: linear-gradient(135deg, var(--gold), var(--lime), var(--forest)); box-shadow: 0 10px 25px rgba(231, 189, 82, 0.35);">
                     <div style="width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: var(--cream); display: flex; align-items: center; justify-content: center;">
-                        <img
-                            id="birthday-member-img"
-                            src="{{ $popupData[0]['photo_url'] }}"
-                            alt="{{ $popupData[0]['full_name'] }}"
-                            style="width: 100%; height: 100%; object-fit: cover;"
-                        >
+                        <a id="birthday-member-img-link" href="{{ $popupData[0]['full_photo_url'] ?? $popupData[0]['photo_url'] }}" target="_blank" rel="noopener noreferrer" title="Click to view full size photo in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                            <img
+                                id="birthday-member-img"
+                                src="{{ $popupData[0]['photo_url'] }}"
+                                alt="{{ $popupData[0]['full_name'] }}"
+                                style="width: 100%; height: 100%; object-fit: cover;"
+                            >
+                        </a>
                     </div>
                     <div style="position: absolute; bottom: 2px; right: 2px; font-size: 26px;">
                         🎉
@@ -258,6 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applyMemberData(current) {
         if (memberImg) memberImg.src = current.photo_url;
+        const memberImgLink = document.getElementById('birthday-member-img-link');
+        if (memberImgLink) memberImgLink.href = current.full_photo_url || current.photo_url;
         if (memberName) memberName.textContent = current.full_name;
         if (recipientName) recipientName.textContent = current.full_name;
         if (recipientIdInput) recipientIdInput.value = current.id;

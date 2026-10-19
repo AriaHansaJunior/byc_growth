@@ -115,12 +115,14 @@
                                 {{-- Image Preview --}}
                                 <td>
                                     <div style="width: 96px; height: 60px; border-radius: 10px; overflow: hidden; background: var(--forest-dark); border: 1px solid var(--line); position: relative;">
-                                        <img
-                                            src="{{ $slide->image_url }}"
-                                            alt="{{ $slide->title ?: 'Slide ' . ($index + 1) }}"
-                                            style="width: 100%; height: 100%; object-fit: cover;"
-                                            loading="lazy"
-                                        >
+                                        <a href="{{ $slide->full_image_url }}" target="_blank" rel="noopener noreferrer" title="Click to view full size slide in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                                            <img
+                                                src="{{ $slide->image_url }}"
+                                                alt="{{ $slide->title ?: 'Slide ' . ($index + 1) }}"
+                                                style="width: 100%; height: 100%; object-fit: cover;"
+                                                loading="lazy"
+                                            >
+                                        </a>
                                     </div>
                                 </td>
 

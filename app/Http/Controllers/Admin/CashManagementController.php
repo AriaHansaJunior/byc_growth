@@ -159,7 +159,7 @@ class CashManagementController extends Controller
             'member_id' => 'required|exists:members,id',
             'account_type' => 'required|string|max:100',
             'amount' => 'required|numeric|gt:0',
-            'proof' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'proof' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:51200',
         ]);
 
         $member = Member::findOrFail($validated['member_id']);
@@ -246,6 +246,8 @@ class CashManagementController extends Controller
             'account_type' => $transaction->account_type,
             'amount' => (float) $transaction->amount,
             'proof_url' => $transaction->proof_file_url,
+            'proof_full_url' => $transaction->proof_file_full_url,
+            'proof_download_url' => $transaction->proof_download_url,
             'has_proof' => (bool) $transaction->proof_file_id,
             'transaction_date' => $transaction->transaction_date ? $transaction->transaction_date->format('Y-m-d') : null,
             'created_at' => $transaction->created_at ? $transaction->created_at->format('M j, Y H:i:s') : null,
@@ -264,7 +266,7 @@ class CashManagementController extends Controller
             'contributor_name' => 'nullable|string|max:255',
             'account_type' => 'required|string|max:100',
             'amount' => 'required|numeric|gt:0',
-            'proof' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'proof' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:51200',
         ]);
 
         $newMedia = null;

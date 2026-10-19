@@ -116,7 +116,7 @@
                                 data-end-date="{{ $endDateStr }}"
                                 data-date="{{ $startDateStr }}"
                                 data-description="{{ $activity->description }}"
-                                data-photos="{{ json_encode($activity->photos->map(fn($p) => ['id' => $p->id, 'url' => $p->getUrl(), 'name' => $p->original_name])) }}"
+                                data-photos="{{ json_encode($activity->photos->map(fn($p) => ['id' => $p->id, 'url' => $p->getUrl(), 'full_url' => $p->getFullUrl(), 'name' => $p->original_name])) }}"
                                 style="font-size: 12px; padding: 4px 10px; height: 32px;"
                             >
                                 ✎ Edit
@@ -143,9 +143,9 @@
                     @if($activity->photos->isNotEmpty())
                         <div class="activity-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-top: 14px;">
                             @foreach($activity->photos as $photo)
-                                <a href="{{ $photo->getUrl() }}" target="_blank" rel="noopener noreferrer" class="activity-photo-item" style="display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); min-height: 130px; max-height: 180px; background: #141f17; position: relative; transition: transform .2s ease;">
+                                <a href="{{ $photo->getFullUrl() }}" target="_blank" rel="noopener noreferrer" class="activity-photo-item" title="Click to open full size photo in new tab" style="display: flex; align-items: center; justify-content: center; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); min-height: 130px; max-height: 180px; background: #141f17; position: relative; transition: transform .2s ease; cursor: pointer;">
                                     <img
-                                        src="{{ $photo->getUrl() }}"
+                                        src="{{ route('media.file', ['id' => $photo->id]) }}"
                                         alt="{{ $activity->name }} Photo"
                                         loading="lazy"
                                         style="max-width: 100%; max-height: 180px; width: auto; height: auto; object-fit: contain; display: block;"
