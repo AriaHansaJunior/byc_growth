@@ -140,6 +140,11 @@ class GameController extends Controller
         }
 
         $message = !empty($validated['id']) ? 'Guess Me round updated successfully.' : 'New Guess Me round created successfully.';
+
+        if ($request->filled('from_host')) {
+            return redirect()->route('admin.games.guess-me.host')->with('success', $message);
+        }
+
         return redirect()->route('admin.games', ['tab' => 'guess-me'])->with('success', $message);
     }
 
@@ -221,6 +226,11 @@ class GameController extends Controller
         }
 
         $message = !empty($validated['id']) ? 'Survey question updated successfully.' : 'New survey question created successfully.';
+
+        if ($request->filled('from_host')) {
+            return redirect()->route('admin.games.growth-100.host')->with('success', $message);
+        }
+
         return redirect()->route('admin.games', ['tab' => 'growth-100'])->with('success', $message);
     }
 

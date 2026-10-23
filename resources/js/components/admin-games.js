@@ -862,4 +862,25 @@ export function initAdminGames() {
             if (teamConfigModal && teamConfigModal.style.display !== 'none') closeTeamModal();
         }
     });
+
+    // Auto-open modals if action parameter is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const actionParam = urlParams.get('action');
+    const tabParam = urlParams.get('tab');
+
+    if (actionParam === 'add' || actionParam === 'add-question') {
+        if (tabParam === 'growth-100') {
+            setTimeout(() => {
+                openGrowthModal(false);
+            }, 120);
+        } else if (tabParam === 'guess-me') {
+            setTimeout(() => {
+                openGuessModal(false);
+            }, 120);
+        }
+    } else if (actionParam === 'add-round') {
+        setTimeout(() => {
+            openGuessModal(false);
+        }, 120);
+    }
 }

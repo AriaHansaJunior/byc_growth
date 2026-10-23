@@ -219,7 +219,7 @@
                     <input type="file" id="add-activity-photos" name="photos[]" multiple accept="image/*" style="display: none;">
 
                     {{-- Live Selected Photos Preview Strip (Natural Aspect Ratio) --}}
-                    <div id="add-photos-preview-strip" style="display: none; margin-top: 10px; max-height: 160px; overflow-x: auto; overflow-y: hidden; display: none; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--cream);"></div>
+                    <div id="add-photos-preview-strip" style="display: none; margin-top: 10px; max-height: 200px; overflow-x: auto; overflow-y: hidden; gap: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--cream);"></div>
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--line);">
@@ -297,7 +297,7 @@
                         <div style="font-weight: 700; font-size: 13px; color: var(--ink);">Select photos to append to gallery</div>
                     </div>
                     <input type="file" id="edit-activity-photos" name="photos[]" multiple accept="image/*" style="display: none;">
-                    <div id="edit-photos-preview-strip" style="display: none; margin-top: 10px; max-height: 160px; overflow-x: auto; overflow-y: hidden; display: none; gap: 10px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--cream);"></div>
+                    <div id="edit-photos-preview-strip" style="display: none; margin-top: 10px; max-height: 200px; overflow-x: auto; overflow-y: hidden; gap: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--cream);"></div>
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--line);">
@@ -406,13 +406,13 @@ document.addEventListener('DOMContentLoaded', function () {
             previewStripEl.style.display = 'flex';
             accumulatedFiles.forEach((file, index) => {
                 const card = document.createElement('div');
-                card.style = 'flex: 0 0 auto; height: 95px; width: 130px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: #141f17; position: relative; display: flex; align-items: center; justify-content: center;';
+                card.style = 'flex: 0 0 auto; height: 135px; width: 180px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #141f17; position: relative; display: flex; align-items: center; justify-content: center;';
 
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.title = 'Remove this photo';
                 removeBtn.innerHTML = '&times;';
-                removeBtn.style = 'position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(189,76,66,0.92); color: #fff; border: none; border-radius: 50%; font-size: 14px; font-weight: 800; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5;';
+                removeBtn.style = 'position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: rgba(189,76,66,0.92); color: #fff; border: none; border-radius: 50%; font-size: 15px; font-weight: 800; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5;';
                 removeBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     accumulatedFiles.splice(index, 1);
@@ -421,11 +421,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 const img = document.createElement('img');
-                img.style = 'max-height: 95px; max-width: 130px; width: auto; height: auto; object-fit: contain; display: block;';
+                img.style = 'max-height: 135px; max-width: 180px; width: auto; height: auto; object-fit: contain; display: block;';
                 img.alt = file.name;
 
                 const nameLabel = document.createElement('span');
-                nameLabel.style = 'position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.72); color: #fff; font-size: 10px; padding: 2px 4px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center;';
+                nameLabel.style = 'position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.76); color: #fff; font-size: 11px; padding: 3px 6px; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; text-align: center;';
                 nameLabel.textContent = file.name;
 
                 const reader = new FileReader();

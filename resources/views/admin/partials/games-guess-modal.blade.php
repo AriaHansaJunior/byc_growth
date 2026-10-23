@@ -15,6 +15,7 @@
         <form action="{{ route('admin.games.guess-me.save-round') }}" method="POST" enctype="multipart/form-data" id="form-admin-guess-round" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; margin: 0;">
             @csrf
             <input type="hidden" name="id" id="guess-form-id">
+            <input type="hidden" name="from_host" id="guess-from-host" value="{{ request('from') === 'host' ? '1' : '' }}">
 
             {{-- Scrollable Form Body --}}
             <div class="modal-scroll-body" style="padding: 24px 28px; overflow-y: auto; flex: 1; min-height: 0;">
@@ -25,10 +26,10 @@
                     </label>
 
                     {{-- Existing Image Preview (For edit mode before replacing) --}}
-                    <div id="guess-existing-preview-wrap" style="display: none; margin-bottom: 12px; text-align: center;">
-                        <div style="width: 280px; height: 210px; aspect-ratio: 4 / 3; margin: 0 auto; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: var(--paper); box-shadow: 0 4px 14px rgba(0,0,0,0.06); position: relative;">
+                    <div id="guess-existing-preview-wrap" style="display: none; margin-bottom: 14px; text-align: center;">
+                        <div style="width: 340px; height: 255px; max-width: 100%; aspect-ratio: 4 / 3; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--paper); box-shadow: 0 4px 16px rgba(0,0,0,0.08); position: relative;">
                             <img id="guess-existing-img" src="" alt="Current clue image" style="width: 100%; height: 100%; object-fit: cover;">
-                            <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 600;">Current Clue Image</span>
+                            <span style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Current Clue Image (4:3)</span>
                         </div>
                     </div>
 

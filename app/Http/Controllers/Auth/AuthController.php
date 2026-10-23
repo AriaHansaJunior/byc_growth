@@ -17,6 +17,10 @@ class AuthController extends Controller
      */
     public function showLoginForm(Request $request): View|RedirectResponse
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         if (Auth::guard('web')->check()) {
             if ($request->filled('redirect')) {
                 return redirect($request->input('redirect'));
@@ -71,7 +75,7 @@ class AuthController extends Controller
                 ]);
         }
 
-        Auth::guard('web')->login($user, true);
+        Auth::guard('web')->login($user, $request->boolean('remember'));
         $request->session()->regenerate();
         session()->flash('welcome_user', $user->username);
 

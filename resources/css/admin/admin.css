@@ -880,6 +880,13 @@ body.modal-open {
   color: var(--forest-hover, #1b3821) !important;
 }
 
+.member-modal-card .crop-dropzone,
+.member-modal-card .member-crop-viewport {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
+
 @media (max-width: 640px) {
   .member-modal-card {
     width: 95vw !important;
@@ -893,3 +900,4 @@ body.modal-open {
     height: 170px !important;
   }
 }
+

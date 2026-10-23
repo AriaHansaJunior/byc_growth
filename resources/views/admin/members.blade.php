@@ -23,16 +23,16 @@
 <style>
 .member-modal-card {
     width: min(840px, 95vw);
-    min-height: 590px;
+    min-height: 640px;
 }
 
 .member-modal-body {
-    padding: 22px 30px 48px;
+    padding: 20px 30px 40px;
     flex: 1;
-    min-height: 440px;
+    min-height: 480px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
 }
 
 @media (min-width: 641px) and (min-height: 620px) {
@@ -399,17 +399,18 @@ document.addEventListener('DOMContentLoaded', function () {
         let hasNewFile = false;
 
         function getDimensions() {
-            const baseScale = Math.max(viewportSize / (imgNaturalW || 1), viewportSize / (imgNaturalH || 1));
+            const currentVpSize = (viewport && viewport.clientWidth) ? viewport.clientWidth : (viewportSize || 200);
+            const baseScale = Math.max(currentVpSize / (imgNaturalW || 1), currentVpSize / (imgNaturalH || 1));
             const scale = baseScale * currentZoom;
             const displayW = imgNaturalW * scale;
             const displayH = imgNaturalH * scale;
 
-            const minOffsetX = viewportSize - displayW;
+            const minOffsetX = currentVpSize - displayW;
             const maxOffsetX = 0;
-            const minOffsetY = viewportSize - displayH;
+            const minOffsetY = currentVpSize - displayH;
             const maxOffsetY = 0;
 
-            return { scale, displayW, displayH, minOffsetX, maxOffsetX, minOffsetY, maxOffsetY };
+            return { scale, displayW, displayH, minOffsetX, maxOffsetX, minOffsetY, maxOffsetY, currentVpSize };
         }
 
         function clampOffsets() {
@@ -427,9 +428,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function centerImage() {
-            const { displayW, displayH } = getDimensions();
-            currentOffsetX = (viewportSize - displayW) / 2;
-            currentOffsetY = (viewportSize - displayH) / 2;
+            const { displayW, displayH, currentVpSize } = getDimensions();
+            currentOffsetX = (currentVpSize - displayW) / 2;
+            currentOffsetY = (currentVpSize - displayH) / 2;
             clampOffsets();
             updateImageStyle();
         }
@@ -545,11 +546,11 @@ document.addEventListener('DOMContentLoaded', function () {
         function getCroppedBlob() {
             return new Promise((resolve, reject) => {
                 try {
-                    const { scale } = getDimensions();
+                    const { scale, currentVpSize } = getDimensions();
                     const cropX = -currentOffsetX / scale;
                     const cropY = -currentOffsetY / scale;
-                    const cropW = viewportSize / scale;
-                    const cropH = viewportSize / scale;
+                    const cropW = currentVpSize / scale;
+                    const cropH = currentVpSize / scale;
 
                     const targetSize = Math.min(1200, Math.max(480, Math.round(cropW)));
                     const canvas = document.createElement('canvas');
@@ -622,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize Add Member Cropper
     const addCropper = setupCropper({
-        viewportSize: 124,
+        viewportSize: 200,
         dropzone: document.getElementById('add-member-dropzone'),
         fileInput: document.getElementById('add-photo'),
         studio: document.getElementById('add-member-studio'),
@@ -638,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize Edit Member Cropper
     const editCropper = setupCropper({
-        viewportSize: 124,
+        viewportSize: 200,
         dropzone: document.getElementById('edit-member-dropzone'),
         fileInput: document.getElementById('edit-photo'),
         studio: document.getElementById('edit-member-studio'),

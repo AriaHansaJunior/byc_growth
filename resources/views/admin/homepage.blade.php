@@ -96,7 +96,7 @@
                     <thead>
                         <tr>
                             <th style="width: 80px; text-align: center;">Order</th>
-                            <th style="width: 120px;">Preview</th>
+                            <th style="width: 140px;">Preview</th>
                             <th>Photo Information</th>
                             <th style="width: 120px; text-align: center;">Sequence</th>
                             <th style="width: 170px; text-align: right;">Actions</th>
@@ -114,7 +114,7 @@
 
                                 {{-- Image Preview --}}
                                 <td>
-                                    <div style="width: 96px; height: 60px; border-radius: 10px; overflow: hidden; background: var(--forest-dark); border: 1px solid var(--line); position: relative;">
+                                    <div style="width: 120px; height: 75px; border-radius: 12px; overflow: hidden; background: var(--forest-dark); border: 1px solid var(--line); position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
                                         <a href="{{ $slide->full_image_url }}" target="_blank" rel="noopener noreferrer" title="Click to view full size slide in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
                                             <img
                                                 src="{{ $slide->image_url }}"

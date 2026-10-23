@@ -58,7 +58,16 @@ export function initGuessMe() {
 
         // Image
         if (guessImage) {
-            guessImage.src = `/assets/images/${currentRound.image}`;
+            const imgSrc = currentRound.image_url || (currentRound.image ? `/assets/images/${currentRound.image}` : '/assets/images/BYC_Growth.jpg');
+            guessImage.src = imgSrc;
+            guessImage.onerror = function() {
+                this.onerror = null;
+                this.src = '/assets/images/BYC_Growth.jpg';
+            };
+            const parentLink = guessImage.closest('a');
+            if (parentLink) {
+                parentLink.href = imgSrc;
+            }
         }
 
         // Answer / Clue Box

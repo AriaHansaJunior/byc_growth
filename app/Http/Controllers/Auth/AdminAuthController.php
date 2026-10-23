@@ -75,7 +75,7 @@ class AdminAuthController extends Controller
                 ]);
         }
 
-        Auth::guard('admin')->login($user, true);
+        Auth::guard('admin')->login($user, false);
         $request->session()->regenerate();
         session()->flash('welcome_user', $user->username);
 
@@ -84,7 +84,7 @@ class AdminAuthController extends Controller
         }
 
         $intended = $request->session()->pull('url.intended');
-        if ($intended) {
+        if ($intended && !str_contains($intended, 'admin-ganteng')) {
             return redirect($intended);
         }
 

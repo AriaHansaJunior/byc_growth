@@ -1,3 +1,6 @@
+@php
+    $currentUser = auth('web')->user() ?? auth('admin')->user();
+@endphp
 <header class="global-header">
     <div class="header-container">
         <a href="{{ route('home') }}" class="header-brand-link" aria-label="BYC Growth Home">
@@ -21,24 +24,29 @@
                 Game Center
             </a>
 
-            @if(auth()->guest())
+            @if(!$currentUser)
                 <a href="{{ route('login') }}" class="nav-login-btn" id="btn-header-login" title="Member Sign In">
                     Login
                 </a>
             @else
                 <div class="nav-user-dropdown-wrap" id="nav-user-dropdown-wrap">
                     <button type="button" class="nav-user-btn" id="btn-user-dropdown" aria-haspopup="true" aria-expanded="false" title="Account Menu">
-                        <span class="nav-user-username">{{ auth()->user()->username }}</span>
+                        <span class="nav-user-username">{{ $currentUser->username }}</span>
                         <x-icon name="chevron-down" />
                     </button>
                     <div class="nav-user-dropdown-menu" id="nav-user-dropdown-menu" role="menu" style="display: none; min-width: 180px;">
-                        @if(auth()->user()->member)
+                        @if($currentUser->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="nav-user-dropdown-item" role="menuitem">
+                                Admin Dashboard
+                            </a>
+                            <div style="height: 1px; background: var(--line); margin: 4px 6px;"></div>
+                        @elseif($currentUser->member)
                             <a href="{{ route('birthday.wishes') }}" class="nav-user-dropdown-item" role="menuitem">
                                 My Birthday Wishes
                             </a>
                             <div style="height: 1px; background: var(--line); margin: 4px 6px;"></div>
                         @endif
-                        <form method="POST" action="{{ route('logout') }}" style="margin: 0; width: 100%;">
+                        <form method="POST" action="{{ $currentUser->isAdmin() ? route('admin.logout') : route('logout') }}" style="margin: 0; width: 100%;">
                             @csrf
                             <button type="submit" class="nav-user-logout-item" id="btn-header-logout" role="menuitem">
                                 Logout
@@ -84,7 +92,7 @@
         </nav>
 
         <div class="mobile-nav-footer">
-            @if(auth()->guest())
+            @if(!$currentUser)
                 <a href="{{ route('login') }}" class="button button-primary mobile-nav-login-btn">
                     Member Sign In
                 </a>
@@ -92,14 +100,18 @@
                 <div class="mobile-nav-user-card">
                     <div class="mobile-nav-user-info">
                         <span class="mobile-nav-user-label">Signed in as</span>
-                        <strong class="mobile-nav-username">{{ auth()->user()->username }}</strong>
+                        <strong class="mobile-nav-username">{{ $currentUser->username }} @if($currentUser->isAdmin()) (Admin) @endif</strong>
                     </div>
-                    @if(auth()->user()->member)
+                    @if($currentUser->isAdmin())
+                        <a href="{{ route('admin.dashboard') }}" class="button button-primary button-sm" style="width: 100%; margin-top: 10px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
+                            Admin Dashboard
+                        </a>
+                    @elseif($currentUser->member)
                         <a href="{{ route('birthday.wishes') }}" class="button button-ghost button-sm" style="width: 100%; margin-top: 10px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
                             My Birthday Wishes
                         </a>
                     @endif
-                    <form method="POST" action="{{ route('logout') }}" style="margin-top: 8px; width: 100%;">
+                    <form method="POST" action="{{ $currentUser->isAdmin() ? route('admin.logout') : route('logout') }}" style="margin-top: 8px; width: 100%;">
                         @csrf
                         <button type="submit" class="button button-danger button-sm" style="width: 100%;">
                             Logout

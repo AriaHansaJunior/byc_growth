@@ -16,6 +16,10 @@ class Authenticate extends Middleware
             return null;
         }
 
-        return $request->is('admin*') ? route('admin.ganteng') : route('login');
+        if ($request->is('admin*') || $request->is('game/*') || $request->is('cash-management*') || $request->routeIs('admin.*')) {
+            return route('admin.ganteng');
+        }
+
+        return route('login');
     }
 }

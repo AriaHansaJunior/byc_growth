@@ -272,6 +272,11 @@ class GameController extends Controller
             return response()->file($uploadsPath);
         }
 
+        $fallback = public_path('assets/images/BYC_Growth.jpg');
+        if (File::exists($fallback) && is_file($fallback)) {
+            return response()->file($fallback);
+        }
+
         abort(404, 'Image not found.');
     }
 }

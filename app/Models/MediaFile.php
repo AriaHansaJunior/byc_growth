@@ -16,6 +16,8 @@ class MediaFile extends Model
         'disk',
         'file_path',
         'compressed_path',
+        'file_data',
+        'compressed_data',
         'original_name',
         'mime_type',
         'file_size',
@@ -44,6 +46,10 @@ class MediaFile extends Model
      */
     public function getUrl(): string
     {
+        if ($this->exists) {
+            return route('media.file', ['id' => $this->id]);
+        }
+
         $path = !empty($this->compressed_path) ? $this->compressed_path : $this->file_path;
 
         if (str_starts_with($path, 'assets/')) {
@@ -58,6 +64,10 @@ class MediaFile extends Model
      */
     public function getFullUrl(): string
     {
+        if ($this->exists) {
+            return route('media.file', ['id' => $this->id, 'full' => 1]);
+        }
+
         if (str_starts_with($this->file_path, 'assets/')) {
             return asset($this->file_path);
         }

@@ -23,17 +23,17 @@
                     </label>
 
                     {{-- Empty Dropzone when no photo --}}
-                    <div id="edit-member-dropzone" class="crop-dropzone" style="height: 124px; width: 124px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; border-radius: 50%; cursor: pointer;">
-                        <div class="crop-dropzone-icon" style="font-size: 26px; margin-bottom: 2px;">👤</div>
-                        <div style="font-weight: 700; color: var(--ink); font-size: 12.5px; margin-bottom: 1px;">Choose Photo</div>
-                        <small style="color: var(--muted); font-size: 9.5px; display: block; line-height: 1.2;">Click or drag photo</small>
+                    <div id="edit-member-dropzone" class="crop-dropzone" style="height: 200px; width: 200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; border-radius: 50%; cursor: pointer;">
+                        <div class="crop-dropzone-icon" style="font-size: 38px; margin-bottom: 6px;">👤</div>
+                        <div style="font-weight: 700; color: var(--ink); font-size: 14px; margin-bottom: 3px;">Choose Photo</div>
+                        <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.2;">Click or drag photo</small>
                     </div>
 
                     <input type="file" id="edit-photo" name="photo" accept="image/*" style="display: none;">
 
                     {{-- Photo Preview & Crop Studio --}}
                     <div id="edit-member-studio" style="display: none;">
-                        <div class="crop-viewport-container member-crop-viewport" id="edit-member-viewport" style="width: 124px; height: 124px; margin: 0 auto 8px; border-radius: 50%;">
+                        <div class="crop-viewport-container member-crop-viewport" id="edit-member-viewport" style="width: 200px; height: 200px; margin: 0 auto 10px; border-radius: 50%;">
                             <img id="edit-member-preview-img" class="crop-viewport-image" alt="Edit Photo Preview" src="">
                             <div class="crop-grid-overlay" style="border-radius: 50%;">
                                 <div class="crop-grid-cell"></div><div class="crop-grid-cell"></div><div class="crop-grid-cell"></div>
@@ -42,13 +42,13 @@
                             </div>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 220px; margin: 0 auto 6px;">
-                            <div class="crop-zoom-bar" style="flex: 1; padding: 4px 8px; font-size: 11px; border-radius: 8px;">
-                                <span id="edit-member-zoom-label" style="white-space: nowrap; font-size: 11px;">1.0x</span>
-                                <input type="range" id="edit-member-zoom-range" min="1" max="2.5" step="0.05" value="1" style="height: 4px;">
-                                <button type="button" id="edit-member-btn-reset" class="crop-preset-btn" style="padding: 2px 6px; font-size: 10px;">Reset</button>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 10px; max-width: 320px; margin: 0 auto 6px;">
+                            <div class="crop-zoom-bar" style="flex: 1; padding: 6px 12px; font-size: 12px; border-radius: 10px; display: flex; align-items: center; gap: 8px;">
+                                <span id="edit-member-zoom-label" style="white-space: nowrap; font-size: 12px; font-weight: 700;">1.0x</span>
+                                <input type="range" id="edit-member-zoom-range" min="1" max="2.5" step="0.05" value="1" style="height: 5px; flex: 1; accent-color: var(--forest); cursor: pointer;">
+                                <button type="button" id="edit-member-btn-reset" class="crop-preset-btn" style="padding: 3px 8px; font-size: 11px;">Reset</button>
                             </div>
-                            <button type="button" id="edit-member-btn-change" class="button button-ghost button-sm" style="padding: 3px 8px; font-size: 11px; height: 28px;">
+                            <button type="button" id="edit-member-btn-change" class="button button-ghost button-sm" style="padding: 4px 12px; font-size: 12px; height: 32px;">
                                 Change
                             </button>
                         </div>

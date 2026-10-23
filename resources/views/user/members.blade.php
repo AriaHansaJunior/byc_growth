@@ -43,13 +43,67 @@
         </div>
     @endif
 
+    {{-- Members Search Bar --}}
+    <div class="members-search-wrapper" style="margin-bottom: 26px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;">
+        <form method="GET" action="{{ route('members') }}" id="form-search-members" style="display: flex; gap: 10px; align-items: center; flex: 1; max-width: 480px; position: relative;">
+            <div style="position: relative; width: 100%;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input
+                    type="text"
+                    name="search"
+                    id="search-members-input"
+                    value="{{ $search ?? '' }}"
+                    placeholder="Search member by name..."
+                    autocomplete="off"
+                    style="width: 100%; height: 44px; padding: 10px 38px 10px 42px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--white); font-family: inherit; font-size: 14px; color: var(--ink); box-shadow: 0 2px 6px rgba(0,0,0,0.03); outline: none; transition: all 0.2s ease;"
+                >
+                <button
+                    type="button"
+                    id="btn-clear-search"
+                    title="Clear search"
+                    style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #e5e5e5; border: none; width: 22px; height: 22px; border-radius: 50%; display: {{ !empty($search) ? 'flex' : 'none' }}; align-items: center; justify-content: center; font-size: 13px; line-height: 1; color: var(--ink); cursor: pointer; padding: 0;"
+                >
+                    &times;
+                </button>
+            </div>
+            <button type="submit" class="button button-primary" style="height: 44px; padding: 0 20px; border-radius: 999px; font-weight: 700; font-size: 14px; white-space: nowrap;">
+                Search
+            </button>
+            @if(!empty($search))
+                <a href="{{ route('members') }}" class="button button-secondary" style="height: 44px; padding: 0 16px; border-radius: 999px; font-weight: 600; font-size: 13px; text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center;">
+                    Reset
+                </a>
+            @endif
+        </form>
+
+        <div id="members-count-badge" style="font-size: 13.5px; color: var(--muted); font-weight: 600;">
+            <span id="displayed-members-count">{{ $members->count() }}</span> members
+        </div>
+    </div>
+
+    {{-- Live Search Zero Results Box (Client-side) --}}
+    <div id="no-search-results" class="placeholder-card" style="display: none; text-align: center; padding: 48px 24px; background: var(--white); border: 1px dashed var(--line); border-radius: 20px; margin-bottom: 24px;">
+        <div style="font-size: 36px; margin-bottom: 12px;">🔍</div>
+        <h2>No members found</h2>
+        <p style="max-width: 480px; margin: 0 auto; color: var(--muted);">
+            No member matched "<span id="no-results-query"></span>". Try another name or <button type="button" id="btn-reset-search-inline" style="background: none; border: none; color: var(--forest); font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0;">view all members</button>.
+        </p>
+    </div>
+
     {{-- Public Members Roster (Equal Cards: Photo + Name ONLY) --}}
     @if($members->isEmpty())
-        <div class="placeholder-card" style="text-align: center; padding: 48px 24px;">
+        <div class="placeholder-card" style="text-align: center; padding: 48px 24px; background: var(--white); border: 1px dashed var(--line); border-radius: 20px;">
             <div style="font-size: 36px; margin-bottom: 12px;">👥</div>
             <h2>No members found.</h2>
             <p style="max-width: 480px; margin: 0 auto; color: var(--muted);">
-                Our community members will be showcased here.
+                @if(!empty($search))
+                    No member matched "{{ $search }}". <a href="{{ route('members') }}" style="color: var(--forest); font-weight: 700; text-decoration: underline;">View all members</a>
+                @else
+                    Our community members will be showcased here.
+                @endif
             </p>
         </div>
     @else
@@ -57,10 +111,17 @@
             @foreach($members as $member)
                 @php
                     $isBirthday = $member->isBirthdayToday();
+                    $isOwner = (isset($currentUserMemberId) && (int)$currentUserMemberId === (int)$member->id)
+                        || (auth()->check() && !auth()->user()->isAdmin() && (int)auth()->user()->member_id === (int)$member->id);
                 @endphp
-                <div class="member-card {{ $isBirthday ? 'member-card-birthday' : '' }}" data-birthday="{{ $isBirthday ? '1' : '0' }}" style="background: var(--white); border: {{ $isBirthday ? '2px solid var(--gold)' : '1px solid var(--line)' }}; border-radius: 20px; padding: 20px; text-align: center; box-shadow: {{ $isBirthday ? '0 12px 30px rgba(231, 189, 82, 0.2)' : 'var(--shadow)' }}; position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                <div class="member-card {{ $isBirthday ? 'member-card-birthday' : '' }} {{ $isOwner ? 'member-card-owner' : '' }}"
+                    data-id="{{ $member->id }}"
+                    data-name="{{ strtolower($member->full_name) }}"
+                    data-birthday="{{ $isBirthday ? '1' : '0' }}"
+                    data-owner="{{ $isOwner ? '1' : '0' }}"
+                    style="background: var(--white); border: {{ $isBirthday ? '2px solid var(--gold)' : ($isOwner ? '2px solid var(--forest)' : '1px solid var(--line)') }}; border-radius: 20px; padding: 20px; text-align: center; box-shadow: {{ $isBirthday ? '0 12px 30px rgba(231, 189, 82, 0.2)' : ($isOwner ? '0 8px 24px rgba(44, 76, 56, 0.12)' : 'var(--shadow)') }}; position: relative; display: flex; flex-direction: column; align-items: center; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                     {{-- Photo Frame (With celebratory decoration for today's birthday celebrants) --}}
-                    <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid {{ $isBirthday ? 'var(--gold)' : 'var(--line)' }}; {{ $isBirthday ? 'box-shadow: 0 0 0 3px var(--gold), 0 8px 24px rgba(231, 189, 82, 0.45);' : '' }} margin-bottom: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <div class="member-photo-frame" style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; background: var(--cream); border: 3px solid {{ $isBirthday ? 'var(--gold)' : ($isOwner ? 'var(--forest)' : 'var(--line)') }}; {{ $isBirthday ? 'box-shadow: 0 0 0 3px var(--gold), 0 8px 24px rgba(231, 189, 82, 0.45);' : '' }} margin-bottom: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
                         @if($member->photo_url)
                             <a href="{{ $member->full_photo_url }}" target="_blank" rel="noopener noreferrer" title="Click to view full size photo of {{ $member->full_name }}" style="display: block; width: 100%; height: 100%; cursor: pointer;">
                                 <img
@@ -89,9 +150,13 @@
                         @endif
                     </div>
 
-                    {{-- Member Full Name ONLY (No position, no role, no hierarchy, no birthday) --}}
-                    <h2 class="member-name" style="font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; line-height: 1.3;">
-                        {{ $member->full_name }}
+                    {{-- Member Full Name ONLY (Owner gets (yourself) bolded) --}}
+                    <h2 class="member-name" style="font-family: 'Manrope', sans-serif; font-size: 17px; color: var(--ink); margin: 0; line-height: 1.35; word-break: break-word;">
+                        @if($isOwner)
+                            <strong style="font-weight: 800; color: var(--forest-dark);">{{ $member->full_name }} (yourself)</strong>
+                        @else
+                            <span style="font-weight: 600;">{{ $member->full_name }}</span>
+                        @endif
                     </h2>
 
                     {{-- Birthday Interaction Action (Available on birthday date, even after popup is closed) --}}
@@ -518,4 +583,81 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 @endif
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-members-input');
+    const clearBtn = document.getElementById('btn-clear-search');
+    const countBadge = document.getElementById('displayed-members-count');
+    const memberCards = document.querySelectorAll('.member-card');
+    const noResultsBox = document.getElementById('no-search-results');
+    const noResultsQuery = document.getElementById('no-results-query');
+    const resetInlineBtn = document.getElementById('btn-reset-search-inline');
+    const membersGrid = document.querySelector('.members-grid');
+
+    function applySearch(query) {
+        const q = (query || '').toLowerCase().trim();
+        let visibleCount = 0;
+
+        memberCards.forEach(card => {
+            const name = card.getAttribute('data-name') || '';
+            if (!q || name.includes(q)) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        if (clearBtn) {
+            clearBtn.style.display = q ? 'flex' : 'none';
+        }
+
+        if (countBadge) {
+            countBadge.textContent = visibleCount;
+        }
+
+        if (noResultsBox) {
+            if (visibleCount === 0 && memberCards.length > 0) {
+                noResultsBox.style.display = 'block';
+                if (noResultsQuery) noResultsQuery.textContent = q;
+                if (membersGrid) membersGrid.style.display = 'none';
+            } else {
+                noResultsBox.style.display = 'none';
+                if (membersGrid) membersGrid.style.display = 'grid';
+            }
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            applySearch(e.target.value);
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                if (window.location.search.includes('search=')) {
+                    window.location.href = "{{ route('members') }}";
+                    return;
+                }
+                searchInput.value = '';
+                searchInput.focus();
+                applySearch('');
+            });
+        }
+
+        if (resetInlineBtn) {
+            resetInlineBtn.addEventListener('click', () => {
+                if (window.location.search.includes('search=')) {
+                    window.location.href = "{{ route('members') }}";
+                    return;
+                }
+                searchInput.value = '';
+                searchInput.focus();
+                applySearch('');
+            });
+        }
+    }
+});
+</script>
 @endsection

@@ -48,7 +48,7 @@
                         $gameClueSrc = !empty($currentRound['image_url']) ? $currentRound['image_url'] : asset('assets/images/' . $currentRound['image']);
                     @endphp
                     <a href="{{ $gameClueSrc }}" target="_blank" rel="noopener noreferrer" title="Click to view full size clue image in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
-                        <img id="guess-image" src="{{ $gameClueSrc }}" alt="Visual clue for active round">
+                        <img id="guess-image" src="{{ $gameClueSrc }}" alt="Visual clue for active round" onerror="this.onerror=null; this.src='{{ asset('assets/images/BYC_Growth.jpg') }}';">
                     </a>
                 </div>
                 <div class="guess-content">

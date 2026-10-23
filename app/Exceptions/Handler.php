@@ -44,5 +44,17 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'CSRF token mismatch. Sesi Anda telah berakhir.'], 419);
+            }
+
+            if ($request->is('admin*') || $request->is('game/*') || $request->is('cash-management*') || $request->routeIs('admin.*')) {
+                return redirect()->route('admin.ganteng')->with('error', 'Sesi Anda telah berakhir karena tidak ada aktivitas. Silakan login kembali.');
+            }
+
+            return back()->withInput()->with('error', 'Sesi Anda telah diperbarui karena tidak ada aktivitas. Silakan coba kirim kembali.');
+        });
     }
 }

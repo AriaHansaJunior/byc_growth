@@ -134,9 +134,6 @@
                     <button type="button" class="button button-ghost" id="btn-open-teams-modal">
                         <x-icon name="user" /> Configure Teams
                     </button>
-                    <button type="button" class="button button-ghost" id="btn-open-editor">
-                        <x-icon name="edit" /> Edit Questions
-                    </button>
                 </div>
             </div>
 
@@ -162,9 +159,12 @@
                 </button>
             </div>
         @else
-            <div style="padding: 40px; text-align: center; background: #bad3ff; border-radius: 20px;">
-                <p>No survey questions available.</p>
-                <button type="button" class="button button-primary" id="btn-open-editor-empty">Add Survey Question</button>
+            <div style="padding: 48px 24px; text-align: center; background: rgba(255, 255, 255, 0.7); border: 1px dashed var(--line); border-radius: 20px; max-width: 520px; margin: 40px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <p style="font-size: 17px; font-weight: 800; color: var(--ink); margin: 0 0 6px;">No survey questions available.</p>
+                <p style="font-size: 13.5px; color: var(--muted); margin: 0 0 20px;">Please configure questions in the Games Center.</p>
+                <a href="{{ route('admin.games', ['tab' => 'growth-100']) }}" class="button button-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    Go to Games Center
+                </a>
             </div>
         @endif
     </main>
@@ -183,9 +183,6 @@
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button type="button" class="button button-ghost button-sm" id="btn-open-teams-modal-header" style="font-size: 12.5px; height: 34px;" onclick="document.getElementById('btn-open-teams-modal').click();">
                     <x-icon name="user" /> Configure Teams
-                </button>
-                <button type="button" class="button button-ghost button-sm" id="btn-open-editor-header" style="font-size: 12.5px; height: 34px;" onclick="document.getElementById('btn-open-editor').click();">
-                    <x-icon name="edit" /> Edit Questions
                 </button>
                 <button type="button" class="icon-button" id="btn-close-scoreboard" aria-label="Close scoreboard modal" style="width: 34px; height: 34px;">
                     <x-icon name="x" />
@@ -236,9 +233,6 @@
         </div>
     </div>
 </div>
-
-{{-- CRUD Editor Modal --}}
-@include('partials.growth-100-editor')
 
 {{-- Team Configuration Modal --}}
 @include('partials.team-config-modal')

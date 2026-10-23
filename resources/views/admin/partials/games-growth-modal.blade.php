@@ -15,6 +15,7 @@
         <form action="{{ route('admin.games.growth-100.save-round') }}" method="POST" id="form-admin-growth-round" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; margin: 0;">
             @csrf
             <input type="hidden" name="id" id="growth-form-id">
+            <input type="hidden" name="from_host" id="growth-from-host" value="{{ request('from') === 'host' ? '1' : '' }}">
 
             {{-- Scrollable Form Body --}}
             <div class="modal-scroll-body" style="padding: 24px 28px; overflow-y: auto; overflow-x: hidden; flex: 1; min-height: 0;">

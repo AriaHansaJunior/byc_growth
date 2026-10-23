@@ -70,11 +70,32 @@ class GameRound extends Model
     public function getImageUrlAttribute(): string
     {
         if ($this->mediaFile) {
-            return $this->mediaFile->getUrl();
+            $url = $this->mediaFile->getUrl();
+            if (!empty($url)) {
+                return $url;
+            }
         }
 
         if ($this->image_path) {
-            return asset('assets/images/' . $this->image_path);
+            $raw = basename($this->image_path);
+
+            if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+                return $this->image_path;
+            }
+
+            if (file_exists(public_path('assets/images/uploads/' . $raw))) {
+                return asset('assets/images/uploads/' . $raw);
+            }
+
+            if (file_exists(public_path('assets/images/' . $raw))) {
+                return asset('assets/images/' . $raw);
+            }
+
+            if (file_exists(storage_path('app/game/images/' . $raw))) {
+                return route('game.image', ['filename' => $raw]);
+            }
+
+            return route('game.image', ['filename' => $raw]);
         }
 
         return asset('assets/images/BYC_Growth.jpg');

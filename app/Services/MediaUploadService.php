@@ -55,16 +55,34 @@ class MediaUploadService
             : $relativePath;
 
         $fileSize = File::exists($fullPath) ? File::size($fullPath) : 0;
+        $mime = $file->getClientMimeType() ?: 'image/jpeg';
+
+        // Convert to database-stored base64
+        $rawContent = File::exists($fullPath) ? File::get($fullPath) : '';
+        $base64 = !empty($rawContent) ? ('data:' . $mime . ';base64,' . base64_encode($rawContent)) : null;
+
+        $compressedBase64 = null;
+        if (!empty($base64)) {
+            $compressedBase64 = $this->optimizer->compressBase64($base64, 900, 80) ?: $base64;
+        }
 
         $data = [
             'disk' => 'public',
             'file_path' => $relativePath,
             'original_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getClientMimeType() ?: 'image/jpeg',
+            'mime_type' => $mime,
             'file_size' => $fileSize,
             'fileable_type' => $fileableType,
             'fileable_id' => $fileableId,
         ];
+
+        // Store base64 data directly in database
+        if (Schema::hasColumn('media_files', 'file_data') && $base64) {
+            $data['file_data'] = $base64;
+        }
+        if (Schema::hasColumn('media_files', 'compressed_data') && $compressedBase64) {
+            $data['compressed_data'] = $compressedBase64;
+        }
 
         // Only include compressed_path if the column exists in database schema
         if (Schema::hasColumn('media_files', 'compressed_path')) {

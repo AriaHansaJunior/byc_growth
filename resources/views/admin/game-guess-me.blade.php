@@ -67,7 +67,12 @@
         @if ($currentRound)
             <section class="guess-stage">
                 <div class="guess-image">
-                    <img id="guess-image" src="{{ asset('assets/images/' . $currentRound['image']) }}" alt="Visual clue for active round">
+                    @php
+                        $gameClueSrc = !empty($currentRound['image_url']) ? $currentRound['image_url'] : asset('assets/images/' . $currentRound['image']);
+                    @endphp
+                    <a href="{{ $gameClueSrc }}" target="_blank" rel="noopener noreferrer" title="Click to view full size clue image in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                        <img id="guess-image" src="{{ $gameClueSrc }}" alt="Visual clue for active round" onerror="this.onerror=null; this.src='{{ asset('assets/images/BYC_Growth.jpg') }}';">
+                    </a>
                 </div>
                 <div class="guess-content">
                     <span class="clue-label">Clue for Teams</span>
@@ -87,27 +92,29 @@
                     <span>Points</span>
                 </div>
             </section>
+            {{-- Round Navigation: Centered, Text-only, NO arrows --}}
+            <div class="round-nav">
+                <button type="button" class="button button-secondary" id="btn-prev-round" {{ $currentRoundIndex === 0 ? 'disabled' : '' }}>
+                    Previous
+                </button>
+                <div class="round-dots" id="round-dots-container">
+                    @foreach ($rounds as $idx => $r)
+                        <span class="{{ $currentRoundIndex === $idx ? 'active' : '' }}" data-index="{{ $idx }}" title="Round {{ $idx + 1 }}{{ !empty($r['is_hidden']) ? ' (Hidden)' : '' }}"></span>
+                    @endforeach
+                </div>
+                <button type="button" class="button button-primary" id="btn-next-round" {{ $currentRoundIndex >= count($rounds) - 1 ? 'disabled' : '' }}>
+                    Next
+                </button>
+            </div>
         @else
-            <div style="padding: 40px; text-align: center; background: white; border-radius: 20px;">
-                <p>No rounds available.</p>
-                <button type="button" class="button button-primary" id="btn-open-editor-empty">Add Round</button>
+            <div style="padding: 48px 24px; text-align: center; background: rgba(255, 255, 255, 0.7); border: 1px dashed var(--line); border-radius: 20px; max-width: 520px; margin: 40px auto; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <p style="font-size: 17px; font-weight: 800; color: var(--ink); margin: 0 0 6px;">No rounds available.</p>
+                <p style="font-size: 13.5px; color: var(--muted); margin: 0 0 20px;">Please configure rounds in the Games Center.</p>
+                <a href="{{ route('admin.games', ['tab' => 'guess-me']) }}" class="button button-secondary" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                    Go to Games Center
+                </a>
             </div>
         @endif
-
-        {{-- Round Navigation: Centered, Text-only, NO arrows --}}
-        <div class="round-nav">
-            <button type="button" class="button button-secondary" id="btn-prev-round" {{ $currentRoundIndex === 0 ? 'disabled' : '' }}>
-                Previous
-            </button>
-            <div class="round-dots" id="round-dots-container">
-                @foreach ($rounds as $idx => $r)
-                    <span class="{{ $currentRoundIndex === $idx ? 'active' : '' }}" data-index="{{ $idx }}" title="Round {{ $idx + 1 }}{{ !empty($r['is_hidden']) ? ' (Hidden)' : '' }}"></span>
-                @endforeach
-            </div>
-            <button type="button" class="button button-primary" id="btn-next-round" {{ $currentRoundIndex >= count($rounds) - 1 ? 'disabled' : '' }}>
-                Next
-            </button>
-        </div>
     </main>
 </div>
 
@@ -124,9 +131,6 @@
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button type="button" class="button button-ghost button-sm" id="btn-open-teams-modal" style="font-size: 12.5px; height: 34px;">
                     <x-icon name="user" /> Configure Teams
-                </button>
-                <button type="button" class="button button-ghost button-sm" id="btn-open-editor" style="font-size: 12.5px; height: 34px;">
-                    <x-icon name="edit" /> Edit Rounds
                 </button>
                 <button type="button" class="icon-button" id="btn-close-scoreboard" aria-label="Close scoreboard modal" style="width: 34px; height: 34px;">
                     <x-icon name="x" />
@@ -177,9 +181,6 @@
         </div>
     </div>
 </div>
-
-{{-- CRUD Editor Modal --}}
-@include('partials.guess-me-editor')
 
 {{-- Team Configuration Modal --}}
 @include('partials.team-config-modal')

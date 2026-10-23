@@ -63,7 +63,7 @@ Route::prefix('game')->name('game.')->group(function () {
 });
 
 // Protected Game Management Endpoints (Requires Auth, Admin Role & Games Permission)
-Route::middleware(['auth', 'admin', 'admin.permission:games'])->prefix('game')->name('game.')->group(function () {
+Route::middleware(['auth:admin', 'admin', 'admin.permission:games'])->prefix('game')->name('game.')->group(function () {
     Route::post('/update-score', [GameController::class, 'updateScore'])->name('update-score');
     Route::post('/assign-round-points', [GameController::class, 'assignRoundPoints'])->name('assign-round-points');
     Route::post('/teams/configure', [GameController::class, 'configureTeams'])->name('teams.configure');
@@ -97,8 +97,9 @@ Route::get('/admin-ganteng', [AdminAuthController::class, 'showLoginForm'])->nam
 Route::post('/admin-ganteng', [AdminAuthController::class, 'login'])->name('admin.ganteng.submit');
 
 // Protected Administrator Routes (Requires Auth & Admin Role)
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth:admin', 'admin'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', fn() => redirect()->route('admin.dashboard'));
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
