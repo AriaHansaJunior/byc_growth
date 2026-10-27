@@ -130,7 +130,7 @@
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button type="button" class="button button-ghost button-sm" id="btn-open-teams-modal" style="font-size: 12.5px; height: 34px;">
-                    <x-icon name="user" /> Configure Teams
+                    Configure Teams
                 </button>
                 <button type="button" class="icon-button" id="btn-close-scoreboard" aria-label="Close scoreboard modal" style="width: 34px; height: 34px;">
                     <x-icon name="x" />

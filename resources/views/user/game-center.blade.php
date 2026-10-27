@@ -14,7 +14,7 @@
             </p>
             <div class="game-center-hero-actions">
                 <button type="button" class="button button-secondary" id="btn-how-to-play">
-                    <x-icon name="book" /> Rules & How to Play
+                    Rules & How to Play
                 </button>
             </div>
         </div>

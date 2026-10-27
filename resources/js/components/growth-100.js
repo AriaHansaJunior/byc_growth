@@ -157,6 +157,20 @@ export function initGrowth100() {
             btnResetCrosses.disabled = crosses === 0;
         }
 
+        // Reveal All & Hide All Buttons State
+        const totalAnswers = currentRound && currentRound.answers ? currentRound.answers.length : 0;
+        const revealedCount = revealed.length;
+        const allRevealed = totalAnswers > 0 && revealedCount >= totalAnswers;
+        const noneRevealed = revealedCount === 0;
+
+        if (btnRevealAll) {
+            btnRevealAll.disabled = allRevealed || totalAnswers === 0;
+        }
+
+        if (btnHideAll) {
+            btnHideAll.disabled = noneRevealed;
+        }
+
         // Navigation buttons
         if (btnPrevRound) btnPrevRound.disabled = currentIndex === 0;
         if (btnNextRound) btnNextRound.disabled = currentIndex >= rounds.length - 1;

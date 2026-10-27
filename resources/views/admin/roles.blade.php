@@ -140,10 +140,14 @@
                     </thead>
                     <tbody>
                         @foreach($users as $user)
+                            @php
+                                $canDeleteUser = $user->canBeDeletedBy($currentUser);
+                                $canEditUser = $user->canBeEditedBy($currentUser);
+                            @endphp
                             <tr id="user-row-{{ $user->id }}">
                                 <td style="text-align: center;">
-                                    @if($user->id === $currentUser->id)
-                                        <input type="checkbox" disabled title="Cannot select your own active administrator account" style="width: 17px; height: 17px; opacity: 0.35; cursor: not-allowed;">
+                                    @if(!$canDeleteUser)
+                                        <input type="checkbox" disabled title="{{ $user->id === $currentUser->id ? 'Cannot select your own active administrator account' : ($user->isRootOwner() ? 'Primary owner accounts cannot be deleted' : 'Protected administrator account') }}" style="width: 17px; height: 17px; opacity: 0.35; cursor: not-allowed;">
                                     @else
                                         <input type="checkbox" name="ids[]" value="{{ $user->id }}" form="form-batch-delete-roles" class="role-batch-checkbox" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;">
                                     @endif
@@ -159,94 +163,126 @@
                                             </span>
                                         @endif
                                     </div>
-                                @if($user->name && $user->name !== $user->username)
-                                    <small style="color: var(--muted); display: block; font-size: 12px; margin-top: 2px;">
-                                        {{ $user->name }}
-                                    </small>
-                                @endif
-                            </td>
-                            <td>
-                                <span style="color: var(--ink); font-size: 13.5px;">
-                                    {{ $user->email }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($user->role === 'admin')
-                                    <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                                        <span class="role-badge" style="background: #eaf3dc; color: var(--forest); font-weight: 700;">
-                                            Admin
-                                        </span>
-                                        @php
-                                            $userPerms = is_array($user->permissions) ? $user->permissions : [];
-                                            $permCount = count($userPerms);
-                                        @endphp
-                                        <small style="color: var(--muted); font-size: 11px; line-height: 1.2;">
-                                            @if($permCount === 7)
-                                                Full Access (7/7)
-                                            @elseif($permCount > 0)
-                                                {{ $permCount }} module{{ $permCount === 1 ? '' : 's' }}
-                                            @else
-                                                <span style="color: var(--danger); font-weight: 600;">No active modules</span>
-                                            @endif
+                                    @if($user->name && $user->name !== $user->username)
+                                        <small style="color: var(--muted); display: block; font-size: 12px; margin-top: 2px;">
+                                            {{ $user->name }}
                                         </small>
-                                    </div>
-                                @else
-                                    <span class="role-badge" style="background: #dfe9f2; color: #315e89; font-weight: 700;">
-                                        User
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <span style="color: var(--muted); font-size: 12.5px;">
-                                    {{ $user->created_at ? $user->created_at->format('M j, Y') : '-' }}
-                                </span>
-                            </td>
-                            <td style="text-align: right;">
-                                <div class="admin-action-group" style="justify-content: flex-end; gap: 6px;">
-                                    <button
-                                        type="button"
-                                        class="button button-ghost button-sm btn-edit-user"
-                                        data-id="{{ $user->id }}"
-                                        data-username="{{ $user->username }}"
-                                        data-name="{{ $user->name }}"
-                                        data-email="{{ $user->email }}"
-                                        data-role="{{ $user->role }}"
-                                        data-permissions='@json($user->permissions ?? [])'
-                                        style="font-size: 12px; padding: 4px 10px; height: 32px;"
-                                        title="Edit User"
-                                    >
-                                        Edit
-                                    </button>
-
-                                    @if($user->id !== $currentUser->id)
-                                        <form method="POST" action="{{ route('admin.roles.destroy', $user->id) }}" style="display: inline; margin: 0;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button
-                                                type="submit"
-                                                class="button button-danger button-sm"
-                                                style="font-size: 12px; padding: 4px 10px; height: 32px;"
-                                                data-admin-confirm="Are you sure you want to delete account '{{ '@' . $user->username }}' ({{ $user->email }})? This action cannot be undone."
-                                                title="Delete Account"
-                                            >
-                                                Delete
-                                            </button>
-                                        </form>
-                                    @else
-                                        <button
-                                            type="button"
-                                            class="button button-ghost button-sm"
-                                            disabled
-                                            title="Cannot delete your own active administrator account"
-                                            style="padding: 4px 10px; height: 32px; font-size: 12px; opacity: 0.45; cursor: not-allowed;"
-                                        >
-                                            Self
-                                        </button>
                                     @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
+                                </td>
+                                <td>
+                                    <span style="color: var(--ink); font-size: 13.5px;">
+                                        {{ $user->email }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($user->isSuperAdmin())
+                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                            <span class="role-badge" style="background: #eaf3dc; color: var(--forest); font-weight: 700;">
+                                                Super Admin
+                                            </span>
+                                            <small style="color: var(--muted); font-size: 11px; line-height: 1.2;">
+                                                {{ $user->isRootOwner() ? 'Primary Owner' : 'Protected Admin' }}
+                                            </small>
+                                        </div>
+                                    @elseif($user->role === 'admin')
+                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                            <span class="role-badge" style="background: #eaf3dc; color: var(--forest); font-weight: 700;">
+                                                Admin
+                                            </span>
+                                            @php
+                                                $userPerms = is_array($user->permissions) ? $user->permissions : [];
+                                                $permCount = count($userPerms);
+                                            @endphp
+                                            <small style="color: var(--muted); font-size: 11px; line-height: 1.2;">
+                                                @if($permCount === 7)
+                                                    Full Access (7/7)
+                                                @elseif($permCount > 0)
+                                                    {{ $permCount }} module{{ $permCount === 1 ? '' : 's' }}
+                                                @else
+                                                    <span style="color: var(--danger); font-weight: 600;">No active modules</span>
+                                                @endif
+                                            </small>
+                                        </div>
+                                    @else
+                                        <span class="role-badge" style="background: #dfe9f2; color: #315e89; font-weight: 700;">
+                                            User
+                                        </span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span style="color: var(--muted); font-size: 12.5px;">
+                                        {{ $user->created_at ? $user->created_at->format('M j, Y') : '-' }}
+                                    </span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div class="admin-action-group" style="justify-content: flex-end; gap: 6px;">
+                                        @if($canEditUser)
+                                            <button
+                                                type="button"
+                                                class="button button-ghost button-sm btn-edit-user"
+                                                data-id="{{ $user->id }}"
+                                                data-username="{{ $user->username }}"
+                                                data-name="{{ $user->name }}"
+                                                data-email="{{ $user->email }}"
+                                                data-role="{{ $user->role }}"
+                                                data-is-root="{{ $user->isRootOwner() ? '1' : '0' }}"
+                                                data-permissions='@json($user->permissions ?? [])'
+                                                style="font-size: 12px; padding: 4px 10px; height: 32px;"
+                                                title="Edit User"
+                                            >
+                                                Edit
+                                            </button>
+                                        @else
+                                            <button
+                                                type="button"
+                                                class="button button-ghost button-sm"
+                                                disabled
+                                                title="This administrator account is protected and cannot be edited by other administrators"
+                                                style="padding: 4px 10px; height: 32px; font-size: 12px; opacity: 0.45; cursor: not-allowed;"
+                                            >
+                                                Protected
+                                            </button>
+                                        @endif
+
+                                        @if($user->id === $currentUser->id)
+                                            <button
+                                                type="button"
+                                                class="button button-ghost button-sm"
+                                                disabled
+                                                title="Cannot delete your own active administrator account"
+                                                style="padding: 4px 10px; height: 32px; font-size: 12px; opacity: 0.45; cursor: not-allowed;"
+                                            >
+                                                Self
+                                            </button>
+                                        @elseif(!$canDeleteUser)
+                                            <button
+                                                type="button"
+                                                class="button button-ghost button-sm"
+                                                disabled
+                                                title="{{ $user->isRootOwner() ? 'Primary owner accounts cannot be deleted' : 'Protected account: cannot be deleted by other administrators' }}"
+                                                style="padding: 4px 10px; height: 32px; font-size: 12px; opacity: 0.45; cursor: not-allowed; color: var(--muted);"
+                                            >
+                                                Protected
+                                            </button>
+                                        @else
+                                            <form method="POST" action="{{ route('admin.roles.destroy', $user->id) }}" style="display: inline; margin: 0;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button
+                                                    type="submit"
+                                                    class="button button-danger button-sm"
+                                                    style="font-size: 12px; padding: 4px 10px; height: 32px;"
+                                                    data-admin-confirm="Are you sure you want to delete account '{{ '@' . $user->username }}' ({{ $user->email }})? This action cannot be undone."
+                                                    title="Delete Account"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
                 </tbody>
             </table>
         </div>
@@ -255,100 +291,113 @@
 
     {{-- Modal: Create Account --}}
     <div class="admin-modal-backdrop modal-backdrop" id="modal-add-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px; overscroll-behavior: contain;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 16px; max-width: 450px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 12px 18px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">👤</span>
-                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink);">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 620px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 800; color: var(--ink);">
                         Create New User Account
                     </h3>
                 </div>
                 <button type="button" class="btn-close-modal" data-target="modal-add-user" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
             </div>
 
-            <form method="POST" action="{{ route('admin.roles.store') }}" id="form-add-user" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
+            <form method="POST" action="{{ route('admin.roles.store') }}" id="form-add-user" autocomplete="off" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
-                <div style="padding: 12px 18px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
+
+                {{-- Hidden trap to prevent browser password managers from autofilling saved credentials --}}
+                <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; height: 0; width: 0; overflow: hidden;" aria-hidden="true">
+                    <input type="text" name="chrome_anti_autofill_user" tabindex="-1" autocomplete="off">
+                    <input type="password" name="chrome_anti_autofill_pass" tabindex="-1" autocomplete="new-password">
+                </div>
+
+                <div style="padding: 18px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="add-user-username" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Username *</label>
+                        <label class="form-label" for="add-user-username" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Username *</label>
                         <input
                             type="text"
                             name="username"
                             id="add-user-username"
                             class="form-input @error('username') input-invalid @enderror"
-                            value="{{ old('username') }}"
+                            value=""
                             placeholder="e.g. john_doe"
                             maxlength="60"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="off"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                         @error('username')
-                            <div class="form-field-error" data-for="add-user-username" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-username" style="font-size: 11px; margin-top: 2px;">{{ $message }}</div>
                         @enderror
-                        <small style="color: var(--muted); font-size: 10px; line-height: 1.25; display: block; margin-top: 1px;">Alphanumeric and underscores only.</small>
+                        <small style="color: var(--muted); font-size: 11px; line-height: 1.3; display: block; margin-top: 2px;">Alphanumeric and underscores only.</small>
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="add-user-name" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Full Name</label>
+                        <label class="form-label" for="add-user-name" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Full Name</label>
                         <input
                             type="text"
                             name="name"
                             id="add-user-name"
-                            value="{{ old('name') }}"
+                            value=""
                             class="form-input"
                             placeholder="e.g. John Doe (optional)"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="off"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="add-user-email" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Email Address *</label>
+                        <label class="form-label" for="add-user-email" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Email Address *</label>
                         <input
                             type="email"
                             name="email"
                             id="add-user-email"
-                            value="{{ old('email') }}"
+                            value=""
                             class="form-input @error('email') input-invalid @enderror"
                             placeholder="e.g. user@bycgrowth.org"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="off"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                         @error('email')
-                            <div class="form-field-error" data-for="add-user-email" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-email" style="font-size: 11px; margin-top: 2px;">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="add-user-password" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Password *</label>
+                        <label class="form-label" for="add-user-password" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Password *</label>
                         <input
                             type="password"
                             name="password"
                             id="add-user-password"
                             class="form-input @error('password') input-invalid @enderror"
                             placeholder="Minimum 6 characters"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="new-password"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                         @error('password')
-                            <div class="form-field-error" data-for="add-user-password" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-password" style="font-size: 11px; margin-top: 2px;">{{ $message }}</div>
                         @enderror
-                        <small style="color: var(--muted); font-size: 10px; line-height: 1.25; display: block; margin-top: 1px;">Securely encrypted using bcrypt.</small>
+                        <small style="color: var(--muted); font-size: 11px; line-height: 1.3; display: block; margin-top: 2px;">Securely encrypted using bcrypt.</small>
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="add-user-role" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Access Role *</label>
-                        <select name="role" id="add-user-role" class="form-input @error('role') input-invalid @enderror" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
-                            <option value="user" {{ old('role') === 'user' ? 'selected' : '' }}>User (Standard Fellowship Member)</option>
-                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin (Full Administrator)</option>
+                        <label class="form-label" for="add-user-role" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Access Role *</label>
+                        <select name="role" id="add-user-role" class="form-input @error('role') input-invalid @enderror" style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                            <option value="user">User (Standard Fellowship Member)</option>
+                            <option value="admin">Admin (Administrator)</option>
+                            @if($currentUser->canAssignSuperAdmin())
+                                <option value="super_admin">Super Admin (Protected Administrator)</option>
+                            @endif
                         </select>
                         @error('role')
-                            <div class="form-field-error" data-for="add-user-role" style="font-size: 10.5px; margin-top: 1px;">{{ $message }}</div>
+                            <div class="form-field-error" data-for="add-user-role" style="font-size: 11px; margin-top: 2px;">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
 
-                <div style="padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user" style="padding: 4px 12px; font-size: 12px;">
+                <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user" style="padding: 6px 16px; font-size: 13px; font-weight: 600;">
                         Cancel
                     </button>
-                    <button type="submit" class="button button-primary button-sm" style="min-width: 120px; padding: 4px 14px; font-size: 12px;">
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 130px; padding: 6px 18px; font-size: 13px; font-weight: 700;">
                         Create Account
                     </button>
                 </div>
@@ -358,59 +407,61 @@
 
     {{-- Modal: Edit Account --}}
     <div class="admin-modal-backdrop modal-backdrop" id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px; overscroll-behavior: contain;">
-        <div class="admin-modal-card" style="background: var(--white); border-radius: 16px; max-width: 580px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 12px 18px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">✏️</span>
-                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink);">
+        <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 620px; width: 100%; max-height: calc(100vh - 48px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
+            <div style="padding: 16px 22px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+                <div>
+                    <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 800; color: var(--ink);">
                         Edit User Account
                     </h3>
                 </div>
                 <button type="button" class="btn-close-modal" data-target="modal-edit-user" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
             </div>
 
-            <form method="POST" id="form-edit-user" action="" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
+            <form method="POST" id="form-edit-user" action="" autocomplete="off" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
                 @method('PUT')
-                <div style="padding: 12px 18px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;">
+                <div style="padding: 18px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="edit-user-username" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Username *</label>
+                        <label class="form-label" for="edit-user-username" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Username *</label>
                         <input
                             type="text"
                             name="username"
                             id="edit-user-username"
                             class="form-input"
                             maxlength="60"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="off"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="edit-user-name" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Full Name</label>
+                        <label class="form-label" for="edit-user-name" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Full Name</label>
                         <input
                             type="text"
                             name="name"
                             id="edit-user-name"
                             class="form-input"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="off"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="edit-user-email" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Email Address *</label>
+                        <label class="form-label" for="edit-user-email" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Email Address *</label>
                         <input
                             type="email"
                             name="email"
                             id="edit-user-email"
                             class="form-input"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="off"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="edit-user-password" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">
+                        <label class="form-label" for="edit-user-password" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">
                             Change Password
-                            <small style="color: var(--muted); font-weight: normal; font-size: 10px;">(Leave empty to preserve current)</small>
+                            <small style="color: var(--muted); font-weight: normal; font-size: 11px;">(Leave empty to preserve current)</small>
                         </label>
                         <input
                             type="password"
@@ -418,15 +469,19 @@
                             id="edit-user-password"
                             class="form-input"
                             placeholder="Leave blank to keep current password"
-                            style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;"
+                            autocomplete="new-password"
+                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
                         >
                     </div>
 
                     <div class="form-group" style="margin: 0;">
-                        <label class="form-label" for="edit-user-role" style="display: block; font-weight: 700; font-size: 11px; color: var(--ink); margin-bottom: 2px;">Access Role *</label>
-                        <select name="role" id="edit-user-role" class="form-input" style="height: 32px; padding: 4px 10px; font-size: 12.5px; border-radius: 7px; width: 100%; box-sizing: border-box;">
+                        <label class="form-label" for="edit-user-role" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Access Role *</label>
+                        <select name="role" id="edit-user-role" class="form-input" style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;">
                             <option value="user">User (Standard Fellowship Member)</option>
-                            <option value="admin">Admin (Full Administrator)</option>
+                            <option value="admin">Admin (Administrator)</option>
+                            @if($currentUser->canAssignSuperAdmin())
+                                <option value="super_admin">Super Admin (Protected Administrator)</option>
+                            @endif
                         </select>
                     </div>
 
@@ -469,11 +524,11 @@
                     </div>
                 </div>
 
-                <div style="padding: 10px 18px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user" style="padding: 4px 12px; font-size: 12px;">
+                <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user" style="padding: 6px 16px; font-size: 13px; font-weight: 600;">
                         Cancel
                     </button>
-                    <button type="submit" class="button button-primary button-sm" style="min-width: 120px; padding: 4px 14px; font-size: 12px;">
+                    <button type="submit" class="button button-primary button-sm" style="min-width: 130px; padding: 6px 18px; font-size: 13px; font-weight: 700;">
                         Save Changes
                     </button>
                 </div>
@@ -620,6 +675,11 @@ document.addEventListener('DOMContentLoaded', function () {
             permInputs.forEach(input => {
                 input.checked = perms.includes(input.value);
             });
+        } else if (role === 'super_admin') {
+            editPermSection.style.display = 'block';
+            permInputs.forEach(input => {
+                input.checked = true;
+            });
         } else {
             editPermSection.style.display = 'none';
             permInputs.forEach(input => {
@@ -667,6 +727,10 @@ document.addEventListener('DOMContentLoaded', function () {
             clearAllErrors(formEdit);
             let hasError = false;
 
+            if (editRole) {
+                editRole.disabled = false;
+            }
+
             const uVal = editUsername ? editUsername.value.trim() : '';
             if (!uVal) {
                 setFieldError(editUsername, 'Please enter a username.');
@@ -709,16 +773,37 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function resetAddUserForm() {
+        if (!formAddUser) return;
+        formAddUser.reset();
+        clearAllErrors(formAddUser);
+        const usernameEl = document.getElementById('add-user-username');
+        const nameEl = document.getElementById('add-user-name');
+        const emailEl = document.getElementById('add-user-email');
+        const passwordEl = document.getElementById('add-user-password');
+        const roleEl = document.getElementById('add-user-role');
+        if (usernameEl) usernameEl.value = '';
+        if (nameEl) nameEl.value = '';
+        if (emailEl) emailEl.value = '';
+        if (passwordEl) passwordEl.value = '';
+        if (roleEl) roleEl.value = 'user';
+    }
+
     @if($errors->hasAny(['username', 'email', 'password', 'role']))
         if (addModal) {
             openModal(addModal);
         }
+    @else
+        resetAddUserForm();
     @endif
 
     if (openAddBtn && addModal) {
         openAddBtn.addEventListener('click', function () {
-            clearAllErrors(formAddUser);
+            resetAddUserForm();
             openModal(addModal);
+            setTimeout(resetAddUserForm, 50);
+            setTimeout(resetAddUserForm, 150);
+            setTimeout(resetAddUserForm, 300);
         });
     }
 
@@ -728,11 +813,24 @@ document.addEventListener('DOMContentLoaded', function () {
             clearAllErrors(formEdit);
             formEdit.action = '/admin/roles/' + data.id;
 
+            const isRoot = data.isRoot === '1';
+            const roleSelect = document.getElementById('edit-user-role');
+            if (roleSelect) {
+                let superOpt = roleSelect.querySelector('option[value="super_admin"]');
+                if (isRoot && !superOpt) {
+                    superOpt = document.createElement('option');
+                    superOpt.value = 'super_admin';
+                    superOpt.textContent = 'Super Admin (Primary Owner)';
+                    roleSelect.appendChild(superOpt);
+                }
+                roleSelect.value = data.role || (isRoot ? 'super_admin' : 'user');
+                roleSelect.disabled = isRoot;
+            }
+
             document.getElementById('edit-user-username').value = data.username || '';
             document.getElementById('edit-user-name').value = data.name || '';
             document.getElementById('edit-user-email').value = data.email || '';
             document.getElementById('edit-user-password').value = '';
-            document.getElementById('edit-user-role').value = data.role || 'user';
 
             let userPerms = [];
             try {
@@ -756,7 +854,20 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', function () {
             const targetId = this.dataset.target;
             if (targetId) {
+                if (targetId === 'modal-add-user') {
+                    resetAddUserForm();
+                }
                 closeModal(document.getElementById(targetId));
+            }
+        });
+    });
+
+    [addModal, editModal].forEach(function (m) {
+        if (!m) return;
+        m.addEventListener('click', function (e) {
+            if (e.target === m) {
+                if (m === addModal) resetAddUserForm();
+                closeModal(m);
             }
         });
     });
@@ -766,6 +877,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Escape') {
             document.querySelectorAll('.admin-modal-backdrop').forEach(function (modal) {
                 if (modal.style.display !== 'none') {
+                    if (modal === addModal) resetAddUserForm();
                     closeModal(modal);
                 }
             });

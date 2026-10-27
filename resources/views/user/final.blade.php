@@ -84,6 +84,7 @@
         }
         return $number . $ends[$number % 10];
     };
+    $isAdmin = \App\Models\User::isCurrentAdmin();
 @endphp
 
 <main class="final-screen">
@@ -93,7 +94,7 @@
     <div class="confetti confetti-four"></div>
 
     {{-- Brand Home / Back Link (Pinned to top left) --}}
-    <a href="{{ (Auth::check() && Auth::user()->isAdmin()) ? route('admin.games') : route('game.center') }}" class="brand-button final-brand-link" aria-label="{{ (Auth::check() && Auth::user()->isAdmin()) ? 'Back to Admin Games' : 'Back to Game Center' }}" title="{{ (Auth::check() && Auth::user()->isAdmin()) ? 'Back to Admin Games' : 'Back to Game Center' }}">
+    <a href="{{ $isAdmin ? route('admin.games') : route('game.center') }}" class="brand-button final-brand-link" aria-label="{{ $isAdmin ? 'Back to Admin Games' : 'Back to Game Center' }}" title="{{ $isAdmin ? 'Back to Admin Games' : 'Back to Game Center' }}">
         <x-brand compact="true" />
     </a>
 
@@ -233,8 +234,8 @@
     @endif
 
     {{-- Bottom Return Action --}}
-    <a href="{{ (Auth::check() && Auth::user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="button button-secondary final-return-btn">
-        <x-icon name="home" /> Return to Home
+    <a href="{{ $isAdmin ? route('admin.dashboard') : route('home') }}" class="button button-secondary final-return-btn" title="{{ $isAdmin ? 'Return to Admin Dashboard' : 'Return to Home' }}">
+        {{ $isAdmin ? 'Return to Admin Dashboard' : 'Return to Home' }}
     </a>
 </main>
 @endsection

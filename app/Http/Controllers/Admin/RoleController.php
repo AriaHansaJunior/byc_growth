@@ -35,8 +35,12 @@ class RoleController extends Controller
             });
         }
 
-        if (in_array($role, ['admin', 'user'], true)) {
-            $query->where('role', $role);
+        if ($role === 'super_admin') {
+            $query->where('role', User::ROLE_SUPER_ADMIN);
+        } elseif ($role === 'admin') {
+            $query->whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN]);
+        } elseif ($role === 'user') {
+            $query->where('role', User::ROLE_USER);
         }
 
         switch ($sort) {
@@ -65,13 +69,13 @@ class RoleController extends Controller
         $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();
 
         $totalUsersCount = User::count();
-        $totalAdminsCount = User::where('role', 'admin')->count();
-        $totalStandardUsersCount = User::where('role', 'user')->count();
+        $totalAdminsCount = User::whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN])->count();
+        $totalStandardUsersCount = User::where('role', User::ROLE_USER)->count();
 
         return view('admin.roles', [
             'users' => $users,
             'members' => $members,
-            'currentUser' => Auth::user(),
+            'currentUser' => Auth::guard('admin')->user() ?? Auth::user(),
             'totalUsersCount' => $totalUsersCount,
             'totalAdminsCount' => $totalAdminsCount,
             'totalStandardUsersCount' => $totalStandardUsersCount,
@@ -109,6 +113,14 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
+        /** @var User|null $currentUser */
+        $currentUser = Auth::guard('admin')->user() ?? Auth::user();
+
+        $allowedRoles = [User::ROLE_ADMIN, User::ROLE_USER];
+        if ($currentUser && $currentUser->canAssignSuperAdmin()) {
+            $allowedRoles[] = User::ROLE_SUPER_ADMIN;
+        }
+
         $validated = $request->validate([
             'username' => [
                 $request->has('username') ? 'required' : 'nullable',
@@ -121,16 +133,24 @@ class RoleController extends Controller
             'name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
-            'role' => ['required', Rule::in(['admin', 'user'])],
+            'role' => ['required', Rule::in($allowedRoles)],
             'member_id' => ['nullable', 'exists:members,id', 'unique:users,member_id'],
         ]);
+
+        $role = $validated['role'];
+        $permissions = null;
+        if ($role === User::ROLE_SUPER_ADMIN) {
+            $permissions = array_keys(User::AVAILABLE_PERMISSIONS);
+        } elseif ($role === User::ROLE_ADMIN) {
+            $permissions = [];
+        }
 
         $userData = [
             'name' => !empty($validated['name']) ? $validated['name'] : ($validated['username'] ?? null),
             'email' => strtolower($validated['email']),
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-            'permissions' => $validated['role'] === 'admin' ? [] : null,
+            'role' => $role,
+            'permissions' => $permissions,
             'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ];
 
@@ -140,7 +160,7 @@ class RoleController extends Controller
 
         $user = User::create($userData);
 
-        AuditLog::record(Auth::user(), 'created', 'roles', $user->id, "Created account '{$user->email}' with role {$user->role}");
+        AuditLog::record($currentUser, 'created', 'roles', $user->id, "Created account '{$user->email}' with role {$user->role}");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -159,6 +179,25 @@ class RoleController extends Controller
     public function update(Request $request, int $id)
     {
         $user = User::findOrFail($id);
+        /** @var User|null $currentUser */
+        $currentUser = Auth::guard('admin')->user() ?? Auth::user();
+
+        // Enforce account protection
+        if (!$user->canBeEditedBy($currentUser)) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'You do not have authorization to modify this protected account.',
+                ], 403);
+            }
+
+            return redirect()->route('admin.roles')->with('error', 'You do not have authorization to modify this protected account.');
+        }
+
+        $allowedRoles = [User::ROLE_ADMIN, User::ROLE_USER];
+        if (($currentUser && $currentUser->canAssignSuperAdmin()) || $user->isSuperAdmin()) {
+            $allowedRoles[] = User::ROLE_SUPER_ADMIN;
+        }
 
         $validated = $request->validate([
             'username' => [
@@ -178,7 +217,7 @@ class RoleController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'password' => ['nullable', 'string', 'min:6'],
-            'role' => ['required', Rule::in(['admin', 'user'])],
+            'role' => ['required', Rule::in($allowedRoles)],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string', Rule::in(array_keys(User::AVAILABLE_PERMISSIONS))],
             'member_id' => [
@@ -188,13 +227,21 @@ class RoleController extends Controller
             ],
         ]);
 
+        $newRole = $validated['role'];
+        // Primary root owners can never be demoted
+        if ($user->isRootOwner()) {
+            $newRole = User::ROLE_SUPER_ADMIN;
+        }
+
         $updateData = [
             'email' => strtolower($validated['email']),
-            'role' => $validated['role'],
+            'role' => $newRole,
             'member_id' => !empty($validated['member_id']) ? (int) $validated['member_id'] : null,
         ];
 
-        if ($validated['role'] === 'admin') {
+        if ($newRole === User::ROLE_SUPER_ADMIN) {
+            $updateData['permissions'] = array_keys(User::AVAILABLE_PERMISSIONS);
+        } elseif ($newRole === User::ROLE_ADMIN) {
             $updateData['permissions'] = array_values(array_unique($request->input('permissions', [])));
         } else {
             $updateData['permissions'] = null;
@@ -215,7 +262,7 @@ class RoleController extends Controller
 
         $user->update($updateData);
 
-        AuditLog::record(Auth::user(), 'edited', 'roles', $user->id, "Updated account '{$user->email}'");
+        AuditLog::record($currentUser, 'edited', 'roles', $user->id, "Updated account '{$user->email}'");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -230,29 +277,38 @@ class RoleController extends Controller
 
     /**
      * Remove the specified account from storage.
-     * Prevents deletion of the currently authenticated admin account.
+     * Prevents deletion of the currently authenticated admin account and protected accounts.
      */
     public function destroy(Request $request, int $id)
     {
         $user = User::findOrFail($id);
+        /** @var User|null $currentUser */
+        $currentUser = Auth::guard('admin')->user() ?? Auth::user();
 
-        // Critical Rule: An admin MUST NOT be able to delete their own currently authenticated account
-        if ($user->id === Auth::id()) {
+        if (!$user->canBeDeletedBy($currentUser)) {
+            $errorMsg = $user->isRootOwner()
+                ? 'Primary website owner accounts are permanently protected and cannot be deleted.'
+                : ($user->isSuperAdmin()
+                    ? 'Super Admin accounts can only be deleted by primary website owners (rilbiezzz / admin_utama).'
+                    : ($user->id === ($currentUser?->id ?? Auth::id())
+                        ? 'Cannot delete your own active administrator account.'
+                        : 'You do not have authorization to delete this protected account.'));
+
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Cannot delete your own active administrator account.',
+                    'error' => $errorMsg,
                 ], 403);
             }
 
-            return redirect()->route('admin.roles')->with('error', 'Cannot delete your own active administrator account.');
+            return redirect()->route('admin.roles')->with('error', $errorMsg);
         }
 
         $userEmail = $user->email;
         $userId = $user->id;
         $user->delete();
 
-        AuditLog::record(Auth::user(), 'deleted', 'roles', $userId, "Deleted account '{$userEmail}'");
+        AuditLog::record($currentUser, 'deleted', 'roles', $userId, "Deleted account '{$userEmail}'");
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -266,7 +322,7 @@ class RoleController extends Controller
 
     /**
      * Remove multiple accounts from storage.
-     * Prevents deletion of the currently authenticated admin account.
+     * Prevents deletion of the currently authenticated admin account and protected accounts.
      */
     public function batchDestroy(Request $request)
     {
@@ -275,31 +331,34 @@ class RoleController extends Controller
             'ids.*' => ['required', 'integer', 'exists:users,id'],
         ]);
 
-        $currentUserId = Auth::id();
-        // Prevent deleting current logged-in admin account
-        $targetIds = array_values(array_filter($validated['ids'], function ($id) use ($currentUserId) {
-            return (int) $id !== (int) $currentUserId;
-        }));
+        /** @var User|null $currentUser */
+        $currentUser = Auth::guard('admin')->user() ?? Auth::user();
 
-        if (empty($targetIds)) {
+        // Retrieve requested candidate users and filter strictly by canBeDeletedBy
+        $candidateUsers = User::whereIn('id', $validated['ids'])->get();
+        $deletableUsers = $candidateUsers->filter(function ($user) use ($currentUser) {
+            return $user->canBeDeletedBy($currentUser);
+        });
+
+        if ($deletableUsers->isEmpty()) {
+            $errorMsg = 'None of the selected accounts can be deleted. Protected administrator accounts cannot be deleted.';
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Cannot delete your own active administrator account.',
+                    'error' => $errorMsg,
                 ], 403);
             }
 
-            return redirect()->route('admin.roles')->with('error', 'Cannot delete your own active administrator account.');
+            return redirect()->route('admin.roles')->with('error', $errorMsg);
         }
 
-        $targetUsers = User::whereIn('id', $targetIds)->get();
         $deletedCount = 0;
-        foreach ($targetUsers as $user) {
+        foreach ($deletableUsers as $user) {
             $user->delete();
             $deletedCount++;
         }
 
-        AuditLog::record(Auth::user(), 'batch_deleted', 'roles', null, "Batch deleted {$deletedCount} accounts");
+        AuditLog::record($currentUser, 'batch_deleted', 'roles', null, "Batch deleted {$deletedCount} accounts");
 
         $message = "Successfully deleted {$deletedCount} account" . ($deletedCount === 1 ? '' : 's') . '.';
 

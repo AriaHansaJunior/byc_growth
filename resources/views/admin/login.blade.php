@@ -87,7 +87,7 @@
             </div>
 
             <button type="submit" class="button button-primary" style="width: 100%;">
-                Login <x-icon name="arrow" />
+                Login 
             </button>
         </form>
     </div>

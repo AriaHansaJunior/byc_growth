@@ -87,7 +87,7 @@
             {{-- Action Controls (Hidden during initial lock sequence) --}}
             <div id="birthday-action-buttons" style="display: none; justify-content: center; align-items: center; gap: 14px; margin-top: 8px;">
                 <button type="button" id="btn-birthday-write-letter" class="button button-primary">
-                    <x-icon name="sparkles" /> <span id="btn-birthday-write-text">Write a Letter</span>
+                    <span id="btn-birthday-write-text">Write a Letter</span>
                 </button>
                 @if(auth()->check() && auth()->user()->member)
                     <a href="{{ route('birthday.wishes') }}" class="button button-ghost" style="border-color: var(--gold); color: #8e680a; font-weight: 700;">

@@ -406,8 +406,9 @@
     line-height: 1.55 !important;
   }
 
-  .admin-stamp {
-    display: none !important; /* Hide decorative circle on mobile so text has 100% width and is never squashed */
+  .admin-stamp,
+  .admin-welcome-badge {
+    display: none !important; /* Hide decorative badge on mobile so text has 100% width and is never squashed */
   }
 
   /* Admin Modals & Popups (Screenshot 2: prevent modal from sticking out) */
@@ -422,11 +423,20 @@
   .info-modal {
     width: 100% !important;
     max-width: calc(100vw - 24px) !important;
-    max-height: min(600px, 80vh) !important;
-    padding: 20px 16px !important;
+    max-height: min(680px, 92vh) !important;
     border-radius: 18px !important;
     box-sizing: border-box !important;
     margin: auto !important;
+  }
+
+  .admin-modal-card:not(:has(form)) {
+    padding: 20px 16px !important;
+  }
+
+  .admin-modal-card:has(form),
+  #modal-add-user .admin-modal-card,
+  #modal-edit-user .admin-modal-card {
+    padding: 0 !important;
   }
 
   .activity-date-grid {

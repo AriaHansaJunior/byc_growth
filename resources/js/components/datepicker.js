@@ -190,13 +190,20 @@ class BycDatePicker {
         });
         observer.observe(this.originalInput, { attributes: true, attributeFilter: ['disabled', 'max', 'min'] });
 
-        // Intercept programmatic value setter on originalInput
+        // Intercept programmatic value setter and getter on originalInput
         const originalSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-        if (originalSetter) {
-            const self = this;
+        const originalGetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.get;
+        const self = this;
+
+        if (originalSetter && originalGetter) {
             Object.defineProperty(this.originalInput, 'value', {
                 set: function(val) {
                     originalSetter.call(this, val);
+                    if (val) {
+                        this.setAttribute('value', val);
+                    } else {
+                        this.removeAttribute('value');
+                    }
                     const parsed = parseDateString(val);
                     if (parsed && ((self.maxDate && parsed > self.maxDate) || (self.minDate && parsed < self.minDate))) {
                         self.selectedDate = null;
@@ -216,7 +223,88 @@ class BycDatePicker {
                     }
                 },
                 get: function() {
-                    return this.getAttribute('value') || '';
+                    return originalGetter.call(this) || this.getAttribute('value') || '';
+                },
+                configurable: true
+            });
+        }
+
+        // Intercept disabled property on originalInput so programmatic input.disabled = false updates displayInput
+        const originalDisabledSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'disabled')?.set;
+        const originalDisabledGetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'disabled')?.get;
+        if (originalDisabledSetter && originalDisabledGetter) {
+            Object.defineProperty(this.originalInput, 'disabled', {
+                set: function(val) {
+                    const boolVal = !!val;
+                    originalDisabledSetter.call(this, boolVal);
+                    if (boolVal) {
+                        this.setAttribute('disabled', '');
+                    } else {
+                        this.removeAttribute('disabled');
+                    }
+                    if (self.displayInput) {
+                        self.displayInput.disabled = boolVal;
+                        if (boolVal) {
+                            self.displayInput.classList.add('is-disabled');
+                            self.displayInput.style.opacity = '0.6';
+                            self.displayInput.style.cursor = 'not-allowed';
+                        } else {
+                            self.displayInput.classList.remove('is-disabled');
+                            self.displayInput.style.opacity = '1';
+                            self.displayInput.style.cursor = 'pointer';
+                        }
+                    }
+                },
+                get: function() {
+                    return originalDisabledGetter.call(this);
+                },
+                configurable: true
+            });
+        }
+
+        // Intercept min property on originalInput
+        const originalMinSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'min')?.set;
+        const originalMinGetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'min')?.get;
+        if (originalMinSetter && originalMinGetter) {
+            Object.defineProperty(this.originalInput, 'min', {
+                set: function(val) {
+                    originalMinSetter.call(this, val);
+                    if (val) {
+                        this.setAttribute('min', val);
+                    } else {
+                        this.removeAttribute('min');
+                    }
+                    self.initConstraints();
+                    if (self.isOpen()) {
+                        self.render();
+                    }
+                },
+                get: function() {
+                    return originalMinGetter.call(this) || this.getAttribute('min') || '';
+                },
+                configurable: true
+            });
+        }
+
+        // Intercept max property on originalInput
+        const originalMaxSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'max')?.set;
+        const originalMaxGetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'max')?.get;
+        if (originalMaxSetter && originalMaxGetter) {
+            Object.defineProperty(this.originalInput, 'max', {
+                set: function(val) {
+                    originalMaxSetter.call(this, val);
+                    if (val) {
+                        this.setAttribute('max', val);
+                    } else {
+                        this.removeAttribute('max');
+                    }
+                    self.initConstraints();
+                    if (self.isOpen()) {
+                        self.render();
+                    }
+                },
+                get: function() {
+                    return originalMaxGetter.call(this) || this.getAttribute('max') || '';
                 },
                 configurable: true
             });
@@ -809,10 +897,23 @@ class BycDatePicker {
         } else {
             this.originalInput.value = isoStr;
         }
+        this.originalInput.setAttribute('value', isoStr);
 
         // Trigger native change and input events on original input
         this.originalInput.dispatchEvent(new Event('input', { bubbles: true }));
         this.originalInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    setDisabled(disabled) {
+        this.originalInput.disabled = !!disabled;
+    }
+
+    setMin(minVal) {
+        this.originalInput.min = minVal || '';
+    }
+
+    setMax(maxVal) {
+        this.originalInput.max = maxVal || '';
     }
 }
 

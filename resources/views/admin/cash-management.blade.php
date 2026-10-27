@@ -11,16 +11,10 @@
             Record member contributions, verify transfer proofs, monitor treasury inflow, and maintain transparent fellowship accounting.
         </p>
     </div>
-    <div class="admin-header-actions">
-        <button type="button" class="button button-primary button-sm" id="btn-open-record-tx">
-            Record Transaction
-        </button>
-    </div>
 </div>
 @endsection
 
 @section('content')
-    {{-- Treasury Summary Card --}}
     {{-- Treasury Summary Card --}}
     <div class="admin-card cash-hero-card" style="background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%); color: #fff; margin-bottom: 24px; padding: 24px 28px; border-radius: 20px; box-shadow: var(--shadow);">
         <div class="cash-hero-layout" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
@@ -32,8 +26,8 @@
                 <small class="cash-hero-sub" style="color: #b8c5bf; font-size: 13px;">Accurate total across all matching transactions in the fellowship treasury</small>
             </div>
             <div class="cash-hero-actions">
-                <button type="button" class="button button-primary button-sm btn-quick-record-tx" onclick="document.getElementById('btn-open-record-tx')?.click();" style="background: var(--lime); color: var(--forest-dark); font-weight: 800; border: none; height: 38px; padding: 0 16px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px;">
-                    <span>+</span> Record Tx
+                <button type="button" class="button button-primary button-sm btn-quick-record-tx" id="btn-open-record-tx" style="background: var(--lime); color: var(--forest-dark); font-weight: 800; border: none; height: 38px; padding: 0 18px; border-radius: 10px; display: inline-flex; align-items: center;">
+                    Record Transaction
                 </button>
             </div>
         </div>
@@ -57,7 +51,7 @@
                         data-amount="{{ $shortcuts[$m->id]['amount'] ?? '' }}"
                         style="font-size: 12px; padding: 4px 12px; border-radius: 99px; height: 32px; white-space: nowrap; flex-shrink: 0;"
                     >
-                        + {{ $m->full_name }}
+                        {{ $m->full_name }}
                     </button>
                 @endforeach
             </div>
@@ -85,7 +79,7 @@
 
                 <div class="cash-filter-col">
                     <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Amount</label>
-                    <input type="number" name="amount" value="{{ $filters['amount'] }}" placeholder="Exact amount..." class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                    <input type="number" name="amount" value="{{ $filters['amount'] }}" placeholder="Exact amount..." class="form-input" style="background-color: var(--white, #ffffff); height: 40px; font-size: 13.5px; padding: 8px 12px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);">
                 </div>
 
                 <div class="cash-filter-col">
@@ -482,7 +476,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modalRecordTx = document.getElementById('modal-record-tx');
-    const btnOpenRecordTx = document.getElementById('btn-open-record-tx') || document.getElementById('btn-quick-record');
+    const recordButtons = document.querySelectorAll('#btn-open-record-tx, .btn-quick-record-tx');
 
     function openModal(modalEl) {
         if (!modalEl) return;
@@ -501,10 +495,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    if (btnOpenRecordTx && modalRecordTx) {
-        btnOpenRecordTx.addEventListener('click', function (e) {
-            e.preventDefault();
-            openModal(modalRecordTx);
+    if (modalRecordTx) {
+        recordButtons.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal(modalRecordTx);
+            });
         });
     }
 

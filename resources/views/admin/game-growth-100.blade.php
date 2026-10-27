@@ -13,8 +13,13 @@
     $currentCrosses = (int) ($game2State['crosses'][$roundId] ?? 0);
     $isRoundHidden = !empty($currentRound['is_hidden']);
 
-    // Calculate sum of revealed answer points
+    // Calculate sum of revealed answer points and completion state
     $roundRevealedPoints = 0;
+    $totalAnswersCount = $currentRound && isset($currentRound['answers']) ? count($currentRound['answers']) : 0;
+    $revealedCount = count($revealedIndexes);
+    $allAnswersRevealed = $totalAnswersCount > 0 && $revealedCount >= $totalAnswersCount;
+    $noneAnswersRevealed = $revealedCount === 0;
+
     if ($currentRound && isset($currentRound['answers'])) {
         foreach ($currentRound['answers'] as $idx => $ans) {
             if (in_array($idx, $revealedIndexes)) {
@@ -125,14 +130,14 @@
                         @endfor
                     </div>
                     <button type="button" class="btn-cross-reset" id="btn-reset-crosses" title="Reset all strikes for this round" {{ $currentCrosses === 0 ? 'disabled' : '' }}>
-                        <x-icon name="rotate-ccw" /> Reset Strikes
+                        Reset Strikes
                     </button>
                 </div>
                 <div class="reveal-control">
-                    <button type="button" class="button button-secondary" id="btn-reveal-all">Reveal All</button>
-                    <button type="button" class="button button-ghost" id="btn-hide-all">Hide All</button>
+                    <button type="button" class="button button-secondary" id="btn-reveal-all" {{ ($allAnswersRevealed || $totalAnswersCount === 0) ? 'disabled' : '' }}>Reveal All</button>
+                    <button type="button" class="button button-ghost" id="btn-hide-all" {{ $noneAnswersRevealed ? 'disabled' : '' }}>Hide All</button>
                     <button type="button" class="button button-ghost" id="btn-open-teams-modal">
-                        <x-icon name="user" /> Configure Teams
+                        Configure Teams
                     </button>
                 </div>
             </div>
@@ -182,7 +187,7 @@
             </div>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button type="button" class="button button-ghost button-sm" id="btn-open-teams-modal-header" style="font-size: 12.5px; height: 34px;" onclick="document.getElementById('btn-open-teams-modal').click();">
-                    <x-icon name="user" /> Configure Teams
+                    Configure Teams
                 </button>
                 <button type="button" class="icon-button" id="btn-close-scoreboard" aria-label="Close scoreboard modal" style="width: 34px; height: 34px;">
                     <x-icon name="x" />

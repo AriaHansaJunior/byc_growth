@@ -3,6 +3,10 @@
 @section('title', 'Members Directory — BYC GROWTH')
 
 @section('content')
+@php
+    $currentUser = \App\Models\User::current();
+    $isAdmin = \App\Models\User::isCurrentAdmin();
+@endphp
 <div class="page-shell">
     {{-- Page Header --}}
     <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 28px;">
@@ -14,12 +18,12 @@
             </p>
         </div>
         <div style="display: flex; gap: 12px; align-items: center;">
-            @if(auth()->check() && auth()->user()->isAdmin())
+            @if($isAdmin)
                 <button type="button" class="button button-primary button-sm" id="btn-open-add-member">
                     Add New Member
                 </button>
             @endif
-            @if(auth()->check() && auth()->user()->member)
+            @if($currentUser && $currentUser->member)
                 <a href="{{ route('birthday.wishes') }}" class="button button-secondary button-sm" style="font-weight: 700; white-space: nowrap; text-decoration: none;">
                     My Birthday Wishes
                 </a>
@@ -112,7 +116,7 @@
                 @php
                     $isBirthday = $member->isBirthdayToday();
                     $isOwner = (isset($currentUserMemberId) && (int)$currentUserMemberId === (int)$member->id)
-                        || (auth()->check() && !auth()->user()->isAdmin() && (int)auth()->user()->member_id === (int)$member->id);
+                        || ($currentUser && !$currentUser->isAdmin() && (int)$currentUser->member_id === (int)$member->id);
                 @endphp
                 <div class="member-card {{ $isBirthday ? 'member-card-birthday' : '' }} {{ $isOwner ? 'member-card-owner' : '' }}"
                     data-id="{{ $member->id }}"
@@ -181,7 +185,7 @@
                     @endif
 
                     {{-- Admin Controls (Only visible to authenticated administrators) --}}
-                    @if(auth()->check() && auth()->user()->isAdmin())
+                    @if($isAdmin)
                         <div class="admin-member-actions" style="margin-top: 14px; display: flex; gap: 8px; width: 100%; justify-content: center;">
                             <button
                                 type="button"
@@ -211,7 +215,7 @@
 </div>
 
 {{-- Admin Modal: Add Member --}}
-@if(auth()->check() && auth()->user()->isAdmin())
+@if($isAdmin)
 <div class="game-modal-overlay" id="modal-add-member" style="display: none;">
     <div class="game-modal" style="max-width: 500px; width: 90%;">
         <div class="game-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px;">

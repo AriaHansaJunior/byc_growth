@@ -335,52 +335,107 @@ document.addEventListener('DOMContentLoaded', function () {
     // 1. Add Activity Date Rules:
     // Initially end_date is disabled until start_date is chosen.
     // Default: end_date = start_date. Cannot select end_date prior to start_date.
-    addStartDate.addEventListener('change', function () {
-        if (this.value) {
+    function syncAddDatepicker() {
+        const startDateVal = addStartDate.value;
+        if (startDateVal) {
             addEndDate.disabled = false;
+            addEndDate.removeAttribute('disabled');
+            addEndDate.min = startDateVal;
+            addEndDate.setAttribute('min', startDateVal);
             addEndDate.style.opacity = '1';
             addEndDate.style.cursor = 'default';
-            addEndDate.min = this.value;
-            if (!addEndDate.value || addEndDate.value < this.value) {
-                addEndDate.value = this.value;
+
+            if (addEndDate._bycDatePicker) {
+                addEndDate._bycDatePicker.displayInput.disabled = false;
+                addEndDate._bycDatePicker.displayInput.classList.remove('is-disabled');
+                addEndDate._bycDatePicker.displayInput.style.opacity = '1';
+                addEndDate._bycDatePicker.displayInput.style.cursor = 'pointer';
+                addEndDate._bycDatePicker.initConstraints();
             }
+
+            if (!addEndDate.value || addEndDate.value < startDateVal) {
+                if (window.setDatePickerValue) {
+                    window.setDatePickerValue(addEndDate, startDateVal);
+                } else {
+                    addEndDate.value = startDateVal;
+                }
+            }
+
             if (addEndDateHint) {
                 addEndDateHint.textContent = 'Defaults to same day; change if multi-day.';
             }
         } else {
             addEndDate.disabled = true;
-            addEndDate.value = '';
+            addEndDate.setAttribute('disabled', 'disabled');
             addEndDate.style.opacity = '0.6';
             addEndDate.style.cursor = 'not-allowed';
+
+            if (addEndDate._bycDatePicker) {
+                addEndDate._bycDatePicker.displayInput.disabled = true;
+                addEndDate._bycDatePicker.displayInput.classList.add('is-disabled');
+                addEndDate._bycDatePicker.displayInput.style.opacity = '0.6';
+                addEndDate._bycDatePicker.displayInput.style.cursor = 'not-allowed';
+            }
+
+            if (window.setDatePickerValue) {
+                window.setDatePickerValue(addEndDate, '');
+            } else {
+                addEndDate.value = '';
+            }
+
             if (addEndDateHint) {
                 addEndDateHint.textContent = 'Choose start date first.';
             }
         }
-    });
+    }
+
+    addStartDate.addEventListener('change', syncAddDatepicker);
+    addStartDate.addEventListener('input', syncAddDatepicker);
 
     addEndDate.addEventListener('change', function () {
         if (addStartDate.value && this.value < addStartDate.value) {
-            this.value = addStartDate.value;
+            if (window.setDatePickerValue) {
+                window.setDatePickerValue(this, addStartDate.value);
+            } else {
+                this.value = addStartDate.value;
+            }
         }
     });
 
     formAdd.addEventListener('submit', function () {
         addEndDate.disabled = false; // ensure value is sent in request
+        addEndDate.removeAttribute('disabled');
     });
 
     // 2. Edit Activity Date Rules:
-    editStartDate.addEventListener('change', function () {
-        if (this.value) {
-            editEndDate.min = this.value;
-            if (!editEndDate.value || editEndDate.value < this.value) {
-                editEndDate.value = this.value;
+    function syncEditDatepicker() {
+        const startVal = editStartDate.value;
+        if (startVal) {
+            editEndDate.min = startVal;
+            editEndDate.setAttribute('min', startVal);
+            if (editEndDate._bycDatePicker) {
+                editEndDate._bycDatePicker.initConstraints();
+            }
+            if (!editEndDate.value || editEndDate.value < startVal) {
+                if (window.setDatePickerValue) {
+                    window.setDatePickerValue(editEndDate, startVal);
+                } else {
+                    editEndDate.value = startVal;
+                }
             }
         }
-    });
+    }
+
+    editStartDate.addEventListener('change', syncEditDatepicker);
+    editStartDate.addEventListener('input', syncEditDatepicker);
 
     editEndDate.addEventListener('change', function () {
         if (editStartDate.value && this.value < editStartDate.value) {
-            this.value = editStartDate.value;
+            if (window.setDatePickerValue) {
+                window.setDatePickerValue(this, editStartDate.value);
+            } else {
+                this.value = editStartDate.value;
+            }
         }
     });
 
@@ -518,9 +573,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.setDatePickerValue(addEndDate, '');
             }
             addEndDate.disabled = true;
+            addEndDate.setAttribute('disabled', 'disabled');
             addEndDate.value = '';
             addEndDate.style.opacity = '0.6';
             addEndDate.style.cursor = 'not-allowed';
+            if (addEndDate._bycDatePicker) {
+                addEndDate._bycDatePicker.displayInput.disabled = true;
+                addEndDate._bycDatePicker.displayInput.classList.add('is-disabled');
+                addEndDate._bycDatePicker.displayInput.style.opacity = '0.6';
+                addEndDate._bycDatePicker.displayInput.style.cursor = 'not-allowed';
+            }
             if (addEndDateHint) addEndDateHint.textContent = 'Choose start date first.';
             addPhotosManager.clear();
             openModal(addModal);
@@ -546,14 +608,25 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.setDatePickerValue(editStartDate, startDate);
                     if (editEndDate) {
                         editEndDate.disabled = false;
+                        editEndDate.removeAttribute('disabled');
                         editEndDate.min = startDate;
+                        editEndDate.setAttribute('min', startDate);
+                        if (editEndDate._bycDatePicker) {
+                            editEndDate._bycDatePicker.displayInput.disabled = false;
+                            editEndDate._bycDatePicker.displayInput.classList.remove('is-disabled');
+                            editEndDate._bycDatePicker.displayInput.style.opacity = '1';
+                            editEndDate._bycDatePicker.displayInput.style.cursor = 'pointer';
+                            editEndDate._bycDatePicker.initConstraints();
+                        }
                         window.setDatePickerValue(editEndDate, endDate);
                     }
                 } else {
                     editStartDate.value = startDate;
                     if (editEndDate) {
                         editEndDate.disabled = false;
+                        editEndDate.removeAttribute('disabled');
                         editEndDate.min = startDate;
+                        editEndDate.setAttribute('min', startDate);
                         editEndDate.value = endDate;
                     }
                 }

@@ -10,7 +10,7 @@
                 </p>
                 <div class="footer-cta-action">
                     <a href="{{ route('about') }}" class="button button-primary">
-                        Connect With Us <x-icon name="arrow" />
+                        Connect With Us
                     </a>
                 </div>
             </div>
@@ -31,8 +31,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.instagram.com/bycgrowth?xtok=MXNzemZubG9xZHpkYw==" target="_blank" rel="noopener noreferrer" class="footer-link footer-link-flex">
-                                <x-icon name="instagram" /> @bycgrowth (Instagram)
+                            <a href="https://www.instagram.com/bycgrowth?xtok=MXNzemZubG9xZHpkYw==" target="_blank" rel="noopener noreferrer" class="footer-link">
+                                @bycgrowth (Instagram)
                             </a>
                         </li>
                     </ul>
@@ -67,14 +67,6 @@
                     <x-brand :compact="true" />
                 </a>
                 <span class="footer-tagline">Faith &bull; Purpose &bull; Fellowship</span>
-            </div>
-            <div class="footer-social-group">
-                <a href="https://www.instagram.com/bycgrowth?xtok=MXNzemZubG9xZHpkYw==" target="_blank" rel="noopener noreferrer" class="footer-social-btn" title="Instagram @bycgrowth" aria-label="Instagram">
-                    <x-icon name="instagram" />
-                </a>
-                <a href="https://wa.me/6283857509420" target="_blank" rel="noopener noreferrer" class="footer-social-btn" title="WhatsApp" aria-label="WhatsApp">
-                    <x-icon name="phone" />
-                </a>
             </div>
             <div class="footer-legal">
                 <p>&copy; 2026 BYC Growth. All rights reserved.</p>

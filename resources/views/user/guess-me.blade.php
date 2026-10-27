@@ -15,7 +15,7 @@
 <div class="game-shell">
     {{-- Topbar: Brand & Live Scores Only --}}
     <header class="topbar">
-        <a href="{{ route('game.center') }}" class="brand-button" aria-label="Back to Game Center" title="Back to Game Center">
+        <a href="{{ \App\Models\User::isCurrentAdmin() ? route('admin.games') : route('game.center') }}" class="brand-button" aria-label="{{ \App\Models\User::isCurrentAdmin() ? 'Back to Admin Games' : 'Back to Game Center' }}" title="{{ \App\Models\User::isCurrentAdmin() ? 'Back to Admin Games' : 'Back to Game Center' }}">
             <x-brand compact="true" />
         </a>
         <div class="topbar-scores-wrap">

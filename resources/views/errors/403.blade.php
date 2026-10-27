@@ -16,8 +16,8 @@
         <p style="color: var(--muted); line-height: 1.6; margin-bottom: 28px;">
             You do not have authorization to view or manage this restricted resource. Administrator privileges are required.
         </p>
-        <a href="{{ (Auth::check() && Auth::user()->isAdmin()) ? route('admin.dashboard') : route('home') }}" class="button button-primary">
-            Return to Homepage
+        <a href="{{ \App\Models\User::isCurrentAdmin() ? route('admin.dashboard') : route('home') }}" class="button button-primary">
+            {{ \App\Models\User::isCurrentAdmin() ? 'Return to Admin Dashboard' : 'Return to Homepage' }}
         </a>
     </div>
 </div>

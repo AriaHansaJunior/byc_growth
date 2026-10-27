@@ -12,8 +12,13 @@
     $revealedIndexes = $game2State['revealed'][$roundId] ?? [];
     $currentCrosses = (int) ($game2State['crosses'][$roundId] ?? 0);
 
-    // Calculate sum of revealed answer points
+    // Calculate sum of revealed answer points and completion state
     $roundRevealedPoints = 0;
+    $totalAnswersCount = $currentRound && isset($currentRound['answers']) ? count($currentRound['answers']) : 0;
+    $revealedCount = count($revealedIndexes);
+    $allAnswersRevealed = $totalAnswersCount > 0 && $revealedCount >= $totalAnswersCount;
+    $noneAnswersRevealed = $revealedCount === 0;
+
     if ($currentRound && isset($currentRound['answers'])) {
         foreach ($currentRound['answers'] as $idx => $ans) {
             if (in_array($idx, $revealedIndexes)) {
@@ -26,7 +31,7 @@
 <div class="game-shell">
     {{-- Topbar: Brand & Live Scores Only --}}
     <header class="topbar">
-        <a href="{{ route('game.center') }}" class="brand-button" aria-label="Back to Game Center" title="Back to Game Center">
+        <a href="{{ \App\Models\User::isCurrentAdmin() ? route('admin.games') : route('game.center') }}" class="brand-button" aria-label="{{ \App\Models\User::isCurrentAdmin() ? 'Back to Admin Games' : 'Back to Game Center' }}" title="{{ \App\Models\User::isCurrentAdmin() ? 'Back to Admin Games' : 'Back to Game Center' }}">
             <x-brand compact="true" />
         </a>
         <div class="topbar-scores-wrap">
@@ -102,12 +107,12 @@
                         @endfor
                     </div>
                     <button type="button" class="btn-cross-reset" id="btn-reset-crosses" title="Reset all strikes for this round" {{ $currentCrosses === 0 ? 'disabled' : '' }}>
-                        <x-icon name="rotate-ccw" /> Reset Strikes
+                        Reset Strikes
                     </button>
                 </div>
                 <div class="reveal-control">
-                    <button type="button" class="button button-secondary" id="btn-reveal-all">Reveal All</button>
-                    <button type="button" class="button button-ghost" id="btn-hide-all">Hide All</button>
+                    <button type="button" class="button button-secondary" id="btn-reveal-all" {{ ($allAnswersRevealed || $totalAnswersCount === 0) ? 'disabled' : '' }}>Reveal All</button>
+                    <button type="button" class="button button-ghost" id="btn-hide-all" {{ $noneAnswersRevealed ? 'disabled' : '' }}>Hide All</button>
                 </div>
             </div>
 

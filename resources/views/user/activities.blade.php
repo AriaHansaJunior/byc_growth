@@ -3,11 +3,14 @@
 @section('title', 'Community Activities — BYC GROWTH')
 
 @section('content')
+@php
+    $isAdmin = \App\Models\User::isCurrentAdmin();
+@endphp
 <div class="page-shell">
-    @if(auth()->check() && auth()->user()->isAdmin())
+    @if($isAdmin)
         <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
             <button type="button" class="button button-primary button-sm" id="btn-open-add-activity">
-                <x-icon name="sparkles" /> Add New Activity
+                Add New Activity
             </button>
         </div>
     @endif
@@ -60,7 +63,7 @@
                             </h2>
                         </div>
 
-                        @if(auth()->check() && auth()->user()->isAdmin())
+                        @if($isAdmin)
                             <div class="admin-activity-actions" style="display: flex; gap: 8px;">
                                 <button
                                     type="button"
@@ -108,7 +111,7 @@
 </div>
 
 {{-- Admin Modal: Add Activity --}}
-@if(auth()->check() && auth()->user()->isAdmin())
+@if($isAdmin)
 <div class="game-modal-overlay" id="modal-add-activity" style="display: none;">
     <div class="game-modal" style="max-width: 600px; width: 90%;">
         <div class="game-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px;">
