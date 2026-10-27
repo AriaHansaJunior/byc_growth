@@ -1,6 +1,6 @@
 {{-- Add Member Modal --}}
-<div id="modal-add-member" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 16px; overscroll-behavior: contain;" role="dialog" aria-modal="true" aria-labelledby="modal-add-member-title">
-    <div class="info-modal member-modal-card" style="width: min(840px, 95vw); min-height: 590px; max-height: calc(100vh - 36px); display: flex; flex-direction: column; background: var(--white); border-radius: 22px; overflow: hidden; position: relative; box-shadow: var(--shadow-lg); border: 1px solid var(--line);">
+<div id="modal-add-member" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center; padding: 12px; overscroll-behavior: contain; box-sizing: border-box;" role="dialog" aria-modal="true" aria-labelledby="modal-add-member-title">
+    <div class="member-modal-card" style="width: 100%; max-width: 680px; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); display: flex; flex-direction: column; background: var(--white); border-radius: 20px; overflow: hidden; position: relative; box-shadow: var(--shadow-lg); border: 1px solid var(--line); box-sizing: border-box; margin: auto;">
         {{-- Header --}}
         <div style="padding: 18px 26px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
             <div>

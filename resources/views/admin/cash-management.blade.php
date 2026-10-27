@@ -21,26 +21,32 @@
 
 @section('content')
     {{-- Treasury Summary Card --}}
-    <div class="admin-card" style="background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%); color: #fff; margin-bottom: 28px; padding: 28px 32px; border-radius: 20px; box-shadow: var(--shadow);">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-            <div>
-                <span style="color: var(--lime); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; display: block; margin-bottom: 4px;">Treasury Balance (Filtered Total)</span>
-                <div style="font: 800 clamp(32px, 3.5vw, 44px) 'Manrope', sans-serif; letter-spacing: -.03em; color: #fff;">
+    {{-- Treasury Summary Card --}}
+    <div class="admin-card cash-hero-card" style="background: linear-gradient(135deg, var(--forest) 0%, var(--forest-dark) 100%); color: #fff; margin-bottom: 24px; padding: 24px 28px; border-radius: 20px; box-shadow: var(--shadow);">
+        <div class="cash-hero-layout" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+            <div class="cash-hero-info">
+                <span class="cash-hero-eyebrow" style="color: var(--lime); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; display: block; margin-bottom: 4px;">Treasury Balance (Filtered Total)</span>
+                <div class="cash-hero-balance" style="font: 800 clamp(28px, 3.5vw, 42px) 'Manrope', sans-serif; letter-spacing: -.03em; color: #fff;">
                     Rp {{ number_format($totalCash, 0, ',', '.') }}
                 </div>
-                <small style="color: #b8c5bf; font-size: 13.5px;">Accurate total across all matching transactions in the fellowship treasury</small>
+                <small class="cash-hero-sub" style="color: #b8c5bf; font-size: 13px;">Accurate total across all matching transactions in the fellowship treasury</small>
+            </div>
+            <div class="cash-hero-actions">
+                <button type="button" class="button button-primary button-sm btn-quick-record-tx" onclick="document.getElementById('btn-open-record-tx')?.click();" style="background: var(--lime); color: var(--forest-dark); font-weight: 800; border: none; height: 38px; padding: 0 16px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px;">
+                    <span>+</span> Record Tx
+                </button>
             </div>
         </div>
     </div>
 
     {{-- Member Quick Shortcuts --}}
     @if($members->isNotEmpty())
-        <div class="admin-card" style="padding: 18px 24px; margin-bottom: 24px;">
-            <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                <strong style="font-size: 12.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);">Member Quick-Fill Shortcuts</strong>
-                <small style="color: var(--muted); font-size: 12px;">Click a member to auto-fill contributor name, account type, and last amount</small>
+        <div class="admin-card cash-shortcuts-card" style="padding: 14px 20px; margin-bottom: 20px;">
+            <div class="cash-shortcuts-header" style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <strong style="font-size: 11.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);">Member Quick-Fill Shortcuts</strong>
+                <small class="cash-shortcuts-hint" style="color: var(--muted); font-size: 11.5px;">Click to auto-fill contributor</small>
             </div>
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <div class="cash-shortcuts-scroll" style="display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px;">
                 @foreach($members->take(12) as $m)
                     <button
                         type="button"
@@ -49,7 +55,7 @@
                         data-name="{{ $m->full_name }}"
                         data-account="{{ $shortcuts[$m->id]['account_type'] ?? '' }}"
                         data-amount="{{ $shortcuts[$m->id]['amount'] ?? '' }}"
-                        style="font-size: 12px; padding: 4px 12px; border-radius: 99px; height: 32px;"
+                        style="font-size: 12px; padding: 4px 12px; border-radius: 99px; height: 32px; white-space: nowrap; flex-shrink: 0;"
                     >
                         + {{ $m->full_name }}
                     </button>
@@ -59,60 +65,60 @@
     @endif
 
     {{-- Search & Filtering Controls --}}
-    <div class="admin-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px;">
-        <form method="GET" action="{{ route('admin.cash-management') }}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
-            <div style="flex: 1; min-width: 180px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Contributor</label>
-                <input type="text" name="name" value="{{ $filters['name'] }}" placeholder="Search name..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+    <div class="admin-card cash-filter-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-bottom: 24px;">
+        <form method="GET" action="{{ route('admin.cash-management') }}" class="cash-filter-form">
+            <div class="cash-filter-main">
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Contributor</label>
+                <input type="text" name="name" value="{{ $filters['name'] }}" placeholder="Search name..." class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 150px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Account Type</label>
-                <select name="account_type" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-                    <option value="">All Accounts</option>
-                    @foreach($accountTypes as $type)
-                        <option value="{{ $type }}" {{ $filters['account_type'] === $type ? 'selected' : '' }}>{{ $type }}</option>
-                    @endforeach
-                </select>
+            <div class="cash-filter-grid">
+                <div class="cash-filter-col">
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Account Type</label>
+                    <select name="account_type" class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                        <option value="">All Accounts</option>
+                        @foreach($accountTypes as $type)
+                            <option value="{{ $type }}" {{ $filters['account_type'] === $type ? 'selected' : '' }}>{{ $type }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="cash-filter-col">
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Amount</label>
+                    <input type="number" name="amount" value="{{ $filters['amount'] }}" placeholder="Exact amount..." class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                </div>
+
+                <div class="cash-filter-col">
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Input Date</label>
+                    <input type="date" name="date" max="{{ date('Y-m-d') }}" value="{{ $filters['date'] }}" class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                </div>
+
+                <div class="cash-filter-col">
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
+                    <select name="sort" class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                        <option value="date_desc" {{ ($filters['sort'] ?? 'date_desc') === 'date_desc' ? 'selected' : '' }}>Date (Newest)</option>
+                        <option value="date_asc" {{ ($filters['sort'] ?? '') === 'date_asc' ? 'selected' : '' }}>Date (Oldest)</option>
+                        <option value="amount_desc" {{ ($filters['sort'] ?? '') === 'amount_desc' ? 'selected' : '' }}>Amount (Highest)</option>
+                        <option value="amount_asc" {{ ($filters['sort'] ?? '') === 'amount_asc' ? 'selected' : '' }}>Amount (Lowest)</option>
+                        <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Name (A - Z)</option>
+                        <option value="name_desc" {{ ($filters['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Name (Z - A)</option>
+                    </select>
+                </div>
             </div>
 
-            <div style="min-width: 130px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Amount</label>
-                <input type="number" name="amount" value="{{ $filters['amount'] }}" placeholder="Exact amount..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-            </div>
-
-            <div style="min-width: 140px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Input Date</label>
-                <input type="date" name="date" max="{{ date('Y-m-d') }}" value="{{ $filters['date'] }}" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-            </div>
-
-            <div style="min-width: 170px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
-                <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-                    <option value="date_desc" {{ ($filters['sort'] ?? 'date_desc') === 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
-                    <option value="date_asc" {{ ($filters['sort'] ?? '') === 'date_asc' ? 'selected' : '' }}>Date (Oldest First)</option>
-                    <option value="amount_desc" {{ ($filters['sort'] ?? '') === 'amount_desc' ? 'selected' : '' }}>Amount (Highest First)</option>
-                    <option value="amount_asc" {{ ($filters['sort'] ?? '') === 'amount_asc' ? 'selected' : '' }}>Amount (Lowest First)</option>
-                    <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Contributor (A - Z)</option>
-                    <option value="name_desc" {{ ($filters['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Contributor (Z - A)</option>
-                </select>
-            </div>
-
-            <div style="min-width: 90px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Per Page</label>
-                <select name="per_page" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-                    <option value="5" {{ $currentPerPage == 5 ? 'selected' : '' }}>5</option>
-                    <option value="10" {{ $currentPerPage == 10 ? 'selected' : '' }}>10</option>
-                    <option value="25" {{ $currentPerPage == 25 ? 'selected' : '' }}>25</option>
-                    <option value="50" {{ $currentPerPage == 50 ? 'selected' : '' }}>50</option>
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 8px;">
-                <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+            <div class="cash-filter-actions">
+                <div class="cash-filter-perpage">
+                    <select name="per_page" class="form-input" style="height: 40px; font-size: 13px; padding: 8px 10px;" title="Items per page">
+                        <option value="5" {{ $currentPerPage == 5 ? 'selected' : '' }}>5 / page</option>
+                        <option value="10" {{ $currentPerPage == 10 ? 'selected' : '' }}>10 / page</option>
+                        <option value="25" {{ $currentPerPage == 25 ? 'selected' : '' }}>25 / page</option>
+                        <option value="50" {{ $currentPerPage == 50 ? 'selected' : '' }}>50 / page</option>
+                    </select>
+                </div>
+                <button type="submit" class="button button-primary button-sm" style="height: 40px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.cash-management') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.cash-management') }}" class="button button-danger button-sm" style="height: 40px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center;">
                     Reset
                 </a>
             </div>

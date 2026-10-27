@@ -2,151 +2,7 @@
 
 @section('title', 'Role & Account Management — BYC GROWTH')
 
-@push('styles')
-<style>
-/* Discord-Style Permissions Toggle Card */
-.discord-perm-box {
-    background: #f7f9fa;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 16px;
-    margin-top: 12px;
-}
-.discord-perm-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--line);
-}
-.discord-perm-header-title {
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--muted);
-}
-.discord-perm-header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.discord-perm-action-link {
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--forest);
-    cursor: pointer;
-    text-decoration: underline;
-    transition: opacity 0.15s ease;
-}
-.discord-perm-action-link:hover {
-    opacity: 0.8;
-}
-.discord-perm-action-link.btn-clear {
-    color: #da373c;
-}
-.discord-perm-action-link.btn-clear:hover {
-    color: #a1282c;
-}
-.discord-perm-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-.discord-perm-item {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-.discord-perm-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-.discord-perm-info {
-    flex: 1;
-    min-width: 0;
-}
-.discord-perm-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--ink);
-    margin: 0 0 2px 0;
-    display: block;
-    cursor: pointer;
-}
-.discord-perm-desc {
-    font-size: 11.5px;
-    color: var(--muted);
-    line-height: 1.35;
-    margin: 0;
-}
-/* Discord Switch */
-.discord-switch {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 28px;
-    flex-shrink: 0;
-    cursor: pointer;
-    margin-top: 2px;
-}
-.discord-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    position: absolute;
-}
-.discord-switch-track {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background-color: #80848e;
-    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 28px;
-}
-.discord-switch-track::before {
-    position: absolute;
-    content: "✕";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: 900;
-    line-height: 1;
-    color: #80848e;
-    height: 22px;
-    width: 22px;
-    left: 3px;
-    bottom: 3px;
-    background-color: #ffffff;
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
-}
-.discord-switch input:checked + .discord-switch-track {
-    background-color: #23a55a;
-}
-.discord-switch input:checked + .discord-switch-track::before {
-    content: "✓";
-    transform: translateX(20px);
-    color: #23a55a;
-    font-size: 12px;
-}
-.discord-switch input:focus-visible + .discord-switch-track {
-    outline: 2px solid var(--forest);
-    outline-offset: 2px;
-}
-</style>
-@endpush
+
 
 @section('page-header')
 <div class="admin-page-header">
@@ -167,67 +23,67 @@
 
 @section('content')
     {{-- Summary Stats Strip --}}
-    <div class="admin-card" style="padding: 16px 24px; margin-bottom: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                <div>
-                    <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .08em; display: block;">Total Accounts</span>
-                    <strong style="font-size: 20px; color: var(--ink); font-family: 'Manrope', sans-serif;">{{ $totalUsersCount }}</strong>
-                </div>
-                <div style="width: 1px; height: 28px; background: var(--line);"></div>
-                <div>
-                    <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .08em; display: block;">Administrators</span>
-                    <strong style="font-size: 20px; color: var(--forest); font-family: 'Manrope', sans-serif;">{{ $totalAdminsCount }}</strong>
-                </div>
-                <div style="width: 1px; height: 28px; background: var(--line);"></div>
-                <div>
-                    <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--muted); letter-spacing: .08em; display: block;">Standard Users</span>
-                    <strong style="font-size: 20px; color: #315e89; font-family: 'Manrope', sans-serif;">{{ $totalStandardUsersCount }}</strong>
-                </div>
+    {{-- Modern Responsive Stats Card --}}
+    <div class="admin-card roles-stat-card">
+        <div class="roles-stat-grid">
+            <div class="roles-stat-item">
+                <span class="roles-stat-label">Total Accounts</span>
+                <strong class="roles-stat-val">{{ $totalUsersCount }}</strong>
             </div>
+            <div class="roles-stat-divider"></div>
+            <div class="roles-stat-item">
+                <span class="roles-stat-label">Administrators</span>
+                <strong class="roles-stat-val roles-stat-val--admin">{{ $totalAdminsCount }}</strong>
+            </div>
+            <div class="roles-stat-divider"></div>
+            <div class="roles-stat-item">
+                <span class="roles-stat-label">Standard Users</span>
+                <strong class="roles-stat-val roles-stat-val--user">{{ $totalStandardUsersCount }}</strong>
+            </div>
+        </div>
 
-            <div>
-                <span class="role-badge" style="background: var(--cream); color: var(--forest);">
-                    Active Session: <strong>{{ $currentUser->username ?? $currentUser->name }}</strong>
-                </span>
-            </div>
+        <div class="roles-session-badge">
+            <span class="session-live-dot" aria-hidden="true"></span>
+            <span>Active Session: <strong>{{ $currentUser->username ?? $currentUser->name }}</strong></span>
         </div>
     </div>
 
     {{-- Search & Filtering Controls --}}
-    <div class="admin-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin-bottom: 24px;">
-        <form method="GET" action="{{ route('admin.roles') }}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Accounts</label>
-                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Search by name, username, or email..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
+    <div class="admin-card roles-filter-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px 20px; margin-bottom: 24px;">
+        <form method="GET" action="{{ route('admin.roles') }}" class="roles-filter-form">
+            <div class="roles-filter-search">
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Accounts</label>
+                <input type="text" name="search" value="{{ $filters['search'] }}" placeholder="Search by name, username, or email..." class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 150px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Role</label>
-                <select name="role" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-                    <option value="all" {{ ($filters['role'] ?? 'all') === 'all' ? 'selected' : '' }}>All Roles</option>
-                    <option value="admin" {{ ($filters['role'] ?? '') === 'admin' ? 'selected' : '' }}>Administrator</option>
-                    <option value="user" {{ ($filters['role'] ?? '') === 'user' ? 'selected' : '' }}>Standard User</option>
-                </select>
+            <div class="roles-filter-row">
+                <div class="roles-filter-col">
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Role</label>
+                    <select name="role" class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                        <option value="all" {{ ($filters['role'] ?? 'all') === 'all' ? 'selected' : '' }}>All Roles</option>
+                        <option value="admin" {{ ($filters['role'] ?? '') === 'admin' ? 'selected' : '' }}>Administrator</option>
+                        <option value="user" {{ ($filters['role'] ?? '') === 'user' ? 'selected' : '' }}>Standard User</option>
+                    </select>
+                </div>
+
+                <div class="roles-filter-col">
+                    <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
+                    <select name="sort" class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
+                        <option value="newest" {{ ($filters['sort'] ?? 'newest') === 'newest' ? 'selected' : '' }}>Newest Registered</option>
+                        <option value="oldest" {{ ($filters['sort'] ?? '') === 'oldest' ? 'selected' : '' }}>Oldest Registered</option>
+                        <option value="username_asc" {{ ($filters['sort'] ?? '') === 'username_asc' ? 'selected' : '' }}>Username (A - Z)</option>
+                        <option value="username_desc" {{ ($filters['sort'] ?? '') === 'username_desc' ? 'selected' : '' }}>Username (Z - A)</option>
+                        <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Name (A - Z)</option>
+                        <option value="name_desc" {{ ($filters['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Name (Z - A)</option>
+                    </select>
+                </div>
             </div>
 
-            <div style="min-width: 170px;">
-                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
-                <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
-                    <option value="newest" {{ ($filters['sort'] ?? 'newest') === 'newest' ? 'selected' : '' }}>Newest Registered</option>
-                    <option value="oldest" {{ ($filters['sort'] ?? '') === 'oldest' ? 'selected' : '' }}>Oldest Registered</option>
-                    <option value="username_asc" {{ ($filters['sort'] ?? '') === 'username_asc' ? 'selected' : '' }}>Username (A - Z)</option>
-                    <option value="username_desc" {{ ($filters['sort'] ?? '') === 'username_desc' ? 'selected' : '' }}>Username (Z - A)</option>
-                    <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Name (A - Z)</option>
-                    <option value="name_desc" {{ ($filters['sort'] ?? '') === 'name_desc' ? 'selected' : '' }}>Name (Z - A)</option>
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 8px;">
-                <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+            <div class="roles-filter-actions">
+                <button type="submit" class="button button-primary button-sm" style="height: 40px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center;">
                     Filter
                 </button>
-                <a href="{{ route('admin.roles') }}" class="button button-danger button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
+                <a href="{{ route('admin.roles') }}" class="button button-danger button-sm" style="height: 40px; padding: 0 18px; display: inline-flex; align-items: center; justify-content: center;">
                     Reset
                 </a>
             </div>

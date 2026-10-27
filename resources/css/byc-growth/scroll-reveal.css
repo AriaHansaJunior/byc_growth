@@ -157,7 +157,8 @@
   transform: translateY(0);
 }
 
-.reveal-enabled .scripture-card.scroll-reveal .scripture-stamp {
+.reveal-enabled .scripture-card.scroll-reveal .scripture-stamp,
+.reveal-enabled .scripture-card.scroll-reveal .scripture-badge-icon {
   opacity: 0;
   transform: scale(0.75) rotate(-16deg);
   transition:
@@ -165,7 +166,8 @@
     transform 1.25s var(--reveal-ease) 0.35s;
 }
 
-.reveal-enabled .scripture-card.scroll-reveal.is-revealed .scripture-stamp {
+.reveal-enabled .scripture-card.scroll-reveal.is-revealed .scripture-stamp,
+.reveal-enabled .scripture-card.scroll-reveal.is-revealed .scripture-badge-icon {
   opacity: 1;
   transform: scale(1) rotate(0deg);
 }

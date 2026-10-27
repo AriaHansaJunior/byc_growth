@@ -75,9 +75,9 @@
                 >
             </div>
 
-            <div class="form-group" style="margin-bottom: 24px;">
-                <label class="remember-checkbox" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); cursor: pointer;">
-                    <input type="checkbox" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} style="accent-color: var(--forest); width: 16px; height: 16px;">
+            <div class="form-group form-group--last">
+                <label class="remember-checkbox">
+                    <input type="checkbox" name="remember" value="1" {{ old('remember') ? 'checked' : '' }} class="remember-input">
                     Remember this device
                 </label>
             </div>

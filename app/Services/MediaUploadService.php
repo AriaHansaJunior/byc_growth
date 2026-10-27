@@ -57,14 +57,21 @@ class MediaUploadService
         $fileSize = File::exists($fullPath) ? File::size($fullPath) : 0;
         $mime = $file->getClientMimeType() ?: 'image/jpeg';
 
-        // Convert to database-stored base64
-        $rawContent = File::exists($fullPath) ? File::get($fullPath) : '';
-        $base64 = !empty($rawContent) ? ('data:' . $mime . ';base64,' . base64_encode($rawContent)) : null;
-
-        $compressedBase64 = null;
-        if (!empty($base64)) {
-            $compressedBase64 = $this->optimizer->compressBase64($base64, 900, 80) ?: $base64;
+        // Generate lightweight thumbnail base64 (strictly under 250 KB) for database fallback
+        $thumbBase64 = null;
+        if (File::exists($compressedPath) && File::size($compressedPath) <= 256 * 1024) {
+            $compContent = File::get($compressedPath);
+            $thumbBase64 = 'data:' . $mime . ';base64,' . base64_encode($compContent);
+        } elseif ($fileSize <= 256 * 1024 && File::exists($fullPath)) {
+            $rawContent = File::get($fullPath);
+            $thumbBase64 = 'data:' . $mime . ';base64,' . base64_encode($rawContent);
         }
+
+        // Full-size base64 is only stored if file size is very small (<= 256 KB)
+        // This ensures the SQL query never crashes with 'packet bigger than max_allowed_packet'
+        $dbBase64 = ($fileSize <= 256 * 1024 && File::exists($fullPath))
+            ? ('data:' . $mime . ';base64,' . base64_encode(File::get($fullPath)))
+            : $thumbBase64;
 
         $data = [
             'disk' => 'public',
@@ -76,12 +83,12 @@ class MediaUploadService
             'fileable_id' => $fileableId,
         ];
 
-        // Store base64 data directly in database
-        if (Schema::hasColumn('media_files', 'file_data') && $base64) {
-            $data['file_data'] = $base64;
+        // Store safe, lightweight fallback data directly in database
+        if (Schema::hasColumn('media_files', 'file_data') && $dbBase64) {
+            $data['file_data'] = $dbBase64;
         }
-        if (Schema::hasColumn('media_files', 'compressed_data') && $compressedBase64) {
-            $data['compressed_data'] = $compressedBase64;
+        if (Schema::hasColumn('media_files', 'compressed_data') && $thumbBase64) {
+            $data['compressed_data'] = $thumbBase64;
         }
 
         // Only include compressed_path if the column exists in database schema

@@ -252,3 +252,280 @@
   gap: 8px;
   align-items: center;
 }
+
+/* Roles & Accounts Stat Card (Desktop) */
+.roles-stat-card {
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.roles-stat-grid {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.roles-stat-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--line);
+}
+
+.roles-stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .08em;
+  display: block;
+}
+
+.roles-stat-val {
+  font-size: 20px;
+  color: var(--ink);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+}
+
+.roles-stat-val--admin {
+  color: var(--forest);
+}
+
+.roles-stat-val--user {
+  color: #315e89;
+}
+
+.roles-session-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--cream);
+  color: var(--forest);
+  font-size: 12px;
+}
+
+.roles-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.roles-filter-search {
+  flex: 1;
+  min-width: 200px;
+}
+
+.roles-filter-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.roles-filter-col {
+  min-width: 150px;
+}
+
+.roles-filter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Cash Management Desktop Layout */
+.cash-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: flex-end;
+}
+
+.cash-filter-main {
+  flex: 1;
+  min-width: 180px;
+}
+
+.cash-filter-grid {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cash-filter-col {
+  min-width: 130px;
+}
+
+.cash-filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Discord-Style Permissions Toggle Card */
+.discord-perm-box {
+  background: #f7f9fa;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.discord-perm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.discord-perm-header-title {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+
+.discord-perm-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.discord-perm-action-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--forest);
+  cursor: pointer;
+  text-decoration: underline;
+  transition: opacity 0.15s ease;
+}
+
+.discord-perm-action-link:hover {
+  opacity: 0.8;
+}
+
+.discord-perm-action-link.btn-clear {
+  color: #da373c;
+}
+
+.discord-perm-action-link.btn-clear:hover {
+  color: #a1282c;
+}
+
+.discord-perm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.discord-perm-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.discord-perm-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.discord-perm-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.discord-perm-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 2px 0;
+  display: block;
+  cursor: pointer;
+}
+
+.discord-perm-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* Discord Switch */
+.discord-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  flex-shrink: 0;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.discord-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.discord-switch-track {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #80848e;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 28px;
+}
+
+.discord-switch-track::before {
+  position: absolute;
+  content: "✕";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  color: #80848e;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.discord-switch input:checked + .discord-switch-track {
+  background-color: #23a55a;
+}
+
+.discord-switch input:checked + .discord-switch-track::before {
+  content: "✓";
+  transform: translateX(20px);
+  color: #23a55a;
+  font-size: 12px;
+}
+
+.discord-switch input:focus-visible + .discord-switch-track {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+}

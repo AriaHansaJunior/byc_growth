@@ -43,9 +43,12 @@
 
 @media (max-width: 640px) {
     .member-modal-card {
-        width: min(94vw, 480px) !important;
+        width: 100% !important;
+        max-width: calc(100vw - 20px) !important;
         min-height: auto !important;
-        max-height: calc(100vh - 32px) !important;
+        max-height: calc(100vh - 24px) !important;
+        max-height: calc(100dvh - 24px) !important;
+        margin: auto !important;
     }
     .member-modal-body {
         padding: 16px 18px 36px !important;

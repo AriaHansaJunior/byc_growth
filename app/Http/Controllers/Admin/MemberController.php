@@ -127,16 +127,21 @@ class MemberController extends Controller
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
+            // Compress to maximum 1000px if file is large to protect MySQL packet limit
+            $photoBase64 = strlen($content) > 300 * 1024
+                ? ($this->optimizer->compressBase64($base64, 1000, 85) ?: $base64)
+                : $base64;
+
             $data = [
                 'member_id' => $member->id,
-                'photo_data' => $base64,
+                'photo_data' => $photoBase64,
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
             ];
 
             if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
-                $data['compressed_photo_data'] = $this->optimizer->compressBase64($base64, 550, 80);
+                $data['compressed_photo_data'] = $this->optimizer->compressBase64($photoBase64, 550, 80) ?: $photoBase64;
             }
 
             MemberPhoto::create($data);
@@ -187,15 +192,20 @@ class MemberController extends Controller
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
+            // Compress to maximum 1000px if file is large to protect MySQL packet limit
+            $photoBase64 = strlen($content) > 300 * 1024
+                ? ($this->optimizer->compressBase64($base64, 1000, 85) ?: $base64)
+                : $base64;
+
             $updateData = [
-                'photo_data' => $base64,
+                'photo_data' => $photoBase64,
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
             ];
 
             if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
-                $updateData['compressed_photo_data'] = $this->optimizer->compressBase64($base64, 550, 80);
+                $updateData['compressed_photo_data'] = $this->optimizer->compressBase64($photoBase64, 550, 80) ?: $photoBase64;
             }
 
             $memberPhoto = $member->memberPhoto;

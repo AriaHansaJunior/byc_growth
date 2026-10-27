@@ -859,8 +859,10 @@ body.modal-open {
    Responsive Member Modals & Quick Create Account
    ========================================================================== */
 .member-modal-card {
-  width: min(600px, 94vw);
-  max-height: calc(100vh - 40px);
+  width: 100%;
+  max-width: 680px;
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
   display: flex;
   flex-direction: column;
   background: var(--white);
@@ -869,6 +871,8 @@ body.modal-open {
   position: relative;
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--line);
+  box-sizing: border-box;
+  margin: auto;
 }
 
 .btn-trigger-quick-account {
@@ -889,15 +893,18 @@ body.modal-open {
 
 @media (max-width: 640px) {
   .member-modal-card {
-    width: 95vw !important;
-    max-height: calc(100vh - 24px) !important;
+    width: 100% !important;
+    max-width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
     border-radius: 16px !important;
+    margin: auto !important;
   }
 
   .member-modal-card .crop-dropzone,
   .member-modal-card .member-crop-viewport {
-    width: 170px !important;
-    height: 170px !important;
+    width: 150px !important;
+    height: 150px !important;
   }
 }
 

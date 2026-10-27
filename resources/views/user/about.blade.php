@@ -48,6 +48,11 @@
                     <span class="about-channel-type">Email</span>
                     <span class="about-channel-value">bycgrowthbethany1@gmail.com</span>
                 </a>
+
+                <a href="https://www.instagram.com/bycgrowth?xtok=MXNzemZubG9xZHpkYw==" target="_blank" rel="noopener noreferrer" class="about-contact-card">
+                    <span class="about-channel-type">Instagram</span>
+                    <span class="about-channel-value">@bycgrowth</span>
+                </a>
             </div>
         </div>
     </section>

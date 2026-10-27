@@ -84,16 +84,21 @@ class HomepageController extends Controller
 
             AuditLog::record($adminUser, 'created', 'homepage_slide', $slide->id, "Added homepage slide '{$slide->title}'");
 
+            // Optimize to max 1600px if file is large to keep MySQL insert safe
+            $slideBase64 = strlen($content) > 300 * 1024
+                ? ($this->optimizer->compressBase64($base64, 1600, 85) ?: $base64)
+                : $base64;
+
             $photoData = [
                 'homepage_slide_id' => $slide->id,
-                'image_data' => $base64,
+                'image_data' => $slideBase64,
                 'original_name' => $originalName,
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
             ];
 
             if (Schema::hasColumn('homepage_slide_photos', 'compressed_image_data')) {
-                $photoData['compressed_image_data'] = $this->optimizer->compressBase64($base64, 1200, 82);
+                $photoData['compressed_image_data'] = $this->optimizer->compressBase64($slideBase64, 1200, 82) ?: $slideBase64;
             }
 
             HomepageSlidePhoto::create($photoData);
@@ -164,15 +169,20 @@ class HomepageController extends Controller
 
             AuditLog::record($adminUser, 'edited', 'homepage_slide', $slide->id, "Updated homepage slide '{$slide->title}'");
 
+            // Optimize to max 1600px if file is large to keep MySQL insert safe
+            $slideBase64 = strlen($content) > 300 * 1024
+                ? ($this->optimizer->compressBase64($base64, 1600, 85) ?: $base64)
+                : $base64;
+
             $updateData = [
-                'image_data' => $base64,
+                'image_data' => $slideBase64,
                 'original_name' => $originalName,
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
             ];
 
             if (Schema::hasColumn('homepage_slide_photos', 'compressed_image_data')) {
-                $updateData['compressed_image_data'] = $this->optimizer->compressBase64($base64, 1200, 82);
+                $updateData['compressed_image_data'] = $this->optimizer->compressBase64($slideBase64, 1200, 82) ?: $slideBase64;
             }
 
             $slidePhoto = $slide->slidePhoto;

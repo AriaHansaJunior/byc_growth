@@ -359,39 +359,57 @@ export function initAdminGames() {
 
     if (formGuess) {
         formGuess.addEventListener('submit', async (e) => {
-            if (guessOriginalFile) {
-                e.preventDefault();
-                if (btnSubmitGuess) {
-                    btnSubmitGuess.disabled = true;
-                    btnSubmitGuess.textContent = 'Saving...';
-                }
-                try {
-                    const blob = await getGuessCroppedBlob();
-                    const croppedFile = new File([blob], guessOriginalFile.name, {
-                        type: blob.type || guessOriginalFile.type,
-                        lastModified: Date.now()
-                    });
+            e.preventDefault();
+            if (btnSubmitGuess) {
+                btnSubmitGuess.disabled = true;
+                btnSubmitGuess.textContent = 'Saving...';
+            }
 
-                    if (window.DataTransfer) {
-                        const dt = new DataTransfer();
-                        dt.items.add(croppedFile);
-                        guessImgInput.files = dt.files;
-                        guessOriginalFile = null;
-                        formGuess.submit();
-                    } else {
-                        const formData = new FormData(formGuess);
-                        formData.set('image', croppedFile, guessOriginalFile.name);
-                        await fetch(formGuess.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                        });
-                        window.location.reload();
-                    }
-                } catch (err) {
-                    console.warn('Fallback submit due to:', err);
-                    formGuess.submit();
+            try {
+                const formData = new FormData(formGuess);
+
+                if (guessOriginalFile) {
+                    const blob = await getGuessCroppedBlob();
+                    const fileName = guessOriginalFile.name || 'guess_clue.jpg';
+                    formData.set('image', blob, fileName);
                 }
+
+                const actionUrl = formGuess.action || window.location.href;
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok || (data && data.success === false)) {
+                    const errorMsg = data.error || data.message || 'Validation error. Please check your clue and answer.';
+                    if (guessFeedback) {
+                        guessFeedback.textContent = errorMsg;
+                        guessFeedback.style.color = '#dc2626';
+                    } else {
+                        alert(errorMsg);
+                    }
+                    if (btnSubmitGuess) {
+                        btnSubmitGuess.disabled = false;
+                        btnSubmitGuess.textContent = 'Save Round';
+                    }
+                    return;
+                }
+
+                // Successful save -> reload page to display newly saved round and image
+                window.location.reload();
+            } catch (err) {
+                console.error('Error submitting Guess Me round:', err);
+                if (btnSubmitGuess) {
+                    btnSubmitGuess.disabled = false;
+                    btnSubmitGuess.textContent = 'Save Round';
+                }
+                alert('An error occurred while saving the round: ' + err.message);
             }
         });
     }

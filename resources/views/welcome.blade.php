@@ -71,8 +71,8 @@
                     Our journey as young believers is anchored in trust, rooted in God's promises, and guided by a vision that transcends what is visible. Together, we grow with boldness and unity.
                 </p>
             </div>
-            <div class="scripture-stamp">
-                <strong>Faith<br>&bull;<br>Growth</strong>
+            <div class="scripture-badge-icon" aria-hidden="true">
+                <x-icon name="book" />
             </div>
         </div>
     </section>

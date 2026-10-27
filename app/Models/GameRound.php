@@ -95,7 +95,7 @@ class GameRound extends Model
                 return route('game.image', ['filename' => $raw]);
             }
 
-            return route('game.image', ['filename' => $raw]);
+            return asset('assets/images/BYC_Growth.jpg');
         }
 
         return asset('assets/images/BYC_Growth.jpg');

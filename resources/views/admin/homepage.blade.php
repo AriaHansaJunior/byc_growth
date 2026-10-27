@@ -92,29 +92,29 @@
             </div>
         @else
             <div class="slideshow-table-wrap" style="overflow-x: auto; border: 1px solid var(--line); border-radius: 16px;">
-                <table class="admin-table" style="margin: 0;">
+                <table class="admin-table admin-table--slideshow" style="margin: 0;">
                     <thead>
                         <tr>
-                            <th style="width: 80px; text-align: center;">Order</th>
-                            <th style="width: 140px;">Preview</th>
-                            <th>Photo Information</th>
-                            <th style="width: 120px; text-align: center;">Sequence</th>
-                            <th style="width: 170px; text-align: right;">Actions</th>
+                            <th class="th-col-order" style="width: 60px; text-align: center;">Order</th>
+                            <th class="th-col-preview" style="width: 110px;">Preview</th>
+                            <th class="th-col-info">Photo Information</th>
+                            <th class="th-col-seq" style="width: 90px; text-align: center;">Sequence</th>
+                            <th class="th-col-actions" style="width: 140px; text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="slideshow-list-tbody" data-reorder-url="{{ route('admin.homepage.slides.reorder') }}">
                         @foreach($slides as $index => $slide)
                             <tr data-slide-id="{{ $slide->id }}" class="draggable-slide-row" draggable="true">
                                 {{-- Order Badge --}}
-                                <td style="text-align: center;">
+                                <td class="td-col-order" style="text-align: center;">
                                     <span class="role-badge slide-order-badge" style="background: var(--paper); color: var(--forest-dark); font-weight: 800; font-size: 13px;">
                                         #{{ $index + 1 }}
                                     </span>
                                 </td>
 
                                 {{-- Image Preview --}}
-                                <td>
-                                    <div style="width: 120px; height: 75px; border-radius: 12px; overflow: hidden; background: var(--forest-dark); border: 1px solid var(--line); position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+                                <td class="td-col-preview">
+                                    <div class="slide-preview-thumb-box" style="width: 100px; height: 64px; border-radius: 10px; overflow: hidden; background: var(--forest-dark); border: 1px solid var(--line); position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
                                         <a href="{{ $slide->full_image_url }}" target="_blank" rel="noopener noreferrer" title="Click to view full size slide in new tab" style="display: block; width: 100%; height: 100%; cursor: pointer;">
                                             <img
                                                 src="{{ $slide->image_url }}"
@@ -127,11 +127,11 @@
                                 </td>
 
                                 {{-- Information --}}
-                                <td>
-                                    <div style="font-weight: 700; color: var(--ink); font-size: 15px; margin-bottom: 4px;">
+                                <td class="td-col-info">
+                                    <div class="slide-info-title" style="font-weight: 700; color: var(--ink); font-size: 14px; margin-bottom: 3px;">
                                         {{ $slide->title ?: ($slide->media ? $slide->media->original_name : 'Homepage Slide #' . ($index + 1)) }}
                                     </div>
-                                    <div style="display: flex; gap: 8px; font-size: 11.5px; color: var(--muted); align-items: center;">
+                                    <div class="slide-info-meta" style="display: flex; gap: 6px; font-size: 11px; color: var(--muted); align-items: center; flex-wrap: wrap;">
                                         <span>📁 {{ $slide->media ? $slide->media->original_name : 'Embedded Asset' }}</span>
                                         @if($slide->media && $slide->media->file_size)
                                              <span>&bull; {{ number_format($slide->media->file_size / 1024, 1) }} KB</span>
@@ -140,20 +140,20 @@
                                 </td>
 
                                 {{-- Sequence Controls (Drag to Reorder) --}}
-                                <td style="text-align: center;">
+                                <td class="td-col-seq" style="text-align: center;">
                                     <div
                                         class="slide-drag-handle"
                                         title="Click & drag to reorder photos"
-                                        style="cursor: grab; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 14px; height: 32px; border-radius: 8px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); user-select: none;"
+                                        style="cursor: grab; display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 10px; height: 30px; border-radius: 8px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); user-select: none;"
                                     >
-                                        <span style="font-size: 15px; line-height: 1; color: var(--forest); display: inline-block;">⠿</span>
-                                        <span style="font-size: 12px; font-weight: 700;">Drag</span>
+                                        <span style="font-size: 14px; line-height: 1; color: var(--forest); display: inline-block;">⠿</span>
+                                        <span class="drag-label" style="font-size: 11.5px; font-weight: 700;">Drag</span>
                                     </div>
                                 </td>
 
                                 {{-- Actions (Edit Position & Delete) --}}
-                                <td style="text-align: right;">
-                                    <div style="display: inline-flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                                <td class="td-col-actions" style="text-align: right;">
+                                    <div class="table-actions-group" style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
                                         <button
                                             type="button"
                                             class="button button-sm btn-edit-slide"
@@ -163,7 +163,7 @@
                                             data-filename="{{ $slide->media ? $slide->media->original_name : 'Slide #' . ($index + 1) }}"
                                             data-action="{{ route('admin.homepage.slides.update', $slide->id) }}"
                                             title="Edit Photo Position"
-                                            style="padding: 4px 14px; height: 32px; font-size: 13px; font-weight: 700; background: #dbebe0; color: #1a452d; border: 1px solid #b8dac2;"
+                                            style="padding: 3px 10px; height: 30px; font-size: 12px; font-weight: 700; background: #dbebe0; color: #1a452d; border: 1px solid #b8dac2;"
                                         >
                                             Edit
                                         </button>
@@ -174,7 +174,7 @@
                                             data-confirm-title="Delete Slideshow Photo?"
                                             data-confirm-btn="Delete Photo"
                                             data-action="{{ route('admin.homepage.slides.destroy', $slide->id) }}"
-                                            style="padding: 4px 12px; height: 32px; font-size: 13px;"
+                                            style="padding: 3px 10px; height: 30px; font-size: 12px;"
                                         >
                                             Delete
                                         </button>

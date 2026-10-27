@@ -147,10 +147,21 @@ class MediaController extends Controller
      */
     public function download(Request $request, int $id): \Symfony\Component\HttpFoundation\Response
     {
-        $media = MediaFile::findOrFail($id);
-        $filename = $media->original_name ?: basename($media->file_path);
+        $media = MediaFile::find($id);
+        if (!$media) {
+            $fallback = public_path('assets/images/BYC_Growth.jpg');
+            return response()->download($fallback, 'BYC_Growth.jpg');
+        }
 
-        // If stored directly in database
+        $filename = $media->original_name ?: basename($media->file_path);
+        $fullPath = public_path($media->file_path);
+
+        // 1. Try physical disk file
+        if (File::exists($fullPath) && is_file($fullPath)) {
+            return response()->download($fullPath, $filename);
+        }
+
+        // 2. Fallback to database-stored base64
         if (!empty($media->file_data)) {
             $decoded = $this->optimizer->decodeBase64($media->file_data);
             if ($decoded) {
@@ -163,13 +174,13 @@ class MediaController extends Controller
             }
         }
 
-        $fullPath = public_path($media->file_path);
-
-        if (!File::exists($fullPath)) {
-            abort(404, 'File not found on server.');
+        // 3. Fallback to mascot placeholder
+        $fallback = public_path('assets/images/BYC_Growth.jpg');
+        if (File::exists($fallback)) {
+            return response()->download($fallback, $filename);
         }
 
-        return response()->download($fullPath, $filename);
+        abort(404, 'File not found on server.');
     }
 
     /**
@@ -193,32 +204,37 @@ class MediaController extends Controller
 
     /**
      * Serve a MediaFile as HTTP response.
-     * First checks database-stored base64, falls back to disk file.
+     * First checks physical disk file (Dual-Tier standard), falls back to database base64, then placeholder.
      */
-    protected function serveMediaFileResponse(Request $request, MediaFile $media): Response
+    protected function serveMediaFileResponse(Request $request, MediaFile $media): \Symfony\Component\HttpFoundation\Response
     {
         $isFull = $this->isFullSizeRequest($request);
 
-        // 1. Serve directly from database if file_data is present
-        if (!empty($media->file_data)) {
-            $dataUri = $media->file_data;
+        // 1. Try physical disk file first (Dual-Tier performance standard)
+        $chosenPath = (!$isFull && !empty($media->compressed_path))
+            ? $media->compressed_path
+            : $media->file_path;
 
-            if (!$isFull && !empty($media->compressed_data)) {
-                $dataUri = $media->compressed_data;
-            } elseif (!$isFull) {
-                $compressed = $this->optimizer->compressBase64($media->file_data, 900, 80);
-                if ($compressed && $compressed !== $media->file_data) {
-                    $dataUri = $compressed;
-                    try {
-                        if (Schema::hasColumn('media_files', 'compressed_data')) {
-                            $media->update(['compressed_data' => $compressed]);
-                        }
-                    } catch (\Throwable $e) {
-                        // Ignore silently
-                    }
-                }
-            }
+        $absolutePath = public_path($chosenPath);
+        if (!File::exists($absolutePath) || !is_file($absolutePath)) {
+            $absolutePath = public_path($media->file_path);
+        }
 
+        if (File::exists($absolutePath) && is_file($absolutePath)) {
+            $mime = $media->mime_type ?: (File::mimeType($absolutePath) ?: 'image/jpeg');
+            return response()->file($absolutePath, [
+                'Content-Type' => $mime,
+                'Cache-Control' => 'public, max-age=86400, must-revalidate',
+                'Vary' => 'Sec-Fetch-Dest, Accept',
+            ]);
+        }
+
+        // 2. Fallback to database base64 if disk file was moved or deleted
+        $dataUri = (!$isFull && !empty($media->compressed_data))
+            ? $media->compressed_data
+            : (!empty($media->file_data) ? $media->file_data : $media->compressed_data);
+
+        if (!empty($dataUri)) {
             $decoded = $this->optimizer->decodeBase64($dataUri);
             if ($decoded) {
                 return response($decoded['binary'], 200, [
@@ -230,30 +246,16 @@ class MediaController extends Controller
             }
         }
 
-        // 2. Fallback to physical disk file
-        $chosenPath = $media->file_path;
-        if (!$isFull && !empty($media->compressed_path)) {
-            $chosenPath = $media->compressed_path;
+        // 3. Fallback placeholder image instead of aborting with 404
+        $fallback = public_path('assets/images/BYC_Growth.jpg');
+        if (File::exists($fallback) && is_file($fallback)) {
+            return response()->file($fallback, [
+                'Content-Type' => 'image/jpeg',
+                'Cache-Control' => 'public, max-age=3600',
+            ]);
         }
 
-        $absolutePath = public_path($chosenPath);
-        if (!File::exists($absolutePath)) {
-            $absolutePath = public_path($media->file_path);
-        }
-
-        if (!File::exists($absolutePath)) {
-            abort(404, 'Image file not found.');
-        }
-
-        $content = File::get($absolutePath);
-        $mime = $media->mime_type ?: File::mimeType($absolutePath) ?: 'image/jpeg';
-
-        return response($content, 200, [
-            'Content-Type' => $mime,
-            'Content-Length' => strlen($content),
-            'Cache-Control' => 'public, max-age=86400, must-revalidate',
-            'Vary' => 'Sec-Fetch-Dest, Accept',
-        ]);
+        return $this->serveDummyAvatar();
     }
 
     /**

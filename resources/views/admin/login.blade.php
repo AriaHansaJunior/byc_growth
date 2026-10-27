@@ -6,19 +6,19 @@
 
 @section('content')
 <div class="auth-shell">
-    <div class="auth-card" style="border: 2px solid var(--forest);">
+    <div class="auth-card auth-card--admin">
         {{-- Brand / Header --}}
         <div class="auth-header">
-            <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+            <div class="auth-brand-wrap">
                 <x-brand :compact="true" />
             </div>
             <h1>Admin Sign In</h1>
         </div>
 
         {{-- Warning Callout (Polished English per Spec) --}}
-        <div class="admin-login-warning-box" style="background: var(--cream); border: 1.5px solid var(--line); border-left: 5px solid var(--forest); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; text-align: left;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span style="font-size: 16px;">🛡️</span>
+        <div class="admin-login-warning-box">
+            <div class="warning-header" style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="warning-icon" style="font-size: 16px;">🛡️</span>
                 <strong style="color: var(--forest); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase;">WARNING! THIS IS THE ADMIN AREA.</strong>
             </div>
             <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;">
@@ -73,7 +73,7 @@
                 >
             </div>
 
-            <div class="form-group" style="margin-bottom: 24px;">
+            <div class="form-group form-group--last">
                 <label for="password" class="form-label">Password</label>
                 <input
                     type="password"

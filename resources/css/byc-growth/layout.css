@@ -704,12 +704,25 @@
   color: var(--lime);
 }
 
+.footer-link-flex {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-link-flex svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
 .footer-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-top: 28px;
   gap: 24px;
+  flex-wrap: wrap;
 }
 
 .footer-brand-lockup {
@@ -733,8 +746,39 @@
   color: #8c9f96;
   font-size: 13px;
   letter-spacing: .08em;
-  text-transform: uppercase;
   font-weight: 600;
+}
+
+.footer-social-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #b8c5bf;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.footer-social-btn:hover {
+  background: var(--lime);
+  color: var(--forest-dark);
+  border-color: var(--lime);
+  transform: translateY(-2px);
+}
+
+.footer-social-btn svg {
+  width: 17px;
+  height: 17px;
 }
 
 .footer-legal {
@@ -776,152 +820,5 @@
   line-height: 1.4 !important;
 }
 
-/* Authentication Screen (Admin Login) */
-.auth-shell {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 40px 24px;
-  background: var(--paper);
-}
 
-.auth-card {
-  width: 100%;
-  max-width: 440px;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  padding: 44px 38px;
-  box-shadow: var(--shadow);
-}
-
-.auth-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.auth-brand-link {
-  display: inline-flex;
-  margin-bottom: 16px;
-  text-decoration: none;
-}
-
-.auth-header h1 {
-  font: 800 28px "Manrope", sans-serif;
-  letter-spacing: -.03em;
-  color: var(--forest-dark);
-  margin: 0 0 8px;
-}
-
-.auth-header p {
-  color: var(--muted);
-  font-size: 14px;
-  margin: 0;
-  line-height: 1.5;
-}
-
-.form-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.form-label {
-  display: block;
-  font: 700 12px "Manrope", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  color: var(--ink);
-  margin-bottom: 8px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  font: inherit;
-  font-size: 15px;
-  color: var(--ink);
-  box-sizing: border-box;
-  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  background: var(--white);
-  border-color: var(--forest);
-  box-shadow: 0 0 0 3px rgba(40, 78, 59, .15);
-}
-
-.form-input.input-invalid,
-.input-field.input-invalid,
-.byc-date-display.input-invalid {
-  border-color: var(--red, #bd4c42) !important;
-  background-color: #fdf6f5 !important;
-  box-shadow: 0 0 0 3px rgba(189, 76, 66, 0.18) !important;
-}
-
-.form-field-error {
-  color: var(--red, #bd4c42);
-  font-size: 12px;
-  font-weight: 600;
-  margin-top: 5px;
-  line-height: 1.35;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  animation: formErrorPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes formErrorPop {
-  from {
-    opacity: 0;
-    transform: translateY(-3px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.alert {
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 20px;
-}
-
-.alert-danger {
-  background: var(--red-soft);
-  border: 1px solid rgba(189, 76, 66, .25);
-  color: #87352f;
-}
-
-.alert-success {
-  background: rgba(186, 210, 89, .2);
-  border: 1px solid rgba(186, 210, 89, .35);
-  color: var(--forest-dark);
-}
-
-.auth-footer {
-  margin-top: 26px;
-  text-align: center;
-}
-
-.back-link-subtle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  text-decoration: none;
-  transition: color .2s ease;
-}
-
-.back-link-subtle:hover {
-  color: var(--forest);
-}
 

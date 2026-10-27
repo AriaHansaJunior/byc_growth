@@ -56,17 +56,33 @@ export function initGuessMe() {
             roundIndicator.innerHTML = `${String(currentIndex + 1).padStart(2, '0')} <em>/ ${String(rounds.length).padStart(2, '0')}</em>`;
         }
 
-        // Image
+        // Image: only refresh src if round has actually changed to prevent reveal flicker/reset
         if (guessImage) {
-            const imgSrc = currentRound.image_url || (currentRound.image ? `/assets/images/${currentRound.image}` : '/assets/images/BYC_Growth.jpg');
-            guessImage.src = imgSrc;
-            guessImage.onerror = function() {
-                this.onerror = null;
-                this.src = '/assets/images/BYC_Growth.jpg';
-            };
-            const parentLink = guessImage.closest('a');
-            if (parentLink) {
-                parentLink.href = imgSrc;
+            const currentRoundId = String(currentRound.id);
+            if (guessImage.dataset.currentRoundId !== currentRoundId) {
+                guessImage.dataset.currentRoundId = currentRoundId;
+
+                let imgSrc = currentRound.image_url;
+                if (!imgSrc && currentRound.image) {
+                    if (currentRound.image.startsWith('http') || currentRound.image.startsWith('/')) {
+                        imgSrc = currentRound.image;
+                    } else {
+                        imgSrc = `/assets/images/uploads/${currentRound.image}`;
+                    }
+                }
+                if (!imgSrc) {
+                    imgSrc = '/assets/images/BYC_Growth.jpg';
+                }
+
+                guessImage.src = imgSrc;
+                guessImage.onerror = function() {
+                    this.onerror = null;
+                    this.src = '/assets/images/BYC_Growth.jpg';
+                };
+                const parentLink = guessImage.closest('a');
+                if (parentLink) {
+                    parentLink.href = imgSrc;
+                }
             }
         }
 
