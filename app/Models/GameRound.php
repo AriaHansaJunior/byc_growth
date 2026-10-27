@@ -103,18 +103,22 @@ class GameRound extends Model
 
     /**
      * Mutator: normalize correct_answer to uppercase before persistence.
+     *
+     * @param string|null $value
      */
-    public function setCorrectAnswerAttribute($value): void
+    public function setCorrectAnswerAttribute(?string $value): void
     {
-        $this->attributes['correct_answer'] = $value !== null ? strtoupper(trim((string) $value)) : null;
+        $this->attributes['correct_answer'] = $value !== null ? strtoupper(trim($value)) : null;
     }
 
     /**
      * Mutator: normalize clue to uppercase before persistence.
+     *
+     * @param string|null $value
      */
-    public function setClueAttribute($value): void
+    public function setClueAttribute(?string $value): void
     {
-        $this->attributes['clue'] = $value !== null ? strtoupper(trim((string) $value)) : null;
+        $this->attributes['clue'] = $value !== null ? strtoupper(trim($value)) : null;
     }
 }
 

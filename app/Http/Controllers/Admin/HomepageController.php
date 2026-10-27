@@ -46,7 +46,7 @@ class HomepageController extends Controller
     /**
      * Store a newly uploaded slideshow photo directly in the database.
      */
-    public function storeSlide(Request $request): RedirectResponse
+    public function storeSlide(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
