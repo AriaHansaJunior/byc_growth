@@ -22,7 +22,7 @@
                 <strong style="color: var(--forest); font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase;">WARNING! THIS IS THE ADMIN AREA.</strong>
             </div>
             <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;">
-                If you are an administrator, make sure you know the correct email/username and password before continuing.
+                If you are an administrator, make sure you know your registered email and password before continuing.
             </p>
         </div>
 
@@ -58,32 +58,44 @@
             @endif
 
             <div class="form-group">
-                <label for="login" class="form-label">Email / Username</label>
-                <span style="display: none;" aria-hidden="true">Email Address</span>
+                <label for="email" class="form-label">Email</label>
                 <input
-                    type="text"
-                    id="login"
-                    name="login"
-                    value="{{ old('login', old('email')) }}"
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ old('email', old('login')) }}"
                     required
                     autofocus
-                    autocomplete="username"
-                    class="form-input @if($errors->has('login') || $errors->has('email')) input-invalid @enderror"
-                    placeholder="admin@gmail.com or admin_utama"
+                    autocomplete="email"
+                    class="form-input @if($errors->has('email') || $errors->has('login')) input-invalid @enderror"
+                    placeholder="Enter admin email address"
                 >
             </div>
 
             <div class="form-group form-group--last">
-                <label for="password" class="form-label">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    required
-                    autocomplete="current-password"
-                    class="form-input @error('password') input-invalid @enderror"
-                    placeholder="••••••••"
-                >
+                <label for="admin-password" class="form-label">Password</label>
+                <div class="password-field-wrapper">
+                    <input
+                        type="password"
+                        id="admin-password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        class="form-input @error('password') input-invalid @enderror"
+                        placeholder="••••••••"
+                        style="width: 100%; padding-right: 42px;"
+                    >
+                    <button
+                        type="button"
+                        class="btn-toggle-password"
+                        data-target="admin-password"
+                        title="Show password"
+                        aria-label="Show password"
+                    >
+                        <span class="icon-eye"><x-icon name="eye" /></span>
+                        <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="button button-primary" style="width: 100%;">

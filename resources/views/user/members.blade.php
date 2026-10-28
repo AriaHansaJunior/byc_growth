@@ -174,13 +174,18 @@
                             class="button button-sm btn-member-send-wishes"
                             data-id="{{ $member->id }}"
                             data-name="{{ $member->full_name }}"
+                            data-is-self="{{ $isOwner ? '1' : '0' }}"
                             data-has-letter="{{ $hasLetter ? '1' : '0' }}"
                             data-letter-id="{{ $hasLetter ? $existingLetter->id : '' }}"
                             data-letter-message="{{ $hasLetter ? e($existingLetter->message) : '' }}"
                             data-letter-anonymous="{{ $hasLetter && $existingLetter->is_anonymous ? '1' : '0' }}"
                             style="margin-top: 10px; background: #fdf5d7; border: 1px solid var(--gold); color: #8e680a; font-weight: 700; font-size: 12px; border-radius: 20px; padding: 4px 14px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 2px 6px rgba(231, 189, 82, 0.2);"
                         >
-                            {{ $hasLetter ? 'Edit Wish' : 'Send Wishes' }}
+                            @if($isOwner)
+                                {{ $hasLetter ? 'Edit My Resolution' : 'My Resolution' }}
+                            @else
+                                {{ $hasLetter ? 'Edit Wish' : 'Send Wishes' }}
+                            @endif
                         </button>
                     @endif
 
@@ -246,12 +251,11 @@
                 </div>
 
                 <div>
-                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">User Account</label>
+                    <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">User Account <span style="color: var(--red);">*</span></label>
                     <select name="user_id" id="user-add-user-id" class="input-field" style="width: 100%; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
-                        <option value="">None (Unlinked)</option>
-                        <option value="__new__">+ Create New User Account</option>
+                        <option value="__new__" selected>+ Create New User Account (Required)</option>
                         @if(isset($users) && $users->isNotEmpty())
-                            <optgroup label="Existing Accounts">
+                            <optgroup label="Or Link Existing Account">
                                 @foreach($users as $u)
                                     <option value="{{ $u->id }}">{{ $u->email }} ({{ $u->username }}){{ $u->member_id ? ' [Linked]' : '' }}</option>
                                 @endforeach
@@ -260,7 +264,7 @@
                     </select>
                 </div>
 
-                <div id="user-add-new-account-fields" style="display: none; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 12px;">
+                <div id="user-add-new-account-fields" style="display: block; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 12px;">
                     <div style="font-weight: 700; font-size: 12px; color: var(--forest); margin-bottom: 8px;">New User Account</div>
                     <div style="margin-bottom: 8px;">
                         <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Email *</label>
@@ -272,7 +276,13 @@
                     </div>
                     <div>
                         <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Password (Optional)</label>
-                        <input type="password" name="new_user_password" class="input-field" placeholder="Default: password123" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                        <div class="password-field-wrapper">
+                            <input type="password" name="new_user_password" id="user-add-new-password" class="input-field" placeholder="Default: password123" style="width: 100%; padding: 8px 40px 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                            <button type="button" class="btn-toggle-password" data-target="user-add-new-password" title="Show password" aria-label="Show password">
+                                <span class="icon-eye"><x-icon name="eye" /></span>
+                                <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -348,7 +358,13 @@
                     </div>
                     <div>
                         <label style="display: block; font-size: 11.5px; font-weight: 600; color: var(--ink); margin-bottom: 3px;">Password (Optional)</label>
-                        <input type="password" name="new_user_password" class="input-field" placeholder="Default: password123" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                        <div class="password-field-wrapper">
+                            <input type="password" name="new_user_password" id="user-edit-new-password" class="input-field" placeholder="Default: password123" style="width: 100%; padding: 8px 40px 8px 10px; border: 1px solid var(--line); border-radius: 8px;">
+                            <button type="button" class="btn-toggle-password" data-target="user-edit-new-password" title="Show password" aria-label="Show password">
+                                <span class="icon-eye"><x-icon name="eye" /></span>
+                                <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

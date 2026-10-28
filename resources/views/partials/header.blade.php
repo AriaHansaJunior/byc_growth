@@ -40,13 +40,16 @@
                                 Admin Dashboard
                             </a>
                             <div style="height: 1px; background: var(--line); margin: 4px 6px;"></div>
-                        @elseif($currentUser->member)
-                            <a href="{{ route('birthday.wishes') }}" class="nav-user-dropdown-item" role="menuitem">
+                        @else
+                            <a href="{{ $currentUser->member ? route('birthday.wishes.received') : route('birthday.wishes.sent') }}" class="nav-user-dropdown-item {{ request()->routeIs('birthday.*') ? 'active' : '' }}" role="menuitem">
                                 My Birthday Wishes
+                            </a>
+                            <a href="{{ route('profile') }}" class="nav-user-dropdown-item {{ request()->routeIs('profile') ? 'active' : '' }}" role="menuitem">
+                                Profile
                             </a>
                             <div style="height: 1px; background: var(--line); margin: 4px 6px;"></div>
                         @endif
-                        <form method="POST" action="{{ $currentUser->isAdmin() ? route('admin.logout') : route('logout') }}" style="margin: 0; width: 100%;">
+                        <form method="POST" action="{{ $currentUser->isAdmin() ? route('admin.logout') : route('logout') }}" id="form-header-logout" class="js-logout-form" style="margin: 0; width: 100%;">
                             @csrf
                             <button type="submit" class="nav-user-logout-item" id="btn-header-logout" role="menuitem">
                                 Logout
@@ -106,12 +109,15 @@
                         <a href="{{ route('admin.dashboard') }}" class="button button-primary button-sm" style="width: 100%; margin-top: 10px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
                             Admin Dashboard
                         </a>
-                    @elseif($currentUser->member)
-                        <a href="{{ route('birthday.wishes') }}" class="button button-ghost button-sm" style="width: 100%; margin-top: 10px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
+                    @else
+                        <a href="{{ $currentUser->member ? route('birthday.wishes.received') : route('birthday.wishes.sent') }}" class="button button-ghost button-sm" style="width: 100%; margin-top: 10px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
                             My Birthday Wishes
                         </a>
+                        <a href="{{ route('profile') }}" class="button button-secondary button-sm" style="width: 100%; margin-top: 6px; margin-bottom: 6px; text-decoration: none; text-align: center; justify-content: center; font-weight: 700;">
+                            Profile
+                        </a>
                     @endif
-                    <form method="POST" action="{{ $currentUser->isAdmin() ? route('admin.logout') : route('logout') }}" style="margin-top: 8px; width: 100%;">
+                    <form method="POST" action="{{ $currentUser->isAdmin() ? route('admin.logout') : route('logout') }}" id="form-mobile-logout" class="js-logout-form" style="margin-top: 8px; width: 100%;">
                         @csrf
                         <button type="submit" class="button button-danger button-sm" style="width: 100%;">
                             Logout
@@ -121,3 +127,78 @@
             @endif
         </div>
     </div>
+
+@if($currentUser)
+{{-- Logout Confirmation Modal --}}
+<div class="game-modal-overlay" id="modal-confirm-logout" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-logout-title" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(32, 48, 41, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
+    <div class="game-modal" style="max-width: 420px; width: 92%; background: var(--white); border: 2px solid var(--forest); border-radius: 22px; padding: 28px 24px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.25);">
+        <h3 id="modal-confirm-logout-title" style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 800; color: var(--ink); margin: 0 0 10px;">
+            Confirm Logout
+        </h3>
+        <p style="color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0 0 24px;">
+            Are you sure you want to log out?
+        </p>
+        <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" id="btn-cancel-logout" class="button button-secondary" style="padding: 10px 20px;">
+                Cancel
+            </button>
+            <button type="button" id="btn-confirm-logout" class="button button-danger" style="padding: 10px 24px;">
+                Log Out
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const logoutModal = document.getElementById('modal-confirm-logout');
+    const cancelLogoutBtn = document.getElementById('btn-cancel-logout');
+    const confirmLogoutBtn = document.getElementById('btn-confirm-logout');
+    let pendingLogoutForm = null;
+
+    if (!logoutModal) return;
+
+    document.querySelectorAll('.js-logout-form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            if (form.dataset.confirmed === '1') return;
+            e.preventDefault();
+            pendingLogoutForm = form;
+            logoutModal.style.display = 'flex';
+        });
+    });
+
+    if (cancelLogoutBtn) {
+        cancelLogoutBtn.addEventListener('click', () => {
+            logoutModal.style.display = 'none';
+            pendingLogoutForm = null;
+        });
+    }
+
+    logoutModal.addEventListener('click', (e) => {
+        if (e.target === logoutModal) {
+            logoutModal.style.display = 'none';
+            pendingLogoutForm = null;
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && logoutModal.style.display !== 'none') {
+            logoutModal.style.display = 'none';
+            pendingLogoutForm = null;
+        }
+    });
+
+    if (confirmLogoutBtn) {
+        confirmLogoutBtn.addEventListener('click', () => {
+            const targetForm = pendingLogoutForm || document.getElementById('form-header-logout');
+            if (targetForm) {
+                confirmLogoutBtn.disabled = true;
+                confirmLogoutBtn.textContent = 'Logging Out...';
+                targetForm.dataset.confirmed = '1';
+                targetForm.submit();
+            }
+        });
+    }
+});
+</script>
+@endif

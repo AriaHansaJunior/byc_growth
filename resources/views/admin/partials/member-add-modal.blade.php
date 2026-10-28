@@ -79,9 +79,9 @@
                         <div class="byc-searchable-select" id="searchable-add-user" style="position: relative; width: 100%;">
                             {{-- Standard underlying select for form data & validations --}}
                             <select id="add-user-id" name="user_id" tabindex="-1" aria-hidden="true" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; margin: -1px; clip: rect(0,0,0,0); overflow: hidden;">
-                                <option value="">None (Unlinked)</option>
+                                <option value="__new__" selected>Create New Account</option>
                                 @if(isset($users) && $users->isNotEmpty())
-                                    <optgroup label="Existing Accounts">
+                                    <optgroup label="Or Link Existing Account">
                                         @foreach($users as $u)
                                             <option value="{{ $u->id }}" data-email="{{ $u->email }}" data-username="{{ $u->username }}" data-linked="{{ $u->member_id ? '1' : '0' }}">{{ $u->email }} ({{ $u->username }}){{ $u->member_id ? ' [Linked]' : '' }}</option>
                                         @endforeach
@@ -91,8 +91,8 @@
 
                             {{-- Trigger Button --}}
                             <button type="button" class="byc-select-trigger" id="btn-trigger-add-user" aria-haspopup="listbox" aria-expanded="false" style="width: 100%; height: 44px; min-height: 44px; padding: 10px 14px; font-size: 14px; line-height: 1.4; border-radius: 10px; border: 1px solid var(--line); background: var(--white); color: var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; text-align: left; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box;">
-                                <span class="byc-select-trigger-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;">
-                                    None (Unlinked)
+                                <span class="byc-select-trigger-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; font-weight: 700; color: var(--forest);">
+                                    Create New Account
                                 </span>
                                 <svg class="byc-select-chevron" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted); flex-shrink: 0; transition: transform 0.2s ease;">
                                     <path d="M6 8l4 4 4-4"/>
@@ -113,6 +113,37 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- New User Account Fields --}}
+                        <div id="add-member-new-account-block" style="margin-top: 10px; background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;">
+                            <div>
+                                <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 3px;">
+                                    Account Email <span style="color: var(--red);">*</span>
+                                </label>
+                                <input type="email" name="new_user_email" id="add-new-user-email" class="form-input" placeholder="e.g. member@bycgrowth.org" style="height: 36px; min-height: 36px; padding: 6px 10px; font-size: 13px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 3px;">
+                                        Username
+                                    </label>
+                                    <input type="text" name="new_user_username" id="add-new-user-username" class="form-input" placeholder="Auto if blank" style="height: 36px; min-height: 36px; padding: 6px 10px; font-size: 13px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 3px;">
+                                        Password
+                                    </label>
+                                    <div class="password-field-wrapper">
+                                        <input type="password" name="new_user_password" id="add-new-user-password" class="form-input" value="password123" placeholder="password123" style="height: 36px; min-height: 36px; padding: 6px 36px 6px 10px; font-size: 13px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                                        <button type="button" class="btn-toggle-password" data-target="add-new-user-password" title="Show password" aria-label="Show password" style="right: 8px;">
+                                            <span class="icon-eye"><x-icon name="eye" /></span>
+                                            <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     </div>
 
                     {{-- Left Column, Row 2: Date of Birth --}}

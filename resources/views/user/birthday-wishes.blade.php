@@ -1,33 +1,50 @@
 @extends('layouts.app')
 
-@section('title', 'Birthday Wishes & Archive — BYC GROWTH')
+@section('title', $mode === 'admin' ? 'Birthday Wishes Directory — BYC GROWTH' : 'Birthday Wishes for Me — BYC GROWTH')
 
 @section('content')
 <div class="page-shell">
 
-
     {{-- Page Header --}}
-    <header class="page-header">
+    <header class="page-header" style="margin-bottom: 24px;">
         @if($mode === 'admin')
             <span class="eyebrow">Administrative Management • Archive System</span>
-            <h1>Birthday Wishes Directory</h1>
-            <p>
+            <h1 style="margin: 0 0 8px;">Birthday Wishes Directory</h1>
+            <p style="margin: 0; color: var(--muted);">
                 Complete administrative record of fellowship birthday letters across all members and years.
             </p>
         @elseif($mode === 'recipient')
-            <span class="eyebrow">🎂 Birthday Celebration • Surabaya (Asia/Jakarta)</span>
-            <h1>Birthday Wishes for {{ $recipientMember->full_name }}</h1>
-            <p>
-                Heartfelt blessings, prayers, and encouraging words received from your BYC fellowship family.
+            <span class="eyebrow">Fellowship Celebrations • {{ $recipientMember->full_name }}</span>
+            <h1 style="margin: 0 0 8px;">Birthday Wishes for Me</h1>
+            <p style="margin: 0; color: var(--muted);">
+                Read the greetings your BYC fellowship family has sent to you.
             </p>
         @else
-            <span class="eyebrow">💌 Sent Birthday Wishes</span>
-            <h1>My Birthday Wishes</h1>
-            <p>
-                Review and manage your heartfelt birthday greetings sent for today's celebration.
+            <h1 style="margin: 0 0 8px;">Birthday Wishes for Me</h1>
+            <p style="margin: 0; color: var(--muted);">
+                Read the greetings your BYC fellowship family has sent to you.
             </p>
         @endif
     </header>
+
+    {{-- Mode Navigation Tabs (Birthday Wishes for Me / Sent Birthday Wishes / My Birthday Resolution) --}}
+    @if(auth()->check() && !auth()->user()->isAdmin())
+        <div class="wishes-nav-tabs" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;">
+            @if(auth()->user()->member)
+                <a href="{{ route('birthday.wishes.received') }}" style="padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 13.5px; text-decoration: none; background: var(--forest); color: var(--white); box-shadow: 0 4px 12px rgba(44, 76, 56, 0.25);">
+                    Birthday Wishes for Me
+                </a>
+            @endif
+            <a href="{{ route('birthday.wishes.sent') }}" style="padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 13.5px; text-decoration: none; background: var(--white); border: 1.5px solid var(--line); color: var(--ink); transition: all 0.2s ease;">
+                Sent Birthday Wishes
+            </a>
+            @if(auth()->user()->member)
+                <a href="{{ route('birthday.resolution') }}" style="padding: 10px 22px; border-radius: 999px; font-weight: 700; font-size: 13.5px; text-decoration: none; background: var(--white); border: 1.5px solid var(--line); color: var(--ink); transition: all 0.2s ease;">
+                    My Birthday Resolution
+                </a>
+            @endif
+        </div>
+    @endif
 
     {{-- Filter & Context Bar --}}
     <div class="wishes-controls-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 20px 24px; margin-bottom: 28px; box-shadow: var(--shadow); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
@@ -164,7 +181,11 @@
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px;">
                             <div>
                                 {{-- Sender Display State --}}
-                                @if($wish->is_anonymous)
+                                @if($wish->isSelfWish())
+                                    <div style="display: inline-flex; align-items: center; gap: 6px; background: #fdf5d7; border: 1px solid var(--gold); color: #8e680a; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 800;">
+                                        <span>🌟</span> My Personal Resolution
+                                    </div>
+                                @elseif($wish->is_anonymous)
                                     <div style="display: inline-flex; align-items: center; gap: 6px; background: #eee8d3; color: var(--ink); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 700;">
                                         <span>🕶️</span> Anonymous
                                     </div>
@@ -218,7 +239,7 @@
                                 data-anonymous="{{ $wish->is_anonymous ? '1' : '0' }}"
                                 style="font-size: 12px; padding: 4px 12px; height: 30px;"
                             >
-                                ✏️ Edit Wish
+                                Edit Wish
                             </button>
                         @endif
                     </div>
@@ -231,13 +252,10 @@
 {{-- Edit Wish Modal Dialog --}}
 <div class="game-modal-overlay" id="modal-edit-wish" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(32, 48, 41, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
     <div class="game-modal" style="max-width: 500px; width: 92%; background: var(--white); border: 2px solid var(--gold); border-radius: 24px; padding: 32px 28px; box-shadow: 0 24px 60px rgba(32, 48, 41, 0.35); text-align: left; position: relative;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px;">
+        <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px;">
             <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 20px; color: var(--ink);">
                 Edit Birthday Wish
             </h3>
-            <button type="button" id="btn-close-edit-wish" style="background: none; border: none; font-size: 26px; cursor: pointer; color: var(--muted); line-height: 1;">
-                &times;
-            </button>
         </div>
 
         <form id="form-edit-wish">

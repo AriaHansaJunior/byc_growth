@@ -38,40 +38,38 @@ class AdminAuthController extends Controller
 
     /**
      * Handle an incoming admin authentication request.
-     * Supports both email and username. Strictly restricted to administrator accounts.
+     * Supports email and password only. Strictly restricted to administrator accounts.
      */
     public function login(Request $request): RedirectResponse
     {
-        $loginInput = trim($request->input('login') ?? $request->input('email') ?? '');
+        $email = strtolower(trim((string) ($request->input('email') ?? $request->input('login') ?? '')));
         $password = (string) $request->input('password', '');
 
-        if ($loginInput === '' || $password === '') {
+        if ($email === '' || $password === '') {
             return back()
-                ->withInput($request->only('login', 'email'))
+                ->withInput($request->only('email', 'login'))
                 ->withErrors([
-                    'login' => 'Email or username and password are required.',
+                    'email' => 'Email and password are required.',
                 ]);
         }
 
-        // Query user by email or username
-        $user = User::where('email', $loginInput)
-            ->orWhere('username', $loginInput)
-            ->first();
+        // Query user strictly by email (username login removed as per system policy)
+        $user = User::where('email', $email)->first();
 
         if (!$user || !Hash::check($password, $user->password)) {
             return back()
-                ->withInput($request->only('login', 'email'))
+                ->withInput($request->only('email', 'login'))
                 ->withErrors([
-                    'login' => 'These credentials do not match our records.',
+                    'email' => 'These credentials do not match our records.',
                 ]);
         }
 
         // Strictly reject standard users from logging in to the admin portal
         if (!$user->isAdmin()) {
             return back()
-                ->withInput($request->only('login', 'email'))
+                ->withInput($request->only('email', 'login'))
                 ->withErrors([
-                    'login' => 'Standard user accounts do not have administrator access.',
+                    'email' => 'Standard user accounts do not have administrator access.',
                 ]);
         }
 

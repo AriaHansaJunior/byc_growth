@@ -896,6 +896,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchableAdd = initSearchableSelect('add-user-id', 'searchable-add-user', 'btn-trigger-add-user', 'dropdown-menu-add-user');
     const searchableEdit = initSearchableSelect('edit-user-id', 'searchable-edit-user', 'btn-trigger-edit-user', 'dropdown-menu-edit-user');
 
+    const addMemberAccountBlock = document.getElementById('add-member-new-account-block');
+    const addMemberSelectEl = document.getElementById('add-user-id');
+    if (addMemberSelectEl && addMemberAccountBlock) {
+        addMemberSelectEl.addEventListener('change', () => {
+            const isNew = addMemberSelectEl.value === '__new__' || !addMemberSelectEl.value;
+            addMemberAccountBlock.style.display = isNew ? 'flex' : 'none';
+        });
+    }
+
     // Quick Create User Account Modal Controller
     let quickAccountTarget = 'add';
     const quickUserModal = document.getElementById('modal-quick-create-user');

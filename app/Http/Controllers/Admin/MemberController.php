@@ -285,6 +285,26 @@ class MemberController extends Controller
             User::where('member_id', $member->id)->where('id', '!=', $chosenId)->update(['member_id' => null]);
             // Attach chosen user
             User::where('id', $chosenId)->update(['member_id' => $member->id]);
+        } elseif ($request->isMethod('post') && !$member->user) {
+            // Guarantee every newly created member has a linked user account
+            $baseSlug = \Illuminate\Support\Str::slug($member->full_name, '.') ?: 'member';
+            $candidateEmail = $baseSlug . '.' . $member->id . '@bycgrowth.org';
+            $candidateUsername = \Illuminate\Support\Str::slug($member->full_name, '_') . '_' . $member->id;
+
+            $counter = 1;
+            while (User::where('email', $candidateEmail)->exists()) {
+                $candidateEmail = $baseSlug . '.' . $member->id . '.' . $counter . '@bycgrowth.org';
+                $counter++;
+            }
+
+            User::create([
+                'name' => $member->full_name,
+                'username' => $candidateUsername,
+                'email' => $candidateEmail,
+                'password' => Hash::make('password123'),
+                'role' => 'user',
+                'member_id' => $member->id,
+            ]);
         } elseif ($request->has('user_id') && empty($userId)) {
             // Unlink account
             User::where('member_id', $member->id)->update(['member_id' => null]);

@@ -64,7 +64,7 @@ class MediaController extends Controller
                 return response($decoded['binary'], 200, [
                     'Content-Type' => $decoded['mime'],
                     'Content-Length' => strlen($decoded['binary']),
-                    'Cache-Control' => 'public, max-age=86400, must-revalidate',
+                    'Cache-Control' => 'no-cache, private, must-revalidate',
                     'Vary' => 'Sec-Fetch-Dest, Accept',
                 ]);
             }
@@ -117,7 +117,7 @@ class MediaController extends Controller
                 return response($decoded['binary'], 200, [
                     'Content-Type' => $decoded['mime'],
                     'Content-Length' => strlen($decoded['binary']),
-                    'Cache-Control' => 'public, max-age=86400, must-revalidate',
+                    'Cache-Control' => 'no-cache, private, must-revalidate',
                     'Vary' => 'Sec-Fetch-Dest, Accept',
                 ]);
             }
@@ -240,7 +240,7 @@ class MediaController extends Controller
                 return response($decoded['binary'], 200, [
                     'Content-Type' => $decoded['mime'],
                     'Content-Length' => strlen($decoded['binary']),
-                    'Cache-Control' => 'public, max-age=86400, must-revalidate',
+                    'Cache-Control' => 'no-cache, private, must-revalidate',
                     'Vary' => 'Sec-Fetch-Dest, Accept',
                 ]);
             }

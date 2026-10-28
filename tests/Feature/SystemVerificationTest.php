@@ -136,7 +136,7 @@ class SystemVerificationTest extends TestCase
         ];
 
         foreach ($routes as $route) {
-            $response = $this->actingAs($admin)->get($route);
+            $response = $this->actingAs($admin, 'admin')->get($route);
             $response->assertStatus(200);
         }
     }
@@ -170,14 +170,14 @@ class SystemVerificationTest extends TestCase
         $admin = $this->createAdminUser();
 
         // Validation error on empty name
-        $response = $this->actingAs($admin)->post('/admin/members', [
+        $response = $this->actingAs($admin, 'admin')->post('/admin/members', [
             'full_name' => '',
         ]);
         $response->assertSessionHasErrors(['full_name']);
 
         // Successful creation
         $name = 'Verification Member ' . uniqid();
-        $response = $this->actingAs($admin)->post('/admin/members', [
+        $response = $this->actingAs($admin, 'admin')->post('/admin/members', [
             'full_name' => $name,
             'date_of_birth' => '2000-05-15',
         ]);
@@ -198,12 +198,12 @@ class SystemVerificationTest extends TestCase
         ]);
 
         // Missing required fields
-        $response = $this->actingAs($admin)->post('/admin/cash-management', []);
+        $response = $this->actingAs($admin, 'admin')->post('/admin/cash-management', []);
         $response->assertSessionHasErrors(['member_id', 'account_type', 'amount', 'proof']);
 
         // Successful transaction creation with fake image upload
         $fakeProof = \Illuminate\Http\UploadedFile::fake()->image('receipt.jpg');
-        $response = $this->actingAs($admin)->post('/admin/cash-management', [
+        $response = $this->actingAs($admin, 'admin')->post('/admin/cash-management', [
             'member_id' => $member->id,
             'account_type' => 'Bank Transfer (BCA)',
             'amount' => 50000,
@@ -218,7 +218,7 @@ class SystemVerificationTest extends TestCase
     }
 
     /**
-     * Test normal user login and authentication flow.
+     * Test normal user login and authentication flow (email-only).
      */
     public function test_user_can_login_with_credentials(): void
     {
@@ -231,8 +231,17 @@ class SystemVerificationTest extends TestCase
             'role' => 'user',
         ]);
 
+        // Username login must be rejected
+        $badResponse = $this->post('/login', [
+            'email' => $user->username,
+            'password' => $password,
+        ]);
+        $badResponse->assertSessionHasErrors(['email']);
+        $this->assertGuest('web');
+
+        // Email login must succeed
         $response = $this->post('/login', [
-            'login' => $user->username,
+            'email' => $user->email,
             'password' => $password,
         ]);
         $response->assertRedirect('/');
@@ -254,7 +263,7 @@ class SystemVerificationTest extends TestCase
         ]);
 
         $response = $this->post('/admin-ganteng', [
-            'login' => $admin->email,
+            'email' => $admin->email,
             'password' => $password,
         ]);
         $response->assertRedirect('/admin/dashboard');
@@ -276,13 +285,13 @@ class SystemVerificationTest extends TestCase
         ]);
 
         $response = $this->post('/login', [
-            'login' => $admin->username,
+            'email' => $admin->email,
             'password' => $password,
         ]);
         $response->assertSessionHasErrors([
-            'login' => 'Administrator accounts cannot log in to the User portal.',
+            'email' => 'Administrator accounts cannot log in to the User portal.',
         ]);
-        $errors = session('errors')->get('login');
+        $errors = session('errors')->get('email');
         $this->assertCount(1, $errors);
         $this->assertGuest('web');
     }
@@ -302,13 +311,13 @@ class SystemVerificationTest extends TestCase
         ]);
 
         $response = $this->post('/admin-ganteng', [
-            'login' => $user->username,
+            'email' => $user->email,
             'password' => $password,
         ]);
         $response->assertSessionHasErrors([
-            'login' => 'Standard user accounts do not have administrator access.',
+            'email' => 'Standard user accounts do not have administrator access.',
         ]);
-        $errors = session('errors')->get('login');
+        $errors = session('errors')->get('email');
         $this->assertCount(1, $errors);
         $this->assertGuest('admin');
     }
@@ -320,7 +329,7 @@ class SystemVerificationTest extends TestCase
     {
         $admin = $this->createAdminUser();
 
-        $response = $this->actingAs($admin)->delete("/admin/roles/{$admin->id}");
+        $response = $this->actingAs($admin, 'admin')->delete("/admin/roles/{$admin->id}");
         $response->assertSessionHas('error');
         $this->assertDatabaseHas('users', ['id' => $admin->id]);
     }
@@ -414,7 +423,124 @@ class SystemVerificationTest extends TestCase
 
         $response = $this->actingAs($user, 'web')->get('/birthday-wishes');
         $response->assertStatus(200);
-        $response->assertSee('Birthday Wishes for ' . $member->full_name);
+        $response->assertSee('Birthday Wishes for Me');
+        $response->assertSee($member->full_name);
+    }
+
+    /**
+     * Test birthday self-resolution (Mode B) separation from received and sent wishes, and profile update.
+     */
+    public function test_self_resolution_separation_and_profile_update(): void
+    {
+        $today = \Carbon\Carbon::now('Asia/Jakarta');
+        $memberA = Member::create([
+            'full_name' => 'Self Celebrant ' . uniqid(),
+            'date_of_birth' => $today->copy()->subYears(21)->format('Y-m-d'),
+            'is_active' => true,
+        ]);
+        $memberB = Member::create([
+            'full_name' => 'Other Celebrant ' . uniqid(),
+            'date_of_birth' => $today->copy()->subYears(23)->format('Y-m-d'),
+            'is_active' => true,
+        ]);
+
+        $userA = User::create([
+            'name' => $memberA->full_name,
+            'username' => 'self_user_' . uniqid(),
+            'email' => 'self_' . uniqid() . '@bycgrowth.test',
+            'password' => Hash::make('password123'),
+            'role' => 'user',
+            'member_id' => $memberA->id,
+        ]);
+
+        // 1. User A writes personal birthday resolution for themselves (Mode B)
+        $resSelf = $this->actingAs($userA, 'web')->postJson('/birthday/letter', [
+            'member_id' => $memberA->id,
+            'message' => 'My personal birthday resolution for the coming year.',
+        ]);
+        $resSelf->assertStatus(200);
+        $resSelf->assertJson([
+            'success' => true,
+            'is_self_wish' => true,
+        ]);
+
+        // 2. User A sends birthday wish to Member B (Mode A)
+        $resOther = $this->actingAs($userA, 'web')->postJson('/birthday/letter', [
+            'member_id' => $memberB->id,
+            'message' => 'Happy Birthday to Member B!',
+        ]);
+        $resOther->assertStatus(200);
+        $resOther->assertJson([
+            'success' => true,
+            'is_self_wish' => false,
+        ]);
+
+        // 3. Verify separation on /birthday-wishes/received, /birthday-wishes/sent, and /birthday-resolution
+        $selfLetterId = $resSelf->json('letter_id');
+        $otherLetterId = $resOther->json('letter_id');
+
+        $receivedResp = $this->actingAs($userA, 'web')->get('/birthday-wishes/received');
+        $receivedResp->assertStatus(200);
+        $this->assertCount(0, $receivedResp->viewData('wishes'));
+        $receivedResp->assertDontSee('id="wish-card-' . $selfLetterId . '"', false);
+
+        $sentResp = $this->actingAs($userA, 'web')->get('/birthday-wishes/sent');
+        $sentResp->assertStatus(200);
+        $this->assertCount(1, $sentResp->viewData('wishes'));
+        $this->assertFalse($sentResp->viewData('wishes')->first()->isSelfWish());
+        $sentResp->assertSee('id="wish-card-' . $otherLetterId . '"', false);
+        $sentResp->assertDontSee('id="wish-card-' . $selfLetterId . '"', false);
+
+        $resolutionResp = $this->actingAs($userA, 'web')->get('/birthday-resolution');
+        $resolutionResp->assertStatus(200);
+        $this->assertCount(1, $resolutionResp->viewData('resolutions'));
+        $this->assertTrue($resolutionResp->viewData('resolutions')->first()->isSelfWish());
+        $resolutionResp->assertSee('id="resolution-card-' . $selfLetterId . '"', false);
+        $resolutionResp->assertDontSee('id="wish-card-' . $otherLetterId . '"', false);
+
+        // 4. Verify Profile page and update preserving User ID and password when new_password is empty, with photo upload
+        $originalId = $userA->id;
+        $originalHash = $userA->password;
+        $newEmail = 'updated_' . uniqid() . '@bycgrowth.test';
+
+        $profileGet = $this->actingAs($userA, 'web')->get('/profile');
+        $profileGet->assertStatus(200);
+        $profileGet->assertSee('Member Profile');
+
+        $fakePhoto = \Illuminate\Http\UploadedFile::fake()->image('profile_test.jpg', 300, 300);
+
+        $profilePut = $this->actingAs($userA, 'web')->put('/profile', [
+            'email' => $newEmail,
+            'new_password' => '',
+            'photo' => $fakePhoto,
+        ]);
+        $profilePut->assertRedirect('/profile');
+        $userA->refresh();
+        $this->assertEquals($originalId, $userA->id);
+        $this->assertEquals($newEmail, $userA->email);
+        $this->assertEquals($originalHash, $userA->password);
+
+        $memberA->refresh();
+        $this->assertNotNull($memberA->memberPhoto);
+        $this->assertNotEmpty($memberA->photo_url);
+
+        // 5. Test updating with photo_base64 and changing password
+        $newerEmail = 'updated_pwd_' . uniqid() . '@bycgrowth.test';
+        $newPlainPassword = 'newSecretPassword99';
+        $dummyBase64 = 'data:image/jpeg;base64,' . base64_encode('fake image binary content for testing');
+
+        $profilePut2 = $this->actingAs($userA, 'web')->put('/profile', [
+            'email' => $newerEmail,
+            'new_password' => $newPlainPassword,
+            'photo_base64' => $dummyBase64,
+        ]);
+        $profilePut2->assertRedirect('/profile');
+        $userA->refresh();
+        $this->assertEquals($newerEmail, $userA->email);
+        $this->assertTrue(Hash::check($newPlainPassword, $userA->password));
+
+        $memberA->refresh();
+        $this->assertStringContainsString('data:image/jpeg;base64,', $memberA->memberPhoto->photo_data);
     }
 
     /**

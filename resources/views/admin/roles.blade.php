@@ -363,15 +363,27 @@
 
                     <div class="form-group" style="margin: 0;">
                         <label class="form-label" for="add-user-password" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Password *</label>
-                        <input
-                            type="password"
-                            name="password"
-                            id="add-user-password"
-                            class="form-input @error('password') input-invalid @enderror"
-                            placeholder="Minimum 6 characters"
-                            autocomplete="new-password"
-                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
-                        >
+                        <div class="password-field-wrapper">
+                            <input
+                                type="password"
+                                name="password"
+                                id="add-user-password"
+                                class="form-input @error('password') input-invalid @enderror"
+                                placeholder="Minimum 6 characters"
+                                autocomplete="new-password"
+                                style="height: 38px; padding: 6px 40px 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
+                            >
+                            <button
+                                type="button"
+                                class="btn-toggle-password"
+                                data-target="add-user-password"
+                                title="Show password"
+                                aria-label="Show password"
+                            >
+                                <span class="icon-eye"><x-icon name="eye" /></span>
+                                <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                            </button>
+                        </div>
                         @error('password')
                             <div class="form-field-error" data-for="add-user-password" style="font-size: 11px; margin-top: 2px;">{{ $message }}</div>
                         @enderror
@@ -460,18 +472,15 @@
 
                     <div class="form-group" style="margin: 0;">
                         <label class="form-label" for="edit-user-password" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">
-                            Change Password
-                            <small style="color: var(--muted); font-weight: normal; font-size: 11px;">(Leave empty to preserve current)</small>
+                            Change Password <small style="color: var(--muted); font-weight: normal; font-size: 11px;">(Leave empty to preserve current)</small>
                         </label>
-                        <input
-                            type="password"
-                            name="password"
-                            id="edit-user-password"
-                            class="form-input"
-                            placeholder="Leave blank to keep current password"
-                            autocomplete="new-password"
-                            style="height: 38px; padding: 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
-                        >
+                        <div class="password-field-wrapper">
+                            <input type="password" name="password" id="edit-user-password" class="form-input" placeholder="Leave blank to keep current password" autocomplete="new-password" style="height: 38px; padding: 6px 40px 6px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;">
+                            <button type="button" class="btn-toggle-password" data-target="edit-user-password" title="Show password" aria-label="Show password">
+                                <span class="icon-eye"><x-icon name="eye" /></span>
+                                <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group" style="margin: 0;">
@@ -568,11 +577,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const errorEl = document.createElement('div');
         errorEl.className = 'form-field-error';
         const fieldId = field.id || field.name;
-        if (fieldId) {
-            errorEl.setAttribute('data-for', fieldId);
-        }
+        if (fieldId) errorEl.setAttribute('data-for', fieldId);
         errorEl.textContent = message;
-        field.insertAdjacentElement('afterend', errorEl);
+        const targetEl = field.closest('.password-field-wrapper') || field;
+        targetEl.insertAdjacentElement('afterend', errorEl);
     }
 
     function clearFieldError(field) {
@@ -583,8 +591,9 @@ document.addEventListener('DOMContentLoaded', function () {
         if (parent) {
             parent.querySelectorAll(`.form-field-error[data-for="${fieldId}"]`).forEach(el => el.remove());
         }
-        if (field.nextElementSibling && field.nextElementSibling.classList.contains('form-field-error')) {
-            field.nextElementSibling.remove();
+        const targetEl = field.closest('.password-field-wrapper') || field;
+        if (targetEl.nextElementSibling && targetEl.nextElementSibling.classList.contains('form-field-error')) {
+            targetEl.nextElementSibling.remove();
         }
     }
 

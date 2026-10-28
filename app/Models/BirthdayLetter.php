@@ -15,6 +15,7 @@ class BirthdayLetter extends Model
         'user_id',
         'birthday_year',
         'is_anonymous',
+        'is_self_wish',
         'sender_name',
         'message',
         'last_action_by',
@@ -25,6 +26,7 @@ class BirthdayLetter extends Model
     protected $casts = [
         'birthday_year' => 'integer',
         'is_anonymous' => 'boolean',
+        'is_self_wish' => 'boolean',
         'last_action_at' => 'datetime',
     ];
 
@@ -119,5 +121,21 @@ class BirthdayLetter extends Model
         }
 
         return $this->member ? $this->member->isBirthdayToday() : false;
+    }
+
+    /**
+     * Check if this letter is a personal self birthday wish / resolution.
+     */
+    public function isSelfWish(): bool
+    {
+        if ($this->is_self_wish) {
+            return true;
+        }
+
+        if ($this->user && $this->user->member_id && (int) $this->user->member_id === (int) $this->member_id) {
+            return true;
+        }
+
+        return false;
     }
 }

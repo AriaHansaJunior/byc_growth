@@ -71,7 +71,8 @@ class Member extends Model
     public function getPhotoUrlAttribute(): ?string
     {
         if ($this->memberPhoto && !empty($this->memberPhoto->photo_data)) {
-            return route('media.member.photo', ['id' => $this->id]);
+            $version = $this->memberPhoto->updated_at ? $this->memberPhoto->updated_at->timestamp : ($this->updated_at ? $this->updated_at->timestamp : time());
+            return route('media.member.photo', ['id' => $this->id, 'v' => $version]);
         }
 
         return $this->photo ? $this->photo->getUrl() : null;
@@ -83,7 +84,8 @@ class Member extends Model
     public function getFullPhotoUrlAttribute(): ?string
     {
         if ($this->memberPhoto && !empty($this->memberPhoto->photo_data)) {
-            return route('media.member.photo', ['id' => $this->id, 'full' => 1]);
+            $version = $this->memberPhoto->updated_at ? $this->memberPhoto->updated_at->timestamp : ($this->updated_at ? $this->updated_at->timestamp : time());
+            return route('media.member.photo', ['id' => $this->id, 'full' => 1, 'v' => $version]);
         }
 
         return $this->photo ? $this->photo->getFullUrl() : null;

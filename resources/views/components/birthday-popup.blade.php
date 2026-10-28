@@ -2,6 +2,10 @@
 @php
     $celebrantsCount = $birthdayMembers->count();
     $lockDurationSeconds = $celebrantsCount * 5;
+    $authPopupUser = auth('web')->user() ?? auth('admin')->user() ?? auth()->user();
+    $popupUserMemberId = ($authPopupUser && !$authPopupUser->isAdmin() && $authPopupUser->member_id)
+        ? (int) $authPopupUser->member_id
+        : null;
     $popupData = $birthdayMembers->map(function ($m) {
         return [
             'id' => $m->id,
@@ -22,9 +26,6 @@
      style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(32, 48, 41, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
     
     <div class="game-modal birthday-modal-card" style="max-width: 520px; width: 92%; background: var(--white); border: 2px solid var(--gold); border-radius: 24px; padding: 36px 32px; text-align: center; box-shadow: 0 24px 60px rgba(32, 48, 41, 0.35); position: relative; animation: birthdayPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-        
-        {{-- Close X Button --}}
-        <button type="button" class="btn-close-modal" id="btn-birthday-modal-x" aria-label="Close modal" style="position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 26px; cursor: pointer; color: var(--muted); line-height: 1; z-index: 10;">&times;</button>
 
         {{-- Celebratory Banner Badge --}}
         <div style="display: inline-flex; align-items: center; gap: 8px; background: #fdf5d7; border: 1px solid var(--gold); color: #8e680a; padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 20px;">
@@ -100,13 +101,13 @@
             </div>
         </div>
 
-        {{-- Write / Edit a Letter Form View --}}
+        {{-- Write / Edit a Letter or Resolution Form View --}}
         <div id="birthday-view-letter" style="display: none; text-align: left;">
             <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px;">
                 <h3 id="birthday-letter-title" style="font-family: 'Manrope', sans-serif; font-size: 19px; margin: 0 0 4px; color: var(--ink);">
                     Send Birthday Letter
                 </h3>
-                <small style="color: var(--muted);">
+                <small id="birthday-letter-subtitle" style="color: var(--muted); display: block;">
                     To: <strong id="birthday-letter-recipient" style="color: var(--forest);">{{ $popupData[0]['full_name'] }}</strong>
                 </small>
             </div>
@@ -116,7 +117,7 @@
                 <input type="hidden" name="member_id" id="letter-member-id" value="{{ $popupData[0]['id'] }}">
                 <input type="hidden" name="letter_id" id="letter-id" value="">
 
-                <div style="margin-bottom: 14px;">
+                <div id="wrap-letter-anonymous" style="margin-bottom: 14px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--ink); cursor: pointer;">
                         <input type="checkbox" name="is_anonymous" id="letter-is-anonymous" value="1" style="width: 16px; height: 16px; accent-color: var(--forest);">
                         Send Anonymously
@@ -127,7 +128,7 @@
                 </div>
 
                 <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">
+                    <label id="letter-message-label" for="letter-message" style="display: block; font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">
                         Your Birthday Wishes *
                     </label>
                     <textarea name="message" id="letter-message" required rows="4" placeholder="Write your heartfelt blessing and encouraging words..." class="input-field" style="width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit; resize: vertical;"></textarea>
@@ -154,12 +155,12 @@
             <p id="success-desc" style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">
                 Your birthday wishes have been recorded for <strong id="success-member-name"></strong>. Thank you for sharing joy!
             </p>
-            <div style="display: flex; justify-content: center; gap: 12px; margin-top: 8px;">
+            <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
                 <button type="button" id="btn-success-close" class="button button-primary">
                     Done & Close
                 </button>
-                <a href="{{ route('birthday.wishes') }}" class="button button-secondary">
-                    Review My Wish &rarr;
+                <a href="{{ route('birthday.wishes.sent') }}" id="btn-success-review-link" class="button button-secondary">
+                    Sent Birthday Wishes
                 </a>
             </div>
         </div>
@@ -174,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const members = @json($popupData);
     const celebrantsCount = members.length;
     const lockDurationSeconds = celebrantsCount * 5;
-    const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+    const isAuthenticated = {{ $authPopupUser ? 'true' : 'false' }};
+    const currentUserMemberId = @json($popupUserMemberId);
 
     // Preloaded letters by member id for the current user
     const lettersByMember = @json(isset($userBirthdayLetters) ? $userBirthdayLetters : []);
@@ -209,8 +211,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const recipientIdInput = document.getElementById('letter-member-id');
     const letterIdInput = document.getElementById('letter-id');
     const letterTitle = document.getElementById('birthday-letter-title');
+    const letterSubtitle = document.getElementById('birthday-letter-subtitle');
     const letterMessage = document.getElementById('letter-message');
+    const letterMessageLabel = document.getElementById('letter-message-label');
     const letterIsAnonymous = document.getElementById('letter-is-anonymous');
+    const wrapLetterAnonymous = document.getElementById('wrap-letter-anonymous');
     const btnSubmitLetter = document.getElementById('btn-submit-letter');
     const counterBadge = document.getElementById('birthday-counter-badge');
 
@@ -220,8 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const lockStateEl = document.getElementById('birthday-lock-state');
     const actionButtonsEl = document.getElementById('birthday-action-buttons');
     const closeBtn = document.getElementById('btn-birthday-close');
-    const modalXBtn = document.getElementById('btn-birthday-modal-x');
     const successCloseBtn = document.getElementById('btn-success-close');
+    const successReviewLink = document.getElementById('btn-success-review-link');
 
     const viewGreeting = document.getElementById('birthday-view-greeting');
     const viewLetter = document.getElementById('birthday-view-letter');
@@ -236,10 +241,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const successTitle = document.getElementById('success-title');
     const successDesc = document.getElementById('success-desc');
 
+    function isSelfMember(memberId) {
+        return currentUserMemberId !== null && parseInt(memberId, 10) === parseInt(currentUserMemberId, 10);
+    }
+
     function updateGreetingWriteButton(memberId) {
         if (!btnWriteText) return;
         const existing = lettersByMember[memberId];
-        btnWriteText.textContent = existing ? 'Edit Birthday Wish' : 'Write a Letter';
+        if (isSelfMember(memberId)) {
+            btnWriteText.textContent = existing ? 'Edit My Resolution' : 'My Birthday Resolution';
+        } else {
+            btnWriteText.textContent = existing ? 'Edit Birthday Wish' : 'Write a Letter';
+        }
     }
 
     function updateMemberDisplay(index, animated = false) {
@@ -305,7 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (modalXBtn) modalXBtn.addEventListener('click', closeModal);
     if (successCloseBtn) successCloseBtn.addEventListener('click', closeModal);
 
     document.addEventListener('keydown', (e) => {
@@ -314,10 +326,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Function to populate and open letter form (new or edit mode)
+    // Function to populate and open letter or resolution form (Mode A vs Mode B)
     function openLetterForm(memberId, memberNameText, explicitLetterData, fromGreeting = false) {
         const idInt = parseInt(memberId, 10);
         const idx = members.findIndex(m => m.id === idInt);
+        const selfMode = isSelfMember(idInt);
 
         openedFromGreeting = fromGreeting;
 
@@ -330,10 +343,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'flex';
         unlockControls();
 
+        let targetName = memberNameText || 'Birthday Celebrant';
         if (idx !== -1) {
             updateMemberDisplay(idx, false);
+            targetName = members[idx].full_name;
         } else {
-            if (recipientName) recipientName.textContent = memberNameText || 'Birthday Celebrant';
             if (recipientIdInput) recipientIdInput.value = idInt;
         }
 
@@ -341,21 +355,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const letter = explicitLetterData || lettersByMember[idInt];
 
         if (letterError) letterError.style.display = 'none';
+        if (letterIdInput) letterIdInput.value = letter && letter.id ? letter.id : '';
+        if (letterMessage) letterMessage.value = letter && letter.message ? letter.message : '';
 
-        if (letter) {
-            // Edit Wish Mode
-            if (letterTitle) letterTitle.textContent = 'Edit Birthday Letter';
-            if (letterIdInput) letterIdInput.value = letter.id || '';
-            if (letterMessage) letterMessage.value = letter.message || '';
-            if (letterIsAnonymous) letterIsAnonymous.checked = Boolean(letter.is_anonymous);
-            if (btnSubmitLetter) btnSubmitLetter.textContent = 'Update Letter';
-        } else {
-            // Send New Letter Mode
-            if (letterTitle) letterTitle.textContent = 'Send Birthday Letter';
-            if (letterIdInput) letterIdInput.value = '';
-            if (letterMessage) letterMessage.value = '';
+        if (selfMode) {
+            // Mode B — Writing a resolution for oneself
+            if (letterTitle) letterTitle.textContent = letter ? 'Edit My Birthday Resolution' : 'My Birthday Resolution';
+            if (letterSubtitle) letterSubtitle.textContent = 'Write your hopes, prayers, and intentions for the year ahead.';
+            if (wrapLetterAnonymous) wrapLetterAnonymous.style.display = 'none';
             if (letterIsAnonymous) letterIsAnonymous.checked = false;
-            if (btnSubmitLetter) btnSubmitLetter.textContent = 'Send Letter';
+            if (letterMessageLabel) letterMessageLabel.textContent = 'My Resolution *';
+            if (letterMessage) letterMessage.placeholder = 'Write your personal hopes, prayers, and intentions for the coming year...';
+            if (btnSubmitLetter) btnSubmitLetter.textContent = letter ? 'Update Resolution' : 'Save Resolution';
+        } else {
+            // Mode A — Sending wishes to another member
+            if (letterTitle) letterTitle.textContent = letter ? 'Edit Birthday Letter' : 'Send Birthday Letter';
+            if (letterSubtitle) {
+                letterSubtitle.innerHTML = 'To: <strong id="birthday-letter-recipient" style="color: var(--forest);"></strong>';
+                const recStrong = document.getElementById('birthday-letter-recipient');
+                if (recStrong) recStrong.textContent = targetName;
+            }
+            if (wrapLetterAnonymous) wrapLetterAnonymous.style.display = 'block';
+            if (letterIsAnonymous) letterIsAnonymous.checked = Boolean(letter && letter.is_anonymous);
+            if (letterMessageLabel) letterMessageLabel.textContent = 'Your Birthday Wishes *';
+            if (letterMessage) letterMessage.placeholder = 'Write your heartfelt blessing and encouraging words...';
+            if (btnSubmitLetter) btnSubmitLetter.textContent = letter ? 'Update Letter' : 'Send Letter';
         }
 
         viewGreeting.style.display = 'none';
@@ -401,16 +425,19 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             if (letterError) letterError.style.display = 'none';
 
+            const currentMemberId = parseInt(recipientIdInput ? recipientIdInput.value : 0, 10);
+            const selfMode = isSelfMember(currentMemberId);
             const message = (letterMessage ? letterMessage.value : '').trim();
             if (!message || message.length < 3) {
                 if (letterError) {
-                    letterError.textContent = 'Please enter at least 3 characters in your birthday message.';
+                    letterError.textContent = selfMode
+                        ? 'Please enter at least 3 characters in your birthday resolution.'
+                        : 'Please enter at least 3 characters in your birthday message.';
                     letterError.style.display = 'block';
                 }
                 return;
             }
 
-            const currentMemberId = parseInt(recipientIdInput ? recipientIdInput.value : 0, 10);
             const letterId = letterIdInput ? letterIdInput.value : '';
             const isEditing = Boolean(letterId);
 
@@ -440,7 +467,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const savedLetter = data.letter || {
                         id: data.letter_id || letterId,
                         message: message,
-                        is_anonymous: letterIsAnonymous ? letterIsAnonymous.checked : false,
+                        is_anonymous: selfMode ? false : (letterIsAnonymous ? letterIsAnonymous.checked : false),
+                        is_self_wish: selfMode,
                         member_id: currentMemberId
                     };
 
@@ -450,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Update card button on Members page if present
                     const memberCardBtn = document.querySelector(`.btn-member-send-wishes[data-id="${currentMemberId}"]`);
                     if (memberCardBtn) {
-                        memberCardBtn.textContent = 'Edit Wish';
+                        memberCardBtn.textContent = selfMode ? 'Edit My Resolution' : 'Edit Wish';
                         memberCardBtn.dataset.hasLetter = '1';
                         memberCardBtn.dataset.letterId = savedLetter.id;
                         memberCardBtn.dataset.letterMessage = savedLetter.message;
@@ -461,22 +489,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Show success screen
                     viewLetter.style.display = 'none';
-                    if (successName) {
-                        const targetMember = members.find(m => m.id === currentMemberId);
-                        successName.textContent = targetMember ? targetMember.full_name : 'the celebrant';
+                    const targetMember = members.find(m => m.id === currentMemberId);
+                    const targetMemberName = targetMember ? targetMember.full_name : 'the celebrant';
+
+                    if (selfMode) {
+                        if (successTitle) {
+                            successTitle.textContent = isEditing ? 'Resolution Updated!' : 'Resolution Saved!';
+                        }
+                        if (successDesc) {
+                            successDesc.textContent = isEditing
+                                ? 'Your personal birthday resolution for the year ahead has been updated.'
+                                : 'Your personal birthday resolution for the year ahead has been saved.';
+                        }
+                        if (successReviewLink) {
+                            successReviewLink.href = "{{ route('birthday.resolution') }}";
+                            successReviewLink.textContent = 'My Birthday Resolution';
+                        }
+                    } else {
+                        if (successTitle) {
+                            successTitle.textContent = isEditing ? 'Letter Updated!' : 'Letter Sent with Love!';
+                        }
+                        if (successDesc) {
+                            successDesc.innerHTML = isEditing
+                                ? `Your birthday wishes for <strong id="success-member-name"></strong> have been updated.`
+                                : `Your birthday wishes have been recorded for <strong id="success-member-name"></strong>. Thank you for sharing joy!`;
+                            const nameSpan = document.getElementById('success-member-name');
+                            if (nameSpan) nameSpan.textContent = targetMemberName;
+                        }
+                        if (successReviewLink) {
+                            successReviewLink.href = "{{ route('birthday.wishes.sent') }}";
+                            successReviewLink.textContent = 'Sent Birthday Wishes';
+                        }
                     }
-                    if (successTitle) {
-                        successTitle.textContent = isEditing ? 'Letter Updated!' : 'Letter Sent with Love!';
-                    }
-                    if (successDesc) {
-                        successDesc.innerHTML = isEditing
-                            ? `Your birthday wishes for <strong id="success-member-name">${successName ? successName.textContent : 'the celebrant'}</strong> have been updated.`
-                            : `Your birthday wishes have been recorded for <strong id="success-member-name">${successName ? successName.textContent : 'the celebrant'}</strong>. Thank you for sharing joy!`;
-                    }
+
                     viewSuccess.style.display = 'block';
                 } else {
                     if (letterError) {
-                        letterError.textContent = data.message || 'Failed to submit letter. Please check your message.';
+                        letterError.textContent = data.message || 'Failed to save your message. Please check your input.';
                         letterError.style.display = 'block';
                     }
                 }
@@ -488,7 +537,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 if (btnSubmitLetter) {
                     btnSubmitLetter.disabled = false;
-                    btnSubmitLetter.textContent = isEditing ? 'Update Letter' : 'Send Letter';
+                    if (selfMode) {
+                        btnSubmitLetter.textContent = isEditing ? 'Update Resolution' : 'Save Resolution';
+                    } else {
+                        btnSubmitLetter.textContent = isEditing ? 'Update Letter' : 'Send Letter';
+                    }
                 }
             }
         });

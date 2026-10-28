@@ -42,6 +42,13 @@ Route::post('/birthday/letter', [BirthdayController::class, 'submitLetter'])->na
 Route::match(['put', 'patch', 'post'], '/birthday/letter/{id}', [BirthdayController::class, 'updateLetter'])->name('birthday.letter.update');
 Route::get('/birthday/letter/{id}', [BirthdayController::class, 'showLetter'])->name('birthday.letter.show');
 Route::get('/birthday-wishes', [BirthdayController::class, 'wishes'])->name('birthday.wishes');
+Route::get('/birthday-wishes/received', [BirthdayController::class, 'wishes'])->name('birthday.wishes.received');
+Route::get('/birthday-wishes/sent', [BirthdayController::class, 'sentWishes'])->name('birthday.wishes.sent');
+Route::get('/birthday-resolution', [BirthdayController::class, 'resolution'])->name('birthday.resolution');
+
+// Member Profile Routes (Authenticated Web User)
+Route::get('/profile', [PageController::class, 'profile'])->name('profile');
+Route::match(['put', 'post'], '/profile', [PageController::class, 'updateProfile'])->name('profile.update');
 
 // Interactive Games (Public Access Preserved)
 Route::get('/guess-me', [GameController::class, 'guessMe'])->name('game.guess-me');

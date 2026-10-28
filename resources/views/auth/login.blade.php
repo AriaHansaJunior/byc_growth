@@ -13,7 +13,7 @@
                 <x-brand :compact="true" />
             </a>
             <h1>Sign In</h1>
-            <p>Enter your email or username to access your account.</p>
+            <p>Enter your email to access your account.</p>
         </div>
 
         {{-- Flash / Status Messages --}}
@@ -48,31 +48,44 @@
             @endif
 
             <div class="form-group">
-                <label for="login" class="form-label">Email / Username</label>
+                <label for="email" class="form-label">Email</label>
                 <input
-                    type="text"
-                    id="login"
-                    name="login"
-                    value="{{ old('login', old('email')) }}"
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ old('email', old('login')) }}"
                     required
                     autofocus
-                    autocomplete="username"
-                    class="form-input @if($errors->has('login') || $errors->has('email')) input-invalid @enderror"
-                    placeholder="Enter email or username"
+                    autocomplete="email"
+                    class="form-input @if($errors->has('email') || $errors->has('login')) input-invalid @enderror"
+                    placeholder="Enter your email"
                 >
             </div>
 
             <div class="form-group">
                 <label for="password" class="form-label">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    required
-                    autocomplete="current-password"
-                    class="form-input @error('password') input-invalid @enderror"
-                    placeholder="••••••••"
-                >
+                <div class="password-field-wrapper">
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        class="form-input @error('password') input-invalid @enderror"
+                        placeholder="••••••••"
+                        style="width: 100%; padding-right: 42px;"
+                    >
+                    <button
+                        type="button"
+                        class="btn-toggle-password"
+                        data-target="password"
+                        title="Show password"
+                        aria-label="Show password"
+                    >
+                        <span class="icon-eye"><x-icon name="eye" /></span>
+                        <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                    </button>
+                </div>
             </div>
 
             <div class="form-group form-group--last">

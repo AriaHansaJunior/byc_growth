@@ -74,6 +74,7 @@ trait ManagesGrowth100
 
             $totalScore += $score;
             $sanitized[] = [
+                'id' => isset($ans['id']) && $ans['id'] !== '' ? (int) $ans['id'] : null,
                 'text' => $text,
                 'score' => $score,
                 'revealed' => (bool) ($ans['revealed'] ?? false),
@@ -90,6 +91,55 @@ trait ManagesGrowth100
         usort($sanitized, fn($a, $b) => $b['score'] <=> $a['score']);
 
         return ['valid' => true, 'answers' => $sanitized, 'error' => null];
+    }
+
+    /**
+     * Synchronize answers for a Growth 100 round in-place, preserving existing answer IDs.
+     */
+    protected function syncGrowth100Answers(GameRound $round, array $sanitizedAnswers): void
+    {
+        $existingAnswers = $round->answers()->orderBy('sort_order')->orderBy('id')->get();
+        $existingById = $existingAnswers->keyBy('id');
+        $usedIds = [];
+        $keptIds = [];
+
+        foreach ($sanitizedAnswers as $sortIdx => $ans) {
+            $targetAnswer = null;
+            if (!empty($ans['id']) && $existingById->has((int) $ans['id']) && !in_array((int) $ans['id'], $usedIds, true)) {
+                $targetAnswer = $existingById->get((int) $ans['id']);
+            } else {
+                foreach ($existingAnswers as $candidate) {
+                    if (!in_array((int) $candidate->id, $usedIds, true)) {
+                        $targetAnswer = $candidate;
+                        break;
+                    }
+                }
+            }
+
+            if ($targetAnswer) {
+                $usedIds[] = (int) $targetAnswer->id;
+                $keptIds[] = (int) $targetAnswer->id;
+                $targetAnswer->update([
+                    'answer_text' => $ans['text'],
+                    'points' => (int) $ans['score'],
+                    'sort_order' => $sortIdx,
+                    'is_revealed' => (bool) ($ans['revealed'] ?? false),
+                ]);
+            } else {
+                $created = GameAnswer::create([
+                    'game_round_id' => $round->id,
+                    'answer_text' => $ans['text'],
+                    'points' => (int) $ans['score'],
+                    'sort_order' => $sortIdx,
+                    'is_revealed' => (bool) ($ans['revealed'] ?? false),
+                ]);
+                $keptIds[] = (int) $created->id;
+            }
+        }
+
+        if (!empty($keptIds)) {
+            GameAnswer::where('game_round_id', $round->id)->whereNotIn('id', $keptIds)->delete();
+        }
     }
 
     /**
@@ -127,7 +177,6 @@ trait ManagesGrowth100
                 $round->update([
                     'question' => $question,
                 ]);
-                $round->answers()->delete();
             } else {
                 $maxRound = (int) GameRound::where('game_id', $game2->id)->max('round_number');
                 $round = GameRound::create([
@@ -138,15 +187,7 @@ trait ManagesGrowth100
                 ]);
             }
 
-            foreach ($validation['answers'] as $sortIdx => $ans) {
-                GameAnswer::create([
-                    'game_round_id' => $round->id,
-                    'answer_text' => $ans['text'],
-                    'points' => (int) $ans['score'],
-                    'sort_order' => $sortIdx,
-                    'is_revealed' => (bool) ($ans['revealed'] ?? false),
-                ]);
-            }
+            $this->syncGrowth100Answers($round, $validation['answers']);
 
             return ['success' => true, 'round' => $round, 'rounds' => $this->getGrowth100Rounds()];
         });
@@ -405,7 +446,6 @@ trait ManagesGrowth100
                         'round_number' => $idx + 1,
                         'question' => $question,
                     ]);
-                    $round->answers()->delete();
                     $keptIds[] = $round->id;
                 } else {
                     $round = GameRound::create([
@@ -417,15 +457,7 @@ trait ManagesGrowth100
                     $keptIds[] = $round->id;
                 }
 
-                foreach ($validation['answers'] as $sortIdx => $ans) {
-                    GameAnswer::create([
-                        'game_round_id' => $round->id,
-                        'answer_text' => $ans['text'],
-                        'points' => (int) $ans['score'],
-                        'sort_order' => $sortIdx,
-                        'is_revealed' => (bool) ($ans['revealed'] ?? false),
-                    ]);
-                }
+                $this->syncGrowth100Answers($round, $validation['answers']);
             }
 
             // Delete omitted rounds

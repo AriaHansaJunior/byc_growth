@@ -569,4 +569,48 @@ nav[role="navigation"] span[aria-disabled="true"] span,
   opacity: 0.6 !important;
 }
 
+/* Password Visibility Toggle */
+.password-field-wrapper {
+  position: relative;
+  width: 100%;
+  display: block;
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: color .15s ease, background-color .15s ease;
+  line-height: 1;
+  z-index: 2;
+}
+
+.btn-toggle-password:hover {
+  color: var(--forest-dark);
+  background-color: rgba(32, 48, 41, 0.06);
+}
+
+.btn-toggle-password:focus-visible {
+  outline: 2px solid var(--forest);
+  outline-offset: 1px;
+}
+
+.btn-toggle-password svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  pointer-events: none;
+}
+
+
 

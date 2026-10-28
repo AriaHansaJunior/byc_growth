@@ -63,16 +63,28 @@
 
                 <div class="form-group" style="margin: 0;">
                     <label class="form-label" for="quick-user-password" style="display: block; font-weight: 700; font-size: 12px; color: var(--ink); margin-bottom: 4px;">Password *</label>
-                    <input
-                        type="password"
-                        name="password"
-                        id="quick-user-password"
-                        class="form-input"
-                        placeholder="Minimum 6 characters (default: password123)"
-                        value="password123"
-                        required
-                        style="height: 40px; min-height: 40px; padding: 8px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
-                    >
+                    <div class="password-field-wrapper">
+                        <input
+                            type="password"
+                            name="password"
+                            id="quick-user-password"
+                            class="form-input"
+                            placeholder="Minimum 6 characters (default: password123)"
+                            value="password123"
+                            required
+                            style="height: 40px; min-height: 40px; padding: 8px 40px 8px 12px; font-size: 13.5px; border-radius: 8px; width: 100%; box-sizing: border-box;"
+                        >
+                        <button
+                            type="button"
+                            class="btn-toggle-password"
+                            data-target="quick-user-password"
+                            title="Show password"
+                            aria-label="Show password"
+                        >
+                            <span class="icon-eye"><x-icon name="eye" /></span>
+                            <span class="icon-eye-off" style="display: none;"><x-icon name="eye-off" /></span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="form-group" style="margin: 0;">
