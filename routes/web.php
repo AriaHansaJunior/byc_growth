@@ -122,10 +122,11 @@ Route::middleware(['auth:admin', 'admin'])->group(function () {
         // Member Management CRUD
         Route::middleware('admin.permission:members')->group(function () {
             Route::get('/members', [MemberController::class, 'index'])->name('members');
+            Route::get('/members/create', [MemberController::class, 'create'])->name('members.create');
             Route::post('/members', [MemberController::class, 'store'])->name('members.store');
             Route::post('/members/batch-delete', [MemberController::class, 'batchDestroy'])->name('members.batch-delete');
-            Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->name('members.update');
-            Route::delete('/members/{id}', [MemberController::class, 'destroy'])->name('members.destroy');
+            Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->whereNumber('id')->name('members.update');
+            Route::delete('/members/{id}', [MemberController::class, 'destroy'])->whereNumber('id')->name('members.destroy');
         });
 
         // Activity Management CRUD

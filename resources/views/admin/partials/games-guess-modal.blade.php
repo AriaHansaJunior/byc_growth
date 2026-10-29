@@ -40,10 +40,10 @@
                             Click or drag image to upload or replace
                         </div>
                         <small style="color: var(--muted); font-size: 11.5px; display: block;">
-                            Supported formats: JPG, PNG, WEBP, GIF (Max: 5 MB)
+                            Supported formats: JPG, PNG, WEBP, GIF, HEIC (Max: 5 MB)
                         </small>
                     </div>
-                    <input type="file" name="image" id="guess-image-input" accept="image/jpeg,image/png,image/webp,image/jpg,image/gif" style="display: none;">
+                    <input type="file" name="image" id="guess-image-input" accept="image/jpeg,image/png,image/webp,image/jpg,image/gif,image/heic,image/heif,.heic,.heif" style="display: none;">
 
                     {{-- Selected File Info Bar (Hidden until selected) --}}
                     <div id="guess-crop-file-info" style="display: none; align-items: center; justify-content: space-between; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin: 10px 0;">

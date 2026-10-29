@@ -49,7 +49,7 @@ class HomepageController extends Controller
     public function storeSlide(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
-            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'image' => 'required|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
@@ -65,7 +65,11 @@ class HomepageController extends Controller
             $title = !empty($validated['title']) ? $validated['title'] : $originalName;
             $caption = $validated['caption'] ?? null;
 
+            $ext = strtolower($file->getClientOriginalExtension());
             $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
@@ -140,7 +144,7 @@ class HomepageController extends Controller
         $slide = HomepageSlide::with(['slidePhoto', 'media'])->findOrFail($id);
 
         $validated = $request->validate([
-            'image' => 'required|file|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'image' => 'required|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
@@ -152,7 +156,11 @@ class HomepageController extends Controller
             $originalName = $file->getClientOriginalName();
             $title = !empty($validated['title']) ? $validated['title'] : ($slide->title ?: $originalName);
 
+            $ext = strtolower($file->getClientOriginalExtension());
             $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 

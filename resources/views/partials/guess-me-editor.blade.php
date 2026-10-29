@@ -26,10 +26,10 @@
                 
                 <label>
                     Upload / Replace Image
-                    <input type="file" name="image" id="guess-round-image" accept="image/*" style="display: none;">
+                    <input type="file" name="image" id="guess-round-image" accept="image/*,.heic,.heif" style="display: none;">
                     <div class="upload-box" id="guess-upload-box" role="button" tabindex="0" style="cursor: pointer;">
                         <span id="guess-upload-label">Click to select round image</span>
-                        <small>JPG or PNG, maximum 5 MB</small>
+                        <small>JPG, PNG, WEBP, or HEIC, maximum 5 MB</small>
                     </div>
                 </label>
 

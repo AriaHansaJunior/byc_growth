@@ -159,7 +159,7 @@ class CashManagementController extends Controller
             'member_id' => 'required|exists:members,id',
             'account_type' => 'required|string|max:100',
             'amount' => 'required|numeric|gt:0',
-            'proof' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:51200',
+            'proof' => 'required|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
         ]);
 
         $member = Member::findOrFail($validated['member_id']);
@@ -266,7 +266,7 @@ class CashManagementController extends Controller
             'contributor_name' => 'nullable|string|max:255',
             'account_type' => 'required|string|max:100',
             'amount' => 'required|numeric|gt:0',
-            'proof' => 'nullable|file|image|mimes:jpeg,png,jpg,webp|max:51200',
+            'proof' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
         ]);
 
         $newMedia = null;

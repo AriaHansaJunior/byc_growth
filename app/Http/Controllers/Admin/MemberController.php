@@ -91,6 +91,18 @@ class MemberController extends Controller
     }
 
     /**
+     * Show the form for creating a new member on a dedicated full page.
+     */
+    public function create(): \Illuminate\View\View
+    {
+        $users = User::where('role', 'user')->orderBy('username')->get();
+
+        return view('admin.members-create', [
+            'users' => $users,
+        ]);
+    }
+
+    /**
      * Store a newly created member in storage.
      */
     public function store(Request $request): RedirectResponse
@@ -98,7 +110,8 @@ class MemberController extends Controller
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'nullable|date|before_or_equal:today',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
+            'photo_base64' => 'nullable|string',
             'user_id' => 'nullable',
             'new_user_email' => 'nullable|string|email|max:255',
             'new_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/',
@@ -121,9 +134,39 @@ class MemberController extends Controller
 
         AuditLog::record($adminUser, 'created', 'member', $member->id, "Created member '{$member->full_name}'");
 
-        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+        if ($request->filled('photo_base64') && str_starts_with($request->input('photo_base64'), 'data:image/')) {
+            $base64 = $request->input('photo_base64');
+            $mime = 'image/jpeg';
+            if (preg_match('/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/', $base64, $m)) {
+                $mime = $m[1];
+            }
+            $rawBinary = base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $base64));
+            $contentLen = strlen($rawBinary);
+
+            $photoBase64 = $contentLen > 300 * 1024
+                ? ($this->optimizer->compressBase64($base64, 1000, 85) ?: $base64)
+                : $base64;
+
+            $data = [
+                'member_id' => $member->id,
+                'photo_data' => $photoBase64,
+                'original_name' => 'member_photo_' . time() . '.jpg',
+                'mime_type' => $mime,
+                'file_size' => $contentLen,
+            ];
+
+            if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
+                $data['compressed_photo_data'] = $this->optimizer->compressBase64($photoBase64, 550, 80) ?: $photoBase64;
+            }
+
+            MemberPhoto::create($data);
+        } elseif ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             $file = $request->file('photo');
+            $ext = strtolower($file->getClientOriginalExtension());
             $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
@@ -166,7 +209,8 @@ class MemberController extends Controller
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'date_of_birth' => 'nullable|date|before_or_equal:today',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
+            'photo_base64' => 'nullable|string',
             'remove_photo' => 'nullable|boolean',
             'user_id' => 'nullable',
             'new_user_email' => 'nullable|string|email|max:255',
@@ -186,9 +230,49 @@ class MemberController extends Controller
             }
         }
 
-        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+        if ($request->filled('photo_base64') && str_starts_with($request->input('photo_base64'), 'data:image/')) {
+            $base64 = $request->input('photo_base64');
+            $mime = 'image/jpeg';
+            if (preg_match('/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/', $base64, $m)) {
+                $mime = $m[1];
+            }
+            $rawBinary = base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $base64));
+            $contentLen = strlen($rawBinary);
+
+            $photoBase64 = $contentLen > 300 * 1024
+                ? ($this->optimizer->compressBase64($base64, 1000, 85) ?: $base64)
+                : $base64;
+
+            $updateData = [
+                'photo_data' => $photoBase64,
+                'original_name' => 'member_photo_' . time() . '.jpg',
+                'mime_type' => $mime,
+                'file_size' => $contentLen,
+            ];
+
+            if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
+                $updateData['compressed_photo_data'] = $this->optimizer->compressBase64($photoBase64, 550, 80) ?: $photoBase64;
+            }
+
+            $memberPhoto = $member->memberPhoto;
+            if ($memberPhoto) {
+                $memberPhoto->update($updateData);
+            } else {
+                $updateData['member_id'] = $member->id;
+                MemberPhoto::create($updateData);
+            }
+
+            if ($member->photo) {
+                $this->mediaService->deleteMediaFile($member->photo);
+                $member->update(['photo_file_id' => null]);
+            }
+        } elseif ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             $file = $request->file('photo');
+            $ext = strtolower($file->getClientOriginalExtension());
             $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
             $content = file_get_contents($file->getRealPath());
             $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 

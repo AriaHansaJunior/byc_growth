@@ -44,11 +44,11 @@
         @csrf
         @method('PUT')
 
-        {{-- 2-Column Full-Width Aligned Grid (Matches Navbar Margins) --}}
-        <div class="profile-layout-grid" style="display: grid; grid-template-columns: 380px 1fr; gap: 36px; align-items: start;">
+        {{-- 2-Column Full-Width Aligned Grid (Matches Navbar Margins, Equal Height Cards) --}}
+        <div class="profile-layout-grid" style="display: grid; grid-template-columns: 380px 1fr; gap: 36px; align-items: stretch;">
             
-            {{-- Left Column: Identity & Interactive Photo Cropper Card --}}
-            <div class="profile-identity-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 24px; padding: 36px 30px; box-shadow: var(--shadow); text-align: center; display: flex; flex-direction: column; align-items: center;">
+            {{-- Left Column: Identity & Interactive Photo Cropper Card (Stretches to match right card) --}}
+            <div class="profile-identity-card" style="background: var(--white); border: 1px solid var(--line); border-radius: 24px; padding: 36px 30px; box-shadow: var(--shadow); text-align: center; display: flex; flex-direction: column; align-items: center; height: 100%; box-sizing: border-box;">
                 <span class="eyebrow" style="color: var(--forest); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; display: block;">
                     Community Identity
                 </span>
@@ -106,16 +106,12 @@
                     </div>
 
                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <button type="button" id="btn-crop-change-file" class="button button-ghost button-sm" style="padding: 4px 12px; font-size: 12px; height: 30px;">
-                            Choose Different
-                        </button>
                         <button type="button" id="btn-crop-cancel" class="button button-ghost button-sm" style="padding: 4px 12px; font-size: 12px; height: 30px; color: var(--red);">
                             Cancel
                         </button>
-                    </div>
-
-                    <div style="margin-top: 10px; font-size: 11.5px; font-weight: 700; color: var(--forest); background: #eaf3dc; border: 1px solid var(--lime); padding: 4px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
-                        <span>✓</span> <span>Framing ready. Click Save Changes to apply.</span>
+                        <button type="button" id="btn-crop-change-file" class="button button-ghost button-sm" style="padding: 4px 12px; font-size: 12px; height: 30px;">
+                            Choose Another Photo
+                        </button>
                     </div>
                 </div>
 
@@ -124,7 +120,7 @@
                     type="file"
                     name="photo"
                     id="profile-photo-input"
-                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
                     style="display: none;"
                 >
                 <input
@@ -150,8 +146,8 @@
                     </span>
                 </div>
 
-                {{-- Details Section (Birthday & Status ONLY) --}}
-                <div style="width: 100%; border-top: 1px solid var(--line); padding-top: 20px; display: flex; flex-direction: column; gap: 14px; text-align: left; font-size: 13.5px;">
+                {{-- Details Section (Birthday & Status ONLY - Pinned to bottom of equal-height card) --}}
+                <div class="profile-identity-details" style="width: 100%; border-top: 1px solid var(--line); padding-top: 20px; margin-top: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; font-size: 13.5px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="color: var(--muted); font-weight: 600;">Birthday</span>
                         <span style="color: var(--ink); font-weight: 700;">
@@ -349,6 +345,17 @@
 </div>
 
 <style>
+.profile-layout-grid {
+    align-items: stretch !important;
+}
+.profile-identity-card {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+.profile-identity-details {
+    margin-top: auto !important;
+}
 .crop-viewport-wrap:active {
     cursor: grabbing !important;
 }
@@ -370,6 +377,7 @@
 }
 </style>
 
+<script src="{{ asset('assets/js/heic2any.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('btn-submit-profile');
@@ -451,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateImageStyle();
     }
 
-    function loadFile(file) {
+    async function loadFile(file) {
         if (!file) return;
         if (file.size > 50 * 1024 * 1024) {
             alert('Photo is too large. Maximum size is 50MB.');
@@ -461,6 +469,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         originalFile = file;
         hasNewCrop = true;
+
+        let displayBlob = file;
+        if (/\.(heic|heif)$/i.test(file.name) && window.heic2any) {
+            try {
+                const converted = await window.heic2any({
+                    blob: file,
+                    toType: 'image/jpeg',
+                    quality: 0.92
+                });
+                displayBlob = Array.isArray(converted) ? converted[0] : converted;
+            } catch (err) {
+                console.warn('heic2any conversion fallback:', err);
+            }
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             cropImg.onload = () => {
@@ -473,9 +496,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 studioWrap.style.display = 'block';
                 centerImage();
             };
+            cropImg.onerror = () => {
+                // If browser does not natively decode HEIC in <img> (non-Safari),
+                // gracefully leave static display and allow saving original file directly
+                staticWrap.style.display = 'flex';
+                studioWrap.style.display = 'none';
+                hasNewCrop = false;
+            };
             cropImg.src = e.target.result;
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(displayBlob);
     }
 
     if (fileInput) {

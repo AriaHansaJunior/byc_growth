@@ -606,4 +606,73 @@ class SystemVerificationTest extends TestCase
             'is_anonymous' => 1,
         ]);
     }
+
+    /**
+     * Test HEIC photo upload support across member creation and profile update.
+     */
+    public function test_heic_photo_upload_support(): void
+    {
+        $admin = $this->createAdminUser();
+
+        // 1. Create member with HEIC photo
+        $fakeHeicData = pack('N', 24) . 'ftypheic' . pack('N', 0) . 'heicmif1' . str_repeat("\0", 100);
+        $heicFile = \Illuminate\Http\UploadedFile::fake()->createWithContent('iphone_avatar.heic', $fakeHeicData);
+
+        $name = 'HEIC iPhone Member ' . uniqid();
+        $response = $this->actingAs($admin, 'admin')->post('/admin/members', [
+            'full_name' => $name,
+            'date_of_birth' => '1998-09-20',
+            'photo' => $heicFile,
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $member = \App\Models\Member::where('full_name', $name)->first();
+        $this->assertNotNull($member);
+        $this->assertNotNull($member->memberPhoto);
+        $this->assertEquals('image/heic', $member->memberPhoto->mime_type);
+
+        // 2. Update user profile with HEIC photo
+        $user = $member->user;
+        $this->assertNotNull($user);
+
+        $profileHeic = \Illuminate\Http\UploadedFile::fake()->createWithContent('profile_shot.heic', $fakeHeicData);
+        $resProfile = $this->actingAs($user, 'web')->post('/profile', [
+            'email' => $user->email,
+            'photo' => $profileHeic,
+        ]);
+
+        $resProfile->assertSessionHasNoErrors();
+        $member->refresh();
+        $this->assertNotNull($member->memberPhoto);
+        $this->assertStringContainsString('heic', $member->memberPhoto->mime_type);
+    }
+
+    /**
+     * Test admin dedicated add new member page resolution and submission.
+     */
+    public function test_admin_members_create_page_and_navigation(): void
+    {
+        $admin = $this->createAdminUser();
+        $normalUser = $this->createNormalUser();
+
+        // 1. Guest redirected to login
+        $guestRes = $this->get('/admin/members/create');
+        $guestRes->assertRedirect('/admin-ganteng');
+
+        // 2. Normal member redirected/forbidden
+        $memberRes = $this->actingAs($normalUser, 'web')->get('/admin/members/create');
+        $memberRes->assertRedirect('/admin-ganteng');
+
+        // 3. Admin can access dedicated page
+        $adminRes = $this->actingAs($admin, 'admin')->get('/admin/members/create');
+        $adminRes->assertStatus(200);
+        $adminRes->assertSee('Add New Member');
+        $adminRes->assertSee('action="' . route('admin.members.store') . '"', false);
+        $adminRes->assertSee('href="' . route('admin.members') . '"', false);
+
+        // 4. Admin members index page has button linking to /admin/members/create
+        $indexRes = $this->actingAs($admin, 'admin')->get('/admin/members');
+        $indexRes->assertStatus(200);
+        $indexRes->assertSee('href="' . route('admin.members.create') . '"', false);
+    }
 }

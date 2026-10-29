@@ -216,7 +216,7 @@
                         <div style="font-weight: 700; font-size: 13px; color: var(--ink);">Click to select photos or drag here</div>
                         <small style="color: var(--muted); font-size: 11px; display: block;">Supports any file size. Automatically optimized while maintaining crisp quality.</small>
                     </div>
-                    <input type="file" id="add-activity-photos" name="photos[]" multiple accept="image/*" style="display: none;">
+                    <input type="file" id="add-activity-photos" name="photos[]" multiple accept="image/*,.heic,.heif" style="display: none;">
 
                     {{-- Live Selected Photos Preview Strip (Natural Aspect Ratio) --}}
                     <div id="add-photos-preview-strip" style="display: none; margin-top: 10px; max-height: 200px; overflow-x: auto; overflow-y: hidden; gap: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--cream);"></div>
@@ -296,7 +296,7 @@
                         <span style="font-size: 20px; display: block; margin-bottom: 2px;">📷</span>
                         <div style="font-weight: 700; font-size: 13px; color: var(--ink);">Select photos to append to gallery</div>
                     </div>
-                    <input type="file" id="edit-activity-photos" name="photos[]" multiple accept="image/*" style="display: none;">
+                    <input type="file" id="edit-activity-photos" name="photos[]" multiple accept="image/*,.heic,.heif" style="display: none;">
                     <div id="edit-photos-preview-strip" style="display: none; margin-top: 10px; max-height: 200px; overflow-x: auto; overflow-y: hidden; gap: 14px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--cream);"></div>
                 </div>
 
@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const dt = e.dataTransfer;
             if (dt && dt.files && dt.files.length) {
                 Array.from(dt.files).forEach(f => {
-                    if (f.type.startsWith('image/')) accumulatedFiles.push(f);
+                    if (f.type.startsWith('image/') || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(f.name)) accumulatedFiles.push(f);
                 });
                 syncToFileInput();
                 renderPreviews();

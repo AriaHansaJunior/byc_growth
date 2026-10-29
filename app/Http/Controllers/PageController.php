@@ -150,7 +150,7 @@ class PageController extends Controller
         $validated = $request->validate([
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'new_password' => 'nullable|string|min:6',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:51200',
+            'photo' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
             'photo_base64' => 'nullable|string',
         ]);
 
@@ -175,7 +175,11 @@ class PageController extends Controller
             $originalName = 'cropped_avatar_' . time() . '.jpg';
         } elseif ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             $file = $request->file('photo');
+            $ext = strtolower($file->getClientOriginalExtension());
             $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
             $content = file_get_contents($file->getRealPath());
             $photoBase64 = 'data:' . $mime . ';base64,' . base64_encode($content);
             $originalName = $file->getClientOriginalName();

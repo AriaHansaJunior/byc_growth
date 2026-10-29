@@ -28,7 +28,7 @@
                         <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.2;">Click or drag photo</small>
                     </div>
 
-                    <input type="file" id="add-photo" name="photo" accept="image/*" style="display: none;">
+                    <input type="file" id="add-photo" name="photo" accept="image/*,.heic,.heif" style="display: none;">
 
                     {{-- Live Large Preview Studio --}}
                     <div id="add-member-studio" style="display: none;">
@@ -122,7 +122,7 @@
                                 </label>
                                 <input type="email" name="new_user_email" id="add-new-user-email" class="form-input" placeholder="e.g. member@bycgrowth.org" style="height: 36px; min-height: 36px; padding: 6px 10px; font-size: 13px; border-radius: 8px; width: 100%; box-sizing: border-box;">
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div class="account-fields-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                 <div>
                                     <label style="display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 3px;">
                                         Username
@@ -144,7 +144,6 @@
                             </div>
                         </div>
                     </div>
-                    </div>
 
                     {{-- Left Column, Row 2: Date of Birth --}}
                     <div class="form-group" style="margin: 0;">
@@ -165,7 +164,7 @@
             </div>
 
             {{-- Footer --}}
-            <div style="padding: 14px 28px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0;">
+            <div class="member-modal-footer" style="padding: 14px 28px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0;">
                 <button type="submit" class="button button-primary button-sm" id="btn-submit-add-member" style="min-width: 130px; height: 38px; font-weight: 700;">
                     Save Member
                 </button>

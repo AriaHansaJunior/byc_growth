@@ -25,11 +25,11 @@
                         Click to select photo or drag here
                     </div>
                     <small style="color: var(--muted); font-size: 12px; display: block;">
-                        Supports JPEG, PNG, WEBP, GIF up to 5MB.
+                        Supports JPEG, PNG, WEBP, GIF, HEIC up to 5MB.
                     </small>
                 </div>
 
-                <input type="file" id="add-slide-image" name="image" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif" required style="display: none;">
+                <input type="file" id="add-slide-image" name="image" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif" required style="display: none;">
             </div>
 
             {{-- Selected File Info Bar (Hidden until selected) --}}

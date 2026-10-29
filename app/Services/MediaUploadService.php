@@ -56,6 +56,9 @@ class MediaUploadService
 
         $fileSize = File::exists($fullPath) ? File::size($fullPath) : 0;
         $mime = $file->getClientMimeType() ?: 'image/jpeg';
+        if (in_array($extension, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+            $mime = 'image/' . $extension;
+        }
 
         // Generate lightweight thumbnail base64 (strictly under 250 KB) for database fallback
         $thumbBase64 = null;

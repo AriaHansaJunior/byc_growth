@@ -29,7 +29,7 @@
                         <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.2;">Click or drag photo</small>
                     </div>
 
-                    <input type="file" id="edit-photo" name="photo" accept="image/*" style="display: none;">
+                    <input type="file" id="edit-photo" name="photo" accept="image/*,.heic,.heif" style="display: none;">
 
                     {{-- Photo Preview & Crop Studio --}}
                     <div id="edit-member-studio" style="display: none;">
@@ -143,7 +143,7 @@
             </div>
 
             {{-- Footer --}}
-            <div style="padding: 14px 28px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0;">
+            <div class="member-modal-footer" style="padding: 14px 28px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; flex-shrink: 0;">
                 <button type="submit" class="button button-primary button-sm" id="btn-submit-edit-member" style="min-width: 130px; height: 38px; font-weight: 700;">
                     Update Member
                 </button>

@@ -115,7 +115,7 @@ class GameController extends Controller
             'correct_answer' => 'required|string|max:100',
             'clue' => 'required|string|max:100',
             'score' => 'required|integer|min:1',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
         ]);
 
         $imageFile = $request->file('image');

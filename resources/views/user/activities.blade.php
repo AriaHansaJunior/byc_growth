@@ -139,8 +139,8 @@
 
                 <div>
                     <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">Supporting Photos (Multiple Images)</label>
-                    <input type="file" name="photos[]" multiple accept="image/jpeg,image/png,image/jpg,image/webp,image/gif" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
-                    <small style="color: var(--muted); font-size: 12px;">Only images (JPG, PNG, WEBP, GIF) accepted. Max 5MB each.</small>
+                    <input type="file" name="photos[]" multiple accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                    <small style="color: var(--muted); font-size: 12px;">Images (JPG, PNG, WEBP, GIF, HEIC) accepted. Max 5MB each.</small>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">
@@ -185,8 +185,8 @@
 
                 <div>
                     <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">Add More Photos</label>
-                    <input type="file" name="photos[]" multiple accept="image/jpeg,image/png,image/jpg,image/webp,image/gif" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
-                    <small style="color: var(--muted); font-size: 12px;">Only images (JPG, PNG, WEBP, GIF) accepted. Max 5MB each.</small>
+                    <input type="file" name="photos[]" multiple accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                    <small style="color: var(--muted); font-size: 12px;">Images (JPG, PNG, WEBP, GIF, HEIC) accepted. Max 5MB each.</small>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px;">

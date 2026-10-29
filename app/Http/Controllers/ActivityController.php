@@ -47,7 +47,7 @@ class ActivityController extends Controller
             'event_date' => 'nullable|date',
             'description' => 'required|string',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'photos.*' => 'file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
         ]);
 
         $startDate = $validated['start_date'] ?? $validated['event_date'] ?? now()->toDateString();
@@ -106,7 +106,7 @@ class ActivityController extends Controller
             'event_date' => 'nullable|date',
             'description' => 'required|string',
             'photos' => 'nullable|array',
-            'photos.*' => 'image|mimes:jpeg,png,jpg,webp,gif|max:51200',
+            'photos.*' => 'file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
             'remove_photo_ids' => 'nullable|array',
             'remove_photo_ids.*' => 'integer|exists:media_files,id',
         ]);

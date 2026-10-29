@@ -246,8 +246,8 @@
 
                 <div>
                     <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">Member Photo</label>
-                    <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/webp" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
-                    <small style="color: var(--muted); font-size: 12px;">Only images (JPG, PNG, WEBP) accepted. Max 5MB.</small>
+                    <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                    <small style="color: var(--muted); font-size: 12px;">Images (JPG, PNG, WEBP, HEIC) accepted. Max 5MB.</small>
                 </div>
 
                 <div>
@@ -320,8 +320,8 @@
 
                 <div>
                     <label style="display: block; font-weight: 700; font-size: 13px; margin-bottom: 6px; color: var(--ink);">Upload / Replace Photo</label>
-                    <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/webp" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
-                    <small style="color: var(--muted); font-size: 12px;">Only images (JPG, PNG, WEBP) accepted. Max 5MB.</small>
+                    <input type="file" name="photo" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif" class="input-field" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit;">
+                    <small style="color: var(--muted); font-size: 12px;">Images (JPG, PNG, WEBP, HEIC) accepted. Max 5MB.</small>
                 </div>
 
                 <div id="edit-member-remove-photo-wrap" style="display: none;">

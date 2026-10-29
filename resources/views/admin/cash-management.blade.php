@@ -380,12 +380,12 @@
                             id="record-proof"
                             name="proof"
                             class="form-input @error('proof') input-invalid @enderror"
-                            accept="image/jpeg,image/png,image/jpg,image/webp"
+                            accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif"
                         >
                         @error('proof')
                             <div class="form-field-error" data-for="record-proof">{{ $message }}</div>
                         @enderror
-                        <small style="color: var(--muted); font-size: 11px;">Image only (JPG, PNG, WEBP, max 5MB). PDF/documents rejected.</small>
+                        <small style="color: var(--muted); font-size: 11px;">Image only (JPG, PNG, WEBP, HEIC, max 5MB). PDF/documents rejected.</small>
                     </div>
 
                     {{-- System Input Time --}}
@@ -454,7 +454,7 @@
 
                     <div class="form-group">
                         <label class="form-label" for="edit-tx-proof">Replacement Proof Image (Optional)</label>
-                        <input type="file" id="edit-tx-proof" name="proof" class="form-input" accept="image/jpeg,image/png,image/jpg,image/webp">
+                        <input type="file" id="edit-tx-proof" name="proof" class="form-input" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif">
                         <small style="color: var(--muted); font-size: 11px;">Upload only if replacing existing proof. Old proof will be safely cleaned up.</small>
                     </div>
                 </div>
@@ -586,8 +586,8 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 const file = recProof.files[0];
                 const ext = file.name.split('.').pop().toLowerCase();
-                const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
-                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/'))) {
+                const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/') && file.type !== 'application/octet-stream' && file.type !== '')) {
                     setFieldError(recProof, 'This file type is not supported.');
                     hasError = true;
                 } else if (file.size > 5 * 1024 * 1024) {
@@ -642,8 +642,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (editProof && editProof.files && editProof.files.length > 0) {
                 const file = editProof.files[0];
                 const ext = file.name.split('.').pop().toLowerCase();
-                const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
-                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/'))) {
+                const allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+                if (!allowedExts.includes(ext) || (file.type && !file.type.startsWith('image/') && file.type !== 'application/octet-stream' && file.type !== '')) {
                     setFieldError(editProof, 'This file type is not supported.');
                     hasError = true;
                 } else if (file.size > 5 * 1024 * 1024) {

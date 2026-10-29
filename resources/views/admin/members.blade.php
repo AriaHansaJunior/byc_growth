@@ -12,9 +12,9 @@
         </p>
     </div>
     <div class="admin-header-actions">
-        <button type="button" class="button button-primary button-sm" id="btn-open-add-member">
+        <a href="{{ route('admin.members.create') }}" class="button button-primary button-sm" id="btn-open-add-member" style="text-decoration: none;">
             Add Member
-        </button>
+        </a>
     </div>
 </div>
 @endsection
@@ -49,9 +49,10 @@
         max-height: calc(100vh - 24px) !important;
         max-height: calc(100dvh - 24px) !important;
         margin: auto !important;
+        border-radius: 16px !important;
     }
     .member-modal-body {
-        padding: 16px 18px 36px !important;
+        padding: 16px 18px 28px !important;
         min-height: auto !important;
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch;
@@ -60,6 +61,21 @@
     .member-form-grid {
         grid-template-columns: 1fr !important;
         gap: 14px !important;
+    }
+    .member-modal-footer {
+        padding: 12px 18px !important;
+    }
+    .member-modal-footer button {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-fields-row {
+        grid-template-columns: 1fr !important;
+    }
+    .member-modal-card {
+        max-width: calc(100vw - 16px) !important;
     }
 }
 
@@ -1050,8 +1066,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Open Add Modal
-    if (btnOpenAdd && addModal) {
+    // Open Add Modal (Fallback if element is a button instead of navigation link)
+    if (btnOpenAdd && addModal && btnOpenAdd.tagName === 'BUTTON') {
         btnOpenAdd.addEventListener('click', () => {
             clearAllErrors(formAdd);
             addCropper.reset();
