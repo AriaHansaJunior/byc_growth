@@ -375,6 +375,17 @@
         gap: 18px !important;
     }
 }
+@media (max-width: 600px) {
+    .profile-form-actions {
+        flex-direction: column-reverse !important;
+        width: 100% !important;
+        gap: 12px !important;
+    }
+    .profile-form-actions .button {
+        width: 100% !important;
+        justify-content: center !important;
+    }
+}
 </style>
 
 <script src="{{ asset('assets/js/heic2any.min.js') }}"></script>

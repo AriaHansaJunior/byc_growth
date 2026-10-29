@@ -29,17 +29,30 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Admin Utama',
                 'username' => 'admin_utama',
                 'password' => Hash::make('admin123'),
-                'role' => 'admin',
+                'role' => 'super_admin',
+                'permissions' => ['homepage', 'activities', 'members', 'games', 'birthday_wishes', 'cash_management', 'roles'],
             ]
         );
 
         User::updateOrCreate(
             ['email' => 'jojo_ganteng@gmail.com'],
             [
-                'name' => 'Jojo Admin',
+                'name' => 'rilbiezzz',
                 'username' => 'rilbiezzz',
                 'password' => Hash::make('jojo123'),
-                'role' => 'admin',
+                'role' => 'super_admin',
+                'permissions' => ['homepage', 'activities', 'members', 'games', 'birthday_wishes', 'cash_management', 'roles'],
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'mega@gmail.com'],
+            [
+                'name' => 'mega',
+                'username' => 'meme_imup',
+                'password' => '$2y$10$29NiAeimSeQpN81k/oJoceOjvpSmX1eAgLwiDmiL7y1cCsQIMugyy',
+                'role' => 'super_admin',
+                'permissions' => ['homepage', 'activities', 'members', 'games', 'birthday_wishes', 'cash_management', 'roles'],
             ]
         );
 

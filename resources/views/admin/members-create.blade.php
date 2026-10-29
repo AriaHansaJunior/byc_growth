@@ -34,7 +34,10 @@
 
                 {{-- Empty Dropzone (Initial state) --}}
                 <div id="create-photo-dropzone" class="crop-dropzone" style="height: 190px; width: 190px; margin: 0 auto 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px; border-radius: 50%; cursor: pointer; border: 2px dashed var(--line); background: var(--cream); transition: border-color 0.2s, background-color 0.2s; box-sizing: border-box;">
-                    <div style="font-size: 42px; margin-bottom: 6px; line-height: 1;">👤</div>
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted); margin-bottom: 6px;">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
                     <div style="font-weight: 700; color: var(--ink); font-size: 14px; margin-bottom: 3px;">Choose Photo</div>
                     <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.2;">Click or drag photo</small>
                 </div>
@@ -86,13 +89,8 @@
                 >
 
                 {{-- Helper Note (Pinned to bottom of left card) --}}
-                <div style="width: 100%; border-top: 1px solid var(--line); padding-top: 18px; margin-top: auto; text-align: left; font-size: 12px; color: var(--muted); line-height: 1.5;">
-                    <div style="display: flex; gap: 8px; align-items: flex-start;">
-                        <span style="font-size: 14px; line-height: 1; flex-shrink: 0; margin-top: 2px;">💡</span>
-                        <span>
-                            Supports <strong>JPG, PNG, WEBP, GIF, and iPhone HEIC</strong> (Max 50MB). Photos are automatically web-optimized while maintaining crisp quality.
-                        </span>
-                    </div>
+                <div style="width: 100%; border-top: 1px solid var(--line); padding-top: 18px; margin-top: auto; text-align: center; font-size: 11.5px; color: var(--muted); line-height: 1.5;">
+                    Supports JPG, PNG, WEBP, GIF, or HEIC (Max 50MB)
                 </div>
             </div>
 
@@ -292,7 +290,7 @@
                 </div>
 
                 {{-- Action Buttons --}}
-                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line);">
+                <div class="member-create-actions" style="display: flex; justify-content: flex-end; align-items: center; gap: 14px; margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line);">
                     <a href="{{ route('admin.members') }}" class="button button-ghost" style="height: 44px; padding: 11px 24px; font-weight: 700; text-decoration: none;">
                         Cancel
                     </a>
@@ -335,6 +333,18 @@
     .member-account-row {
         grid-template-columns: 1fr !important;
         gap: 14px !important;
+    }
+}
+@media (max-width: 600px) {
+    .member-create-actions {
+        flex-direction: column-reverse !important;
+        width: 100% !important;
+        gap: 12px !important;
+    }
+    .member-create-actions .button {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
     }
 }
 </style>

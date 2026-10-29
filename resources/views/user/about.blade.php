@@ -67,7 +67,7 @@
         <div class="feature-grid-3">
             <div class="feature-box">
                 <div class="feature-box-icon">
-                    <x-icon name="sparkles" />
+                    <x-icon name="book" />
                 </div>
                 <h3>Spiritual Maturity</h3>
                 <p>Grounding our lives on Biblical truth, prayer, and authentic worship that transforms our daily character.</p>

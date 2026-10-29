@@ -104,7 +104,7 @@
                 'name' => 'Activities',
                 'desc' => 'Record community events, publish fellowship recaps, and upload event galleries.',
                 'route' => route('admin.activities'),
-                'icon' => 'sparkles',
+                'icon' => 'calendar',
             ],
             'members' => [
                 'name' => 'Members',
