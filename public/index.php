@@ -5,6 +5,23 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Direct fallback error handler for shared hosting debugging
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
+set_exception_handler(function ($e) {
+    http_response_code(500);
+    header('Content-Type: text/html; charset=utf-8');
+    echo "<div style='font-family:sans-serif; padding:24px; background:#fff2f2; border:2px solid #e00; margin:20px; border-radius:10px;'>";
+    echo "<h2 style='color:#c00;'>Hosting Error Detected:</h2>";
+    echo "<p><b>" . htmlspecialchars(get_class($e)) . "</b>: " . htmlspecialchars($e->getMessage()) . "</p>";
+    echo "<p>In file: <code>" . htmlspecialchars($e->getFile()) . "</code> on line <b>" . $e->getLine() . "</b></p>";
+    echo "<pre style='background:#222; color:#eee; padding:15px; border-radius:6px; overflow:auto;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
+    echo "</div>";
+    exit;
+});
+
 /*
 |--------------------------------------------------------------------------
 | Check If The Application Is Under Maintenance
