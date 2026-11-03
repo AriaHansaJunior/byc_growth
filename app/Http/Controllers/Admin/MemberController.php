@@ -103,6 +103,20 @@ class MemberController extends Controller
     }
 
     /**
+     * Show the form for editing an existing member on a dedicated full page.
+     */
+    public function edit(int $id): \Illuminate\View\View
+    {
+        $member = Member::with(['photo', 'memberPhoto', 'user'])->findOrFail($id);
+        $users = User::where('role', 'user')->orderBy('username')->get();
+
+        return view('admin.members-edit', [
+            'member' => $member,
+            'users' => $users,
+        ]);
+    }
+
+    /**
      * Store a newly created member in storage.
      */
     public function store(Request $request): RedirectResponse
@@ -213,6 +227,10 @@ class MemberController extends Controller
             'photo_base64' => 'nullable|string',
             'remove_photo' => 'nullable|boolean',
             'user_id' => 'nullable',
+            'account_mode' => 'nullable|string|in:current,new,link,unlink',
+            'edit_user_email' => 'nullable|string|email|max:255',
+            'edit_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/',
+            'edit_user_password' => 'nullable|string|min:6',
             'new_user_email' => 'nullable|string|email|max:255',
             'new_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/',
             'new_user_password' => 'nullable|string|min:6',
@@ -340,9 +358,47 @@ class MemberController extends Controller
     {
         $userId = $request->input('user_id');
         $newEmail = trim((string) $request->input('new_user_email', ''));
+        $editEmail = trim((string) $request->input('edit_user_email', ''));
+        $accountMode = $request->input('account_mode');
 
-        if ($userId === '__new__' || (!empty($newEmail) && empty($userId))) {
-            // Unlink any currently linked user
+        // Mode 1: Edit currently linked user account credentials
+        if ($member->user && ($accountMode === 'current' || (!empty($editEmail) && $accountMode !== 'link' && $accountMode !== 'new' && $accountMode !== 'unlink'))) {
+            $linkedUser = $member->user;
+
+            $request->validate([
+                'edit_user_email' => 'required|email|max:255|unique:users,email,' . $linkedUser->id,
+                'edit_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/|unique:users,username,' . $linkedUser->id,
+                'edit_user_password' => 'nullable|string|min:6',
+            ]);
+
+            $linkedUser->name = $member->full_name;
+            $linkedUser->email = strtolower($request->input('edit_user_email'));
+            if ($request->has('edit_user_username')) {
+                $linkedUser->username = $request->filled('edit_user_username') ? strtolower($request->input('edit_user_username')) : null;
+            }
+            if ($request->filled('edit_user_password')) {
+                $linkedUser->password = Hash::make($request->input('edit_user_password'));
+            }
+            $linkedUser->save();
+            return;
+        }
+
+        // Mode 2: Unlink account
+        if ($accountMode === 'unlink' || ($request->has('user_id') && empty($userId) && $accountMode !== 'new')) {
+            User::where('member_id', $member->id)->update(['member_id' => null]);
+            return;
+        }
+
+        // Mode 3: Link existing user account
+        if (($accountMode === 'link' || (!empty($userId) && is_numeric($userId))) && is_numeric($userId)) {
+            $chosenId = (int) $userId;
+            User::where('member_id', $member->id)->where('id', '!=', $chosenId)->update(['member_id' => null]);
+            User::where('id', $chosenId)->update(['member_id' => $member->id]);
+            return;
+        }
+
+        // Mode 4: Create brand new user account
+        if ($accountMode === 'new' || $userId === '__new__' || (!empty($newEmail) && empty($userId))) {
             User::where('member_id', $member->id)->update(['member_id' => null]);
 
             $request->validate([
@@ -351,7 +407,7 @@ class MemberController extends Controller
                 'new_user_password' => 'nullable|string|min:6',
             ]);
 
-            $email = strtolower($newEmail);
+            $email = strtolower($newEmail ?: $request->input('new_user_email'));
             $password = $request->filled('new_user_password') ? $request->input('new_user_password') : 'password123';
             $username = $request->filled('new_user_username') ? strtolower($request->input('new_user_username')) : null;
 
@@ -363,14 +419,11 @@ class MemberController extends Controller
                 'role' => 'user',
                 'member_id' => $member->id,
             ]);
-        } elseif (!empty($userId) && is_numeric($userId)) {
-            $chosenId = (int) $userId;
-            // Unlink any other user attached to this member
-            User::where('member_id', $member->id)->where('id', '!=', $chosenId)->update(['member_id' => null]);
-            // Attach chosen user
-            User::where('id', $chosenId)->update(['member_id' => $member->id]);
-        } elseif ($request->isMethod('post') && !$member->user) {
-            // Guarantee every newly created member has a linked user account
+            return;
+        }
+
+        // Mode 5: Legacy auto-creation on POST if newly registered member has no user
+        if ($request->isMethod('post') && !$member->user) {
             $baseSlug = \Illuminate\Support\Str::slug($member->full_name, '.') ?: 'member';
             $candidateEmail = $baseSlug . '.' . $member->id . '@bycgrowth.org';
             $candidateUsername = \Illuminate\Support\Str::slug($member->full_name, '_') . '_' . $member->id;
@@ -389,9 +442,12 @@ class MemberController extends Controller
                 'role' => 'user',
                 'member_id' => $member->id,
             ]);
-        } elseif ($request->has('user_id') && empty($userId)) {
-            // Unlink account
-            User::where('member_id', $member->id)->update(['member_id' => null]);
+            return;
+        }
+
+        // Keep name synchronized if member has user
+        if ($member->user) {
+            $member->user->update(['name' => $member->full_name]);
         }
     }
 

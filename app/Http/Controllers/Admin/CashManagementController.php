@@ -66,6 +66,7 @@ class CashManagementController extends Controller
             $escapedName = addcslashes($name, '%_\\');
             $query->where(function ($q) use ($escapedName) {
                 $q->where('contributor_name', 'like', "%{$escapedName}%")
+                  ->orWhere('record_name', 'like', "%{$escapedName}%")
                   ->orWhereHas('member', function ($mq) use ($escapedName) {
                       $mq->where('full_name', 'like', "%{$escapedName}%");
                   });
@@ -157,12 +158,42 @@ class CashManagementController extends Controller
     {
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
+            'record_name' => 'nullable|string|max:255',
             'account_type' => 'required|string|max:100',
             'amount' => 'required|numeric|gt:0',
             'proof' => 'required|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
         ]);
 
         $member = Member::findOrFail($validated['member_id']);
+        $recordName = !empty($validated['record_name']) ? trim($validated['record_name']) : null;
+        $now = Carbon::now('Asia/Jakarta');
+
+        // Prevent accidental double-submission / rapid multi-click duplicates
+        $duplicate = CashTransaction::where('member_id', $member->id)
+            ->where('amount', $validated['amount'])
+            ->where('account_type', $validated['account_type'])
+            ->where(function ($q) use ($recordName) {
+                if ($recordName) {
+                    $q->where('record_name', $recordName);
+                } else {
+                    $q->whereNull('record_name')->orWhere('record_name', '');
+                }
+            })
+            ->where('created_at', '>=', $now->copy()->subSeconds(6))
+            ->first();
+
+        if ($duplicate) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Cash transaction recorded successfully.',
+                    'transaction' => $duplicate,
+                ], 200);
+            }
+
+            return redirect()->route('cash-management')->with('success', 'Cash transaction recorded successfully.');
+        }
+
         $media = null;
 
         try {
@@ -176,7 +207,6 @@ class CashManagementController extends Controller
             );
 
             // Server-side timestamp authority (Asia/Jakarta timezone)
-            $now = Carbon::now('Asia/Jakarta');
             $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
             $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
 
@@ -184,6 +214,7 @@ class CashManagementController extends Controller
                 'user_id' => Auth::id(),
                 'member_id' => $member->id,
                 'contributor_name' => $member->full_name,
+                'record_name' => $recordName,
                 'amount' => $validated['amount'],
                 'account_type' => $validated['account_type'],
                 'type' => 'inflow',
@@ -243,6 +274,7 @@ class CashManagementController extends Controller
             'id' => $transaction->id,
             'member_id' => $transaction->member_id,
             'contributor_name' => $transaction->member ? $transaction->member->full_name : $transaction->contributor_name,
+            'record_name' => $transaction->record_name,
             'account_type' => $transaction->account_type,
             'amount' => (float) $transaction->amount,
             'proof_url' => $transaction->proof_file_url,
@@ -264,6 +296,7 @@ class CashManagementController extends Controller
         $validated = $request->validate([
             'member_id' => 'nullable|exists:members,id',
             'contributor_name' => 'nullable|string|max:255',
+            'record_name' => 'nullable|string|max:255',
             'account_type' => 'required|string|max:100',
             'amount' => 'required|numeric|gt:0',
             'proof' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
@@ -294,6 +327,7 @@ class CashManagementController extends Controller
                 $transaction->contributor_name = $validated['contributor_name'];
             }
 
+            $transaction->record_name = !empty($validated['record_name']) ? trim($validated['record_name']) : null;
             $transaction->account_type = $validated['account_type'];
             $transaction->amount = $validated['amount'];
             $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();

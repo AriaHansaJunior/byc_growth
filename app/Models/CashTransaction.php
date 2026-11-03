@@ -14,6 +14,7 @@ class CashTransaction extends Model
         'user_id',
         'member_id',
         'contributor_name',
+        'record_name',
         'amount',
         'account_type',
         'type',

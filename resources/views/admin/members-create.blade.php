@@ -57,7 +57,7 @@
                     </div>
 
                     {{-- Zoom Slider & Controls --}}
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 300px; margin: 0 auto 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;">
+                    <div class="crop-zoom-control-bar" style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 300px; margin: 0 auto 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;">
                         <span id="create-crop-zoom-label" style="font-size: 11.5px; font-weight: 700; color: var(--ink); min-width: 32px;">1.0x</span>
                         <input type="range" id="create-crop-zoom-range" min="1" max="2.5" step="0.05" value="1" style="flex: 1; accent-color: var(--forest); cursor: pointer; height: 5px;">
                         <button type="button" id="btn-create-crop-reset" class="button button-ghost button-sm" style="padding: 2px 8px; height: 24px; font-size: 11px;">Reset</button>
@@ -336,6 +336,14 @@
     }
 }
 @media (max-width: 600px) {
+    .member-photo-card {
+        padding: 24px 16px !important;
+        border-radius: 18px !important;
+    }
+    .member-details-card {
+        padding: 24px 16px !important;
+        border-radius: 18px !important;
+    }
     .member-create-actions {
         flex-direction: column-reverse !important;
         width: 100% !important;
@@ -345,6 +353,24 @@
         width: 100% !important;
         justify-content: center !important;
         text-align: center !important;
+        min-height: 44px !important;
+    }
+    .crop-zoom-control-bar {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+@media (max-width: 480px) {
+    .member-create-wrapper {
+        padding-bottom: 30px !important;
+    }
+    .member-photo-card {
+        padding: 20px 14px !important;
+        border-radius: 16px !important;
+    }
+    .member-details-card {
+        padding: 20px 14px !important;
+        border-radius: 16px !important;
     }
 }
 </style>
@@ -657,27 +683,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // 3. Password Show/Hide Toggle
-    document.querySelectorAll('.btn-toggle-password').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const targetId = this.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            const iconEye = this.querySelector('.icon-eye');
-            const iconEyeOff = this.querySelector('.icon-eye-off');
-            if (!input) return;
-
-            if (input.type === 'password') {
-                input.type = 'text';
-                if (iconEye) iconEye.style.display = 'none';
-                if (iconEyeOff) iconEyeOff.style.display = 'inline';
-            } else {
-                input.type = 'password';
-                if (iconEye) iconEye.style.display = 'inline';
-                if (iconEyeOff) iconEyeOff.style.display = 'none';
-            }
-        });
-    });
 });
 </script>
 @endpush

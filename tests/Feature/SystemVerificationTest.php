@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\CashTransaction;
 use App\Models\Member;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -215,6 +216,104 @@ class SystemVerificationTest extends TestCase
             'amount' => 50000,
             'account_type' => 'Bank Transfer (BCA)',
         ]);
+    }
+
+    /**
+     * Test cash management record name support in create, edit, display, and search.
+     */
+    public function test_cash_management_record_name_support(): void
+    {
+        $admin = $this->createAdminUser();
+        $member = Member::create([
+            'full_name' => 'Mega Record Test ' . uniqid(),
+            'date_of_birth' => '1999-05-15',
+            'is_active' => true,
+        ]);
+
+        $fakeProof = \Illuminate\Http\UploadedFile::fake()->image('receipt.jpg');
+        $recordName = 'tabungan oktober_mega';
+
+        // 1. Create with record_name
+        $createResponse = $this->actingAs($admin, 'admin')->post('/admin/cash-management', [
+            'member_id' => $member->id,
+            'record_name' => $recordName,
+            'account_type' => 'BCA',
+            'amount' => 30000,
+            'proof' => $fakeProof,
+        ]);
+        $createResponse->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('cash_transactions', [
+            'member_id' => $member->id,
+            'record_name' => $recordName,
+            'amount' => 30000,
+        ]);
+
+        $tx = CashTransaction::where('member_id', $member->id)->first();
+        $this->assertNotNull($tx);
+
+        // 2. View in ledger table (Date & Time, Name, Contributor)
+        $ledgerResponse = $this->actingAs($admin, 'admin')->get('/admin/cash-management');
+        $ledgerResponse->assertStatus(200);
+        $ledgerResponse->assertSee($recordName);
+
+        // 3. Update record_name
+        $updatedName = 'tabungan november_mega';
+        $updateResponse = $this->actingAs($admin, 'admin')->put('/admin/cash-management/' . $tx->id, [
+            'member_id' => $member->id,
+            'record_name' => $updatedName,
+            'account_type' => 'BCA',
+            'amount' => 35000,
+        ]);
+        $updateResponse->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('cash_transactions', [
+            'id' => $tx->id,
+            'record_name' => $updatedName,
+            'amount' => 35000,
+        ]);
+
+        // 4. Search filter by record_name
+        $searchResponse = $this->actingAs($admin, 'admin')->get('/admin/cash-management?name=november_mega');
+        $searchResponse->assertStatus(200);
+        $searchResponse->assertSee($updatedName);
+    }
+
+    /**
+     * Test double-submit protection in cash management store.
+     */
+    public function test_cash_management_prevents_duplicate_double_submit(): void
+    {
+        $admin = $this->createAdminUser();
+        $member = Member::create([
+            'full_name' => 'Double Click Member ' . uniqid(),
+            'date_of_birth' => '2001-07-20',
+            'is_active' => true,
+        ]);
+
+        $fakeProof1 = \Illuminate\Http\UploadedFile::fake()->image('receipt1.jpg');
+        $fakeProof2 = \Illuminate\Http\UploadedFile::fake()->image('receipt2.jpg');
+
+        $payload = [
+            'member_id' => $member->id,
+            'record_name' => 'tabungan double_click',
+            'account_type' => 'BCA',
+            'amount' => 50000,
+            'proof' => $fakeProof1,
+        ];
+
+        // 1st click
+        $res1 = $this->actingAs($admin, 'admin')->post('/admin/cash-management', $payload);
+        $res1->assertSessionHasNoErrors();
+
+        // 2nd click (simulated immediate duplicate submit with same payload)
+        $payload['proof'] = $fakeProof2;
+        $res2 = $this->actingAs($admin, 'admin')->post('/admin/cash-management', $payload);
+        $res2->assertSessionHasNoErrors();
+
+        // Total count for this member must strictly be 1, not 2
+        $count = CashTransaction::where('member_id', $member->id)->count();
+        $this->assertEquals(1, $count);
     }
 
     /**
@@ -674,5 +773,64 @@ class SystemVerificationTest extends TestCase
         $indexRes = $this->actingAs($admin, 'admin')->get('/admin/members');
         $indexRes->assertStatus(200);
         $indexRes->assertSee('href="' . route('admin.members.create') . '"', false);
+    }
+
+    /**
+     * Test admin dedicated edit member page resolution and credentials update.
+     */
+    public function test_admin_members_edit_page_and_credentials_update(): void
+    {
+        $admin = $this->createAdminUser();
+        $member = Member::create([
+            'full_name' => 'Editable Member ' . uniqid(),
+            'date_of_birth' => '1997-04-10',
+            'is_active' => true,
+        ]);
+
+        $initialEmail = 'old_email_' . uniqid() . '@bycgrowth.test';
+        $user = User::create([
+            'name' => $member->full_name,
+            'username' => 'old_user_' . uniqid(),
+            'email' => $initialEmail,
+            'password' => Hash::make('oldpassword123'),
+            'role' => 'user',
+            'member_id' => $member->id,
+        ]);
+
+        // 1. Admin can access edit page
+        $editPageRes = $this->actingAs($admin, 'admin')->get("/admin/members/{$member->id}/edit");
+        $editPageRes->assertStatus(200);
+        $editPageRes->assertSee('Edit Member');
+        $editPageRes->assertSee($member->full_name);
+        $editPageRes->assertSee($initialEmail);
+
+        // 2. Members index page links to /admin/members/{id}/edit
+        $indexRes = $this->actingAs($admin, 'admin')->get('/admin/members');
+        $indexRes->assertStatus(200);
+        $indexRes->assertSee('href="' . route('admin.members.edit', $member->id) . '"', false);
+
+        // 3. Update member name, email, and password
+        $updatedEmail = 'new_email_' . uniqid() . '@bycgrowth.test';
+        $updatedUsername = 'new_user_' . uniqid();
+        $updatedPassword = 'newPassword456!';
+
+        $updateRes = $this->actingAs($admin, 'admin')->put("/admin/members/{$member->id}", [
+            'full_name' => 'Updated Member Name',
+            'date_of_birth' => '1997-04-12',
+            'account_mode' => 'current',
+            'edit_user_email' => $updatedEmail,
+            'edit_user_username' => $updatedUsername,
+            'edit_user_password' => $updatedPassword,
+        ]);
+        $updateRes->assertSessionHasNoErrors();
+        $updateRes->assertRedirect(route('admin.members'));
+
+        $member->refresh();
+        $user->refresh();
+
+        $this->assertEquals('Updated Member Name', $member->full_name);
+        $this->assertEquals($updatedEmail, $user->email);
+        $this->assertEquals($updatedUsername, $user->username);
+        $this->assertTrue(Hash::check($updatedPassword, $user->password));
     }
 }

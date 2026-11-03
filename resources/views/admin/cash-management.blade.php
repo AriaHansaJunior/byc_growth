@@ -20,8 +20,8 @@
         <div class="cash-hero-layout" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div class="cash-hero-info">
                 <span class="cash-hero-eyebrow" style="color: var(--lime); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; display: block; margin-bottom: 4px;">Treasury Balance (Filtered Total)</span>
-                <div class="cash-hero-balance" style="font: 800 clamp(28px, 3.5vw, 42px) 'Manrope', sans-serif; letter-spacing: -.03em; color: #fff;">
-                    Rp {{ number_format($totalCash, 0, ',', '.') }}
+                <div class="cash-hero-balance" style="font: 800 clamp(28px, 3.5vw, 42px) 'Manrope', sans-serif; letter-spacing: -.03em; color: #fff; white-space: nowrap;">
+                    Rp&nbsp;{{ number_format($totalCash, 0, ',', '.') }}
                 </div>
                 <small class="cash-hero-sub" style="color: #b8c5bf; font-size: 13px;">Accurate total across all matching transactions in the fellowship treasury</small>
             </div>
@@ -158,9 +158,10 @@
                                 <input type="checkbox" id="check-select-all-cash" style="width: 17px; height: 17px; accent-color: var(--forest); cursor: pointer;" title="Select all on this page">
                             </th>
                             <th>Date & Time</th>
+                            <th>Name</th>
                             <th>Contributor</th>
                             <th>Account / Type</th>
-                            <th>Amount</th>
+                            <th style="white-space: nowrap;">Amount</th>
                             <th>Transfer Proof</th>
                             <th>Recorded By</th>
                             <th style="text-align: right;">Actions</th>
@@ -178,6 +179,11 @@
                                     </span>
                                 </td>
                                 <td>
+                                    <strong style="color: var(--ink); font-size: 14px;">
+                                        {{ $tx->record_name ?: '-' }}
+                                    </strong>
+                                </td>
+                                <td>
                                     <strong style="color: var(--ink); font-size: 14.5px;">
                                         {{ $tx->member ? $tx->member->full_name : $tx->contributor_name }}
                                     </strong>
@@ -192,9 +198,9 @@
                                         {{ $tx->account_type ?: 'Standard' }}
                                     </span>
                                 </td>
-                                <td>
-                                    <strong style="color: var(--forest); font-size: 14.5px; font-family: 'Manrope', sans-serif;">
-                                        Rp {{ number_format($tx->amount, 0, ',', '.') }}
+                                <td style="white-space: nowrap;">
+                                    <strong style="color: var(--forest); font-size: 14.5px; font-family: 'Manrope', sans-serif; white-space: nowrap;">
+                                        Rp&nbsp;{{ number_format($tx->amount, 0, ',', '.') }}
                                     </strong>
                                 </td>
                                 <td>
@@ -206,7 +212,7 @@
                                             data-full-url="{{ $tx->proof_file_full_url ?: $tx->proof_file_url }}"
                                             data-download-url="{{ $tx->proof_download_url ?: ($tx->proof_file_full_url ?: $tx->proof_file_url) }}"
                                             data-contributor="{{ $tx->member ? $tx->member->full_name : $tx->contributor_name }}"
-                                            data-amount="Rp {{ number_format($tx->amount, 0, ',', '.') }}"
+                                            data-amount="Rp&nbsp;{{ number_format($tx->amount, 0, ',', '.') }}"
                                             data-date="{{ $tx->created_at->format('M j, Y') }}"
                                             style="font-size: 11.5px; padding: 3px 10px; height: 28px; display: inline-flex; align-items: center; gap: 4px;"
                                             title="View Transfer Proof (Full Resolution Available)"
@@ -228,6 +234,7 @@
                                             type="button"
                                             class="button button-ghost button-sm btn-edit-tx"
                                             data-id="{{ $tx->id }}"
+                                            data-record-name="{{ $tx->record_name ?? '' }}"
                                             data-member-id="{{ $tx->member_id ?? '' }}"
                                             data-contributor="{{ $tx->contributor_name }}"
                                             data-account="{{ $tx->account_type }}"
@@ -246,7 +253,7 @@
                                                 type="submit"
                                                 class="button button-danger button-sm"
                                                 style="font-size: 12px; padding: 4px 8px; height: 30px;"
-                                                data-admin-confirm="Are you sure you want to delete this cash transaction of Rp {{ number_format($tx->amount, 0, ',', '.') }} for {{ $tx->contributor_name }}? Associated proof media will be safely cleaned up."
+                                                data-admin-confirm="Are you sure you want to delete this cash transaction of Rp&nbsp;{{ number_format($tx->amount, 0, ',', '.') }} for {{ $tx->contributor_name }}? Associated proof media will be safely cleaned up."
                                                 title="Delete Transaction"
                                             >
                                                 Delete
@@ -271,7 +278,7 @@
     {{-- Proof Image Viewer Modal --}}
     <div id="modal-proof-viewer" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 600px; width: 100%; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 16px 20px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
+            <div class="cash-modal-header" style="padding: 16px 20px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;">
                 <div>
                     <h3 id="proof-viewer-title" style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 800; color: var(--ink);">
                         Transfer Proof
@@ -285,7 +292,7 @@
                     <img id="proof-viewer-img" src="" alt="Transfer Proof" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; cursor: pointer;">
                 </a>
             </div>
-            <div style="padding: 14px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="modal-proof-footer" style="padding: 14px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <a id="proof-viewer-link" href="" target="_blank" rel="noopener noreferrer" class="button button-ghost button-sm" style="font-size: 12px;">
                         Open Full Size (New Tab) ↗
@@ -304,7 +311,7 @@
     {{-- Modal: Record New Transaction --}}
     <div id="modal-record-tx" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 580px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+            <div class="cash-modal-header" style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div>
                     <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
                         Record New Contribution
@@ -316,7 +323,7 @@
 
             <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-record-tx" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
-                <div style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
+                <div class="cash-modal-body" style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
                     {{-- Associated Member --}}
                     <div class="form-group">
                         <label class="form-label" for="record-member-id">Associated Member *</label>
@@ -336,6 +343,22 @@
                         </select>
                         @error('member_id')
                             <div class="form-field-error" data-for="record-member-id">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Record Name --}}
+                    <div class="form-group">
+                        <label class="form-label" for="record-name">Record Name</label>
+                        <input
+                            type="text"
+                            id="record-name"
+                            name="record_name"
+                            class="form-input @error('record_name') input-invalid @enderror"
+                            value="{{ old('record_name') }}"
+                            placeholder="e.g. tabungan oktober_mega"
+                        >
+                        @error('record_name')
+                            <div class="form-field-error" data-for="record-name">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -398,7 +421,7 @@
                 </div>
 
                 {{-- Modal Footer --}}
-                <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-shrink: 0;">
+                <div class="cash-modal-footer" style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-shrink: 0;">
                     <button type="reset" class="button button-danger button-sm">
                         Reset Form
                     </button>
@@ -413,7 +436,7 @@
     {{-- Edit Transaction Modal --}}
     <div id="modal-edit-tx" class="admin-modal-backdrop modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(18, 30, 23, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overscroll-behavior: contain;">
         <div class="admin-modal-card" style="background: var(--white); border-radius: 18px; max-width: 540px; width: 100%; max-height: calc(100vh - 40px); display: flex; flex-direction: column; box-shadow: var(--shadow-lg); overflow: hidden; border: 1px solid var(--line);">
-            <div style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
+            <div class="cash-modal-header" style="padding: 18px 24px; background: var(--cream); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <span style="font-size: 20px;">✏️</span>
                     <h3 style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; color: var(--ink);">
@@ -425,7 +448,7 @@
             <form id="form-edit-tx" method="POST" action="" enctype="multipart/form-data" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
                 @method('PUT')
-                <div style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
+                <div class="cash-modal-body" style="padding: 20px 24px; overflow-y: auto; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 14px;">
                     <div class="form-group">
                         <label class="form-label" for="edit-tx-member">Associated Member</label>
                         <select name="member_id" id="edit-tx-member" class="form-input">
@@ -440,6 +463,11 @@
                         <label class="form-label" for="edit-tx-contributor">Contributor Name</label>
                         <input type="text" id="edit-tx-contributor" name="contributor_name" class="form-input" placeholder="Contributor Name">
                         <small style="color: var(--muted); font-size: 11px;">Automatically syncs with selected member, or can be custom.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-tx-record-name">Record Name</label>
+                        <input type="text" id="edit-tx-record-name" name="record_name" class="form-input" placeholder="e.g. tabungan oktober_mega">
                     </div>
 
                     <div class="form-group">
@@ -459,7 +487,7 @@
                     </div>
                 </div>
 
-                <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
+                <div class="cash-modal-footer" style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
                     <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-tx">
                         Cancel
                     </button>
@@ -499,6 +527,9 @@ document.addEventListener('DOMContentLoaded', function () {
         recordButtons.forEach(function (btn) {
             btn.addEventListener('click', function (e) {
                 e.preventDefault();
+                if (formRecordTx && typeof formRecordTx.resetSubmitBtn === 'function') {
+                    formRecordTx.resetSubmitBtn();
+                }
                 openModal(modalRecordTx);
             });
         });
@@ -540,22 +571,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const formRecordTx = document.getElementById('form-record-tx');
     if (formRecordTx) {
+        let isRecordSubmitting = false;
+        const submitRecordBtn = formRecordTx.querySelector('button[type="submit"]');
         const recMember = document.getElementById('record-member-id');
+        const recName = document.getElementById('record-name');
         const recAccount = document.getElementById('record-account-type');
         const recAmount = document.getElementById('record-amount');
         const recProof = document.getElementById('record-proof');
 
-        [recMember, recAccount, recAmount, recProof].forEach(input => {
+        function resetRecordSubmitBtn() {
+            isRecordSubmitting = false;
+            if (submitRecordBtn) {
+                submitRecordBtn.disabled = false;
+                submitRecordBtn.style.opacity = '';
+                submitRecordBtn.style.pointerEvents = '';
+                submitRecordBtn.textContent = 'Submit Transaction';
+            }
+        }
+        formRecordTx.resetSubmitBtn = resetRecordSubmitBtn;
+
+        [recMember, recName, recAccount, recAmount, recProof].forEach(input => {
             if (!input) return;
             input.addEventListener('input', () => clearFieldError(input));
             input.addEventListener('change', () => clearFieldError(input));
         });
 
         formRecordTx.addEventListener('reset', () => {
+            resetRecordSubmitBtn();
             clearAllErrors(formRecordTx);
         });
 
         formRecordTx.addEventListener('submit', function (e) {
+            if (isRecordSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
             clearAllErrors(formRecordTx);
             let hasError = false;
 
@@ -604,22 +655,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 return false;
             }
+
+            // Immediately lock button to prevent double-click / multiple submissions
+            isRecordSubmitting = true;
+            if (submitRecordBtn) {
+                submitRecordBtn.disabled = true;
+                submitRecordBtn.style.opacity = '0.7';
+                submitRecordBtn.style.pointerEvents = 'none';
+                submitRecordBtn.textContent = 'Submitting...';
+            }
         });
     }
 
     const formEditTx = document.getElementById('form-edit-tx');
     if (formEditTx) {
+        let isEditSubmitting = false;
+        const submitEditBtn = formEditTx.querySelector('button[type="submit"]');
+        const editName = document.getElementById('edit-tx-record-name');
         const editAccount = document.getElementById('edit-tx-account');
         const editAmount = document.getElementById('edit-tx-amount');
         const editProof = document.getElementById('edit-tx-proof');
 
-        [editAccount, editAmount, editProof].forEach(input => {
+        function resetEditSubmitBtn() {
+            isEditSubmitting = false;
+            if (submitEditBtn) {
+                submitEditBtn.disabled = false;
+                submitEditBtn.style.opacity = '';
+                submitEditBtn.style.pointerEvents = '';
+                submitEditBtn.textContent = 'Save Changes';
+            }
+        }
+        formEditTx.resetSubmitBtn = resetEditSubmitBtn;
+
+        [editName, editAccount, editAmount, editProof].forEach(input => {
             if (!input) return;
             input.addEventListener('input', () => clearFieldError(input));
             input.addEventListener('change', () => clearFieldError(input));
         });
 
         formEditTx.addEventListener('submit', function (e) {
+            if (isEditSubmitting) {
+                e.preventDefault();
+                return false;
+            }
+
             clearAllErrors(formEditTx);
             let hasError = false;
 
@@ -660,10 +739,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 return false;
             }
+
+            isEditSubmitting = true;
+            if (submitEditBtn) {
+                submitEditBtn.disabled = true;
+                submitEditBtn.style.opacity = '0.7';
+                submitEditBtn.style.pointerEvents = 'none';
+                submitEditBtn.textContent = 'Saving...';
+            }
         });
     }
 
-    @if($errors->hasAny(['member_id', 'account_type', 'amount', 'proof']))
+    @if($errors->hasAny(['member_id', 'record_name', 'account_type', 'amount', 'proof']))
         if (modalRecordTx) {
             openModal(modalRecordTx);
         }
@@ -748,15 +835,20 @@ document.addEventListener('DOMContentLoaded', function () {
             const id = this.dataset.id;
             const memberId = this.dataset.memberId;
             const contributor = this.dataset.contributor;
+            const recordName = this.dataset.recordName;
             const account = this.dataset.account;
             const amount = this.dataset.amount;
 
             const form = document.getElementById('form-edit-tx');
             clearAllErrors(form);
+            if (form && typeof form.resetSubmitBtn === 'function') {
+                form.resetSubmitBtn();
+            }
             form.action = '/admin/cash-management/' + id;
 
             document.getElementById('edit-tx-member').value = memberId || '';
             document.getElementById('edit-tx-contributor').value = contributor || '';
+            document.getElementById('edit-tx-record-name').value = recordName || '';
             document.getElementById('edit-tx-account').value = account || '';
             document.getElementById('edit-tx-amount').value = amount || '';
 

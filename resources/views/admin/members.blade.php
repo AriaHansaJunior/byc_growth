@@ -230,18 +230,13 @@
 
                     {{-- Administrative Controls (Edit / Delete) --}}
                     <div class="admin-action-group" style="display: flex; gap: 8px; width: 100%; justify-content: center; margin-top: auto;">
-                        <button
-                            type="button"
-                            class="button button-secondary button-sm btn-edit-member"
-                            data-id="{{ $member->id }}"
-                            data-name="{{ $member->full_name }}"
-                            data-dob="{{ $member->date_of_birth ? $member->date_of_birth->format('Y-m-d') : '' }}"
-                            data-photo="{{ $member->photo_url }}"
-                            data-user-id="{{ $member->user ? $member->user->id : '' }}"
-                            style="font-size: 12px; padding: 4px 10px; height: 32px;"
+                        <a
+                            href="{{ route('admin.members.edit', $member->id) }}"
+                            class="button button-secondary button-sm"
+                            style="font-size: 12px; padding: 4px 10px; height: 32px; text-decoration: none; display: inline-flex; align-items: center;"
                         >
                             ✎ Edit
-                        </button>
+                        </a>
                         <button
                             type="button"
                             class="button button-danger button-sm"

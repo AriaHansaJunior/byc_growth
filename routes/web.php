@@ -123,6 +123,7 @@ Route::middleware(['auth:admin', 'admin'])->group(function () {
         Route::middleware('admin.permission:members')->group(function () {
             Route::get('/members', [MemberController::class, 'index'])->name('members');
             Route::get('/members/create', [MemberController::class, 'create'])->name('members.create');
+            Route::get('/members/{id}/edit', [MemberController::class, 'edit'])->whereNumber('id')->name('members.edit');
             Route::post('/members', [MemberController::class, 'store'])->name('members.store');
             Route::post('/members/batch-delete', [MemberController::class, 'batchDestroy'])->name('members.batch-delete');
             Route::match(['put', 'post'], '/members/{id}', [MemberController::class, 'update'])->whereNumber('id')->name('members.update');

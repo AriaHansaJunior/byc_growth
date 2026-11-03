@@ -142,7 +142,11 @@ export function initAdminShell() {
     }) {
         activeOnConfirm = onConfirm;
         if (titleEl) titleEl.textContent = title;
-        if (msgEl) msgEl.textContent = message;
+        if (msgEl) {
+            msgEl.textContent = typeof message === 'string'
+                ? message.replace(/Rp\s+/g, 'Rp\u00A0')
+                : message;
+        }
         if (formEl) formEl.action = actionUrl;
         if (methodEl) methodEl.value = method;
         if (submitBtn) {
