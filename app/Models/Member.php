@@ -92,6 +92,19 @@ class Member extends Model
     }
 
     /**
+     * Get member raw (uncropped original) photo URL for cropping studio.
+     */
+    public function getRawPhotoUrlAttribute(): ?string
+    {
+        if ($this->memberPhoto && !empty($this->memberPhoto->photo_data)) {
+            $version = $this->memberPhoto->updated_at ? $this->memberPhoto->updated_at->timestamp : ($this->updated_at ? $this->updated_at->timestamp : time());
+            return route('media.member.photo', ['id' => $this->id, 'raw' => 1, 'v' => $version]);
+        }
+
+        return $this->photo ? $this->photo->getFullUrl() : null;
+    }
+
+    /**
      * Get birthday letters received by this member.
      */
     public function birthdayLetters(): HasMany

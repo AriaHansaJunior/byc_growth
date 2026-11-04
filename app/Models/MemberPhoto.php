@@ -16,9 +16,19 @@ class MemberPhoto extends Model
         'member_id',
         'photo_data',
         'compressed_photo_data',
+        'raw_photo_data',
+        'crop_zoom',
+        'crop_offset_x',
+        'crop_offset_y',
         'original_name',
         'mime_type',
         'file_size',
+    ];
+
+    protected $casts = [
+        'crop_zoom' => 'float',
+        'crop_offset_x' => 'float',
+        'crop_offset_y' => 'float',
     ];
 
     /**

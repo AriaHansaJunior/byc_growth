@@ -44,10 +44,10 @@
 
     {{-- Filtering & Search Controls --}}
     <div class="admin-card" id="wishes-filter-card" style="padding: 18px 24px; margin-bottom: 24px;">
-        <form id="form-wishes-filter" method="GET" action="{{ route('admin.birthday-wishes') }}" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
+        <form id="form-wishes-filter" method="GET" action="{{ route('admin.birthday-wishes') }}" class="admin-filter-bar wishes-filter-bar" style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;">
             <input type="hidden" name="year" value="{{ $selectedYear === null ? 'all' : $selectedYear }}">
 
-            <div style="flex: 1; min-width: 200px;">
+            <div class="wishes-filter-col" style="flex: 1; min-width: 200px;">
                 <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Filter by Celebrant</label>
                 <select name="member_id" id="filter-wishes-member" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="">All Birthday Celebrants</option>
@@ -59,12 +59,12 @@
                 </select>
             </div>
 
-            <div style="flex: 1; min-width: 200px;">
+            <div class="wishes-filter-col" style="flex: 1; min-width: 200px;">
                 <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Search Keyword</label>
                 <input type="text" name="search" value="{{ $searchKeyword }}" placeholder="Search message, sender, email..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 170px;">
+            <div class="wishes-filter-col" style="min-width: 170px;">
                 <label class="form-label" style="font-size: 12px; margin-bottom: 4px;">Sort By</label>
                 <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="newest" {{ ($sort ?? '') === 'newest' ? 'selected' : '' }}>Newest First</option>
@@ -74,7 +74,7 @@
                 </select>
             </div>
 
-            <div style="display: flex; gap: 8px;">
+            <div class="wishes-filter-actions" style="display: flex; gap: 8px;">
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>

@@ -4,8 +4,12 @@ namespace App\Providers;
 
 use App\Models\BirthdayLetter;
 use App\Models\Member;
+use App\Services\IdSequenceService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Routing\Events\RouteMatched;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -25,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(RouteMatched::class, function (RouteMatched $event) {
+            if (!$event->request->isMethodSafe()) {
+                IdSequenceService::resequenceAll();
+            }
+        });
+
+        Event::listen(RequestHandled::class, function (RequestHandled $event) {
+            if (!$event->request->isMethodSafe()) {
+                IdSequenceService::resequenceAll();
+            }
+        });
+
         View::composer(['layouts.app', 'layouts.admin', 'welcome', 'user.*', 'components.*'], function ($view) {
             try {
                 if (Schema::hasTable('members')) {

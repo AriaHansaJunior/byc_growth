@@ -35,9 +35,12 @@ class MediaController extends Controller
 
         // If member has dedicated database-stored photo (base64)
         if ($member->memberPhoto && !empty($member->memberPhoto->photo_data)) {
-            $isFullRequest = $this->isFullSizeRequest($request);
+            $isRawRequest = $request->boolean('raw');
+            $isFullRequest = $isRawRequest || $this->isFullSizeRequest($request);
 
-            $dataUri = $member->memberPhoto->photo_data;
+            $dataUri = ($isRawRequest && !empty($member->memberPhoto->raw_photo_data))
+                ? $member->memberPhoto->raw_photo_data
+                : $member->memberPhoto->photo_data;
 
             if (!$isFullRequest) {
                 // Serve compressed version for fast page loading
@@ -66,6 +69,7 @@ class MediaController extends Controller
                     'Content-Length' => strlen($decoded['binary']),
                     'Cache-Control' => 'no-cache, private, must-revalidate',
                     'Vary' => 'Sec-Fetch-Dest, Accept',
+                    'Access-Control-Allow-Origin' => '*',
                 ]);
             }
         }
@@ -119,6 +123,7 @@ class MediaController extends Controller
                     'Content-Length' => strlen($decoded['binary']),
                     'Cache-Control' => 'no-cache, private, must-revalidate',
                     'Vary' => 'Sec-Fetch-Dest, Accept',
+                    'Access-Control-Allow-Origin' => '*',
                 ]);
             }
         }
@@ -226,6 +231,7 @@ class MediaController extends Controller
                 'Content-Type' => $mime,
                 'Cache-Control' => 'public, max-age=86400, must-revalidate',
                 'Vary' => 'Sec-Fetch-Dest, Accept',
+                'Access-Control-Allow-Origin' => '*',
             ]);
         }
 
@@ -242,6 +248,7 @@ class MediaController extends Controller
                     'Content-Length' => strlen($decoded['binary']),
                     'Cache-Control' => 'no-cache, private, must-revalidate',
                     'Vary' => 'Sec-Fetch-Dest, Accept',
+                    'Access-Control-Allow-Origin' => '*',
                 ]);
             }
         }

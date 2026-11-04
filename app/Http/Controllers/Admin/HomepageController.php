@@ -49,10 +49,17 @@ class HomepageController extends Controller
     public function storeSlide(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
-            'image' => 'required|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
+            'image_base64' => 'nullable|string',
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
+
+        if (!$request->hasFile('image') && !$request->filled('image_base64')) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'image' => ['A photo is required.']
+            ]);
+        }
 
         try {
             DB::beginTransaction();
@@ -60,18 +67,29 @@ class HomepageController extends Controller
             $maxOrder = (int) HomepageSlide::max('sort_order');
             $nextOrder = $maxOrder + 1;
 
-            $file = $request->file('image');
-            $originalName = $file->getClientOriginalName();
+            if ($request->filled('image_base64') && str_starts_with($request->input('image_base64'), 'data:image/')) {
+                $base64 = $request->input('image_base64');
+                $mime = 'image/jpeg';
+                if (preg_match('/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/', $base64, $m)) {
+                    $mime = $m[1];
+                }
+                $rawBinary = base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $base64));
+                $content = $rawBinary;
+                $originalName = $request->hasFile('image') ? $request->file('image')->getClientOriginalName() : ('slide_' . time() . '.jpg');
+            } else {
+                $file = $request->file('image');
+                $originalName = $file->getClientOriginalName();
+                $ext = strtolower($file->getClientOriginalExtension());
+                $mime = $file->getClientMimeType() ?: 'image/jpeg';
+                if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                    $mime = 'image/' . $ext;
+                }
+                $content = file_get_contents($file->getRealPath());
+                $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
+            }
+
             $title = !empty($validated['title']) ? $validated['title'] : $originalName;
             $caption = $validated['caption'] ?? null;
-
-            $ext = strtolower($file->getClientOriginalExtension());
-            $mime = $file->getClientMimeType() ?: 'image/jpeg';
-            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
-                $mime = 'image/' . $ext;
-            }
-            $content = file_get_contents($file->getRealPath());
-            $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
 
             $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
             $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';
@@ -144,25 +162,43 @@ class HomepageController extends Controller
         $slide = HomepageSlide::with(['slidePhoto', 'media'])->findOrFail($id);
 
         $validated = $request->validate([
-            'image' => 'required|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
+            'image_base64' => 'nullable|string',
             'title' => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:500',
         ]);
 
+        if (!$request->hasFile('image') && !$request->filled('image_base64')) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'image' => ['A photo is required.']
+            ]);
+        }
+
         try {
             DB::beginTransaction();
 
-            $file = $request->file('image');
-            $originalName = $file->getClientOriginalName();
-            $title = !empty($validated['title']) ? $validated['title'] : ($slide->title ?: $originalName);
-
-            $ext = strtolower($file->getClientOriginalExtension());
-            $mime = $file->getClientMimeType() ?: 'image/jpeg';
-            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
-                $mime = 'image/' . $ext;
+            if ($request->filled('image_base64') && str_starts_with($request->input('image_base64'), 'data:image/')) {
+                $base64 = $request->input('image_base64');
+                $mime = 'image/jpeg';
+                if (preg_match('/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/', $base64, $m)) {
+                    $mime = $m[1];
+                }
+                $rawBinary = base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $base64));
+                $content = $rawBinary;
+                $originalName = $request->hasFile('image') ? $request->file('image')->getClientOriginalName() : ($slide->slidePhoto ? $slide->slidePhoto->original_name : 'slide_photo.jpg');
+            } else {
+                $file = $request->file('image');
+                $originalName = $file->getClientOriginalName();
+                $ext = strtolower($file->getClientOriginalExtension());
+                $mime = $file->getClientMimeType() ?: 'image/jpeg';
+                if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                    $mime = 'image/' . $ext;
+                }
+                $content = file_get_contents($file->getRealPath());
+                $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
             }
-            $content = file_get_contents($file->getRealPath());
-            $base64 = 'data:' . $mime . ';base64,' . base64_encode($content);
+
+            $title = !empty($validated['title']) ? $validated['title'] : ($slide->title ?: $originalName);
 
             $adminUser = Auth::guard('admin')->user() ?? Auth::guard('web')->user() ?? Auth::user();
             $adminEmail = $adminUser ? $adminUser->email : 'admin@bycgrowth.org';

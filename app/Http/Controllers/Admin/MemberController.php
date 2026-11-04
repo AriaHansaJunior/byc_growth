@@ -126,6 +126,10 @@ class MemberController extends Controller
             'date_of_birth' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
             'photo_base64' => 'nullable|string',
+            'raw_photo_base64' => 'nullable|string',
+            'crop_zoom' => 'nullable|numeric|min:1|max:10',
+            'crop_offset_x' => 'nullable|numeric',
+            'crop_offset_y' => 'nullable|numeric',
             'user_id' => 'nullable',
             'new_user_email' => 'nullable|string|email|max:255',
             'new_user_username' => 'nullable|string|min:3|max:60|regex:/^[a-zA-Z0-9_]+$/',
@@ -148,6 +152,31 @@ class MemberController extends Controller
 
         AuditLog::record($adminUser, 'created', 'member', $member->id, "Created member '{$member->full_name}'");
 
+        $cropZoom = (float) $request->input('crop_zoom', 1.0);
+        $cropOffsetX = (float) $request->input('crop_offset_x', 0);
+        $cropOffsetY = (float) $request->input('crop_offset_y', 0);
+
+        $rawPhotoBase64 = null;
+        if ($request->filled('raw_photo_base64') && str_starts_with($request->input('raw_photo_base64'), 'data:image/')) {
+            $rawInput = $request->input('raw_photo_base64');
+            $rawBinary = base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $rawInput));
+            $rawPhotoBase64 = strlen($rawBinary) > 400 * 1024
+                ? ($this->optimizer->compressBase64($rawInput, 1400, 85) ?: $rawInput)
+                : $rawInput;
+        } elseif ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $file = $request->file('photo');
+            $ext = strtolower($file->getClientOriginalExtension());
+            $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
+            $content = file_get_contents($file->getRealPath());
+            $rawInput = 'data:' . $mime . ';base64,' . base64_encode($content);
+            $rawPhotoBase64 = strlen($content) > 400 * 1024
+                ? ($this->optimizer->compressBase64($rawInput, 1400, 85) ?: $rawInput)
+                : $rawInput;
+        }
+
         if ($request->filled('photo_base64') && str_starts_with($request->input('photo_base64'), 'data:image/')) {
             $base64 = $request->input('photo_base64');
             $mime = 'image/jpeg';
@@ -164,6 +193,10 @@ class MemberController extends Controller
             $data = [
                 'member_id' => $member->id,
                 'photo_data' => $photoBase64,
+                'raw_photo_data' => $rawPhotoBase64 ?: $photoBase64,
+                'crop_zoom' => $cropZoom,
+                'crop_offset_x' => $cropOffsetX,
+                'crop_offset_y' => $cropOffsetY,
                 'original_name' => 'member_photo_' . time() . '.jpg',
                 'mime_type' => $mime,
                 'file_size' => $contentLen,
@@ -192,6 +225,10 @@ class MemberController extends Controller
             $data = [
                 'member_id' => $member->id,
                 'photo_data' => $photoBase64,
+                'raw_photo_data' => $rawPhotoBase64 ?: $photoBase64,
+                'crop_zoom' => $cropZoom,
+                'crop_offset_x' => $cropOffsetX,
+                'crop_offset_y' => $cropOffsetY,
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $mime,
                 'file_size' => strlen($content),
@@ -225,6 +262,10 @@ class MemberController extends Controller
             'date_of_birth' => 'nullable|date|before_or_equal:today',
             'photo' => 'nullable|file|mimes:jpeg,png,jpg,webp,gif,heic,heif,bin|extensions:jpeg,png,jpg,webp,gif,heic,heif|max:51200',
             'photo_base64' => 'nullable|string',
+            'raw_photo_base64' => 'nullable|string',
+            'crop_zoom' => 'nullable|numeric|min:1|max:10',
+            'crop_offset_x' => 'nullable|numeric',
+            'crop_offset_y' => 'nullable|numeric',
             'remove_photo' => 'nullable|boolean',
             'user_id' => 'nullable',
             'account_mode' => 'nullable|string|in:current,new,link,unlink',
@@ -248,6 +289,31 @@ class MemberController extends Controller
             }
         }
 
+        $cropZoom = (float) $request->input('crop_zoom', 1.0);
+        $cropOffsetX = (float) $request->input('crop_offset_x', 0);
+        $cropOffsetY = (float) $request->input('crop_offset_y', 0);
+
+        $rawPhotoBase64 = null;
+        if ($request->filled('raw_photo_base64') && str_starts_with($request->input('raw_photo_base64'), 'data:image/')) {
+            $rawInput = $request->input('raw_photo_base64');
+            $rawBinary = base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/', '', $rawInput));
+            $rawPhotoBase64 = strlen($rawBinary) > 400 * 1024
+                ? ($this->optimizer->compressBase64($rawInput, 1400, 85) ?: $rawInput)
+                : $rawInput;
+        } elseif ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $file = $request->file('photo');
+            $ext = strtolower($file->getClientOriginalExtension());
+            $mime = $file->getClientMimeType() ?: 'image/jpeg';
+            if (in_array($ext, ['heic', 'heif'], true) && (!str_starts_with($mime, 'image/') || $mime === 'image/jpeg')) {
+                $mime = 'image/' . $ext;
+            }
+            $content = file_get_contents($file->getRealPath());
+            $rawInput = 'data:' . $mime . ';base64,' . base64_encode($content);
+            $rawPhotoBase64 = strlen($content) > 400 * 1024
+                ? ($this->optimizer->compressBase64($rawInput, 1400, 85) ?: $rawInput)
+                : $rawInput;
+        }
+
         if ($request->filled('photo_base64') && str_starts_with($request->input('photo_base64'), 'data:image/')) {
             $base64 = $request->input('photo_base64');
             $mime = 'image/jpeg';
@@ -263,10 +329,19 @@ class MemberController extends Controller
 
             $updateData = [
                 'photo_data' => $photoBase64,
+                'crop_zoom' => $cropZoom,
+                'crop_offset_x' => $cropOffsetX,
+                'crop_offset_y' => $cropOffsetY,
                 'original_name' => 'member_photo_' . time() . '.jpg',
                 'mime_type' => $mime,
                 'file_size' => $contentLen,
             ];
+
+            if ($rawPhotoBase64) {
+                $updateData['raw_photo_data'] = $rawPhotoBase64;
+            } elseif ($member->memberPhoto && empty($member->memberPhoto->raw_photo_data)) {
+                $updateData['raw_photo_data'] = $photoBase64;
+            }
 
             if (Schema::hasColumn('member_photos', 'compressed_photo_data')) {
                 $updateData['compressed_photo_data'] = $this->optimizer->compressBase64($photoBase64, 550, 80) ?: $photoBase64;
@@ -301,6 +376,10 @@ class MemberController extends Controller
 
             $updateData = [
                 'photo_data' => $photoBase64,
+                'raw_photo_data' => $rawPhotoBase64 ?: $photoBase64,
+                'crop_zoom' => $cropZoom,
+                'crop_offset_x' => $cropOffsetX,
+                'crop_offset_y' => $cropOffsetY,
                 'original_name' => $file->getClientOriginalName(),
                 'mime_type' => $mime,
                 'file_size' => strlen($content),

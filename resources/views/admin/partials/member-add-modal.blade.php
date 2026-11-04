@@ -29,6 +29,7 @@
                     </div>
 
                     <input type="file" id="add-photo" name="photo" accept="image/*,.heic,.heif" style="display: none;">
+                    <input type="hidden" name="photo_base64" id="add-member-photo-base64" value="">
 
                     {{-- Live Large Preview Studio --}}
                     <div id="add-member-studio" style="display: none;">

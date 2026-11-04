@@ -30,6 +30,7 @@
                 </div>
 
                 <input type="file" id="add-slide-image" name="image" accept="image/jpeg,image/png,image/jpg,image/webp,image/gif,image/heic,image/heif,.heic,.heif" required style="display: none;">
+                <input type="hidden" name="image_base64" id="add-slide-image-base64" value="">
             </div>
 
             {{-- Selected File Info Bar (Hidden until selected) --}}

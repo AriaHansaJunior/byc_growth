@@ -294,6 +294,17 @@ export function initAdminHomepage() {
                         lastModified: Date.now()
                     });
 
+                    const base64Data = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                    const base64Input = form.querySelector('input[name="image_base64"]');
+                    if (base64Input) {
+                        base64Input.value = base64Data;
+                    }
+
                     if (window.DataTransfer && fileInput) {
                         const dt = new DataTransfer();
                         dt.items.add(croppedFile);
@@ -302,6 +313,9 @@ export function initAdminHomepage() {
                     } else {
                         const formData = new FormData(form);
                         formData.set('image', croppedFile, originalFile.name);
+                        if (base64Data) {
+                            formData.set('image_base64', base64Data);
+                        }
                         await fetch(form.action, {
                             method: 'POST',
                             body: formData,

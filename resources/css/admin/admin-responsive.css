@@ -22,11 +22,27 @@
    2. Tablets & Mobile Viewports (<= 768px)
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .admin-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
   /* Admin Topbar */
   .admin-topbar {
     padding: 10px 14px !important;
     flex-wrap: wrap !important;
     gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .admin-brand-wrap {
@@ -55,9 +71,34 @@
     flex-shrink: 0 !important;
   }
 
-  /* Admin Main Shell */
-  .admin-main {
+  /* Admin Main Shell & Container */
+  .admin-main,
+  .admin-container {
     padding: 18px 14px 48px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-card,
+  .admin-container .admin-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-container .members-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-container .member-card {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .admin-page-header {
@@ -97,17 +138,54 @@
   /* Filters & Search Bars */
   .admin-filter-bar,
   .wishes-filter-bar,
-  .members-filter-bar {
+  .members-filter-bar,
+  .members-filter-form,
+  .activities-filter-form {
+    display: flex !important;
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 10px !important;
-    padding: 14px !important;
+    width: 100% !important;
   }
 
   .admin-filter-bar input,
-  .admin-filter-bar select {
+  .admin-filter-bar select,
+  .members-filter-form input,
+  .members-filter-form select,
+  .activities-filter-form input,
+  .activities-filter-form select,
+  .wishes-filter-bar input,
+  .wishes-filter-bar select {
     width: 100% !important;
     min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .members-filter-search,
+  .members-filter-col,
+  .activities-filter-search,
+  .activities-filter-col,
+  .wishes-filter-col {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  .members-filter-actions,
+  .activities-filter-actions,
+  .wishes-filter-actions {
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .members-filter-actions .button,
+  .activities-filter-actions .button,
+  .wishes-filter-actions .button {
+    flex: 1 !important;
+    height: 38px !important;
+    justify-content: center !important;
   }
 
   /* Cash Management Mobile Layout */
@@ -154,22 +232,39 @@
   .cash-filter-form {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
     gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .cash-filter-main {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
   }
 
   .cash-filter-main input {
     width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .cash-filter-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .cash-filter-col {
+    min-width: 0 !important;
+    width: 100% !important;
   }
 
   .cash-filter-col select,
   .cash-filter-col input {
     width: 100% !important;
+    box-sizing: border-box !important;
     height: 38px !important;
     font-size: 13px !important;
     padding: 6px 10px !important;
@@ -180,6 +275,7 @@
     align-items: center !important;
     gap: 8px !important;
     margin-top: 4px !important;
+    width: 100% !important;
   }
 
   .cash-filter-actions .cash-filter-perpage {
@@ -190,6 +286,7 @@
   .cash-filter-actions .button {
     flex: 1 !important;
     height: 38px !important;
+    justify-content: center !important;
   }
 
   /* Cash Management Mobile Table & Modals */
@@ -312,21 +409,38 @@
   .roles-filter-form {
     display: flex !important;
     flex-direction: column !important;
+    align-items: stretch !important;
     gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .roles-filter-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: none !important;
   }
 
   .roles-filter-search input {
     width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .roles-filter-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 8px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .roles-filter-col {
+    min-width: 0 !important;
+    width: 100% !important;
   }
 
   .roles-filter-col select {
     width: 100% !important;
+    box-sizing: border-box !important;
     height: 38px !important;
     font-size: 13px !important;
     padding: 6px 10px !important;
@@ -336,11 +450,13 @@
     display: flex !important;
     gap: 8px !important;
     margin-top: 4px !important;
+    width: 100% !important;
   }
 
   .roles-filter-actions .button {
     flex: 1 !important;
     height: 38px !important;
+    justify-content: center !important;
   }
 
   /* Responsive Tables with Smooth Touch Scrolling */
@@ -544,13 +660,26 @@
     padding: 4px 6px !important;
   }
 
-  .admin-main {
-    padding: 14px 10px 40px !important;
+  .admin-main,
+  .admin-container {
+    padding: 14px 14px 40px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .admin-card {
+  .admin-card,
+  .admin-container .admin-card {
     padding: 16px 12px !important;
     border-radius: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .cash-filter-card,
+  .roles-filter-card {
+    padding: 12px !important;
   }
 
   .admin-batch-bar {
@@ -563,16 +692,61 @@
     font-size: clamp(22px, 6.5vw, 34px) !important;
   }
 
+  /* All Batch Actions Bars across Admin pages */
+  form[id^="form-batch-delete-"],
+  #form-batch-delete-activities,
+  #form-batch-delete-wishes,
   #form-batch-delete-cash,
-  #form-batch-delete-members {
+  #form-batch-delete-members,
+  #form-batch-delete-roles {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 8px !important;
     padding: 10px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
+  form[id^="form-batch-delete-"] .button,
+  #form-batch-delete-activities .button,
+  #form-batch-delete-wishes .button,
   #form-batch-delete-cash .button,
-  #form-batch-delete-members .button {
+  #form-batch-delete-members .button,
+  #form-batch-delete-roles .button {
     width: 100% !important;
+  }
+
+  /* Admin Members Management Mobile Grid (1-column for clean control layout) */
+  .admin-container .members-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-container .member-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+  }
+
+  .admin-container .member-photo-frame {
+    width: 110px !important;
+    height: 110px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .admin-container .admin-action-group {
+    width: 100% !important;
+    display: flex !important;
+    gap: 8px !important;
+  }
+
+  .admin-container .admin-action-group .button {
+    flex: 1 !important;
+    justify-content: center !important;
   }
 }

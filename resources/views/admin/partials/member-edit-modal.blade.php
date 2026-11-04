@@ -30,6 +30,7 @@
                     </div>
 
                     <input type="file" id="edit-photo" name="photo" accept="image/*,.heic,.heif" style="display: none;">
+                    <input type="hidden" name="photo_base64" id="edit-member-photo-base64" value="">
 
                     {{-- Photo Preview & Crop Studio --}}
                     <div id="edit-member-studio" style="display: none;">

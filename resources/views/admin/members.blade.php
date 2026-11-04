@@ -102,13 +102,13 @@
 @section('content')
     {{-- Search & Filtering Bar --}}
     <div class="admin-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; margin-bottom: 24px;">
-        <form method="GET" action="{{ route('admin.members') }}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
-            <div style="flex: 1; min-width: 200px;">
+        <form method="GET" action="{{ route('admin.members') }}" class="admin-filter-bar members-filter-form" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+            <div class="members-filter-search" style="flex: 1; min-width: 200px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Member</label>
                 <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search by name..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 160px;">
+            <div class="members-filter-col" style="min-width: 160px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Filter</label>
                 <select name="filter" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="all" {{ ($filters['filter'] ?? '') === 'all' ? 'selected' : '' }}>All Members</option>
@@ -116,7 +116,7 @@
                 </select>
             </div>
 
-            <div style="min-width: 180px;">
+            <div class="members-filter-col" style="min-width: 180px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
                 <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="name_asc" {{ ($filters['sort'] ?? '') === 'name_asc' ? 'selected' : '' }}>Name (A – Z)</option>
@@ -127,7 +127,7 @@
                 </select>
             </div>
 
-            <div style="display: flex; gap: 8px;">
+            <div class="members-filter-actions" style="display: flex; gap: 8px;">
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>
@@ -472,17 +472,38 @@ document.addEventListener('DOMContentLoaded', function () {
         function loadExistingUrl(url) {
             originalFile = null;
             hasNewFile = false;
-            img.onload = () => {
-                imgNaturalW = img.naturalWidth;
-                imgNaturalH = img.naturalHeight;
-                currentZoom = 1.0;
-                if (zoomRange) zoomRange.value = '1';
-                if (zoomLabel) zoomLabel.textContent = '1.0x';
-                dropzone.style.display = 'none';
-                studio.style.display = 'block';
-                centerImage();
+
+            const applyImage = (src) => {
+                img.onload = () => {
+                    imgNaturalW = img.naturalWidth;
+                    imgNaturalH = img.naturalHeight;
+                    currentZoom = 1.0;
+                    if (zoomRange) zoomRange.value = '1';
+                    if (zoomLabel) zoomLabel.textContent = '1.0x';
+                    dropzone.style.display = 'none';
+                    studio.style.display = 'block';
+                    centerImage();
+                };
+                img.onerror = () => {
+                    dropzone.style.display = 'flex';
+                    studio.style.display = 'none';
+                };
+                img.src = src;
             };
-            img.src = url;
+
+            fetch(url)
+                .then(res => {
+                    if (!res.ok) throw new Error('Fetch failed');
+                    return res.blob();
+                })
+                .then(blob => {
+                    const objectUrl = URL.createObjectURL(blob);
+                    applyImage(objectUrl);
+                })
+                .catch(() => {
+                    img.crossOrigin = 'anonymous';
+                    applyImage(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+                });
         }
 
         function reset() {
@@ -522,8 +543,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         viewport.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
-            currentOffsetX = startOffsetX + (e.clientX - startX);
-            currentOffsetY = startOffsetY + (e.clientY - startY);
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+                hasNewFile = true;
+            }
+            currentOffsetX = startOffsetX + dx;
+            currentOffsetY = startOffsetY + dy;
             clampOffsets();
             updateImageStyle();
         });
@@ -542,6 +568,7 @@ document.addEventListener('DOMContentLoaded', function () {
             zoomRange.addEventListener('input', () => {
                 currentZoom = parseFloat(zoomRange.value);
                 if (zoomLabel) zoomLabel.textContent = `${currentZoom.toFixed(1)}x`;
+                hasNewFile = true;
                 clampOffsets();
                 updateImageStyle();
             });
@@ -606,6 +633,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 const blob = await getCroppedBlob();
+                const base64Data = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+
+                let base64Input = form.querySelector('input[name="photo_base64"]');
+                if (!base64Input) {
+                    base64Input = document.createElement('input');
+                    base64Input.type = 'hidden';
+                    base64Input.name = 'photo_base64';
+                    form.appendChild(base64Input);
+                }
+                base64Input.value = base64Data;
+
                 const croppedFile = new File([blob], originalFile ? originalFile.name : 'member_photo.jpg', {
                     type: blob.type || 'image/jpeg',
                     lastModified: Date.now()
@@ -618,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     form.submit();
                 } else {
                     const formData = new FormData(form);
+                    formData.set('photo_base64', base64Data);
                     formData.set('photo', croppedFile, croppedFile.name);
                     await fetch(form.action, {
                         method: 'POST',

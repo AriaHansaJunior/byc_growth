@@ -22,18 +22,18 @@
 @section('content')
     {{-- Search & Filtering Bar --}}
     <div class="admin-card" style="background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 18px 22px; margin-bottom: 24px;">
-        <form method="GET" action="{{ route('admin.activities') }}" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
-            <div style="flex: 1; min-width: 200px;">
+        <form method="GET" action="{{ route('admin.activities') }}" class="admin-filter-bar activities-filter-form" style="display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;">
+            <div class="activities-filter-search" style="flex: 1; min-width: 200px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Search Activity</label>
                 <input type="text" name="search" value="{{ $filters['search'] ?? '' }}" placeholder="Search by name or description..." class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 150px;">
+            <div class="activities-filter-col" style="min-width: 150px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Filter by Date</label>
                 <input type="date" name="date" value="{{ $filters['date'] ?? '' }}" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
             </div>
 
-            <div style="min-width: 180px;">
+            <div class="activities-filter-col" style="min-width: 180px;">
                 <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Sort By</label>
                 <select name="sort" class="form-input" style="height: 42px; font-size: 13.5px; padding: 8px 12px;">
                     <option value="date_desc" {{ ($filters['sort'] ?? '') === 'date_desc' ? 'selected' : '' }}>Date (Newest First)</option>
@@ -43,7 +43,7 @@
                 </select>
             </div>
 
-            <div style="display: flex; gap: 8px;">
+            <div class="activities-filter-actions" style="display: flex; gap: 8px;">
                 <button type="submit" class="button button-primary button-sm" style="height: 42px; padding: 0 18px; display: inline-flex; align-items: center;">
                     Filter
                 </button>

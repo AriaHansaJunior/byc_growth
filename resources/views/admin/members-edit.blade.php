@@ -13,11 +13,6 @@
             Update community identity, member birthday, profile photo, and user login credentials for <strong>{{ $member->full_name }}</strong>.
         </p>
     </div>
-    <div class="admin-header-actions">
-        <a href="{{ route('admin.members') }}" class="button button-ghost button-sm" style="text-decoration: none;">
-            &larr; Back to Members
-        </a>
-    </div>
 </div>
 @endsection
 
@@ -36,25 +31,7 @@
                     Profile Photo
                 </span>
 
-                {{-- State 1: Current Photo Preview (if member already has a photo) --}}
-                @if($member->photo_url)
-                    <div id="edit-existing-photo-wrap" style="display: flex; flex-direction: column; align-items: center; width: 100%; margin-bottom: 18px;">
-                        <div style="position: relative; width: 190px; height: 190px; margin: 0 auto 16px; border-radius: 50%; overflow: hidden; border: 3px solid var(--forest); box-shadow: var(--shadow); background: var(--cream);">
-                            <img id="edit-current-photo-img" src="{{ $member->photo_url }}" alt="{{ $member->full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                        <div style="display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;">
-                            <button type="button" id="btn-edit-trigger-change-photo" class="button button-secondary button-sm" style="font-size: 12px; height: 32px; padding: 0 14px;">
-                                Change Photo
-                            </button>
-                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--red); cursor: pointer; user-select: none;">
-                                <input type="checkbox" name="remove_photo" id="edit-remove-photo-cb" value="1" style="accent-color: var(--red);">
-                                <span>Remove Photo</span>
-                            </label>
-                        </div>
-                    </div>
-                @endif
-
-                {{-- State 2: Empty Dropzone (Initial state if no photo, or fallback) --}}
+                {{-- Empty Dropzone (Displayed if member has no photo) --}}
                 <div id="edit-photo-dropzone" class="crop-dropzone" style="height: 190px; width: 190px; margin: 0 auto 18px; display: {{ $member->photo_url ? 'none' : 'flex' }}; flex-direction: column; align-items: center; justify-content: center; padding: 18px; border-radius: 50%; cursor: pointer; border: 2px dashed var(--line); background: var(--cream); transition: border-color 0.2s, background-color 0.2s; box-sizing: border-box;">
                     <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted); margin-bottom: 6px;">
                         <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
@@ -64,10 +41,10 @@
                     <small style="color: var(--muted); font-size: 11px; display: block; line-height: 1.2;">Click or drag photo</small>
                 </div>
 
-                {{-- State 3: Interactive Crop Studio (Revealed on file selection) --}}
-                <div id="edit-photo-studio" style="display: none; width: 100%; margin-bottom: 18px;">
-                    <div class="crop-viewport-wrap" style="position: relative; width: 190px; height: 190px; margin: 0 auto 12px; border-radius: 50%; overflow: hidden; border: 3px solid var(--forest); box-shadow: 0 8px 26px rgba(44, 76, 56, 0.2); background: #141f17; cursor: grab; user-select: none; touch-action: none;" id="edit-crop-viewport">
-                        <img id="edit-crop-img" alt="Crop Preview" src="" style="position: absolute; top: 0; left: 0; pointer-events: none; will-change: transform, left, top, width, height;">
+                {{-- Interactive Crop Studio (Active immediately if member has photo, or after new file is selected) --}}
+                <div id="edit-photo-studio" style="display: {{ $member->photo_url ? 'block' : 'none' }}; width: 100%; margin-bottom: 18px;">
+                    <div class="crop-viewport-wrap" style="position: relative; width: 190px; height: 190px; margin: 0 auto 12px; border-radius: 50%; overflow: hidden; border: 3px solid var(--forest); box-shadow: 0 8px 26px rgba(44, 76, 56, 0.2); background: #141f17; cursor: grab; user-select: none; touch-action: none; transition: opacity 0.2s ease;" id="edit-crop-viewport">
+                        <img id="edit-crop-img" alt="Crop Preview" src="{{ $member->photo_url ?? '' }}" crossorigin="anonymous" style="position: absolute; top: 0; left: 0; pointer-events: none; will-change: transform, left, top, width, height;">
                         <div class="crop-grid-overlay" style="position: absolute; inset: 0; pointer-events: none; border-radius: 50%; display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; opacity: 0.35;">
                             <div style="border: 1px dashed rgba(255,255,255,0.4);"></div><div style="border: 1px dashed rgba(255,255,255,0.4);"></div><div style="border: 1px dashed rgba(255,255,255,0.4);"></div>
                             <div style="border: 1px dashed rgba(255,255,255,0.4);"></div><div style="border: 1px dashed rgba(255,255,255,0.4);"></div><div style="border: 1px dashed rgba(255,255,255,0.4);"></div>
@@ -79,18 +56,25 @@
                     </div>
 
                     {{-- Zoom Slider & Controls --}}
-                    <div class="crop-zoom-control-bar" style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 300px; margin: 0 auto 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;">
+                    <div class="crop-zoom-control-bar" id="edit-crop-zoom-bar" style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 300px; margin: 0 auto 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;">
                         <span id="edit-crop-zoom-label" style="font-size: 11.5px; font-weight: 700; color: var(--ink); min-width: 32px;">1.0x</span>
-                        <input type="range" id="edit-crop-zoom-range" min="1" max="2.5" step="0.05" value="1" style="flex: 1; accent-color: var(--forest); cursor: pointer; height: 5px;">
+                        <input type="range" id="edit-crop-zoom-range" min="1" max="3" step="0.05" value="1" style="flex: 1; accent-color: var(--forest); cursor: pointer; height: 5px;" title="Zoom in / out">
                         <button type="button" id="btn-edit-crop-reset" class="button button-ghost button-sm" style="padding: 2px 8px; height: 24px; font-size: 11px;">Reset</button>
                     </div>
 
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <button type="button" id="btn-edit-cancel-photo" class="button button-ghost button-sm" style="padding: 4px 12px; font-size: 12px; height: 30px; color: var(--red);">
-                            Cancel
+                    {{-- Actions: Change Photo, Remove Photo, Cancel New Photo --}}
+                    <div style="display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;">
+                        <button type="button" id="btn-edit-trigger-change-photo" class="button button-secondary button-sm" style="font-size: 12px; height: 32px; padding: 0 14px;">
+                            Change Photo
                         </button>
-                        <button type="button" id="btn-edit-choose-diff" class="button button-ghost button-sm" style="padding: 4px 12px; font-size: 12px; height: 30px;">
-                            Choose Another Photo
+                        @if($member->photo_url)
+                            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--red); cursor: pointer; user-select: none;">
+                                <input type="checkbox" name="remove_photo" id="edit-remove-photo-cb" value="1" style="accent-color: var(--red);">
+                                <span>Remove Photo</span>
+                            </label>
+                        @endif
+                        <button type="button" id="btn-edit-cancel-new-file" class="button button-ghost button-sm" style="display: none; padding: 2px 10px; height: 30px; font-size: 11.5px; color: var(--muted);">
+                            Cancel New Photo
                         </button>
                     </div>
                 </div>
@@ -108,6 +92,30 @@
                     name="photo_base64"
                     id="edit-photo-base64"
                     value=""
+                >
+                <input
+                    type="hidden"
+                    name="raw_photo_base64"
+                    id="edit-raw-photo-base64"
+                    value=""
+                >
+                <input
+                    type="hidden"
+                    name="crop_zoom"
+                    id="edit-crop-zoom"
+                    value="{{ (float) ($member->memberPhoto?->crop_zoom ?? 1.0) }}"
+                >
+                <input
+                    type="hidden"
+                    name="crop_offset_x"
+                    id="edit-crop-offset-x"
+                    value="{{ (float) ($member->memberPhoto?->crop_offset_x ?? 0) }}"
+                >
+                <input
+                    type="hidden"
+                    name="crop_offset_y"
+                    id="edit-crop-offset-y"
+                    value="{{ (float) ($member->memberPhoto?->crop_offset_y ?? 0) }}"
                 >
 
                 {{-- Helper Note --}}
@@ -598,8 +606,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 3. Interactive Photo Cropper
-    const existingPhotoWrap = document.getElementById('edit-existing-photo-wrap');
-    const btnTriggerChange = document.getElementById('btn-edit-trigger-change-photo');
+    const existingPhotoUrl = @json($member->raw_photo_url ?: $member->photo_url);
+    const savedCropZoom = {{ (float) ($member->memberPhoto?->crop_zoom ?? 1.0) }};
+    const savedOffsetX = {{ (float) ($member->memberPhoto?->crop_offset_x ?? 0) }};
+    const savedOffsetY = {{ (float) ($member->memberPhoto?->crop_offset_y ?? 0) }};
     const dropzone = document.getElementById('edit-photo-dropzone');
     const studio = document.getElementById('edit-photo-studio');
     const fileInput = document.getElementById('edit-photo-input');
@@ -609,17 +619,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const zoomRange = document.getElementById('edit-crop-zoom-range');
     const zoomLabel = document.getElementById('edit-crop-zoom-label');
     const btnReset = document.getElementById('btn-edit-crop-reset');
-    const btnChooseDiff = document.getElementById('btn-edit-choose-diff');
-    const btnCancelPhoto = document.getElementById('btn-edit-cancel-photo');
+    const btnTriggerChange = document.getElementById('btn-edit-trigger-change-photo');
+    const btnCancelNewFile = document.getElementById('btn-edit-cancel-new-file');
+    const removePhotoCb = document.getElementById('edit-remove-photo-cb');
     const form = document.getElementById('form-edit-member-page');
     const submitBtn = document.getElementById('btn-submit-edit-member');
 
     let originalFile = null;
+    let rawPhotoBase64 = null;
     let imgNaturalW = 0;
     let imgNaturalH = 0;
-    let currentZoom = 1.0;
-    let currentOffsetX = 0;
-    let currentOffsetY = 0;
+    let currentZoom = savedCropZoom || 1.0;
+    let currentOffsetX = savedOffsetX || 0;
+    let currentOffsetY = savedOffsetY || 0;
     const vpSize = 190;
     let isDragging = false;
     let startX = 0;
@@ -627,59 +639,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let startOffsetX = 0;
     let startOffsetY = 0;
     let hasNewCrop = false;
-
-    if (btnTriggerChange && fileInput) {
-        btnTriggerChange.addEventListener('click', () => fileInput.click());
-    }
-
-    if (dropzone && fileInput) {
-        dropzone.addEventListener('click', () => fileInput.click());
-
-        ['dragenter', 'dragover'].forEach(evt => {
-            dropzone.addEventListener(evt, (e) => {
-                e.preventDefault();
-                dropzone.style.borderColor = 'var(--forest)';
-                dropzone.style.backgroundColor = '#eaf3dc';
-            });
-        });
-
-        ['dragleave', 'drop'].forEach(evt => {
-            dropzone.addEventListener(evt, (e) => {
-                e.preventDefault();
-                dropzone.style.borderColor = 'var(--line)';
-                dropzone.style.backgroundColor = 'var(--cream)';
-            });
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            if (dt && dt.files && dt.files.length) {
-                const file = dt.files[0];
-                fileInput.files = dt.files;
-                loadFile(file);
-            }
-        });
-    }
-
-    if (btnChooseDiff && fileInput) {
-        btnChooseDiff.addEventListener('click', () => fileInput.click());
-    }
-
-    if (btnCancelPhoto) {
-        btnCancelPhoto.addEventListener('click', () => {
-            fileInput.value = '';
-            if (base64Input) base64Input.value = '';
-            originalFile = null;
-            hasNewCrop = false;
-            studio.style.display = 'none';
-            if (existingPhotoWrap) {
-                existingPhotoWrap.style.display = 'flex';
-                if (dropzone) dropzone.style.display = 'none';
-            } else if (dropzone) {
-                dropzone.style.display = 'flex';
-            }
-        });
-    }
 
     function getDimensions() {
         const baseScale = Math.max(vpSize / (imgNaturalW || 1), vpSize / (imgNaturalH || 1));
@@ -715,6 +674,57 @@ document.addEventListener('DOMContentLoaded', () => {
         updateImageStyle();
     }
 
+    function loadExistingUrl(url) {
+        if (!url) return;
+        originalFile = null;
+        hasNewCrop = false;
+
+        const applyImage = (src) => {
+            cropImg.onload = () => {
+                imgNaturalW = cropImg.naturalWidth;
+                imgNaturalH = cropImg.naturalHeight;
+                currentZoom = Math.max(1.0, savedCropZoom || 1.0);
+                if (zoomRange) {
+                    zoomRange.value = String(currentZoom);
+                    zoomRange.disabled = false;
+                }
+                if (zoomLabel) zoomLabel.textContent = `${currentZoom.toFixed(1)}x`;
+                if (dropzone) dropzone.style.display = 'none';
+                if (studio) studio.style.display = 'block';
+                if (btnCancelNewFile) btnCancelNewFile.style.display = 'none';
+
+                if (savedOffsetX !== 0 || savedOffsetY !== 0) {
+                    currentOffsetX = savedOffsetX;
+                    currentOffsetY = savedOffsetY;
+                    clampOffsets();
+                    updateImageStyle();
+                } else {
+                    centerImage();
+                }
+            };
+            cropImg.onerror = () => {
+                console.warn('Failed to load existing photo url:', url);
+                if (dropzone) dropzone.style.display = 'flex';
+                if (studio) studio.style.display = 'none';
+            };
+            cropImg.src = src;
+        };
+
+        fetch(url)
+            .then(res => {
+                if (!res.ok) throw new Error('Fetch failed');
+                return res.blob();
+            })
+            .then(blob => {
+                const objectUrl = URL.createObjectURL(blob);
+                applyImage(objectUrl);
+            })
+            .catch(() => {
+                cropImg.crossOrigin = 'anonymous';
+                applyImage(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now());
+            });
+    }
+
     async function loadFile(file) {
         if (!file) return;
         if (file.size > 50 * 1024 * 1024) {
@@ -725,6 +735,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         originalFile = file;
         hasNewCrop = true;
+        if (removePhotoCb) {
+            removePhotoCb.checked = false;
+            if (viewport) viewport.style.opacity = '1';
+            if (zoomRange) zoomRange.disabled = false;
+        }
 
         let displayBlob = file;
         if (/\.(heic|heif)$/i.test(file.name) && window.heic2any) {
@@ -742,29 +757,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
+            rawPhotoBase64 = e.target.result;
             cropImg.onload = () => {
                 imgNaturalW = cropImg.naturalWidth;
                 imgNaturalH = cropImg.naturalHeight;
                 currentZoom = 1.0;
-                if (zoomRange) zoomRange.value = '1';
-                if (zoomLabel) zoomLabel.textContent = '1.0x';
-                if (existingPhotoWrap) existingPhotoWrap.style.display = 'none';
-                if (dropzone) dropzone.style.display = 'none';
-                studio.style.display = 'block';
-                centerImage();
-            };
-            cropImg.onerror = () => {
-                if (existingPhotoWrap) {
-                    existingPhotoWrap.style.display = 'flex';
-                } else if (dropzone) {
-                    dropzone.style.display = 'flex';
+                if (zoomRange) {
+                    zoomRange.value = '1';
+                    zoomRange.disabled = false;
                 }
-                studio.style.display = 'none';
-                hasNewCrop = false;
+                if (zoomLabel) zoomLabel.textContent = '1.0x';
+                if (dropzone) dropzone.style.display = 'none';
+                if (studio) studio.style.display = 'block';
+                if (btnCancelNewFile) btnCancelNewFile.style.display = existingPhotoUrl ? 'inline-flex' : 'none';
+                centerImage();
             };
             cropImg.src = e.target.result;
         };
         reader.readAsDataURL(displayBlob);
+    }
+
+    // Initialize with existing photo if member already has one
+    if (existingPhotoUrl) {
+        loadExistingUrl(existingPhotoUrl);
+    }
+
+    if (btnTriggerChange && fileInput) {
+        btnTriggerChange.addEventListener('click', () => fileInput.click());
+    }
+
+    if (btnCancelNewFile) {
+        btnCancelNewFile.addEventListener('click', () => {
+            fileInput.value = '';
+            if (base64Input) base64Input.value = '';
+            originalFile = null;
+            rawPhotoBase64 = null;
+            hasNewCrop = false;
+            if (existingPhotoUrl) {
+                loadExistingUrl(existingPhotoUrl);
+            } else {
+                if (studio) studio.style.display = 'none';
+                if (dropzone) dropzone.style.display = 'flex';
+            }
+        });
+    }
+
+    if (removePhotoCb) {
+        removePhotoCb.addEventListener('change', function () {
+            if (this.checked) {
+                if (viewport) viewport.style.opacity = '0.35';
+                if (zoomRange) zoomRange.disabled = true;
+                if (btnReset) btnReset.disabled = true;
+                if (btnTriggerChange) btnTriggerChange.disabled = true;
+            } else {
+                if (viewport) viewport.style.opacity = '1';
+                if (zoomRange) zoomRange.disabled = false;
+                if (btnReset) btnReset.disabled = false;
+                if (btnTriggerChange) btnTriggerChange.disabled = false;
+            }
+        });
+    }
+
+    if (dropzone && fileInput) {
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        ['dragenter', 'dragover'].forEach(evt => {
+            dropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--forest)';
+                dropzone.style.backgroundColor = '#eaf3dc';
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(evt => {
+            dropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--line)';
+                dropzone.style.backgroundColor = 'var(--cream)';
+            });
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            if (dt && dt.files && dt.files.length) {
+                const file = dt.files[0];
+                fileInput.files = dt.files;
+                loadFile(file);
+            }
+        });
     }
 
     if (fileInput) {
@@ -777,6 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Drag to Pan
     if (viewport) {
         const onDragStart = (clientX, clientY) => {
+            if (removePhotoCb && removePhotoCb.checked) return;
             isDragging = true;
             startX = clientX;
             startY = clientY;
@@ -788,6 +869,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isDragging) return;
             const deltaX = clientX - startX;
             const deltaY = clientY - startY;
+            if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+                hasNewCrop = true;
+            }
             currentOffsetX = startOffsetX + deltaX;
             currentOffsetY = startOffsetY + deltaY;
             clampOffsets();
@@ -814,6 +898,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zoomRange.addEventListener('input', (e) => {
             currentZoom = parseFloat(e.target.value);
             if (zoomLabel) zoomLabel.textContent = `${currentZoom.toFixed(1)}x`;
+            hasNewCrop = true;
             clampOffsets();
             updateImageStyle();
         });
@@ -825,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (zoomRange) zoomRange.value = '1';
             if (zoomLabel) zoomLabel.textContent = '1.0x';
             centerImage();
+            hasNewCrop = true;
         });
     }
 
@@ -870,15 +956,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
 
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Updating...';
-                submitBtn.style.opacity = '0.7';
-                submitBtn.style.pointerEvents = 'none';
+            // If user checked remove photo, no need to crop
+            if (removePhotoCb && removePhotoCb.checked) {
+                if (base64Input) base64Input.value = '';
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Updating...';
+                    submitBtn.style.opacity = '0.7';
+                }
+                isSubmitting = true;
+                return;
             }
-            isSubmitting = true;
 
             if (hasNewCrop) {
+                e.preventDefault();
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Processing photo...';
+                    submitBtn.style.opacity = '0.7';
+                }
                 try {
                     const blob = await getCroppedBlob();
                     const base64Data = await new Promise((resolve, reject) => {
@@ -890,9 +986,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (base64Input) {
                         base64Input.value = base64Data;
                     }
+                    const rawInput = document.getElementById('edit-raw-photo-base64');
+                    if (rawInput) rawInput.value = rawPhotoBase64 || '';
+                    const zoomInput = document.getElementById('edit-crop-zoom');
+                    if (zoomInput) zoomInput.value = currentZoom.toFixed(2);
+                    const offsetXInput = document.getElementById('edit-crop-offset-x');
+                    if (offsetXInput) offsetXInput.value = Math.round(currentOffsetX);
+                    const offsetYInput = document.getElementById('edit-crop-offset-y');
+                    if (offsetYInput) offsetYInput.value = Math.round(currentOffsetY);
+                    if (fileInput) {
+                        fileInput.value = '';
+                    }
+                    isSubmitting = true;
+                    if (submitBtn) submitBtn.textContent = 'Updating...';
+                    form.submit();
                 } catch (err) {
                     console.warn('Canvas crop fallback, submitting raw file:', err);
+                    isSubmitting = true;
+                    if (submitBtn) submitBtn.textContent = 'Updating...';
+                    form.submit();
                 }
+            } else {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Updating...';
+                    submitBtn.style.opacity = '0.7';
+                }
+                isSubmitting = true;
             }
         });
     }

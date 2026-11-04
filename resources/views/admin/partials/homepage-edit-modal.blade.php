@@ -17,6 +17,7 @@
             @method('PUT')
             <input type="hidden" id="edit-slide-title" name="title" value="">
             <input type="file" id="edit-slide-image-input" name="image" style="display: none;">
+            <input type="hidden" id="edit-slide-image-base64" name="image_base64" value="">
 
             {{-- Photo Viewport & Reposition Studio --}}
             <div class="crop-studio-wrap" style="padding: 14px; border-radius: 16px; margin-bottom: 12px; background: var(--paper); border: 1px solid var(--line);">

@@ -59,7 +59,7 @@
                     {{-- Zoom Slider & Controls --}}
                     <div class="crop-zoom-control-bar" style="display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 300px; margin: 0 auto 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px;">
                         <span id="create-crop-zoom-label" style="font-size: 11.5px; font-weight: 700; color: var(--ink); min-width: 32px;">1.0x</span>
-                        <input type="range" id="create-crop-zoom-range" min="1" max="2.5" step="0.05" value="1" style="flex: 1; accent-color: var(--forest); cursor: pointer; height: 5px;">
+                        <input type="range" id="create-crop-zoom-range" min="1" max="3" step="0.05" value="1" style="flex: 1; accent-color: var(--forest); cursor: pointer; height: 5px;">
                         <button type="button" id="btn-create-crop-reset" class="button button-ghost button-sm" style="padding: 2px 8px; height: 24px; font-size: 11px;">Reset</button>
                     </div>
 
@@ -86,6 +86,30 @@
                     name="photo_base64"
                     id="create-photo-base64"
                     value=""
+                >
+                <input
+                    type="hidden"
+                    name="raw_photo_base64"
+                    id="create-raw-photo-base64"
+                    value=""
+                >
+                <input
+                    type="hidden"
+                    name="crop_zoom"
+                    id="create-crop-zoom"
+                    value="1.0"
+                >
+                <input
+                    type="hidden"
+                    name="crop_offset_x"
+                    id="create-crop-offset-x"
+                    value="0"
+                >
+                <input
+                    type="hidden"
+                    name="crop_offset_y"
+                    id="create-crop-offset-y"
+                    value="0"
                 >
 
                 {{-- Helper Note (Pinned to bottom of left card) --}}
@@ -423,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('btn-submit-create-member');
 
     let originalFile = null;
+    let rawPhotoBase64 = null;
     let imgNaturalW = 0;
     let imgNaturalH = 0;
     let currentZoom = 1.0;
@@ -474,6 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fileInput.value = '';
             if (base64Input) base64Input.value = '';
             originalFile = null;
+            rawPhotoBase64 = null;
             hasNewCrop = false;
             studio.style.display = 'none';
             dropzone.style.display = 'flex';
@@ -541,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
+            rawPhotoBase64 = e.target.result;
             cropImg.onload = () => {
                 imgNaturalW = cropImg.naturalWidth;
                 imgNaturalH = cropImg.naturalHeight;
@@ -658,14 +685,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Form submission interception
+    let isSubmitting = false;
     if (form) {
         form.addEventListener('submit', async (e) => {
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = 'Saving...';
-            }
+            if (isSubmitting) return;
 
-            if (hasNewCrop) {
+            if (hasNewCrop && cropImg && cropImg.src) {
+                e.preventDefault();
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Processing photo...';
+                    submitBtn.style.opacity = '0.7';
+                }
+
                 try {
                     const blob = await getCroppedBlob();
                     const base64Data = await new Promise((resolve, reject) => {
@@ -677,9 +709,47 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (base64Input) {
                         base64Input.value = base64Data;
                     }
+                    const rawInput = document.getElementById('create-raw-photo-base64');
+                    if (rawInput) rawInput.value = rawPhotoBase64 || '';
+                    const zoomInput = document.getElementById('create-crop-zoom');
+                    if (zoomInput) zoomInput.value = currentZoom.toFixed(2);
+                    const offsetXInput = document.getElementById('create-crop-offset-x');
+                    if (offsetXInput) offsetXInput.value = Math.round(currentOffsetX);
+                    const offsetYInput = document.getElementById('create-crop-offset-y');
+                    if (offsetYInput) offsetYInput.value = Math.round(currentOffsetY);
+                    if (fileInput) {
+                        try {
+                            const croppedFile = new File([blob], originalFile ? originalFile.name : 'member_photo.jpg', {
+                                type: blob.type || 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            if (window.DataTransfer) {
+                                const dt = new DataTransfer();
+                                dt.items.add(croppedFile);
+                                fileInput.files = dt.files;
+                            } else {
+                                fileInput.value = '';
+                            }
+                        } catch (_) {
+                            fileInput.value = '';
+                        }
+                    }
+                    isSubmitting = true;
+                    if (submitBtn) submitBtn.textContent = 'Saving...';
+                    form.submit();
                 } catch (err) {
                     console.warn('Canvas crop fallback, submitting raw file:', err);
+                    isSubmitting = true;
+                    if (submitBtn) submitBtn.textContent = 'Saving...';
+                    form.submit();
                 }
+            } else {
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Saving...';
+                    submitBtn.style.opacity = '0.7';
+                }
+                isSubmitting = true;
             }
         });
     }
