@@ -23,13 +23,10 @@
 
         {{-- Actions --}}
         <div style="display: flex; justify-content: center; gap: 12px;">
-            <button type="button" class="button button-ghost button-sm admin-confirm-cancel-btn" style="min-width: 100px;">
-                Cancel
-            </button>
             <form id="admin-confirm-form" method="POST" action="" style="margin: 0; display: inline-block;">
                 @csrf
                 <input type="hidden" name="_method" id="admin-confirm-method" value="DELETE">
-                <button type="submit" class="button button-danger button-sm" id="admin-confirm-submit-btn" style="min-width: 120px;">
+                <button type="submit" class="button button-danger button-sm" id="admin-confirm-submit-btn" style="min-width: 140px;">
                     Confirm Delete
                 </button>
             </form>

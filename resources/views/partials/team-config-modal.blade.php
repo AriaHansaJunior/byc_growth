@@ -42,7 +42,6 @@
 
             {{-- Fixed Footer Pinned at Bottom --}}
             <div class="modal-footer" style="padding: 16px 28px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; background: var(--white);">
-                <button type="button" class="button button-ghost" id="btn-cancel-team-config">Cancel</button>
                 <button type="submit" class="button button-primary" id="btn-save-teams">Save Changes</button>
             </div>
         </form>

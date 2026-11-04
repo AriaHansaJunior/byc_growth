@@ -285,14 +285,16 @@
                     </h3>
                     <small id="proof-viewer-sub" style="color: var(--muted); font-size: 12px;"></small>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-proof-viewer" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                <button type="button" class="icon-button btn-close-modal" data-target="modal-proof-viewer" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                    <x-icon name="x" />
+                </button>
             </div>
             <div style="padding: 20px; text-align: center; background: #000; min-height: 250px; display: flex; align-items: center; justify-content: center;">
                 <a id="proof-viewer-img-link" href="" target="_blank" rel="noopener noreferrer" title="Click to open full size photo in new tab" style="display: inline-block;">
                     <img id="proof-viewer-img" src="" alt="Transfer Proof" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 8px; cursor: pointer;">
                 </a>
             </div>
-            <div class="modal-proof-footer" style="padding: 14px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div class="modal-proof-footer" style="padding: 14px 20px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-start; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     <a id="proof-viewer-link" href="" target="_blank" rel="noopener noreferrer" class="button button-ghost button-sm" style="font-size: 12px;">
                         Open Full Size (New Tab) ↗
@@ -301,9 +303,6 @@
                         Download Full Size Nota 📥
                     </a>
                 </div>
-                <button type="button" class="button button-primary button-sm btn-close-modal" data-target="modal-proof-viewer">
-                    Done
-                </button>
             </div>
         </div>
     </div>
@@ -318,7 +317,9 @@
                     </h3>
                     <small style="color: var(--muted); font-size: 12.5px; display: block; margin-top: 2px;">File an official cash transfer or cash deposit into fellowship records.</small>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-record-tx" aria-label="Close dialog" style="width: 36px; height: 36px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">&times;</button>
+                <button type="button" class="icon-button btn-close-modal" data-target="modal-record-tx" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                    <x-icon name="x" />
+                </button>
             </div>
 
             <form method="POST" action="{{ route('admin.cash.store') }}" enctype="multipart/form-data" id="form-record-tx" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
@@ -443,7 +444,9 @@
                         Edit Cash Transaction
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-edit-tx" aria-label="Close dialog" style="width: 36px; height: 36px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 22px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">&times;</button>
+                <button type="button" class="icon-button btn-close-modal" data-target="modal-edit-tx" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                    <x-icon name="x" />
+                </button>
             </div>
             <form id="form-edit-tx" method="POST" action="" enctype="multipart/form-data" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
                 @csrf
@@ -488,9 +491,6 @@
                 </div>
 
                 <div class="cash-modal-footer" style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-tx">
-                        Cancel
-                    </button>
                     <button type="submit" class="button button-primary button-sm" style="min-width: 120px;">
                         Save Changes
                     </button>

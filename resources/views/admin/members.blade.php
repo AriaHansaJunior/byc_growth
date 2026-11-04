@@ -817,6 +817,26 @@ document.addEventListener('DOMContentLoaded', function () {
             select.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
+        function fitDropdownToViewport() {
+            if (menu.style.display === 'none' || !optionsList) return;
+            const rect = trigger.getBoundingClientRect();
+            const vh = window.innerHeight || document.documentElement.clientHeight;
+            const spaceBelow = vh - rect.bottom - 16;
+            const spaceAbove = rect.top - 84;
+
+            if (spaceBelow < 185 && spaceAbove > spaceBelow) {
+                menu.style.top = 'auto';
+                menu.style.bottom = 'calc(100% + 6px)';
+                const cappedH = Math.max(105, Math.min(176, spaceAbove - 58));
+                optionsList.style.maxHeight = `${cappedH}px`;
+            } else {
+                menu.style.bottom = 'auto';
+                menu.style.top = 'calc(100% + 6px)';
+                const cappedH = Math.max(105, Math.min(176, spaceBelow - 58));
+                optionsList.style.maxHeight = `${cappedH}px`;
+            }
+        }
+
         function open() {
             document.querySelectorAll('.byc-select-dropdown').forEach(d => {
                 if (d !== menu) d.style.display = 'none';
@@ -830,16 +850,15 @@ document.addEventListener('DOMContentLoaded', function () {
             trigger.style.borderColor = 'var(--forest)';
             trigger.style.boxShadow = '0 0 0 3px rgba(33, 77, 51, 0.15)';
             if (chevron) chevron.style.transform = 'rotate(180deg)';
+
+            fitDropdownToViewport();
+
             if (searchInput) {
                 searchInput.value = '';
                 filterOptions('');
-                setTimeout(() => searchInput.focus(), 50);
-            }
-
-            if (window.innerWidth <= 640) {
-                setTimeout(() => {
-                    trigger.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
+                if (window.innerWidth > 768 && !window.matchMedia('(pointer: coarse)').matches) {
+                    setTimeout(() => searchInput.focus({ preventScroll: true }), 50);
+                }
             }
         }
 
@@ -1192,6 +1211,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.btn-close-modal').forEach(btn => {
         btn.addEventListener('click', closeAllModals);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            if (modalQuickUser && modalQuickUser.style.display !== 'none') {
+                closeQuickCreateUser();
+                return;
+            }
+            if ((addModal && addModal.style.display !== 'none') || (editModal && editModal.style.display !== 'none')) {
+                closeAllModals();
+            }
+        }
     });
 
     // Batch Delete Members Selection & Confirmation

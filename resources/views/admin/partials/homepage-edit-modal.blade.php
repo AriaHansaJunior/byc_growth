@@ -48,7 +48,6 @@
 
             {{-- Modal Action Buttons --}}
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px;">
-                <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
                 <button type="submit" class="button button-primary button-sm" id="btn-submit-edit-slide">
                     Save Changes
                 </button>

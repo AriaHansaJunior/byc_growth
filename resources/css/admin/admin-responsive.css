@@ -619,7 +619,9 @@
 
   .admin-modal-card:has(form),
   #modal-add-user .admin-modal-card,
-  #modal-edit-user .admin-modal-card {
+  #modal-edit-user .admin-modal-card,
+  #modal-view-wish .admin-modal-card,
+  #modal-proof-viewer .admin-modal-card {
     padding: 0 !important;
   }
 
@@ -770,4 +772,40 @@
     flex: 1 !important;
     justify-content: center !important;
   }
+
+  /* Searchable Select Mobile Clamping */
+  .byc-searchable-select,
+  .byc-select-trigger,
+  .byc-select-dropdown {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .byc-select-search-input {
+    font-size: 16px !important;
+  }
+
+  .byc-select-options-list {
+    max-height: 165px !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+}
+
+/* Global Searchable Select Scrollbar & Overflow Styling */
+.byc-select-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.byc-select-options-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.byc-select-options-list::-webkit-scrollbar-thumb {
+  background: rgba(33, 77, 51, 0.22);
+  border-radius: 999px;
+}
+
+.byc-select-options-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(33, 77, 51, 0.4);
 }

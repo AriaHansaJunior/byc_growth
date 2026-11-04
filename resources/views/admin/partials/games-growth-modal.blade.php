@@ -52,9 +52,6 @@
 
             {{-- Fixed Footer --}}
             <div class="modal-footer" style="padding: 16px 28px 20px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; background: var(--white);">
-                <button type="button" class="button button-ghost" id="btn-cancel-growth-modal">
-                    Cancel
-                </button>
                 <button type="submit" class="button button-primary" id="btn-submit-growth-modal">
                     Save Question
                 </button>

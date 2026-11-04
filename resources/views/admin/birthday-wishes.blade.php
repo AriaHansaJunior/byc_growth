@@ -257,7 +257,9 @@
                         Birthday Wish Details
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-view-wish" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                <button type="button" class="icon-button btn-close-modal" data-target="modal-view-wish" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                    <x-icon name="x" />
+                </button>
             </div>
             <div style="padding: 24px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
@@ -287,11 +289,8 @@
                     <div id="view-message" style="background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 16px; font-size: 14px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; max-height: 220px; overflow-y: auto;"></div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; justify-content: flex-start; align-items: center;">
                     <small id="view-date" style="color: var(--muted); font-size: 12px;"></small>
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-view-wish">
-                        Close
-                    </button>
                 </div>
             </div>
         </div>
@@ -310,7 +309,9 @@
                             Edit Birthday Wish
                         </h3>
                     </div>
-                    <button type="button" class="btn-close-modal" data-target="modal-edit-wish" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--muted); line-height: 1;">&times;</button>
+                    <button type="button" class="icon-button btn-close-modal" data-target="modal-edit-wish" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                        <x-icon name="x" />
+                    </button>
                 </div>
                 <div style="padding: 24px;">
                     <div style="margin-bottom: 16px;">
@@ -345,9 +346,6 @@
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-wish">
-                            Cancel
-                        </button>
                         <button type="submit" class="button button-primary button-sm" style="min-width: 120px;">
                             Save Changes
                         </button>

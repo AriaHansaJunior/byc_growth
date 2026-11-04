@@ -383,6 +383,17 @@ export function initGrowth100() {
         btnCloseScoreboard.addEventListener('click', closeScoreboard);
     }
 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (modalScoreboard && modalScoreboard.style.display === 'flex') {
+                closeScoreboard();
+            }
+            if (modalEditor && modalEditor.style.display !== 'none' && modalEditor.style.display !== '') {
+                closeModal();
+            }
+        }
+    });
+
     // ==========================================
     // CRUD Editor Modal Logic with Batch Save
     // ==========================================

@@ -7,7 +7,9 @@
                 <span class="eyebrow" style="color: var(--forest); font-size: 11px; display: block; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Community Directory</span>
                 <h3 id="modal-add-member-title" style="font: 800 20px 'Manrope', sans-serif; color: var(--ink); margin: 2px 0 0;">Add New Member</h3>
             </div>
-            <button type="button" class="btn-close-modal" id="btn-close-add-member" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
+            <button type="button" class="icon-button btn-close-modal" id="btn-close-add-member" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         {{-- Form --}}

@@ -129,6 +129,8 @@
   border: 1px solid var(--line);
   border-radius: 50%;
   background: var(--white);
+  color: var(--ink);
+  flex-shrink: 0;
   cursor: pointer;
   transition: transform .2s ease, background .2s ease;
 }

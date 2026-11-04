@@ -131,10 +131,13 @@
 {{-- Edit Wish Modal Dialog --}}
 <div class="game-modal-overlay" id="modal-edit-sent-wish" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(32, 48, 41, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
     <div class="game-modal" style="max-width: 500px; width: 92%; background: var(--white); border: 2px solid var(--gold); border-radius: 24px; padding: 32px 28px; box-shadow: 0 24px 60px rgba(32, 48, 41, 0.35); text-align: left; position: relative;">
-        <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px;">
-            <h3 id="edit-modal-title" style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 20px; color: var(--ink);">
+        <div style="border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <h3 id="edit-modal-title" style="margin: 0; font-family: 'Manrope', sans-serif; font-size: 20px; color: var(--ink); min-width: 0; flex: 1;">
                 Edit Birthday Greeting
             </h3>
+            <button type="button" id="btn-close-edit-sent" class="icon-button" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         <form id="form-edit-sent-wish">
@@ -167,9 +170,6 @@
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                <button type="button" id="btn-cancel-edit-sent" class="button button-ghost button-sm">
-                    Cancel
-                </button>
                 <button type="submit" id="btn-save-edit-sent" class="button button-primary">
                     Update Message
                 </button>
@@ -199,6 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (closeBtn) closeBtn.addEventListener('click', hideModal);
     if (cancelBtn) cancelBtn.addEventListener('click', hideModal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && editModal && editModal.style.display !== 'none') {
+            hideModal();
+        }
+    });
 
     document.querySelectorAll('.btn-open-edit-sent-wish').forEach(btn => {
         btn.addEventListener('click', () => {

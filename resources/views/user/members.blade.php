@@ -225,7 +225,9 @@
     <div class="game-modal" style="max-width: 500px; width: 90%;">
         <div class="game-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px;">
             <h3 style="margin: 0; font-family: 'Manrope', sans-serif;">Add New Member</h3>
-            <button type="button" class="btn-close-modal" id="btn-close-add-member" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
+            <button type="button" class="icon-button btn-close-modal" id="btn-close-add-member" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         <form method="POST" action="{{ route('admin.members.store') }}" enctype="multipart/form-data" novalidate id="form-user-add-member">
@@ -299,7 +301,9 @@
     <div class="game-modal" style="max-width: 500px; width: 90%;">
         <div class="game-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px;">
             <h3 style="margin: 0; font-family: 'Manrope', sans-serif;">Edit Member</h3>
-            <button type="button" class="btn-close-modal" id="btn-close-edit-member" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
+            <button type="button" class="icon-button btn-close-modal" id="btn-close-edit-member" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         <form method="POST" id="form-edit-member" action="" enctype="multipart/form-data" novalidate>
@@ -520,6 +524,19 @@ document.addEventListener('DOMContentLoaded', () => {
             editModal.style.display = 'none';
         });
     }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (addModal && addModal.style.display !== 'none') {
+                clearAllErrors(formAdd);
+                addModal.style.display = 'none';
+            }
+            if (editModal && editModal.style.display !== 'none') {
+                clearAllErrors(formEdit);
+                editModal.style.display = 'none';
+            }
+        }
+    });
 
     document.querySelectorAll('.btn-edit-member').forEach(btn => {
         btn.addEventListener('click', () => {

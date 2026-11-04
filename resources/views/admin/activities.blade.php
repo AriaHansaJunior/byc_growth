@@ -223,7 +223,6 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--line);">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
                     <button type="submit" class="button button-primary button-sm" id="btn-submit-add-activity">
                         Save Activity
                     </button>
@@ -301,7 +300,6 @@
                 </div>
 
                 <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 10px; border-top: 1px solid var(--line);">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal">Cancel</button>
                     <button type="submit" class="button button-primary button-sm" id="btn-submit-edit-activity">
                         Update Activity
                     </button>
@@ -659,6 +657,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.btn-close-modal').forEach(btn => {
         btn.addEventListener('click', closeAllModals);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            if ((addModal && addModal.style.display !== 'none') || (editModal && editModal.style.display !== 'none')) {
+                closeAllModals();
+            }
+        }
     });
 
     // Batch Delete Activities Selection & Confirmation

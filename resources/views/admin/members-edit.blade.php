@@ -302,23 +302,72 @@
 
                         {{-- Block B: Switch to Different Account --}}
                         <div id="block-link-diff-account" style="display: none;">
-                            <label for="edit-diff-user-id" class="form-label" style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 6px;">
+                            <label for="btn-trigger-edit-diff-user" class="form-label" style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 6px;">
                                 Select Existing Account
                             </label>
-                            <select
-                                name="user_id"
-                                id="edit-diff-user-id"
-                                class="form-input"
-                                style="width: 100%; height: 44px; padding: 8px 14px; font-size: 14px; border-radius: 10px; box-sizing: border-box; background: var(--white);"
-                            >
-                                <option value="">-- Choose Account to Link --</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ old('user_id', $member->user->id) == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name ?: $user->username }} ({{ $user->email }})
-                                        @if($user->member && $user->member->id !== $member->id) [Currently linked: {{ $user->member->full_name }}] @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="byc-searchable-select" id="searchable-edit-diff-user" style="position: relative; width: 100%; max-width: 100%;">
+                                <select
+                                    name="user_id"
+                                    id="edit-diff-user-id"
+                                    tabindex="-1"
+                                    aria-hidden="true"
+                                    style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; margin: -1px; clip: rect(0,0,0,0); overflow: hidden;"
+                                >
+                                    <option value="">-- Choose Account to Link --</option>
+                                    @foreach($users as $user)
+                                        <option
+                                            value="{{ $user->id }}"
+                                            data-name="{{ $user->name ?: $user->username }}"
+                                            data-username="{{ $user->username }}"
+                                            data-email="{{ $user->email }}"
+                                            data-linked-member="{{ ($user->member && $user->member->id !== $member->id) ? $user->member->full_name : '' }}"
+                                            {{ old('user_id', $member->user->id) == $user->id ? 'selected' : '' }}
+                                        >
+                                            {{ $user->name ?: $user->username }} ({{ $user->email }})@if($user->member && $user->member->id !== $member->id) [Currently linked: {{ $user->member->full_name }}]@endif
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                <button
+                                    type="button"
+                                    class="byc-select-trigger"
+                                    id="btn-trigger-edit-diff-user"
+                                    aria-haspopup="listbox"
+                                    aria-expanded="false"
+                                    style="width: 100%; max-width: 100%; height: 44px; min-height: 44px; padding: 8px 14px; font-size: 14px; line-height: 1.4; border-radius: 10px; border: 1px solid var(--line); background: var(--white); color: var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; text-align: left; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box; overflow: hidden;"
+                                >
+                                    <span class="byc-select-trigger-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; color: var(--muted);">
+                                        -- Choose Account to Link --
+                                    </span>
+                                    <svg class="byc-select-chevron" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted); flex-shrink: 0; transition: transform 0.2s ease;">
+                                        <path d="M6 8l4 4 4-4"/>
+                                    </svg>
+                                </button>
+
+                                <div
+                                    class="byc-select-dropdown"
+                                    id="dropdown-menu-edit-diff-user"
+                                    role="listbox"
+                                    style="display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; width: 100%; max-width: 100%; background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 34px rgba(18, 30, 23, 0.16); z-index: 1060; padding: 8px; box-sizing: border-box; flex-direction: column; overflow: hidden;"
+                                >
+                                    <div style="position: relative; margin-bottom: 6px; flex-shrink: 0;">
+                                        <input
+                                            type="text"
+                                            class="byc-select-search-input"
+                                            placeholder="Search by name, username, or email..."
+                                            autocomplete="off"
+                                            style="width: 100%; height: 38px; padding: 6px 12px 6px 34px; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; background: var(--cream); color: var(--ink); box-sizing: border-box; outline: none; font-family: inherit;"
+                                        >
+                                        <svg style="position: absolute; left: 11px; top: 12px; color: var(--muted); pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="byc-select-options-list" style="max-height: 176px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 2px;">
+                                        {{-- Dynamically populated --}}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {{-- Block C: Unlink Warning --}}
@@ -416,23 +465,72 @@
 
                         {{-- Block: Link Existing User Account --}}
                         <div id="block-link-account-edit" style="display: none;">
-                            <label for="edit-existing-user-id" class="form-label" style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 6px;">
+                            <label for="btn-trigger-edit-existing-user" class="form-label" style="display: block; font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 6px;">
                                 Select Existing User Account
                             </label>
-                            <select
-                                name="user_id"
-                                id="edit-existing-user-id"
-                                class="form-input"
-                                style="width: 100%; height: 44px; padding: 8px 14px; font-size: 14px; border-radius: 10px; box-sizing: border-box; background: var(--white);"
-                            >
-                                <option value="">-- Choose Account to Link --</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name ?: $user->username }} ({{ $user->email }})
-                                        @if($user->member) [Currently linked: {{ $user->member->full_name }}] @endif
-                                    </option>
-                                @endforeach
-                            </select>
+                            <div class="byc-searchable-select" id="searchable-edit-existing-user" style="position: relative; width: 100%; max-width: 100%;">
+                                <select
+                                    name="user_id"
+                                    id="edit-existing-user-id"
+                                    tabindex="-1"
+                                    aria-hidden="true"
+                                    style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; margin: -1px; clip: rect(0,0,0,0); overflow: hidden;"
+                                >
+                                    <option value="">-- Choose Account to Link --</option>
+                                    @foreach($users as $user)
+                                        <option
+                                            value="{{ $user->id }}"
+                                            data-name="{{ $user->name ?: $user->username }}"
+                                            data-username="{{ $user->username }}"
+                                            data-email="{{ $user->email }}"
+                                            data-linked-member="{{ $user->member ? $user->member->full_name : '' }}"
+                                            {{ old('user_id') == $user->id ? 'selected' : '' }}
+                                        >
+                                            {{ $user->name ?: $user->username }} ({{ $user->email }})@if($user->member) [Currently linked: {{ $user->member->full_name }}]@endif
+                                        </option>
+                                    @endforeach
+                                </select>
+
+                                <button
+                                    type="button"
+                                    class="byc-select-trigger"
+                                    id="btn-trigger-edit-existing-user"
+                                    aria-haspopup="listbox"
+                                    aria-expanded="false"
+                                    style="width: 100%; max-width: 100%; height: 44px; min-height: 44px; padding: 8px 14px; font-size: 14px; line-height: 1.4; border-radius: 10px; border: 1px solid var(--line); background: var(--white); color: var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; text-align: left; font-family: inherit; transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box; overflow: hidden;"
+                                >
+                                    <span class="byc-select-trigger-text" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; color: var(--muted);">
+                                        -- Choose Account to Link --
+                                    </span>
+                                    <svg class="byc-select-chevron" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--muted); flex-shrink: 0; transition: transform 0.2s ease;">
+                                        <path d="M6 8l4 4 4-4"/>
+                                    </svg>
+                                </button>
+
+                                <div
+                                    class="byc-select-dropdown"
+                                    id="dropdown-menu-edit-existing-user"
+                                    role="listbox"
+                                    style="display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; width: 100%; max-width: 100%; background: var(--white); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 34px rgba(18, 30, 23, 0.16); z-index: 1060; padding: 8px; box-sizing: border-box; flex-direction: column; overflow: hidden;"
+                                >
+                                    <div style="position: relative; margin-bottom: 6px; flex-shrink: 0;">
+                                        <input
+                                            type="text"
+                                            class="byc-select-search-input"
+                                            placeholder="Search by name, username, or email..."
+                                            autocomplete="off"
+                                            style="width: 100%; height: 38px; padding: 6px 12px 6px 34px; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; background: var(--cream); color: var(--ink); box-sizing: border-box; outline: none; font-family: inherit;"
+                                        >
+                                        <svg style="position: absolute; left: 11px; top: 12px; color: var(--muted); pointer-events: none;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="11" cy="11" r="8"></circle>
+                                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="byc-select-options-list" style="max-height: 176px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 2px;">
+                                        {{-- Dynamically populated --}}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -528,25 +626,250 @@
 <script src="{{ asset('assets/js/heic2any.min.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Password Visibility Toggle
-    document.querySelectorAll('.btn-toggle-password').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-target');
-            const input = document.getElementById(targetId);
-            if (!input) return;
-            const eyeIcon = btn.querySelector('.icon-eye');
-            const eyeOffIcon = btn.querySelector('.icon-eye-off');
-            if (input.type === 'password') {
-                input.type = 'text';
-                if (eyeIcon) eyeIcon.style.display = 'none';
-                if (eyeOffIcon) eyeOffIcon.style.display = 'inline';
-            } else {
-                input.type = 'password';
-                if (eyeIcon) eyeIcon.style.display = 'inline';
-                if (eyeOffIcon) eyeOffIcon.style.display = 'none';
+    // 1. Searchable Account Select Controller (with Viewport Height & Width Clamping)
+    function initSearchableAccountSelect(selectId, wrapperId, triggerId, menuId) {
+        const select = document.getElementById(selectId);
+        const wrapper = document.getElementById(wrapperId);
+        const trigger = document.getElementById(triggerId);
+        const menu = document.getElementById(menuId);
+        if (!select || !wrapper || !trigger || !menu) return null;
+
+        const triggerText = trigger.querySelector('.byc-select-trigger-text');
+        const chevron = trigger.querySelector('.byc-select-chevron');
+        const searchInput = menu.querySelector('.byc-select-search-input');
+        const optionsList = menu.querySelector('.byc-select-options-list');
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function buildOptions() {
+            if (!optionsList) return;
+            optionsList.innerHTML = '';
+            const options = Array.from(select.querySelectorAll('option'));
+
+            options.forEach(opt => {
+                const val = opt.value;
+                const text = opt.textContent.trim();
+                const name = opt.getAttribute('data-name') || '';
+                const username = opt.getAttribute('data-username') || '';
+                const email = opt.getAttribute('data-email') || '';
+                const linkedMember = opt.getAttribute('data-linked-member') || '';
+                const isSelected = String(select.value) === String(val);
+
+                const optItem = document.createElement('div');
+                optItem.className = 'byc-select-option' + (isSelected ? ' selected' : '');
+                optItem.setAttribute('data-value', val);
+                optItem.setAttribute('data-search', `${name} ${username} ${email} ${linkedMember} ${text}`.toLowerCase());
+                optItem.setAttribute('title', text);
+                optItem.style.cssText = 'padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink); user-select: none; transition: background 0.12s; max-width: 100%; box-sizing: border-box; overflow: hidden;';
+
+                if (!val) {
+                    optItem.innerHTML = `
+                        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; color: var(--muted); font-style: italic;">
+                            ${escapeHtml(text)}
+                        </span>
+                        <span class="byc-select-check" style="color: var(--forest); font-weight: 800; font-size: 13px; flex-shrink: 0; ${isSelected ? '' : 'display: none;'}">✓</span>
+                    `;
+                } else {
+                    optItem.innerHTML = `
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0;">
+                            <span style="font-weight: 700; color: var(--ink);">${escapeHtml(name || username || email)}</span>
+                            <span style="color: var(--muted); font-size: 12.5px; margin-left: 4px;">(${escapeHtml(email)})</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                            ${linkedMember ? `<span style="max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; font-weight: 700; color: var(--forest); background: rgba(33, 77, 51, 0.09); padding: 2px 7px; border-radius: 6px;">Linked: ${escapeHtml(linkedMember)}</span>` : ''}
+                            <span class="byc-select-check" style="color: var(--forest); font-weight: 800; font-size: 13px; ${isSelected ? '' : 'display: none;'}">✓</span>
+                        </div>
+                    `;
+                }
+
+                optItem.addEventListener('mouseenter', () => {
+                    optItem.style.background = 'var(--cream)';
+                });
+                optItem.addEventListener('mouseleave', () => {
+                    optItem.style.background = optItem.classList.contains('selected') ? 'rgba(33, 77, 51, 0.08)' : 'transparent';
+                });
+
+                if (isSelected) {
+                    optItem.style.background = 'rgba(33, 77, 51, 0.08)';
+                }
+
+                optItem.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setValue(val);
+                    close();
+                });
+
+                optionsList.appendChild(optItem);
+            });
+
+            updateTrigger();
+        }
+
+        function updateTrigger() {
+            const selectedOpt = select.options[select.selectedIndex];
+            const text = selectedOpt ? selectedOpt.textContent.replace(/\s+/g, ' ').trim() : '-- Choose Account to Link --';
+            if (triggerText) {
+                triggerText.textContent = text;
+                triggerText.setAttribute('title', text);
+                if (!select.value) {
+                    triggerText.style.color = 'var(--muted)';
+                } else {
+                    triggerText.style.color = 'var(--ink)';
+                }
             }
+        }
+
+        function setValue(val) {
+            select.value = val;
+            updateTrigger();
+            if (optionsList) {
+                optionsList.querySelectorAll('.byc-select-option').forEach(el => {
+                    const isMatch = el.getAttribute('data-value') === String(val);
+                    el.classList.toggle('selected', isMatch);
+                    el.style.background = isMatch ? 'rgba(33, 77, 51, 0.08)' : 'transparent';
+                    const check = el.querySelector('.byc-select-check');
+                    if (check) check.style.display = isMatch ? 'inline' : 'none';
+                });
+            }
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        function fitDropdownToViewport() {
+            if (menu.style.display === 'none' || !optionsList) return;
+            const rect = trigger.getBoundingClientRect();
+            const vh = window.innerHeight || document.documentElement.clientHeight;
+            const spaceBelow = vh - rect.bottom - 16;
+            const spaceAbove = rect.top - 84;
+
+            if (spaceBelow < 185 && spaceAbove > spaceBelow) {
+                menu.style.top = 'auto';
+                menu.style.bottom = 'calc(100% + 6px)';
+                const cappedH = Math.max(105, Math.min(176, spaceAbove - 58));
+                optionsList.style.maxHeight = `${cappedH}px`;
+            } else {
+                menu.style.bottom = 'auto';
+                menu.style.top = 'calc(100% + 6px)';
+                const cappedH = Math.max(105, Math.min(176, spaceBelow - 58));
+                optionsList.style.maxHeight = `${cappedH}px`;
+            }
+        }
+
+        function open() {
+            menu.style.display = 'flex';
+            trigger.setAttribute('aria-expanded', 'true');
+            trigger.style.borderColor = 'var(--forest)';
+            trigger.style.boxShadow = '0 0 0 3px rgba(33, 77, 51, 0.14)';
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+
+            fitDropdownToViewport();
+
+            if (searchInput) {
+                searchInput.value = '';
+                filterOptions('');
+                if (window.innerWidth > 768 && !window.matchMedia('(pointer: coarse)').matches) {
+                    setTimeout(() => searchInput.focus({ preventScroll: true }), 30);
+                }
+            }
+        }
+
+        function close() {
+            menu.style.display = 'none';
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.style.borderColor = 'var(--line)';
+            trigger.style.boxShadow = 'none';
+            if (chevron) chevron.style.transform = 'none';
+        }
+
+        function filterOptions(query) {
+            if (!optionsList) return;
+            const q = (query || '').toLowerCase().trim();
+            const items = optionsList.querySelectorAll('.byc-select-option');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const val = item.getAttribute('data-value');
+                if (!val && !q) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                    return;
+                }
+                const searchData = item.getAttribute('data-search') || '';
+                if (!q || searchData.includes(q)) {
+                    item.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            let noResultEl = optionsList.querySelector('.byc-select-no-results');
+            if (visibleCount === 0) {
+                if (!noResultEl) {
+                    noResultEl = document.createElement('div');
+                    noResultEl.className = 'byc-select-no-results';
+                    noResultEl.style.cssText = 'padding: 14px 10px; text-align: center; color: var(--muted); font-size: 12.5px;';
+                    optionsList.appendChild(noResultEl);
+                }
+                noResultEl.textContent = `No accounts found matching "${query}"`;
+                noResultEl.style.display = 'block';
+            } else if (noResultEl) {
+                noResultEl.style.display = 'none';
+            }
+        }
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (menu.style.display === 'flex') close();
+            else open();
         });
-    });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => filterOptions(e.target.value));
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    close();
+                    trigger.focus();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const firstVisible = optionsList.querySelector('.byc-select-option[style*="display: flex"][data-value]:not([data-value=""])');
+                    if (firstVisible) {
+                        setValue(firstVisible.getAttribute('data-value'));
+                        close();
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) close();
+        });
+
+        window.addEventListener('resize', fitDropdownToViewport, { passive: true });
+        window.addEventListener('scroll', fitDropdownToViewport, { passive: true });
+
+        buildOptions();
+        return { setValue, close, updateTrigger };
+    }
+
+    const editDiffSelectCtrl = initSearchableAccountSelect(
+        'edit-diff-user-id',
+        'searchable-edit-diff-user',
+        'btn-trigger-edit-diff-user',
+        'dropdown-menu-edit-diff-user'
+    );
+
+    const editExistingSelectCtrl = initSearchableAccountSelect(
+        'edit-existing-user-id',
+        'searchable-edit-existing-user',
+        'btn-trigger-edit-existing-user',
+        'dropdown-menu-edit-existing-user'
+    );
 
     // 2. Account Mode Switcher
     const modeEditCurrent = document.getElementById('mode-edit-current');
@@ -563,6 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (blockEditCurrent) blockEditCurrent.style.display = 'flex';
             if (blockLinkDiff) blockLinkDiff.style.display = 'none';
             if (blockUnlink) blockUnlink.style.display = 'none';
+            if (editDiffSelectCtrl) editDiffSelectCtrl.close();
             if (editUserEmail) editUserEmail.setAttribute('required', 'required');
         } else if (modeLinkDiff && modeLinkDiff.checked) {
             if (blockEditCurrent) blockEditCurrent.style.display = 'none';
@@ -573,6 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (blockEditCurrent) blockEditCurrent.style.display = 'none';
             if (blockLinkDiff) blockLinkDiff.style.display = 'none';
             if (blockUnlink) blockUnlink.style.display = 'block';
+            if (editDiffSelectCtrl) editDiffSelectCtrl.close();
             if (editUserEmail) editUserEmail.removeAttribute('required');
         }
     }
@@ -597,6 +922,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (blockCreateNew) blockCreateNew.style.display = 'flex';
             if (blockLinkExisting) blockLinkExisting.style.display = 'none';
+            if (editExistingSelectCtrl) {
+                editExistingSelectCtrl.setValue('');
+                editExistingSelectCtrl.close();
+            }
             if (newUserEmailEdit) newUserEmailEdit.setAttribute('required', 'required');
         }
     }

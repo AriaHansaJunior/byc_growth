@@ -298,7 +298,9 @@
                         Create New User Account
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-add-user" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
+                <button type="button" class="icon-button btn-close-modal" data-target="modal-add-user" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                    <x-icon name="x" />
+                </button>
             </div>
 
             <form method="POST" action="{{ route('admin.roles.store') }}" id="form-add-user" autocomplete="off" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
@@ -406,9 +408,6 @@
                 </div>
 
                 <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-add-user" style="padding: 6px 16px; font-size: 13px; font-weight: 600;">
-                        Cancel
-                    </button>
                     <button type="submit" class="button button-primary button-sm" style="min-width: 130px; padding: 6px 18px; font-size: 13px; font-weight: 700;">
                         Create Account
                     </button>
@@ -426,7 +425,9 @@
                         Edit User Account
                     </h3>
                 </div>
-                <button type="button" class="btn-close-modal" data-target="modal-edit-user" aria-label="Close dialog" style="width: 32px; height: 32px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 18px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
+                <button type="button" class="icon-button btn-close-modal" data-target="modal-edit-user" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                    <x-icon name="x" />
+                </button>
             </div>
 
             <form method="POST" id="form-edit-user" action="" autocomplete="off" novalidate style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1; min-height: 0;">
@@ -534,9 +535,6 @@
                 </div>
 
                 <div style="padding: 14px 24px; background: var(--paper); border-top: 1px solid var(--line); display: flex; justify-content: flex-end; align-items: center; gap: 10px; flex-shrink: 0;">
-                    <button type="button" class="button button-ghost button-sm btn-close-modal" data-target="modal-edit-user" style="padding: 6px 16px; font-size: 13px; font-weight: 600;">
-                        Cancel
-                    </button>
                     <button type="submit" class="button button-primary button-sm" style="min-width: 130px; padding: 6px 18px; font-size: 13px; font-weight: 700;">
                         Save Changes
                     </button>
@@ -867,16 +865,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     resetAddUserForm();
                 }
                 closeModal(document.getElementById(targetId));
-            }
-        });
-    });
-
-    [addModal, editModal].forEach(function (m) {
-        if (!m) return;
-        m.addEventListener('click', function (e) {
-            if (e.target === m) {
-                if (m === addModal) resetAddUserForm();
-                closeModal(m);
             }
         });
     });

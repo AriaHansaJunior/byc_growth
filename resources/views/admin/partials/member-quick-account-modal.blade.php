@@ -12,7 +12,9 @@
                     <small style="color: var(--muted); font-size: 11px;">Create account and immediately link to this member</small>
                 </div>
             </div>
-            <button type="button" class="btn-close-quick-user" aria-label="Close dialog" style="width: 30px; height: 30px; border-radius: 50%; background: var(--white); border: 1px solid var(--line); display: grid; place-items: center; font-size: 16px; font-weight: 700; color: var(--muted); cursor: pointer; flex-shrink: 0; line-height: 1;">&times;</button>
+            <button type="button" class="icon-button btn-close-quick-user" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         {{-- Form Body --}}

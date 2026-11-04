@@ -74,7 +74,7 @@ class MemberController extends Controller
         }
 
         $members = $query->get();
-        $users = User::where('role', 'user')->orderBy('username')->get();
+        $users = User::with('member')->where('role', 'user')->orderBy('name')->orderBy('username')->get();
 
         return view('admin.members', [
             'members' => $members,
@@ -95,7 +95,7 @@ class MemberController extends Controller
      */
     public function create(): \Illuminate\View\View
     {
-        $users = User::where('role', 'user')->orderBy('username')->get();
+        $users = User::with('member')->where('role', 'user')->orderBy('name')->orderBy('username')->get();
 
         return view('admin.members-create', [
             'users' => $users,
@@ -108,7 +108,7 @@ class MemberController extends Controller
     public function edit(int $id): \Illuminate\View\View
     {
         $member = Member::with(['photo', 'memberPhoto', 'user'])->findOrFail($id);
-        $users = User::where('role', 'user')->orderBy('username')->get();
+        $users = User::with('member')->where('role', 'user')->orderBy('name')->orderBy('username')->get();
 
         return view('admin.members-edit', [
             'member' => $member,

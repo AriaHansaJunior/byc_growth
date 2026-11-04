@@ -326,18 +326,18 @@
 
 {{-- Save Changes Confirmation Modal --}}
 <div class="game-modal-overlay" id="modal-confirm-profile" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-profile-title" style="display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(32, 48, 41, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center; padding: 20px;">
-    <div class="game-modal" style="max-width: 440px; width: 92%; background: var(--white); border: 2px solid var(--forest); border-radius: 22px; padding: 30px 26px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.25);">
-        <h3 id="modal-confirm-profile-title" style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 800; color: var(--ink); margin: 0 0 10px;">
+    <div class="game-modal" style="max-width: 440px; width: 92%; background: var(--white); border: 2px solid var(--forest); border-radius: 22px; padding: 32px 26px 28px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;">
+        <button type="button" id="btn-cancel-modal" class="icon-button" aria-label="Close dialog" style="position: absolute; top: 12px; right: 12px; width: 34px; height: 34px;">
+            <x-icon name="x" />
+        </button>
+        <h3 id="modal-confirm-profile-title" style="font-family: 'Manrope', sans-serif; font-size: 19px; font-weight: 800; color: var(--ink); margin: 0 0 10px; padding: 0 36px;">
             Confirm Profile Changes
         </h3>
         <p style="color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0 0 24px;">
             Are you sure you want to save these changes to your profile?
         </p>
         <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-            <button type="button" id="btn-cancel-modal" class="button button-secondary" style="padding: 10px 20px;">
-                Cancel
-            </button>
-            <button type="button" id="btn-confirm-save" class="button button-primary" style="padding: 10px 24px;">
+            <button type="button" id="btn-confirm-save" class="button button-primary" style="padding: 10px 28px;">
                 Confirm Changes
             </button>
         </div>
@@ -686,6 +686,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmModal.style.display = 'none';
             });
         }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && confirmModal.style.display !== 'none') {
+                confirmModal.style.display = 'none';
+            }
+        });
 
         if (confirmSaveBtn) {
             confirmSaveBtn.addEventListener('click', async () => {

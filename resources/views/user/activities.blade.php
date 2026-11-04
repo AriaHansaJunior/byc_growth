@@ -116,7 +116,9 @@
     <div class="game-modal" style="max-width: 600px; width: 90%;">
         <div class="game-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px;">
             <h3 style="margin: 0; font-family: 'Manrope', sans-serif;">Add New Activity</h3>
-            <button type="button" class="btn-close-modal" id="btn-close-add-activity" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
+            <button type="button" class="icon-button btn-close-modal" id="btn-close-add-activity" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         <form method="POST" action="{{ route('admin.activities.store') }}" enctype="multipart/form-data">
@@ -156,7 +158,9 @@
     <div class="game-modal" style="max-width: 600px; width: 90%;">
         <div class="game-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 20px;">
             <h3 style="margin: 0; font-family: 'Manrope', sans-serif;">Edit Activity</h3>
-            <button type="button" class="btn-close-modal" id="btn-close-edit-activity" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
+            <button type="button" class="icon-button btn-close-modal" id="btn-close-edit-activity" aria-label="Close dialog" style="width: 34px; height: 34px; flex-shrink: 0;">
+                <x-icon name="x" />
+            </button>
         </div>
 
         <form method="POST" id="form-edit-activity" action="" enctype="multipart/form-data">
@@ -223,6 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
             editModal.style.display = 'none';
         });
     }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (addModal && addModal.style.display !== 'none') addModal.style.display = 'none';
+            if (editModal && editModal.style.display !== 'none') editModal.style.display = 'none';
+        }
+    });
 
     document.querySelectorAll('.btn-edit-activity').forEach(btn => {
         btn.addEventListener('click', () => {

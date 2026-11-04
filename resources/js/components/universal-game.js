@@ -377,6 +377,12 @@ export function initTeamConfigModal(initialTeams = [], gameCode = 'game1') {
     if (closeBtn) closeBtn.addEventListener('click', closeModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal && modal.style.display !== 'none' && modal.style.display !== '') {
+            closeModal();
+        }
+    });
+
     presetBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
             const count = parseInt(btn.dataset.count, 10);
