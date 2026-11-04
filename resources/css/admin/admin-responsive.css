@@ -48,14 +48,21 @@
 
   /* Admin Topbar */
   .admin-topbar {
-    position: sticky !important;
+    position: fixed !important;
     top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     z-index: 950 !important;
     padding: 10px 14px !important;
     flex-wrap: wrap !important;
     gap: 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
+  }
+
+  .admin-shell,
+  .admin-shell:has(.admin-topbar) {
+    padding-top: 108px !important;
   }
 
   .admin-brand-wrap {

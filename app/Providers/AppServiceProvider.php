@@ -29,6 +29,35 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Auto-invalidate compiled Blade views when build assets or master layouts change on hosting
+        try {
+            $versionFiles = [
+                public_path('build/assets/app.css'),
+                public_path('build/assets/app.js'),
+                resource_path('views/layouts/app.blade.php'),
+                resource_path('views/layouts/admin.blade.php'),
+            ];
+            $sigParts = [];
+            foreach ($versionFiles as $vf) {
+                $sigParts[] = is_file($vf) ? filemtime($vf) . ':' . filesize($vf) : '0';
+            }
+            $currentSig = md5(implode('|', $sigParts));
+            $sigFile = storage_path('framework/views/.asset_sig');
+            $storedSig = is_file($sigFile) ? trim((string) @file_get_contents($sigFile)) : '';
+
+            if ($storedSig !== $currentSig) {
+                $viewsDir = storage_path('framework/views');
+                if (is_dir($viewsDir)) {
+                    foreach (glob($viewsDir . '/*.php') ?: [] as $compiledView) {
+                        @unlink($compiledView);
+                    }
+                    @file_put_contents($sigFile, $currentSig);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Ignore filesystem restrictions if any
+        }
+
         Event::listen(RouteMatched::class, function (RouteMatched $event) {
             if (!$event->request->isMethodSafe()) {
                 IdSequenceService::resequenceAll();

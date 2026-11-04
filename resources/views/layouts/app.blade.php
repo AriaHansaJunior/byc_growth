@@ -18,13 +18,59 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
-    <!-- Styles & Scripts via Vite -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Styles & Scripts (Always loads latest build with automatic cache-busting) -->
+    @if (file_exists(public_path('hot')))
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @else
+        @php
+            $cssPath = public_path('build/assets/app.css');
+            $jsPath = public_path('build/assets/app.js');
+            $cssVer = file_exists($cssPath) ? substr(md5(filemtime($cssPath) . ':' . filesize($cssPath)), 0, 10) : time();
+            $jsVer = file_exists($jsPath) ? substr(md5(filemtime($jsPath) . ':' . filesize($jsPath)), 0, 10) : time();
+        @endphp
+        <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}?v={{ $cssVer }}">
+        <script type="module" src="{{ asset('build/assets/app.js') }}?v={{ $jsVer }}"></script>
+    @endif
+
+    <!-- Critical Mobile Header Freeze & Smooth Scroll Safeguard -->
+    <style>
+        @media (max-width: 768px) {
+            html, body {
+                overflow-x: clip !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                scroll-behavior: auto !important;
+            }
+            body {
+                min-width: 0 !important;
+                touch-action: pan-y;
+            }
+            .site-wrapper, .site-main {
+                overflow-x: clip !important;
+                overflow-y: visible !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            .global-header {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 950 !important;
+                width: 100% !important;
+            }
+            .site-wrapper.has-global-header,
+            .site-wrapper:has(.global-header) {
+                padding-top: 69px !important;
+            }
+        }
+    </style>
 
     @stack('styles')
 </head>
 <body>
-    <div id="app" class="site-wrapper">
+    <div id="app" class="site-wrapper {{ View::hasSection('no-header') ? 'no-global-header' : 'has-global-header' }}">
         @unless(View::hasSection('no-header'))
             @include('partials.header')
         @endunless
