@@ -4,19 +4,10 @@
     const SCROLL_KEY = 'byc_preserved_scroll_y';
     const PATH_KEY = 'byc_preserved_scroll_path';
 
-    // Disable browser automatic scroll-to-top on page reloads/form submissions
-    if ('scrollRestoration' in history) {
-        history.scrollRestoration = 'manual';
-    }
-
-    let isNavigatingToNewPage = false;
-
-    // Detect navigation via topbar navigation menus or external links
+    // Detect navigation via links
     document.addEventListener('click', function(e) {
-        // Any link inside the top navigation bar or brand logo should start at top
-        const navLink = e.target.closest('.admin-nav-item, .brand-link, .nav-item, .admin-profile-menu a, .site-header a');
+        const navLink = e.target.closest('.admin-nav-item, .brand-link, .header-brand-link, .nav-item, .mobile-nav-link, .footer-link, .admin-profile-menu a, .global-header a');
         if (navLink) {
-            isNavigatingToNewPage = true;
             sessionStorage.removeItem(SCROLL_KEY);
             sessionStorage.removeItem(PATH_KEY);
             return;
@@ -32,12 +23,10 @@
             const targetUrl = new URL(link.href, window.location.origin);
             if (targetUrl.origin === window.location.origin) {
                 if (targetUrl.pathname !== window.location.pathname) {
-                    // Navigating to a different page/route: reset scroll to top
-                    isNavigatingToNewPage = true;
                     sessionStorage.removeItem(SCROLL_KEY);
                     sessionStorage.removeItem(PATH_KEY);
-                } else {
-                    // In-page navigation (e.g. filter reset, pagination links, sort links)
+                } else if (window.scrollY > 10) {
+                    // Same-page filter/sort/pagination link
                     sessionStorage.setItem(SCROLL_KEY, String(Math.round(window.scrollY)));
                     sessionStorage.setItem(PATH_KEY, window.location.pathname);
                 }
@@ -45,66 +34,64 @@
         } catch (_) {}
     }, true);
 
-    // Save scroll position immediately on ANY form submission across the entire application
+    // Save scroll position on form submission (e.g., filter forms, modal actions)
     document.addEventListener('submit', function() {
-        sessionStorage.setItem(SCROLL_KEY, String(Math.round(window.scrollY)));
-        sessionStorage.setItem(PATH_KEY, window.location.pathname);
-    }, true);
-
-    // Also capture position right before page unloads (reload, redirect, form post)
-    window.addEventListener('beforeunload', function() {
-        if (!isNavigatingToNewPage) {
+        if (window.scrollY > 10) {
             sessionStorage.setItem(SCROLL_KEY, String(Math.round(window.scrollY)));
             sessionStorage.setItem(PATH_KEY, window.location.pathname);
+        } else {
+            sessionStorage.removeItem(SCROLL_KEY);
+            sessionStorage.removeItem(PATH_KEY);
         }
-    });
+    }, true);
 
-    // Smart Scroll Restoration Engine
+    // Immediately yield to any user touch/wheel/key interaction
     let userInterrupted = false;
-    window.addEventListener('wheel', function() { userInterrupted = true; }, { passive: true });
-    window.addEventListener('touchmove', function() { userInterrupted = true; }, { passive: true });
+    const markInterrupted = function() { userInterrupted = true; };
+    window.addEventListener('touchstart', markInterrupted, { passive: true });
+    window.addEventListener('touchmove', markInterrupted, { passive: true });
+    window.addEventListener('pointerdown', markInterrupted, { passive: true });
+    window.addEventListener('wheel', markInterrupted, { passive: true });
     window.addEventListener('keydown', function(e) {
         if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Space'].includes(e.code)) {
             userInterrupted = true;
         }
     }, { passive: true });
 
+    let restoredOnce = false;
     function restorePreservedScroll() {
+        if (restoredOnce) return;
+        restoredOnce = true;
+
         const savedPath = sessionStorage.getItem(PATH_KEY);
         const savedScroll = sessionStorage.getItem(SCROLL_KEY);
+        sessionStorage.removeItem(SCROLL_KEY);
+        sessionStorage.removeItem(PATH_KEY);
 
         if (savedPath === window.location.pathname && savedScroll !== null) {
             const targetY = parseInt(savedScroll, 10);
-            if (!isNaN(targetY) && targetY >= 0) {
+            if (!isNaN(targetY) && targetY > 10) {
                 function applyY() {
                     if (userInterrupted) return;
                     if (Math.abs(window.scrollY - targetY) > 2) {
-                        window.scrollTo(0, targetY);
+                        try {
+                            window.scrollTo({ top: targetY, left: 0, behavior: 'instant' });
+                        } catch (_) {
+                            window.scrollTo(0, targetY);
+                        }
                     }
                 }
 
-                // Immediate execution
                 applyY();
-
-                // Multi-frame stages to ensure async components, tables, and images don't jump
                 requestAnimationFrame(applyY);
-                setTimeout(applyY, 40);
-                setTimeout(applyY, 120);
-                setTimeout(applyY, 250);
-                setTimeout(function() {
-                    applyY();
-                    sessionStorage.removeItem(SCROLL_KEY);
-                    sessionStorage.removeItem(PATH_KEY);
-                }, 450);
             }
         }
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', restorePreservedScroll);
+        document.addEventListener('DOMContentLoaded', restorePreservedScroll, { once: true });
     } else {
         restorePreservedScroll();
     }
-    window.addEventListener('load', restorePreservedScroll);
 })();
 </script>

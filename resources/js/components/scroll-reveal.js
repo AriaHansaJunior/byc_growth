@@ -5,9 +5,7 @@
  */
 export function initScrollReveal() {
     const revealSelectors = [
-        // Navigation & Layout Headers
-        '.global-header',
-        '.admin-topbar',
+        // Navigation & Page Headers
         '.back-nav-bar',
         '.page-header',
 
@@ -48,9 +46,6 @@ export function initScrollReveal() {
         // Cash Management & Forms
         '#form-cash-transaction',
 
-        // Global Footer
-        '.global-footer',
-
         // Explicit Targets
         '[data-reveal]',
         '.scroll-reveal-target'
@@ -61,9 +56,9 @@ export function initScrollReveal() {
 
     // Filter out modals or hidden contract elements
     const revealElements = Array.from(allElements).filter((el) => {
-        return !el.closest('.modal-backdrop') && 
-               !el.closest('#modal-birthday-popup') &&
-               !el.classList.contains('destination-card-disabled');
+        return !el.closest('.modal-backdrop') &&
+            !el.closest('#modal-birthday-popup') &&
+            !el.classList.contains('destination-card-disabled');
     });
 
     if (revealElements.length === 0) return;
@@ -100,20 +95,20 @@ export function initScrollReveal() {
     // Orchestrate entrance animation after paint
     requestAnimationFrame(() => {
         const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        const isMobile = window.innerWidth <= 768;
 
         revealElements.forEach((el) => {
             const rect = el.getBoundingClientRect();
-            // Header is animated first with gentle drop
-            if (el.classList.contains('global-header') || el.classList.contains('admin-topbar')) {
-                setTimeout(() => el.classList.add('is-revealed'), 60);
-                return;
-            }
 
             // Check if element is currently in the initial viewport
             if (rect.top < viewportHeight - 20 && rect.bottom > 0) {
-                // Progressive delay based on vertical screen position
+                if (isMobile) {
+                    el.classList.add('is-revealed');
+                    return;
+                }
+                // Progressive delay based on vertical screen position on desktop
                 const verticalRatio = Math.max(0, rect.top / viewportHeight);
-                const entranceDelay = Math.min(Math.round(verticalRatio * 280) + 120, 480);
+                const entranceDelay = Math.min(Math.round(verticalRatio * 200) + 60, 320);
                 setTimeout(() => {
                     el.classList.add('is-revealed');
                 }, entranceDelay);

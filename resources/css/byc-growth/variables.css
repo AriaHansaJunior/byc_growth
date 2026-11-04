@@ -16,7 +16,7 @@
   --blue-soft: #dfe9f2;
   --line: #dcd7c8;
   --shadow: 0 18px 55px rgba(33, 48, 41, .12);
-  
+
   font-family: "DM Sans", sans-serif;
   color: var(--ink);
   background: var(--paper);
@@ -28,12 +28,14 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
-  min-width: 1024px;
+  min-width: 320px;
   min-height: 100vh;
+  overflow-x: clip;
   background: var(--paper);
   color: var(--ink);
   font-family: "DM Sans", sans-serif;
@@ -41,7 +43,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-button, input, textarea {
+button,
+input,
+textarea {
   font: inherit;
 }
 

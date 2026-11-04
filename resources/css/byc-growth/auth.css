@@ -190,15 +190,14 @@
 /* --------------------------------------------------------------------------
    Mobile Auth Compact — 1 single screen without scrolling
    -------------------------------------------------------------------------- */
-@media (max-width: 640px), (max-height: 760px) {
+@media (max-width: 640px),
+(max-height: 760px) {
   .auth-shell {
-    min-height: 100vh;
-    min-height: 100dvh;
-    height: 100vh;
-    height: 100dvh;
-    padding: 10px 14px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    min-height: calc(100vh - 68px);
+    min-height: calc(100dvh - 68px);
+    height: auto;
+    padding: 14px 14px 28px;
+    overflow-x: clip;
   }
 
   .auth-card {

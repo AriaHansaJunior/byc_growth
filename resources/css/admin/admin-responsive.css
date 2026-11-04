@@ -22,22 +22,35 @@
    2. Tablets & Mobile Viewports (<= 768px)
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  html,
-  body {
-    overflow-x: hidden !important;
+
+  html {
+    overflow-x: clip !important;
     max-width: 100% !important;
     width: 100% !important;
+    scroll-behavior: auto !important;
+  }
+
+  body {
+    overflow-x: clip !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    touch-action: pan-y;
   }
 
   .admin-shell {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     box-sizing: border-box !important;
   }
 
   /* Admin Topbar */
   .admin-topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 950 !important;
     padding: 10px 14px !important;
     flex-wrap: wrap !important;
     gap: 10px !important;
@@ -325,7 +338,7 @@
     box-sizing: border-box !important;
   }
 
-  .modal-proof-footer > div,
+  .modal-proof-footer>div,
   .modal-proof-footer .button,
   .modal-proof-footer a {
     width: 100% !important;
@@ -571,7 +584,8 @@
 
   .admin-stamp,
   .admin-welcome-badge {
-    display: none !important; /* Hide decorative badge on mobile so text has 100% width and is never squashed */
+    display: none !important;
+    /* Hide decorative badge on mobile so text has 100% width and is never squashed */
   }
 
   /* Admin Modals & Popups (Screenshot 2: prevent modal from sticking out) */

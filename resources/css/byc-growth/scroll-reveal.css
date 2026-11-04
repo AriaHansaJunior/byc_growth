@@ -205,10 +205,21 @@
   transform: translateY(0) scale(1);
 }
 
-.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(1) { transition-delay: 0.10s; }
-.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(2) { transition-delay: 0.22s; }
-.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(3) { transition-delay: 0.34s; }
-.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(4) { transition-delay: 0.46s; }
+.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(1) {
+  transition-delay: 0.10s;
+}
+
+.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(2) {
+  transition-delay: 0.22s;
+}
+
+.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(3) {
+  transition-delay: 0.34s;
+}
+
+.reveal-enabled .destinations-grid .destination-card.scroll-reveal:nth-child(4) {
+  transition-delay: 0.46s;
+}
 
 .reveal-enabled .destinations-grid .destination-card.scroll-reveal.is-revealed:hover {
   transform: translateY(-8px);
@@ -233,12 +244,29 @@
   transform: translateY(0) scale(1);
 }
 
-.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+1) { transition-delay: 0.06s; }
-.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+2) { transition-delay: 0.13s; }
-.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+3) { transition-delay: 0.20s; }
-.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+4) { transition-delay: 0.27s; }
-.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+5) { transition-delay: 0.34s; }
-.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+6) { transition-delay: 0.41s; }
+.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+1) {
+  transition-delay: 0.06s;
+}
+
+.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+2) {
+  transition-delay: 0.13s;
+}
+
+.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+3) {
+  transition-delay: 0.20s;
+}
+
+.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+4) {
+  transition-delay: 0.27s;
+}
+
+.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+5) {
+  transition-delay: 0.34s;
+}
+
+.reveal-enabled .members-grid .member-card.scroll-reveal:nth-child(6n+6) {
+  transition-delay: 0.41s;
+}
 
 .reveal-enabled .members-grid .member-card.scroll-reveal.is-revealed:hover {
   transform: translateY(-4px);
@@ -283,9 +311,17 @@
   transform: translateY(0);
 }
 
-.reveal-enabled .feature-grid-3 .feature-box.scroll-reveal:nth-child(1) { transition-delay: 0.10s; }
-.reveal-enabled .feature-grid-3 .feature-box.scroll-reveal:nth-child(2) { transition-delay: 0.22s; }
-.reveal-enabled .feature-grid-3 .feature-box.scroll-reveal:nth-child(3) { transition-delay: 0.34s; }
+.reveal-enabled .feature-grid-3 .feature-box.scroll-reveal:nth-child(1) {
+  transition-delay: 0.10s;
+}
+
+.reveal-enabled .feature-grid-3 .feature-box.scroll-reveal:nth-child(2) {
+  transition-delay: 0.22s;
+}
+
+.reveal-enabled .feature-grid-3 .feature-box.scroll-reveal:nth-child(3) {
+  transition-delay: 0.34s;
+}
 
 .reveal-enabled .feature-grid-3 .feature-box.scroll-reveal.is-revealed:hover {
   transform: translateY(-4px);
@@ -321,8 +357,13 @@
   transform: translateY(0) scale(1);
 }
 
-.reveal-enabled .game-center-grid .gc-card.scroll-reveal:nth-child(1) { transition-delay: 0.12s; }
-.reveal-enabled .game-center-grid .gc-card.scroll-reveal:nth-child(2) { transition-delay: 0.26s; }
+.reveal-enabled .game-center-grid .gc-card.scroll-reveal:nth-child(1) {
+  transition-delay: 0.12s;
+}
+
+.reveal-enabled .game-center-grid .gc-card.scroll-reveal:nth-child(2) {
+  transition-delay: 0.26s;
+}
 
 .reveal-enabled .game-center-grid .gc-card.scroll-reveal.is-revealed:hover {
   transform: translateY(-6px);
@@ -371,10 +412,21 @@
   transform: translateY(0) scale(1);
 }
 
-.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+1) { transition-delay: 0.08s; }
-.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+2) { transition-delay: 0.17s; }
-.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+3) { transition-delay: 0.26s; }
-.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+4) { transition-delay: 0.35s; }
+.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+1) {
+  transition-delay: 0.08s;
+}
+
+.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+2) {
+  transition-delay: 0.17s;
+}
+
+.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+3) {
+  transition-delay: 0.26s;
+}
+
+.reveal-enabled .wishes-grid .wish-card.scroll-reveal:nth-child(4n+4) {
+  transition-delay: 0.35s;
+}
 
 .reveal-enabled .wishes-grid .wish-card.scroll-reveal.is-revealed:hover {
   transform: translateY(-4px);
@@ -418,9 +470,24 @@
 }
 
 /* --------------------------------------------------------------------------
-   12. Motion Preference Accessibility
+   12. Mobile Performance Optimization & Motion Preference Accessibility
    -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+
+  .reveal-enabled .scripture-card.scroll-reveal,
+  .reveal-enabled .activity-card.scroll-reveal {
+    filter: none !important;
+    will-change: opacity, transform !important;
+  }
+
+  .reveal-enabled .scroll-reveal {
+    transition-duration: 0.45s !important;
+    transition-delay: 0s !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+
   .reveal-enabled .scroll-reveal,
   .reveal-enabled .global-header.scroll-reveal,
   .reveal-enabled .admin-topbar.scroll-reveal,

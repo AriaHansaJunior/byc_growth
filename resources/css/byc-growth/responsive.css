@@ -63,872 +63,893 @@
    3. Tablets & Mobile Viewports (<= 768px)
    -------------------------------------------------------------------------- */
 @media (max-width: 768px) {
-  html,
+
+  html {
+    overflow-x: clip !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    scroll-behavior: auto !important;
+  }
+
   body {
-    overflow-x: hidden !important;
+    overflow-x: clip !important;
     max-width: 100% !important;
     width: 100% !important;
-  }
-
-  .site-wrapper {
-    overflow-x: hidden !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  /* Members Search Wrapper & Form (User directory) */
-  .members-search-wrapper {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-    width: 100% !important;
-  }
-
-  #form-search-members {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  #form-search-members > div {
-    flex: 1 !important;
     min-width: 0 !important;
-  }
-
-  /* Navigation switch */
-  .header-nav {
-    display: none !important;
-  }
-
-  .mobile-nav-toggle {
-    display: flex !important;
-  }
-
-  .mobile-nav-backdrop {
-    display: block !important;
-  }
-
-  .mobile-nav-drawer {
-    display: flex !important;
-  }
-
-  .header-container {
-    padding: 12px 20px !important;
-  }
-
-  .header-brand-divider,
-  .header-brand-tagline {
-    display: none !important;
-  }
-
-  /* Global Containers padding adaptation */
-  .page-shell {
-    padding: 28px 18px 56px !important;
-    min-height: calc(100vh - 120px) !important;
-  }
-
-  .page-header {
-    margin-bottom: 24px !important;
-  }
-
-  .page-header h1 {
-    font-size: clamp(28px, 6.5vw, 40px) !important;
-    margin: 8px 0 12px !important;
-  }
-
-  .page-header p {
-    font-size: 15px !important;
-  }
-
-  .user-page-container {
-    padding: 20px 16px 48px !important;
-  }
-
-  /* Homepage */
-  .home-hero {
-    padding: 28px 18px 44px !important;
-    min-height: auto !important;
-    gap: 28px !important;
-  }
-
-  .home-copy h1 {
-    font-size: clamp(32px, 8.5vw, 48px) !important;
-    margin: 12px 0 16px !important;
-  }
-
-  .home-copy > p {
-    font-size: 15px !important;
-    margin-bottom: 22px !important;
-  }
-
-  .home-actions {
-    flex-direction: column !important;
-    width: 100% !important;
-    gap: 12px !important;
-  }
-
-  .home-actions .button {
-    width: 100% !important;
-    justify-content: center !important;
-  }
-
-  .hero-photo-wrap {
-    max-width: 100% !important;
-  }
-
-  .scripture-section {
-    padding: 32px 16px !important;
-  }
-
-  .scripture-card {
-    padding: 24px 20px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 16px !important;
-    border-radius: 20px !important;
-  }
-
-  .scripture-card::before {
-    display: none !important;
-  }
-
-  .scripture-card blockquote {
-    font-size: clamp(20px, 5.2vw, 26px) !important;
-    line-height: 1.3 !important;
-    margin-bottom: 10px !important;
-  }
-
-  .scripture-reference {
-    font-size: 13px !important;
-    padding: 4px 10px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .scripture-subtext {
-    font-size: 13.5px !important;
-    line-height: 1.5 !important;
-  }
-
-  .scripture-badge-icon {
-    width: 44px !important;
-    height: 44px !important;
-    border-radius: 12px !important;
-    align-self: flex-end !important;
-    margin-top: -6px !important;
-  }
-
-  .scripture-badge-icon svg {
-    width: 22px !important;
-    height: 22px !important;
-  }
-
-  .destinations-section {
-    padding: 40px 16px 60px !important;
-  }
-
-  .destinations-heading {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 12px !important;
-    margin-bottom: 28px !important;
-  }
-
-  .destinations-heading h2 {
-    font-size: clamp(26px, 7vw, 34px) !important;
-    line-height: 1.25 !important;
-  }
-
-  .destinations-heading p {
-    font-size: 14.5px !important;
-    line-height: 1.55 !important;
-    max-width: 100% !important;
-  }
-
-  .destinations-grid {
-    grid-template-columns: 1fr !important;
-    gap: 18px !important;
-  }
-
-  .destination-card {
-    min-height: auto !important;
-    padding: 24px 20px !important;
-  }
-
-  /* About Page */
-  .about-hero-showcase {
-    padding: 24px 20px !important;
-    border-radius: 18px !important;
-  }
-
-  .about-location-city {
-    font-size: 26px !important;
-  }
-
-  .about-location-details {
-    white-space: normal !important;
-  }
-
-  .about-contact-channels {
-    grid-template-columns: 1fr !important;
-  }
-
-  .feature-grid-3 {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-
-  .placeholder-card {
-    padding: 24px 20px !important;
-    border-radius: 18px !important;
-  }
-
-  .placeholder-card h2 {
-    font-size: 22px !important;
-  }
-
-  /* Activities Page */
-  .activity-card {
-    padding: 20px 18px !important;
-    border-radius: 16px !important;
-  }
-
-  .activity-header h2 {
-    font-size: 20px !important;
-  }
-
-  .activity-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-    gap: 10px !important;
-  }
-
-  /* Game Center Hub */
-  .game-center-hub {
-    padding: 24px 18px 48px !important;
-  }
-
-  .game-center-hero {
-    padding: 24px 20px !important;
-    border-radius: 20px !important;
-    margin-bottom: 32px !important;
-  }
-
-  .game-center-hero-content h1 {
-    font-size: 30px !important;
-  }
-
-  .game-center-art-frame img {
-    height: 200px !important;
-  }
-
-  .game-center-grid {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
-  }
-
-  .gc-card {
-    min-height: auto !important;
-    padding: 24px 20px !important;
-    border-radius: 18px !important;
-  }
-
-  /* Global Footer Compact Mobile */
-  .global-footer,
-  .footer {
-    padding: 32px 16px 20px !important;
-  }
-
-  .footer-top {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
-    padding-bottom: 20px !important;
-  }
-
-  .footer-cta-card {
-    padding: 16px 14px !important;
-    border-radius: 16px !important;
-  }
-
-  .footer-cta-card h2 {
-    font-size: 19px !important;
-    margin-bottom: 6px !important;
-  }
-
-  .footer-cta-card p {
-    font-size: 12.5px !important;
-    line-height: 1.45 !important;
-    margin-bottom: 12px !important;
-  }
-
-  .footer-cta-action .button {
-    height: 36px !important;
-    font-size: 12.5px !important;
-    padding: 0 14px !important;
-  }
-
-  .footer-columns {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-
-  .footer-col-heading {
-    font-size: 11px !important;
-    margin-bottom: 6px !important;
-  }
-
-  .footer-contact-title {
-    font-size: 12px !important;
-    margin-bottom: 4px !important;
-  }
-
-  .footer-contact-list {
-    gap: 5px !important;
-  }
-
-  .footer-link,
-  .footer-location-text {
-    font-size: 12.5px !important;
-    line-height: 1.4 !important;
-  }
-
-  .footer-bottom {
-    padding-top: 14px !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
-  }
-
-  .footer-brand-lockup {
-    gap: 10px !important;
-  }
-
-  .footer-brand-link .brand-logo {
-    height: 24px !important;
-  }
-
-  .footer-tagline {
-    font-size: 11px !important;
-  }
-
-  .footer-legal {
-    text-align: left !important;
-    font-size: 11.5px !important;
-  }
-
-  .footer-subtext {
-    font-size: 10.5px !important;
-  }
-
-  /* Games Management Overall Standings Scoreboard (Screenshot 3: prevent truncated team pills) */
-  .gc-scoreboard {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    padding: 20px 16px !important;
-    gap: 16px !important;
-    border-radius: 20px !important;
-  }
-
-  .gc-scoreboard-info {
-    width: 100% !important;
-    flex: none !important;
-    min-width: 0 !important;
-    text-align: left !important;
-  }
-
-  .gc-scoreboard-teams {
-    width: 100% !important;
-    margin: 0 !important;
-    justify-content: center !important;
-  }
-
-  .gc-scoreboard-teams .score-pair {
-    width: 100% !important;
-    justify-content: center !important;
-    gap: 10px !important;
-  }
-
-  .gc-scoreboard-teams .team-score {
-    max-width: none !important;
-    min-width: 120px !important;
-    flex: 1 !important;
-    padding: 8px 12px !important;
-  }
-
-  .gc-scoreboard-teams .team-name {
-    white-space: nowrap !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-  }
-
-  .gc-scoreboard > div:last-child {
-    width: 100% !important;
-    display: flex !important;
-    gap: 8px !important;
-  }
-
-  .gc-scoreboard > div:last-child .button,
-  .gc-scoreboard > div:last-child a {
-    flex: 1 !important;
-    justify-content: center !important;
-    text-align: center !important;
-    font-size: 13px !important;
-  }
-
-  /* ------------------------------------------------------------------------
+    touch-action: pan-y;
+  }
+
+    .site-wrapper,
+    .site-main {
+      overflow-x: clip !important;
+      overflow-y: visible !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .global-header {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 950 !important;
+      width: 100% !important;
+    }
+
+    /* Members Search Wrapper & Form (User directory) */
+    .members-search-wrapper {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 12px !important;
+      width: 100% !important;
+    }
+
+    #form-search-members {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    #form-search-members>div {
+      flex: 1 !important;
+      min-width: 0 !important;
+    }
+
+    /* Navigation switch */
+    .header-nav {
+      display: none !important;
+    }
+
+    .mobile-nav-toggle {
+      display: flex !important;
+    }
+
+    .mobile-nav-backdrop {
+      display: block !important;
+    }
+
+    .mobile-nav-drawer {
+      display: flex !important;
+    }
+
+    .header-container {
+      padding: 12px 20px !important;
+    }
+
+    .header-brand-divider,
+    .header-brand-tagline {
+      display: none !important;
+    }
+
+    /* Global Containers padding adaptation */
+    .page-shell {
+      padding: 28px 18px 56px !important;
+      min-height: calc(100vh - 120px) !important;
+    }
+
+    .page-header {
+      margin-bottom: 24px !important;
+    }
+
+    .page-header h1 {
+      font-size: clamp(28px, 6.5vw, 40px) !important;
+      margin: 8px 0 12px !important;
+    }
+
+    .page-header p {
+      font-size: 15px !important;
+    }
+
+    .user-page-container {
+      padding: 20px 16px 48px !important;
+    }
+
+    /* Homepage */
+    .home-hero {
+      padding: 28px 18px 44px !important;
+      min-height: auto !important;
+      gap: 28px !important;
+    }
+
+    .home-copy h1 {
+      font-size: clamp(32px, 8.5vw, 48px) !important;
+      margin: 12px 0 16px !important;
+    }
+
+    .home-copy>p {
+      font-size: 15px !important;
+      margin-bottom: 22px !important;
+    }
+
+    .home-actions {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 12px !important;
+    }
+
+    .home-actions .button {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+
+    .hero-photo-wrap {
+      max-width: 100% !important;
+    }
+
+    .scripture-section {
+      padding: 32px 16px !important;
+    }
+
+    .scripture-card {
+      padding: 24px 20px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 16px !important;
+      border-radius: 20px !important;
+    }
+
+    .scripture-card::before {
+      display: none !important;
+    }
+
+    .scripture-card blockquote {
+      font-size: clamp(20px, 5.2vw, 26px) !important;
+      line-height: 1.3 !important;
+      margin-bottom: 10px !important;
+    }
+
+    .scripture-reference {
+      font-size: 13px !important;
+      padding: 4px 10px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .scripture-subtext {
+      font-size: 13.5px !important;
+      line-height: 1.5 !important;
+    }
+
+    .scripture-badge-icon {
+      width: 44px !important;
+      height: 44px !important;
+      border-radius: 12px !important;
+      align-self: flex-end !important;
+      margin-top: -6px !important;
+    }
+
+    .scripture-badge-icon svg {
+      width: 22px !important;
+      height: 22px !important;
+    }
+
+    .destinations-section {
+      padding: 40px 16px 60px !important;
+    }
+
+    .destinations-heading {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 12px !important;
+      margin-bottom: 28px !important;
+    }
+
+    .destinations-heading h2 {
+      font-size: clamp(26px, 7vw, 34px) !important;
+      line-height: 1.25 !important;
+    }
+
+    .destinations-heading p {
+      font-size: 14.5px !important;
+      line-height: 1.55 !important;
+      max-width: 100% !important;
+    }
+
+    .destinations-grid {
+      grid-template-columns: 1fr !important;
+      gap: 18px !important;
+    }
+
+    .destination-card {
+      min-height: auto !important;
+      padding: 24px 20px !important;
+    }
+
+    /* About Page */
+    .about-hero-showcase {
+      padding: 24px 20px !important;
+      border-radius: 18px !important;
+    }
+
+    .about-location-city {
+      font-size: 26px !important;
+    }
+
+    .about-location-details {
+      white-space: normal !important;
+    }
+
+    .about-contact-channels {
+      grid-template-columns: 1fr !important;
+    }
+
+    .feature-grid-3 {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+
+    .placeholder-card {
+      padding: 24px 20px !important;
+      border-radius: 18px !important;
+    }
+
+    .placeholder-card h2 {
+      font-size: 22px !important;
+    }
+
+    /* Activities Page */
+    .activity-card {
+      padding: 20px 18px !important;
+      border-radius: 16px !important;
+    }
+
+    .activity-header h2 {
+      font-size: 20px !important;
+    }
+
+    .activity-gallery {
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+      gap: 10px !important;
+    }
+
+    /* Game Center Hub */
+    .game-center-hub {
+      padding: 24px 18px 48px !important;
+    }
+
+    .game-center-hero {
+      padding: 24px 20px !important;
+      border-radius: 20px !important;
+      margin-bottom: 32px !important;
+    }
+
+    .game-center-hero-content h1 {
+      font-size: 30px !important;
+    }
+
+    .game-center-art-frame img {
+      height: 200px !important;
+    }
+
+    .game-center-grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+    }
+
+    .gc-card {
+      min-height: auto !important;
+      padding: 24px 20px !important;
+      border-radius: 18px !important;
+    }
+
+    /* Global Footer Compact Mobile */
+    .global-footer,
+    .footer {
+      padding: 32px 16px 20px !important;
+    }
+
+    .footer-top {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+      padding-bottom: 20px !important;
+    }
+
+    .footer-cta-card {
+      padding: 16px 14px !important;
+      border-radius: 16px !important;
+    }
+
+    .footer-cta-card h2 {
+      font-size: 19px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .footer-cta-card p {
+      font-size: 12.5px !important;
+      line-height: 1.45 !important;
+      margin-bottom: 12px !important;
+    }
+
+    .footer-cta-action .button {
+      height: 36px !important;
+      font-size: 12.5px !important;
+      padding: 0 14px !important;
+    }
+
+    .footer-columns {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+
+    .footer-col-heading {
+      font-size: 11px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .footer-contact-title {
+      font-size: 12px !important;
+      margin-bottom: 4px !important;
+    }
+
+    .footer-contact-list {
+      gap: 5px !important;
+    }
+
+    .footer-link,
+    .footer-location-text {
+      font-size: 12.5px !important;
+      line-height: 1.4 !important;
+    }
+
+    .footer-bottom {
+      padding-top: 14px !important;
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 10px !important;
+    }
+
+    .footer-brand-lockup {
+      gap: 10px !important;
+    }
+
+    .footer-brand-link .brand-logo {
+      height: 24px !important;
+    }
+
+    .footer-tagline {
+      font-size: 11px !important;
+    }
+
+    .footer-legal {
+      text-align: left !important;
+      font-size: 11.5px !important;
+    }
+
+    .footer-subtext {
+      font-size: 10.5px !important;
+    }
+
+    /* Games Management Overall Standings Scoreboard (Screenshot 3: prevent truncated team pills) */
+    .gc-scoreboard {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      padding: 20px 16px !important;
+      gap: 16px !important;
+      border-radius: 20px !important;
+    }
+
+    .gc-scoreboard-info {
+      width: 100% !important;
+      flex: none !important;
+      min-width: 0 !important;
+      text-align: left !important;
+    }
+
+    .gc-scoreboard-teams {
+      width: 100% !important;
+      margin: 0 !important;
+      justify-content: center !important;
+    }
+
+    .gc-scoreboard-teams .score-pair {
+      width: 100% !important;
+      justify-content: center !important;
+      gap: 10px !important;
+    }
+
+    .gc-scoreboard-teams .team-score {
+      max-width: none !important;
+      min-width: 120px !important;
+      flex: 1 !important;
+      padding: 8px 12px !important;
+    }
+
+    .gc-scoreboard-teams .team-name {
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+    }
+
+    .gc-scoreboard>div:last-child {
+      width: 100% !important;
+      display: flex !important;
+      gap: 8px !important;
+    }
+
+    .gc-scoreboard>div:last-child .button,
+    .gc-scoreboard>div:last-child a {
+      flex: 1 !important;
+      justify-content: center !important;
+      text-align: center !important;
+      font-size: 13px !important;
+    }
+
+    /* ------------------------------------------------------------------------
      Gameplay Responsive Adaptation (Controlled vertical scroll on mobile)
      ------------------------------------------------------------------------ */
-  /* Game Arena Topbar (Screenshot 5: clean 2-row layout without overflow) */
-  .game-shell {
-    height: auto !important;
-    min-height: 100vh !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
+    /* Game Arena Topbar (Screenshot 5: clean 2-row layout without overflow) */
+    .game-shell {
+      height: auto !important;
+      min-height: 100vh !important;
+      max-height: none !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    .topbar {
+      display: flex !important;
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      height: auto !important;
+      min-height: 52px !important;
+      max-height: none !important;
+      padding: 8px 12px 10px !important;
+      gap: 6px 10px !important;
+      overflow: visible !important;
+    }
+
+    .topbar .brand-button {
+      order: 1 !important;
+      flex-shrink: 0 !important;
+    }
+
+    /* Host controls and live pill on Row 1 */
+    .topbar>div:last-child {
+      order: 2 !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      margin-left: auto !important;
+    }
+
+    .topbar #btn-toggle-scoreboard {
+      height: 34px !important;
+      padding: 0 12px !important;
+      font-size: 12.5px !important;
+      font-weight: 700 !important;
+      border-radius: 10px !important;
+    }
+
+    .topbar .live-pill {
+      display: none !important;
+      /* Hide redundant host badge on mobile to preserve topbar space */
+    }
+
+    /* Scores centered with full width on Row 2 */
+    .topbar-scores-wrap {
+      order: 3 !important;
+      width: 100% !important;
+      flex: 0 0 100% !important;
+      margin: 4px 0 0 !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .topbar-scores-wrap .score-pair {
+      width: 100% !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 8px !important;
+      flex-wrap: nowrap !important;
+    }
+
+    .topbar-scores-wrap .team-score-card {
+      flex: 1 1 130px !important;
+      max-width: 160px !important;
+      min-width: 100px !important;
+      padding: 5px 8px !important;
+      font-size: 12.5px !important;
+    }
+
+    .game-content {
+      width: 100% !important;
+      padding: 16px 16px 32px !important;
+      overflow: visible !important;
+      height: auto !important;
+      min-height: auto !important;
+      justify-content: flex-start !important;
+      gap: 20px !important;
+    }
+
+    .game-titlebar {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 8px !important;
+    }
+
+    .game-titlebar h1 {
+      font-size: 24px !important;
+    }
+
+    .guess-stage {
+      grid-template-columns: 1fr !important;
+      gap: 18px !important;
+      min-height: auto !important;
+    }
+
+    .guess-image {
+      min-height: 220px !important;
+      height: auto !important;
+    }
+
+    .guess-image img {
+      max-height: 260px !important;
+      width: 100% !important;
+      object-fit: contain !important;
+    }
+
+    .host-panel {
+      padding: 16px !important;
+      border-radius: 16px !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 14px !important;
+    }
+
+    .host-controls {
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      gap: 8px !important;
+    }
+
+    .round-nav {
+      margin-top: 10px !important;
+      justify-content: space-between !important;
+      width: 100% !important;
+    }
+
+    /* Growth 100 */
+    .growth-content {
+      width: calc(100% - 24px) !important;
+      padding: 16px 0 32px !important;
+      overflow: visible !important;
+      height: auto !important;
+      min-height: auto !important;
+    }
+
+    .growth-title {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+      text-align: center !important;
+    }
+
+    .growth-title h1 {
+      font-size: 26px !important;
+    }
+
+    .growth-title .round-total {
+      justify-self: center !important;
+    }
+
+    .answers-grid {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+
+    .answer-tile {
+      height: auto !important;
+      min-height: 60px !important;
+      padding: 12px 14px !important;
+    }
+
+    .strikes-row {
+      flex-wrap: wrap !important;
+      justify-content: center !important;
+      gap: 8px !important;
+    }
+
+    .growth-bottom {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 14px !important;
+    }
+
+    /* Final Screen */
+    html:has(.final-screen),
+    body:has(.final-screen) {
+      height: auto !important;
+      max-height: none !important;
+      overflow-y: auto !important;
+    }
+
+    body:has(.final-screen) .site-wrapper,
+    body:has(.final-screen) .site-main {
+      height: auto !important;
+      max-height: none !important;
+      overflow-y: auto !important;
+      min-height: 100vh !important;
+    }
+
+    .final-screen {
+      height: auto !important;
+      min-height: 100vh !important;
+      max-height: none !important;
+      overflow-y: auto !important;
+      padding: 68px 16px 36px !important;
+      justify-content: flex-start !important;
+      gap: 24px !important;
+    }
+
+    .winner-podium {
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 16px !important;
+    }
+
+    .podium-slot {
+      width: 100% !important;
+      max-width: 320px !important;
+    }
+
+    .final-breakdown {
+      width: 100% !important;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
+
+    .final-actions {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 10px !important;
+    }
+
+    .final-actions .button {
+      width: 100% !important;
+    }
+
+    /* Host Controls Scoreboard Modal (Screenshot 4: prevent squashed 1-word-per-line title) */
+    .scoreboard-modal-panel {
+      position: relative !important;
+      width: 100% !important;
+      max-width: calc(100vw - 24px) !important;
+      padding: 20px 16px !important;
+      border-radius: 20px !important;
+      box-sizing: border-box !important;
+    }
+
+    .scoreboard-modal-header {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 12px !important;
+      position: relative !important;
+      padding-right: 42px !important;
+    }
+
+    .scoreboard-modal-header>div:first-child {
+      width: 100% !important;
+    }
+
+    .scoreboard-modal-header h3,
+    #scoreboard-modal-title {
+      font-size: 18px !important;
+      line-height: 1.3 !important;
+      word-break: normal !important;
+      margin: 3px 0 0 !important;
+    }
+
+    .scoreboard-modal-header>div:last-child {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+      width: 100% !important;
+      justify-content: flex-start !important;
+    }
+
+    #btn-close-scoreboard {
+      position: absolute !important;
+      top: 12px !important;
+      right: 0 !important;
+    }
+
+    /* Modals on Mobile & Backdrop Containment (Screenshot 2: prevent modal from sticking out) */
+    .modal-backdrop,
+    .admin-modal-backdrop,
+    .scoreboard-modal-backdrop,
+    .game-modal-overlay {
+      padding: 12px !important;
+      box-sizing: border-box !important;
+      overflow-x: hidden !important;
+    }
+
+    .modal-card,
+    .admin-modal-card,
+    .dialog-card,
+    .game-modal {
+      width: 100% !important;
+      max-width: calc(100vw - 24px) !important;
+      max-height: min(600px, 80vh) !important;
+      margin: auto !important;
+      padding: 20px 16px !important;
+      border-radius: 18px !important;
+      box-sizing: border-box !important;
+    }
+
+    .info-modal {
+      width: 100% !important;
+      max-width: calc(100vw - 24px) !important;
+      max-height: min(600px, 80vh) !important;
+      margin: auto !important;
+      border-radius: 20px !important;
+      box-sizing: border-box !important;
+    }
+
+    .editor-panel,
+    .how-to-play-modal {
+      width: min(580px, calc(100vw - 28px)) !important;
+      max-height: min(560px, 75vh) !important;
+      padding: 0 !important;
+      margin: auto !important;
+      border-radius: 22px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    .activity-date-grid {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+
+    .modal-header,
+    .admin-modal-header {
+      margin-bottom: 14px !important;
+    }
+
+    .modal-body,
+    .admin-modal-body {
+      max-height: calc(100vh - 140px) !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+    }
   }
 
-  .topbar {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    height: auto !important;
-    min-height: 52px !important;
-    max-height: none !important;
-    padding: 8px 12px 10px !important;
-    gap: 6px 10px !important;
-    overflow: visible !important;
-  }
-
-  .topbar .brand-button {
-    order: 1 !important;
-    flex-shrink: 0 !important;
-  }
-
-  /* Host controls and live pill on Row 1 */
-  .topbar > div:last-child {
-    order: 2 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 6px !important;
-    margin-left: auto !important;
-  }
-
-  .topbar #btn-toggle-scoreboard {
-    height: 34px !important;
-    padding: 0 12px !important;
-    font-size: 12.5px !important;
-    font-weight: 700 !important;
-    border-radius: 10px !important;
-  }
-
-  .topbar .live-pill {
-    display: none !important; /* Hide redundant host badge on mobile to preserve topbar space */
-  }
-
-  /* Scores centered with full width on Row 2 */
-  .topbar-scores-wrap {
-    order: 3 !important;
-    width: 100% !important;
-    flex: 0 0 100% !important;
-    margin: 4px 0 0 !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-
-  .topbar-scores-wrap .score-pair {
-    width: 100% !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 8px !important;
-    flex-wrap: nowrap !important;
-  }
-
-  .topbar-scores-wrap .team-score-card {
-    flex: 1 1 130px !important;
-    max-width: 160px !important;
-    min-width: 100px !important;
-    padding: 5px 8px !important;
-    font-size: 12.5px !important;
-  }
-
-  .game-content {
-    width: 100% !important;
-    padding: 16px 16px 32px !important;
-    overflow: visible !important;
-    height: auto !important;
-    min-height: auto !important;
-    justify-content: flex-start !important;
-    gap: 20px !important;
-  }
-
-  .game-titlebar {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 8px !important;
-  }
-
-  .game-titlebar h1 {
-    font-size: 24px !important;
-  }
-
-  .guess-stage {
-    grid-template-columns: 1fr !important;
-    gap: 18px !important;
-    min-height: auto !important;
-  }
-
-  .guess-image {
-    min-height: 220px !important;
-    height: auto !important;
-  }
-
-  .guess-image img {
-    max-height: 260px !important;
-    width: 100% !important;
-    object-fit: contain !important;
-  }
-
-  .host-panel {
-    padding: 16px !important;
-    border-radius: 16px !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 14px !important;
-  }
-
-  .host-controls {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 8px !important;
-  }
-
-  .round-nav {
-    margin-top: 10px !important;
-    justify-content: space-between !important;
-    width: 100% !important;
-  }
-
-  /* Growth 100 */
-  .growth-content {
-    width: calc(100% - 24px) !important;
-    padding: 16px 0 32px !important;
-    overflow: visible !important;
-    height: auto !important;
-    min-height: auto !important;
-  }
-
-  .growth-title {
-    grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    text-align: center !important;
-  }
-
-  .growth-title h1 {
-    font-size: 26px !important;
-  }
-
-  .growth-title .round-total {
-    justify-self: center !important;
-  }
-
-  .answers-grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .answer-tile {
-    height: auto !important;
-    min-height: 60px !important;
-    padding: 12px 14px !important;
-  }
-
-  .strikes-row {
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 8px !important;
-  }
-
-  .growth-bottom {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 14px !important;
-  }
-
-  /* Final Screen */
-  html:has(.final-screen),
-  body:has(.final-screen) {
-    height: auto !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-  }
-
-  body:has(.final-screen) .site-wrapper,
-  body:has(.final-screen) .site-main {
-    height: auto !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-    min-height: 100vh !important;
-  }
-
-  .final-screen {
-    height: auto !important;
-    min-height: 100vh !important;
-    max-height: none !important;
-    overflow-y: auto !important;
-    padding: 68px 16px 36px !important;
-    justify-content: flex-start !important;
-    gap: 24px !important;
-  }
-
-  .winner-podium {
-    flex-direction: column !important;
-    align-items: center !important;
-    gap: 16px !important;
-  }
-
-  .podium-slot {
-    width: 100% !important;
-    max-width: 320px !important;
-  }
-
-  .final-breakdown {
-    width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  .final-actions {
-    flex-direction: column !important;
-    width: 100% !important;
-    gap: 10px !important;
-  }
-
-  .final-actions .button {
-    width: 100% !important;
-  }
-
-  /* Host Controls Scoreboard Modal (Screenshot 4: prevent squashed 1-word-per-line title) */
-  .scoreboard-modal-panel {
-    position: relative !important;
-    width: 100% !important;
-    max-width: calc(100vw - 24px) !important;
-    padding: 20px 16px !important;
-    border-radius: 20px !important;
-    box-sizing: border-box !important;
-  }
-
-  .scoreboard-modal-header {
-    flex-direction: column !important;
-    align-items: stretch !important;
-    gap: 12px !important;
-    position: relative !important;
-    padding-right: 42px !important;
-  }
-
-  .scoreboard-modal-header > div:first-child {
-    width: 100% !important;
-  }
-
-  .scoreboard-modal-header h3,
-  #scoreboard-modal-title {
-    font-size: 18px !important;
-    line-height: 1.3 !important;
-    word-break: normal !important;
-    margin: 3px 0 0 !important;
-  }
-
-  .scoreboard-modal-header > div:last-child {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    width: 100% !important;
-    justify-content: flex-start !important;
-  }
-
-  #btn-close-scoreboard {
-    position: absolute !important;
-    top: 12px !important;
-    right: 0 !important;
-  }
-
-  /* Modals on Mobile & Backdrop Containment (Screenshot 2: prevent modal from sticking out) */
-  .modal-backdrop,
-  .admin-modal-backdrop,
-  .scoreboard-modal-backdrop,
-  .game-modal-overlay {
-    padding: 12px !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-  }
-
-  .modal-card,
-  .admin-modal-card,
-  .dialog-card,
-  .game-modal {
-    width: 100% !important;
-    max-width: calc(100vw - 24px) !important;
-    max-height: min(600px, 80vh) !important;
-    margin: auto !important;
-    padding: 20px 16px !important;
-    border-radius: 18px !important;
-    box-sizing: border-box !important;
-  }
-
-  .info-modal {
-    width: 100% !important;
-    max-width: calc(100vw - 24px) !important;
-    max-height: min(600px, 80vh) !important;
-    margin: auto !important;
-    border-radius: 20px !important;
-    box-sizing: border-box !important;
-  }
-
-  .editor-panel,
-  .how-to-play-modal {
-    width: min(580px, calc(100vw - 28px)) !important;
-    max-height: min(560px, 75vh) !important;
-    padding: 0 !important;
-    margin: auto !important;
-    border-radius: 22px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-  }
-
-  .activity-date-grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  .modal-header,
-  .admin-modal-header {
-    margin-bottom: 14px !important;
-  }
-
-  .modal-body,
-  .admin-modal-body {
-    max-height: calc(100vh - 140px) !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-}
-
-/* --------------------------------------------------------------------------
+  /* --------------------------------------------------------------------------
    4. Flagship Smartphone Upper Bound & Mobile Grid (~320px–480px)
    -------------------------------------------------------------------------- */
-@media (max-width: 480px) {
-  .header-container {
-    padding: 10px 14px !important;
+  @media (max-width: 480px) {
+    .header-container {
+      padding: 10px 14px !important;
+    }
+
+    .page-shell {
+      padding: 20px 14px 44px !important;
+    }
+
+    .home-hero {
+      padding: 20px 14px 36px !important;
+    }
+
+    .scripture-section {
+      padding: 24px 14px !important;
+    }
+
+    .destinations-section {
+      padding: 32px 14px 44px !important;
+    }
+
+    .destination-card {
+      padding: 20px 16px !important;
+    }
+
+    /* Members 2-column mobile optimization */
+    .members-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 12px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .member-card {
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      padding: 14px 10px !important;
+      border-radius: 16px !important;
+    }
+
+    .member-photo-frame {
+      width: 96px !important;
+      height: 96px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .member-photo-fallback {
+      font-size: 28px !important;
+    }
+
+    .member-name {
+      font-size: 14px !important;
+      line-height: 1.25 !important;
+      word-break: break-word !important;
+    }
+
+    .birthday-badge-pin {
+      width: 26px !important;
+      height: 26px !important;
+      font-size: 12px !important;
+    }
+
+    #form-search-members {
+      flex-wrap: wrap !important;
+      gap: 8px !important;
+    }
+
+    #form-search-members>div {
+      width: 100% !important;
+      flex: none !important;
+    }
+
+    #form-search-members .button {
+      flex: 1 !important;
+    }
+
+    /* Form & Input usability */
+    .input,
+    .form-control,
+    select,
+    textarea {
+      font-size: 16px !important;
+      /* Prevents iOS auto-zoom on focus */
+    }
+
+    .button {
+      min-height: 44px;
+      /* Touch target accessibility */
+    }
   }
 
-  .page-shell {
-    padding: 20px 14px 44px !important;
-  }
-
-  .home-hero {
-    padding: 20px 14px 36px !important;
-  }
-
-  .scripture-section {
-    padding: 24px 14px !important;
-  }
-
-  .destinations-section {
-    padding: 32px 14px 44px !important;
-  }
-
-  .destination-card {
-    padding: 20px 16px !important;
-  }
-
-  /* Members 2-column mobile optimization */
-  .members-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 12px !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .member-card {
-    min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-    padding: 14px 10px !important;
-    border-radius: 16px !important;
-  }
-
-  .member-photo-frame {
-    width: 96px !important;
-    height: 96px !important;
-    margin-bottom: 10px !important;
-  }
-
-  .member-photo-fallback {
-    font-size: 28px !important;
-  }
-
-  .member-name {
-    font-size: 14px !important;
-    line-height: 1.25 !important;
-    word-break: break-word !important;
-  }
-
-  .birthday-badge-pin {
-    width: 26px !important;
-    height: 26px !important;
-    font-size: 12px !important;
-  }
-
-  #form-search-members {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-  }
-
-  #form-search-members > div {
-    width: 100% !important;
-    flex: none !important;
-  }
-
-  #form-search-members .button {
-    flex: 1 !important;
-  }
-
-  /* Form & Input usability */
-  .input,
-  .form-control,
-  select,
-  textarea {
-    font-size: 16px !important; /* Prevents iOS auto-zoom on focus */
-  }
-
-  .button {
-    min-height: 44px; /* Touch target accessibility */
-  }
-}
-
-/* --------------------------------------------------------------------------
+  /* --------------------------------------------------------------------------
    5. Compact Mobile Viewports (<= 360px)
    -------------------------------------------------------------------------- */
-@media (max-width: 360px) {
-  .members-grid {
-    gap: 8px !important;
-  }
+  @media (max-width: 360px) {
+    .members-grid {
+      gap: 8px !important;
+    }
 
-  .member-photo-frame {
-    width: 82px !important;
-    height: 82px !important;
-  }
+    .member-photo-frame {
+      width: 82px !important;
+      height: 82px !important;
+    }
 
-  .home-copy h1 {
-    font-size: 28px !important;
-  }
+    .home-copy h1 {
+      font-size: 28px !important;
+    }
 
-  .game-titlebar h1 {
-    font-size: 20px !important;
+    .game-titlebar h1 {
+      font-size: 20px !important;
+    }
   }
-}
