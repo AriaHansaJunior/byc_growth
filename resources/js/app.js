@@ -13,8 +13,12 @@ import { initAdminHomepage } from './components/admin-homepage';
 import { initAdminGames } from './components/admin-games';
 import { initMobileNav } from './components/mobile-nav';
 import { initPasswordToggle } from './components/password-toggle';
+import { initRootGrow } from './components/root-grow';
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize organic button root tendril animations
+    initRootGrow();
+
     // Initialize global password visibility toggles
     initPasswordToggle();
 

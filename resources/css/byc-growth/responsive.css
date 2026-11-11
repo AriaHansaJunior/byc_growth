@@ -38,6 +38,11 @@
     padding: 32px 30px;
   }
 
+  .about-philosophy-grid {
+    grid-template-columns: 240px 1fr;
+    gap: 32px;
+  }
+
   .game-center-hero {
     grid-template-columns: 1fr;
     gap: 32px;
@@ -295,6 +300,31 @@
 
     .about-contact-channels {
       grid-template-columns: 1fr !important;
+    }
+
+    /* About Philosophy Section */
+    .about-philosophy-card {
+      padding: 26px 20px !important;
+      border-radius: 18px !important;
+      margin-bottom: 24px !important;
+    }
+
+    .about-philosophy-grid {
+      grid-template-columns: 1fr !important;
+      gap: 24px !important;
+    }
+
+    .about-philosophy-visual {
+      margin: 0 auto;
+    }
+
+    .about-philosophy-title {
+      font-size: 26px !important;
+    }
+
+    .about-philosophy-pillars {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
     }
 
     .feature-grid-3 {
@@ -868,6 +898,33 @@
 
     .destination-card {
       padding: 20px 16px !important;
+    }
+
+    .about-philosophy-card {
+      padding: 20px 16px !important;
+      border-radius: 16px !important;
+    }
+
+    .about-philosophy-title {
+      font-size: 22px !important;
+    }
+
+    .about-philosophy-subtitle {
+      font-size: 14px !important;
+    }
+
+    .about-philosophy-story p {
+      font-size: 14px !important;
+    }
+
+    .about-philosophy-groot-img {
+      width: 145px !important;
+    }
+
+    .about-faith-quote-bar {
+      padding: 14px !important;
+      flex-direction: column !important;
+      gap: 8px !important;
     }
 
     /* Members 2-column mobile optimization */

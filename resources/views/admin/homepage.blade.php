@@ -16,7 +16,7 @@
 
 @section('content')
     {{-- Main Home Hero Preview --}}
-    <main class="home" style="margin-bottom: 32px;">
+    <div class="home" style="margin-bottom: 32px;">
         <section class="home-hero">
             <div class="home-copy">
                 <h1>Growing together in faith,<em>purpose, and community.</em></h1>
@@ -38,6 +38,7 @@
                                     class="hero-group-photo hero-slide {{ $index === 0 ? 'active' : '' }}"
                                     data-slide-index="{{ $index }}"
                                     data-slide-id="{{ $slide->id }}"
+                                    {{ $index === 0 ? 'decoding="async"' : 'loading="lazy" decoding="async"' }}
                                 >
                             @endforeach
                         @else
@@ -62,7 +63,7 @@
                 </div>
             </div>
         </section>
-    </main>
+    </div>
 
     {{-- S2 Slideshow Management Section --}}
     <section class="slideshow-management-section" id="slideshow-management" style="background: var(--white); border: 1px solid var(--line); border-radius: 24px; padding: 32px; box-shadow: var(--shadow);">
@@ -190,4 +191,3 @@
     @include('admin.partials.homepage-add-modal')
     @include('admin.partials.homepage-edit-modal')
 @endsection
-`

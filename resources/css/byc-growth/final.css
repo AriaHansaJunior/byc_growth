@@ -46,16 +46,16 @@ body:has(.final-screen) .site-main {
 }
 
 .final-screen .brand {
-  background: rgba(255, 255, 255, 0.94);
-  padding: 6px 14px;
-  border-radius: 999px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  transition: transform .2s ease, background .2s ease;
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition: transform .2s ease;
 }
 
 .final-screen .brand:hover {
-  background: #ffffff;
-  transform: translateY(-1px);
+  background: transparent !important;
+  transform: translateY(-1px) scale(1.04);
 }
 
 .final-screen .brand-mark {

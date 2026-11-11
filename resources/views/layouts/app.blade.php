@@ -18,6 +18,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 
+    <!-- Preload Critical Brand Asset (High Priority, Instant Paint, Zero Layout Shift) -->
+    <link rel="preload" as="image" href="{{ asset('assets/images/byc-logo.png') }}" fetchpriority="high">
+
     <!-- Styles & Scripts (Always loads latest build with automatic cache-busting) -->
     @if (file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])

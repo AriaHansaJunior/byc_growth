@@ -47,12 +47,16 @@ body.modal-open {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  min-width: 200px;
 }
 
 .admin-brand-wrap .brand-link {
   display: inline-flex;
   align-items: center;
   text-decoration: none;
+  min-width: 85px;
+  min-height: 38px;
+  flex-shrink: 0;
 }
 
 .admin-portal-badge {
@@ -70,12 +74,12 @@ body.modal-open {
 .admin-quick-nav {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 2px 0;
+  padding: 4px 0;
 }
 
 .admin-quick-nav::-webkit-scrollbar {
@@ -89,21 +93,22 @@ body.modal-open {
   font-weight: 600;
   color: var(--muted);
   text-decoration: none;
-  padding: 7px 12px;
+  padding: 7px 14px;
   border-radius: 99px;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .admin-nav-item:hover {
   color: var(--forest);
-  background: rgba(40, 78, 59, 0.07);
+  background: rgba(40, 78, 59, 0.08);
 }
 
 .admin-nav-item.active {
-  color: var(--forest);
-  background: rgba(40, 78, 59, 0.12);
+  color: #ffffff;
+  background: #382314;
   font-weight: 800;
+  box-shadow: 0 3px 10px rgba(56, 35, 20, 0.24);
 }
 
 /* Admin User Navigation & Profile Dropdown */

@@ -1,0 +1,448 @@
+/* ==========================================================================
+   BYC GROWTH — Living Root Animations (Buttons, Navigation & Cards)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Target Buttons, Navigation Pills & Card Bases
+   -------------------------------------------------------------------------- */
+.button,
+.btn,
+.nav-item,
+.admin-nav-item,
+.nav-login-btn,
+.final-return-btn,
+[data-roots],
+.activity-card,
+.gc-card,
+.gc-scoreboard,
+.destination-card,
+.member-card,
+.wish-card,
+.feature-box,
+.final-team,
+.podium-card,
+.about-philosophy-card,
+.about-hero-showcase {
+  position: relative !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. Button Root Sprout Tendrils (Wrapped Snugly around Pill Contours)
+   -------------------------------------------------------------------------- */
+.btn-root-sprout-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+  border-radius: inherit;
+}
+
+.btn-root-anchor {
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, filter;
+}
+
+/* Bottom-Left Anchor */
+.btn-root-bl {
+  bottom: -4px;
+  left: -2px;
+  width: 40px;
+  height: 28px;
+}
+
+/* Top-Right Anchor */
+.btn-root-tr {
+  top: -4px;
+  right: -2px;
+  width: 40px;
+  height: 28px;
+}
+
+/* Button Root Tendril Paths */
+.root-tendril-main,
+.root-tendril-sub {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 45;
+  stroke-dashoffset: 45; /* Hidden/Retracted by default */
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+  vector-effect: non-scaling-stroke;
+}
+
+.root-tendril-main {
+  stroke-width: 2px;
+}
+
+.root-tendril-sub {
+  stroke-width: 1.4px;
+}
+
+.root-leaf-bud {
+  transform: scale(0);
+  opacity: 0;
+  transform-origin: center;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s,
+    opacity 0.35s ease 0.3s;
+}
+
+/* --------------------------------------------------------------------------
+   3. Active Button State: Deep Earthy Wood Bark (#382314) + Glowing Roots
+   -------------------------------------------------------------------------- */
+.nav-item.active,
+.admin-nav-item.active,
+.button.active,
+.btn.active {
+  color: #ffffff !important;
+  background: #382314 !important;
+  font-weight: 800 !important;
+  box-shadow: 0 4px 14px rgba(56, 35, 20, 0.28) !important;
+}
+
+/* Roots on Active Button: Golden-Lime Sprouts Against Dark Bark */
+.nav-item.active .root-tendril-main,
+.nav-item.active .root-tendril-sub,
+.admin-nav-item.active .root-tendril-main,
+.admin-nav-item.active .root-tendril-sub,
+.button.active .root-tendril-main,
+.button.active .root-tendril-sub,
+.btn.active .root-tendril-main,
+.btn.active .root-tendril-sub,
+[data-roots].active .root-tendril-main,
+[data-roots].active .root-tendril-sub {
+  stroke-dashoffset: 0 !important;
+  opacity: 1 !important;
+  stroke: #bad259 !important;
+}
+
+.nav-item.active .root-leaf-bud,
+.admin-nav-item.active .root-leaf-bud,
+.button.active .root-leaf-bud,
+.btn.active .root-leaf-bud,
+[data-roots].active .root-leaf-bud {
+  transform: scale(1) !important;
+  opacity: 1 !important;
+  fill: #e8f598 !important;
+}
+
+/* Living Breath Pulse on Active Button Roots */
+.nav-item.active .btn-root-anchor,
+.admin-nav-item.active .btn-root-anchor,
+.button.active .btn-root-anchor,
+.btn.active .btn-root-anchor,
+[data-roots].active .btn-root-anchor {
+  animation: rootActivePulse 6.5s ease-in-out infinite;
+}
+
+@keyframes rootActivePulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+  }
+  50% {
+    transform: scale(1.05) translate(-0.5px, 0.5px);
+    filter: drop-shadow(0 0 5px rgba(186, 210, 89, 0.6));
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Hovered Button State: Soft Translucent Green + Fresh Tender Sprouts
+   -------------------------------------------------------------------------- */
+.nav-item:hover:not(.active),
+.admin-nav-item:hover:not(.active) {
+  color: var(--forest) !important;
+  background: rgba(40, 78, 59, 0.08) !important;
+}
+
+/* Fresh green roots on hover for all buttons & nav items */
+.button:hover:not(.active):not(:disabled) .root-tendril-main,
+.btn:hover:not(.active):not(:disabled) .root-tendril-main,
+.nav-item:hover:not(.active) .root-tendril-main,
+.admin-nav-item:hover:not(.active) .root-tendril-main,
+.nav-login-btn:hover:not(.active) .root-tendril-main,
+.final-return-btn:hover:not(.active) .root-tendril-main,
+[data-roots]:hover:not(.active):not(:disabled) .root-tendril-main {
+  stroke: #3d6a45;
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.button:hover:not(.active):not(:disabled) .root-tendril-sub,
+.btn:hover:not(.active):not(:disabled) .root-tendril-sub,
+.nav-item:hover:not(.active) .root-tendril-sub,
+.admin-nav-item:hover:not(.active) .root-tendril-sub,
+.nav-login-btn:hover:not(.active) .root-tendril-sub,
+.final-return-btn:hover:not(.active) .root-tendril-sub,
+[data-roots]:hover:not(.active):not(:disabled) .root-tendril-sub {
+  stroke: #528359;
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.button:hover:not(.active):not(:disabled) .root-leaf-bud,
+.btn:hover:not(.active):not(:disabled) .root-leaf-bud,
+.nav-item:hover:not(.active) .root-leaf-bud,
+.admin-nav-item:hover:not(.active) .root-leaf-bud,
+.nav-login-btn:hover:not(.active) .root-leaf-bud,
+.final-return-btn:hover:not(.active) .root-leaf-bud,
+[data-roots]:hover:not(.active):not(:disabled) .root-leaf-bud {
+  transform: scale(1);
+  opacity: 1;
+  fill: #88aa38;
+}
+
+/* Primary Dark Green Buttons: Lime/Gold Sprouts */
+.button-primary:hover:not(.active):not(:disabled) .root-tendril-main,
+.button-primary:hover:not(.active):not(:disabled) .root-tendril-sub {
+  stroke: #bad259 !important;
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.button-primary:hover:not(.active):not(:disabled) .root-leaf-bud {
+  transform: scale(1);
+  opacity: 1;
+  fill: #e8f598 !important;
+}
+
+/* Smooth Retraction on Mouse Leave */
+.button:not(:hover):not(.active) .root-tendril-main,
+.button:not(:hover):not(.active) .root-tendril-sub,
+.btn:not(:hover):not(.active) .root-tendril-main,
+.btn:not(:hover):not(.active) .root-tendril-sub,
+.nav-item:not(:hover):not(.active) .root-tendril-main,
+.nav-item:not(:hover):not(.active) .root-tendril-sub,
+.admin-nav-item:not(:hover):not(.active) .root-tendril-main,
+.admin-nav-item:not(:hover):not(.active) .root-tendril-sub,
+.nav-login-btn:not(:hover):not(.active) .root-tendril-main,
+.nav-login-btn:not(:hover):not(.active) .root-tendril-sub,
+.final-return-btn:not(:hover):not(.active) .root-tendril-main,
+.final-return-btn:not(:hover):not(.active) .root-tendril-sub,
+[data-roots]:not(:hover):not(.active) .root-tendril-main,
+[data-roots]:not(:hover):not(.active) .root-tendril-sub {
+  stroke-dashoffset: 45;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.55s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease;
+}
+
+.button:not(:hover):not(.active) .root-leaf-bud,
+.btn:not(:hover):not(.active) .root-leaf-bud,
+.nav-item:not(:hover):not(.active) .root-leaf-bud,
+.admin-nav-item:not(:hover):not(.active) .root-leaf-bud,
+.nav-login-btn:not(:hover):not(.active) .root-leaf-bud,
+.final-return-btn:not(:hover):not(.active) .root-leaf-bud,
+[data-roots]:not(:hover):not(.active) .root-leaf-bud {
+  transform: scale(0);
+  opacity: 0;
+  transition:
+    transform 0.4s ease,
+    opacity 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   5. Interactive Cards, Scoreboard & Feature Containers
+   -------------------------------------------------------------------------- */
+.card-root-sprout-wrap {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 68px;
+  height: 56px;
+  pointer-events: none;
+  z-index: 3;
+  overflow: visible;
+}
+
+.card-root-anchor {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 68px;
+  height: 56px;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.card-root-main,
+.card-root-branch,
+.card-root-sub {
+  fill: none;
+  stroke: #3d6a45;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 65;
+  stroke-dashoffset: 65; /* Retracted by default */
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.4s ease;
+  vector-effect: non-scaling-stroke;
+}
+
+.card-root-main {
+  stroke-width: 2.2px;
+}
+
+.card-root-branch {
+  stroke-width: 1.6px;
+}
+
+.card-root-sub {
+  stroke-width: 1.2px;
+}
+
+.card-root-bud {
+  fill: #bad259;
+  transform: scale(0);
+  opacity: 0;
+  transform-origin: center;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s,
+    opacity 0.35s ease 0.3s;
+}
+
+/* Card / Scoreboard Hover: Roots Gracefully Sprout In */
+.activity-card:hover .card-root-main,
+.activity-card:hover .card-root-branch,
+.activity-card:hover .card-root-sub,
+.gc-card:hover .card-root-main,
+.gc-card:hover .card-root-branch,
+.gc-card:hover .card-root-sub,
+.gc-scoreboard:hover .card-root-main,
+.gc-scoreboard:hover .card-root-branch,
+.gc-scoreboard:hover .card-root-sub,
+.destination-card:hover .card-root-main,
+.destination-card:hover .card-root-branch,
+.destination-card:hover .card-root-sub,
+.member-card:hover .card-root-main,
+.member-card:hover .card-root-branch,
+.member-card:hover .card-root-sub,
+.wish-card:hover .card-root-main,
+.wish-card:hover .card-root-branch,
+.wish-card:hover .card-root-sub,
+.feature-box:hover .card-root-main,
+.feature-box:hover .card-root-branch,
+.feature-box:hover .card-root-sub,
+.final-team:hover .card-root-main,
+.final-team:hover .card-root-branch,
+.final-team:hover .card-root-sub,
+.podium-card:hover .card-root-main,
+.podium-card:hover .card-root-branch,
+.podium-card:hover .card-root-sub,
+.about-philosophy-card:hover .card-root-main,
+.about-philosophy-card:hover .card-root-branch,
+.about-philosophy-card:hover .card-root-sub,
+.about-hero-showcase:hover .card-root-main,
+.about-hero-showcase:hover .card-root-branch,
+.about-hero-showcase:hover .card-root-sub {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.activity-card:hover .card-root-bud,
+.gc-card:hover .card-root-bud,
+.gc-scoreboard:hover .card-root-bud,
+.destination-card:hover .card-root-bud,
+.member-card:hover .card-root-bud,
+.wish-card:hover .card-root-bud,
+.feature-box:hover .card-root-bud,
+.final-team:hover .card-root-bud,
+.podium-card:hover .card-root-bud,
+.about-philosophy-card:hover .card-root-bud,
+.about-hero-showcase:hover .card-root-bud {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Card / Scoreboard Unhover: Retract Out */
+.activity-card:not(:hover) .card-root-main,
+.activity-card:not(:hover) .card-root-branch,
+.activity-card:not(:hover) .card-root-sub,
+.gc-card:not(:hover) .card-root-main,
+.gc-card:not(:hover) .card-root-branch,
+.gc-card:not(:hover) .card-root-sub,
+.gc-scoreboard:not(:hover) .card-root-main,
+.gc-scoreboard:not(:hover) .card-root-branch,
+.gc-scoreboard:not(:hover) .card-root-sub,
+.destination-card:not(:hover) .card-root-main,
+.destination-card:not(:hover) .card-root-branch,
+.destination-card:not(:hover) .card-root-sub,
+.member-card:not(:hover) .card-root-main,
+.member-card:not(:hover) .card-root-branch,
+.member-card:not(:hover) .card-root-sub,
+.wish-card:not(:hover) .card-root-main,
+.wish-card:not(:hover) .card-root-branch,
+.wish-card:not(:hover) .card-root-sub,
+.feature-box:not(:hover) .card-root-main,
+.feature-box:not(:hover) .card-root-branch,
+.feature-box:not(:hover) .card-root-sub,
+.final-team:not(:hover) .card-root-main,
+.final-team:not(:hover) .card-root-branch,
+.final-team:not(:hover) .card-root-sub,
+.podium-card:not(:hover) .card-root-main,
+.podium-card:not(:hover) .card-root-branch,
+.podium-card:not(:hover) .card-root-sub,
+.about-philosophy-card:not(:hover) .card-root-main,
+.about-philosophy-card:not(:hover) .card-root-branch,
+.about-philosophy-card:not(:hover) .card-root-sub,
+.about-hero-showcase:not(:hover) .card-root-main,
+.about-hero-showcase:not(:hover) .card-root-branch,
+.about-hero-showcase:not(:hover) .card-root-sub {
+  stroke-dashoffset: 65;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.55s ease,
+    opacity 0.4s ease;
+}
+
+.activity-card:not(:hover) .card-root-bud,
+.gc-card:not(:hover) .card-root-bud,
+.gc-scoreboard:not(:hover) .card-root-bud,
+.destination-card:not(:hover) .card-root-bud,
+.member-card:not(:hover) .card-root-bud,
+.wish-card:not(:hover) .card-root-bud,
+.feature-box:not(:hover) .card-root-bud,
+.final-team:not(:hover) .card-root-bud,
+.podium-card:not(:hover) .card-root-bud,
+.about-philosophy-card:not(:hover) .card-root-bud,
+.about-hero-showcase:not(:hover) .card-root-bud {
+  transform: scale(0);
+  opacity: 0;
+  transition:
+    transform 0.4s ease,
+    opacity 0.3s ease;
+}
+
+/* Prevent sticky hover on touch-only devices */
+@media (hover: none) {
+  .card-root-sprout-wrap {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Accessibility & Motion Safeguards
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .btn-root-anchor,
+  .root-tendril-main,
+  .root-tendril-sub,
+  .root-leaf-bud,
+  .card-root-main,
+  .card-root-branch,
+  .card-root-sub,
+  .card-root-bud {
+    animation: none !important;
+    transition: none !important;
+  }
+}

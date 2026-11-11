@@ -19,6 +19,8 @@ export function initScrollReveal() {
         '.destinations-grid .destination-card',
 
         // About & General Pages
+        '.about-hero-showcase',
+        '.about-philosophy-card',
         '.placeholder-card',
         '.feature-grid-3 .feature-box',
 

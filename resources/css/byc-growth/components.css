@@ -85,6 +85,7 @@
 .brand-logo {
   height: 60px;
   width: auto;
+  aspect-ratio: 1230 / 549;
   max-width: 100%;
   object-fit: contain;
   display: block;
@@ -124,10 +125,16 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  min-width: 85px;
+  min-height: 38px;
 }
 
 .brand-compact .brand-logo {
   height: 38px;
+  width: 85px;
+  aspect-ratio: 1230 / 549;
+  min-width: 85px;
+  flex-shrink: 0;
 }
 
 .brand-compact .brand-mark {

@@ -435,16 +435,19 @@
 /* --------------------------------------------------------------------------
    10. Generic Cards, Admin Cards & Forms
    -------------------------------------------------------------------------- */
+.reveal-enabled .about-philosophy-card.scroll-reveal,
 .reveal-enabled .placeholder-card.scroll-reveal,
 .reveal-enabled .admin-welcome-card.scroll-reveal,
 .reveal-enabled #form-cash-transaction.scroll-reveal {
   opacity: 0;
   transform: translateY(30px);
+  will-change: opacity, transform;
   transition:
-    opacity 1.3s var(--reveal-ease),
-    transform 1.3s var(--reveal-ease);
+    opacity 1.1s var(--reveal-ease),
+    transform 1.1s var(--reveal-ease);
 }
 
+.reveal-enabled .about-philosophy-card.scroll-reveal.is-revealed,
 .reveal-enabled .placeholder-card.scroll-reveal.is-revealed,
 .reveal-enabled .admin-welcome-card.scroll-reveal.is-revealed,
 .reveal-enabled #form-cash-transaction.scroll-reveal.is-revealed {
@@ -504,6 +507,7 @@
   .reveal-enabled .feature-grid-3 .feature-box.scroll-reveal,
   .reveal-enabled .game-center-grid .gc-card.scroll-reveal,
   .reveal-enabled .wishes-grid .wish-card.scroll-reveal,
+  .reveal-enabled .about-philosophy-card.scroll-reveal,
   .reveal-enabled .placeholder-card.scroll-reveal,
   .reveal-enabled .global-footer.scroll-reveal {
     opacity: 1 !important;
