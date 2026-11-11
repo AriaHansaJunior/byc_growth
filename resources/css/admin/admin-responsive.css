@@ -671,6 +671,10 @@
    3. Flagship Smartphone Upper Bound (~320px–480px)
    -------------------------------------------------------------------------- */
 @media (max-width: 480px) {
+  .admin-brand-wrap {
+    min-width: auto !important;
+  }
+
   .admin-portal-badge {
     display: none !important;
   }

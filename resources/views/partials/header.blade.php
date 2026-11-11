@@ -75,6 +75,14 @@
         <div class="mobile-nav-header">
             <x-brand :compact="true" />
             <button type="button" class="mobile-nav-close" id="btn-mobile-nav-close" aria-label="Close menu">&times;</button>
+            <span class="drawer-root-vine" aria-hidden="true">
+                <svg viewBox="0 0 140 24" fill="none">
+                    <path class="drawer-vine-stem" d="M 0,18 C 35,18 55,6 82,10 C 102,13 118,6 138,2" />
+                    <path class="drawer-vine-branch" d="M 52,14 C 60,20 72,21 78,19" />
+                    <circle class="drawer-vine-bud" cx="138" cy="2" r="2.5" />
+                    <circle class="drawer-vine-bud" cx="78" cy="19" r="2" />
+                </svg>
+            </span>
         </div>
         <nav class="mobile-nav-links" aria-label="Mobile Navigation Links">
             <a href="{{ route('home') }}" class="mobile-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">

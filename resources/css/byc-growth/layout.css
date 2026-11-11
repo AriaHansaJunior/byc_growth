@@ -467,7 +467,7 @@
   color: var(--ink);
   margin: 0;
   line-height: 1.5;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 /* Weekly Gathering Feature with Strong Visual Prominence */
@@ -484,7 +484,7 @@
   font: 800 24px/1.25 "Manrope", sans-serif;
   letter-spacing: -.02em;
   color: var(--forest-dark);
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 /* Supporting Contact Column */
@@ -501,7 +501,7 @@
   letter-spacing: -.02em;
   color: var(--ink);
   margin: 0 0 18px;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .about-contact-channels {
@@ -541,6 +541,8 @@
   font-weight: 700;
   color: var(--forest);
   transition: color .2s ease;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .about-contact-card:hover .about-channel-value {

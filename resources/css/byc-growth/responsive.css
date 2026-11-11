@@ -9,65 +9,28 @@
 
 
 /* --------------------------------------------------------------------------
-   2. Large Tablets & Small Laptops (<= 1024px)
+   1. Compact Desktop & Landscape Tablets (1025px–1240px)
    -------------------------------------------------------------------------- */
-@media (max-width: 1024px) {
-  body {
-    min-width: 100%;
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .header-brand-divider,
+  .header-brand-tagline {
+    display: none !important;
   }
 
-  .home-hero {
-    grid-template-columns: 1fr;
-    gap: 40px;
-    text-align: center;
-    padding: clamp(36px, 5vh, 60px) max(5vw, 36px);
+  .header-nav {
+    gap: 6px !important;
   }
 
-  .home-copy {
-    max-width: 100%;
-    margin: 0 auto;
-  }
-
-  .home-actions {
-    justify-content: center;
-  }
-
-  .about-hero-showcase {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 32px 30px;
-  }
-
-  .about-philosophy-grid {
-    grid-template-columns: 240px 1fr;
-    gap: 32px;
-  }
-
-  .game-center-hero {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    padding: 36px 32px;
-  }
-
-  .game-center-art-frame img {
-    height: 260px;
-  }
-
-  .footer-top {
-    grid-template-columns: 1fr;
-    gap: 40px;
-  }
-
-  .footer-columns {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 32px;
+  .nav-item {
+    padding: 7px 12px !important;
+    font-size: 13.5px !important;
   }
 }
 
 /* --------------------------------------------------------------------------
-   3. Tablets & Mobile Viewports (<= 768px)
+   2. Tablets & Mobile Viewports (<= 1024px, including 768px, 800px, 820px, 834px)
    -------------------------------------------------------------------------- */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 
   html {
     overflow-x: clip !important;
@@ -84,100 +47,123 @@
     touch-action: pan-y;
   }
 
-    .site-wrapper,
-    .site-main {
-      overflow-x: clip !important;
-      overflow-y: visible !important;
-      max-width: 100% !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
+  .site-wrapper,
+  .site-main {
+    overflow-x: clip !important;
+    overflow-y: visible !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-    .global-header {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      z-index: 950 !important;
-      width: 100% !important;
-    }
+  .global-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 950 !important;
+    width: 100% !important;
+  }
 
-    .site-wrapper.has-global-header,
-    .site-wrapper:has(.global-header) {
-      padding-top: 69px !important;
-    }
+  .site-wrapper.has-global-header,
+  .site-wrapper:has(.global-header) {
+    padding-top: 69px !important;
+  }
 
-    /* Members Search Wrapper & Form (User directory) */
-    .members-search-wrapper {
-      flex-direction: column !important;
-      align-items: stretch !important;
-      gap: 12px !important;
-      width: 100% !important;
-    }
+  /* Navigation switch to clean responsive drawer */
+  .header-nav {
+    display: none !important;
+  }
 
-    #form-search-members {
-      width: 100% !important;
-      max-width: 100% !important;
-    }
+  .mobile-nav-toggle {
+    display: flex !important;
+  }
 
-    #form-search-members>div {
-      flex: 1 !important;
-      min-width: 0 !important;
-    }
+  .mobile-nav-backdrop {
+    display: block !important;
+  }
 
-    /* Navigation switch */
-    .header-nav {
-      display: none !important;
-    }
+  .mobile-nav-drawer {
+    display: flex !important;
+  }
 
-    .mobile-nav-toggle {
-      display: flex !important;
-    }
+  .header-container {
+    padding: 12px 28px !important;
+  }
 
-    .mobile-nav-backdrop {
-      display: block !important;
-    }
+  .header-brand-divider,
+  .header-brand-tagline {
+    display: none !important;
+  }
 
-    .mobile-nav-drawer {
-      display: flex !important;
-    }
+  /* Global Containers padding adaptation */
+  .page-shell {
+    padding: 32px 24px 56px !important;
+    min-height: calc(100vh - 120px) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-    .header-container {
-      padding: 12px 20px !important;
-    }
+  .page-header {
+    margin-bottom: 26px !important;
+  }
 
-    .header-brand-divider,
-    .header-brand-tagline {
-      display: none !important;
-    }
+  .page-header h1 {
+    font-size: clamp(28px, 5.5vw, 40px) !important;
+    margin: 8px 0 12px !important;
+  }
 
-    /* Global Containers padding adaptation */
-    .page-shell {
-      padding: 28px 18px 56px !important;
-      min-height: calc(100vh - 120px) !important;
-    }
+  .page-header p {
+    font-size: 15px !important;
+  }
 
-    .page-header {
-      margin-bottom: 24px !important;
-    }
+  .user-page-container {
+    padding: 24px 20px 48px !important;
+  }
 
-    .page-header h1 {
-      font-size: clamp(28px, 6.5vw, 40px) !important;
-      margin: 8px 0 12px !important;
-    }
+  /* Homepage Hero on Tablets */
+  .home-hero {
+    grid-template-columns: 1fr !important;
+    gap: 36px !important;
+    text-align: center !important;
+    padding: 36px 24px !important;
+    min-height: auto !important;
+  }
 
-    .page-header p {
-      font-size: 15px !important;
-    }
+  .home-copy {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
 
-    .user-page-container {
-      padding: 20px 16px 48px !important;
-    }
+  .home-copy h1 {
+    font-size: clamp(32px, 5.5vw, 46px) !important;
+    margin: 12px 0 16px !important;
+  }
 
-    /* Homepage */
-    .home-hero {
-      padding: 28px 18px 44px !important;
-      min-height: auto !important;
+  .home-copy>p {
+    font-size: 15.5px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .home-actions {
+    justify-content: center !important;
+  }
+
+  .hero-photo-wrap {
+    max-width: 640px !important;
+    margin: 0 auto !important;
+  }
+
+  .footer-top {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+
+  .footer-columns {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 32px !important;
+  }
       gap: 28px !important;
     }
 
@@ -288,18 +274,70 @@
     .about-hero-showcase {
       padding: 24px 20px !important;
       border-radius: 18px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+    }
+
+    .about-focal-column {
+      gap: 20px !important;
     }
 
     .about-location-city {
-      font-size: 26px !important;
+      font-size: clamp(22px, 6.5vw, 28px) !important;
+      line-height: 1.25 !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
     }
 
     .about-location-details {
       white-space: normal !important;
+      font-size: 14.5px !important;
+      line-height: 1.5 !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
+    }
+
+    .about-gathering-unit {
+      padding: 16px 18px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .about-gathering-time {
+      white-space: normal !important;
+      font-size: clamp(18px, 5.2vw, 22px) !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
+    }
+
+    .about-contact-role {
+      white-space: normal !important;
+      font-size: clamp(17px, 5vw, 19px) !important;
+      line-height: 1.3 !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
     }
 
     .about-contact-channels {
       grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+
+    .about-contact-card {
+      padding: 12px 16px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .about-channel-value {
+      font-size: 14.5px !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
     }
 
     /* About Philosophy Section */
@@ -307,6 +345,10 @@
       padding: 26px 20px !important;
       border-radius: 18px !important;
       margin-bottom: 24px !important;
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
     }
 
     .about-philosophy-grid {
@@ -316,10 +358,30 @@
 
     .about-philosophy-visual {
       margin: 0 auto;
+      max-width: 100% !important;
+    }
+
+    .about-philosophy-figure-frame {
+      min-height: 220px !important;
+      max-width: 220px !important;
+      margin: 0 auto !important;
+    }
+
+    .about-philosophy-aura {
+      width: 170px !important;
+      height: 170px !important;
+    }
+
+    .about-philosophy-groot-img {
+      width: 160px !important;
+      max-width: 100% !important;
     }
 
     .about-philosophy-title {
-      font-size: 26px !important;
+      font-size: clamp(22px, 6.5vw, 28px) !important;
+      line-height: 1.25 !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
     }
 
     .about-philosophy-pillars {
@@ -900,6 +962,37 @@
       padding: 20px 16px !important;
     }
 
+    .about-hero-showcase {
+      padding: 18px 14px !important;
+      gap: 18px !important;
+      border-radius: 16px !important;
+    }
+
+    .about-location-city {
+      font-size: 22px !important;
+    }
+
+    .about-gathering-unit {
+      padding: 14px 14px !important;
+      border-radius: 14px !important;
+    }
+
+    .about-gathering-time {
+      font-size: 18px !important;
+    }
+
+    .about-contact-role {
+      font-size: 17px !important;
+    }
+
+    .about-contact-card {
+      padding: 11px 13px !important;
+    }
+
+    .about-channel-value {
+      font-size: 13.5px !important;
+    }
+
     .about-philosophy-card {
       padding: 20px 16px !important;
       border-radius: 16px !important;
@@ -997,20 +1090,199 @@
   }
 
   /* --------------------------------------------------------------------------
-   5. Compact Mobile Viewports (<= 360px)
+   5. Compact Mobile Viewports (<= 360px, e.g. 320x720)
    -------------------------------------------------------------------------- */
   @media (max-width: 360px) {
-    .members-grid {
-      gap: 8px !important;
+    .header-container {
+      padding: 8px 10px !important;
     }
 
-    .member-photo-frame {
-      width: 82px !important;
-      height: 82px !important;
+    .page-shell {
+      padding: 16px 10px 40px !important;
+    }
+
+    .home-hero {
+      padding: 16px 10px 28px !important;
+      gap: 18px !important;
     }
 
     .home-copy h1 {
-      font-size: 28px !important;
+      font-size: 24px !important;
+      line-height: 1.2 !important;
+    }
+
+    .home-copy>p {
+      font-size: 14px !important;
+      margin-bottom: 18px !important;
+    }
+
+    .destinations-section {
+      padding: 24px 10px 36px !important;
+    }
+
+    .destination-card {
+      padding: 16px 12px !important;
+    }
+
+    .scripture-section {
+      padding: 20px 10px !important;
+    }
+
+    .scripture-card {
+      padding: 18px 14px !important;
+    }
+
+    /* About Page Showcase 320px optimization */
+    .about-hero-showcase {
+      padding: 14px 10px !important;
+      gap: 14px !important;
+      border-radius: 14px !important;
+    }
+
+    .about-location-city {
+      font-size: 20px !important;
+      line-height: 1.25 !important;
+    }
+
+    .about-location-details {
+      font-size: 13px !important;
+      line-height: 1.45 !important;
+    }
+
+    .about-gathering-unit {
+      padding: 12px 10px !important;
+      border-radius: 12px !important;
+    }
+
+    .about-gathering-time {
+      font-size: 16px !important;
+      line-height: 1.35 !important;
+    }
+
+    .about-contact-role {
+      font-size: 15.5px !important;
+      margin-bottom: 10px !important;
+    }
+
+    .about-contact-card {
+      padding: 10px 10px !important;
+      border-radius: 12px !important;
+    }
+
+    .about-channel-value {
+      font-size: 12.5px !important;
+    }
+
+    /* Philosophy Card 320px optimization */
+    .about-philosophy-card {
+      padding: 16px 10px !important;
+      border-radius: 14px !important;
+    }
+
+    .about-philosophy-figure-frame {
+      min-height: 170px !important;
+      max-width: 170px !important;
+    }
+
+    .about-philosophy-aura {
+      width: 130px !important;
+      height: 130px !important;
+    }
+
+    .about-philosophy-groot-img {
+      width: 125px !important;
+    }
+
+    .about-philosophy-title {
+      font-size: 20px !important;
+    }
+
+    .about-philosophy-subtitle {
+      font-size: 13px !important;
+      margin-bottom: 14px !important;
+    }
+
+    .about-philosophy-story p {
+      font-size: 13px !important;
+      line-height: 1.55 !important;
+      margin-bottom: 10px !important;
+    }
+
+    .about-faith-quote-bar {
+      padding: 10px 10px !important;
+    }
+
+    .about-faith-quote-bar p {
+      font-size: 12.5px !important;
+    }
+
+    .about-pillar-item {
+      padding: 10px 10px !important;
+    }
+
+    .about-pillar-body h4 {
+      font-size: 14px !important;
+    }
+
+    .about-pillar-body p {
+      font-size: 12px !important;
+    }
+
+    /* Members Grid 320px optimization */
+    .members-grid {
+      gap: 6px !important;
+    }
+
+    .member-card {
+      padding: 10px 6px !important;
+      border-radius: 12px !important;
+    }
+
+    .member-photo-frame {
+      width: 68px !important;
+      height: 68px !important;
+      margin-bottom: 8px !important;
+    }
+
+    .member-photo-fallback {
+      font-size: 24px !important;
+    }
+
+    .member-name {
+      font-size: 12.5px !important;
+    }
+
+    /* Scoreboard & Final Screen 320px */
+    .gc-scoreboard {
+      padding: 14px 10px !important;
+      border-radius: 16px !important;
+    }
+
+    .gc-scoreboard-teams .score-pair {
+      gap: 6px !important;
+    }
+
+    .gc-scoreboard-teams .team-score {
+      min-width: 0 !important;
+      padding: 6px 8px !important;
+    }
+
+    .final-tie-board {
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 12px !important;
+      max-height: none !important;
+    }
+
+    .final-tie-board .final-team {
+      width: 100% !important;
+      max-width: 270px !important;
+      padding: 16px 12px !important;
+    }
+
+    .activity-card {
+      padding: 16px 12px !important;
+      border-radius: 14px !important;
     }
 
     .game-titlebar h1 {

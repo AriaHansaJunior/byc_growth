@@ -9,6 +9,7 @@
 .btn,
 .nav-item,
 .admin-nav-item,
+.mobile-nav-link,
 .nav-login-btn,
 .final-return-btn,
 [data-roots],
@@ -69,7 +70,8 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 45;
-  stroke-dashoffset: 45; /* Hidden/Retracted by default */
+  stroke-dashoffset: 45;
+  /* Hidden/Retracted by default */
   opacity: 0;
   transition:
     stroke-dashoffset 0.75s cubic-bezier(0.16, 1, 0.3, 1),
@@ -99,6 +101,7 @@
    -------------------------------------------------------------------------- */
 .nav-item.active,
 .admin-nav-item.active,
+.mobile-nav-link.active,
 .button.active,
 .btn.active {
   color: #ffffff !important;
@@ -112,6 +115,8 @@
 .nav-item.active .root-tendril-sub,
 .admin-nav-item.active .root-tendril-main,
 .admin-nav-item.active .root-tendril-sub,
+.mobile-nav-link.active .root-tendril-main,
+.mobile-nav-link.active .root-tendril-sub,
 .button.active .root-tendril-main,
 .button.active .root-tendril-sub,
 .btn.active .root-tendril-main,
@@ -125,6 +130,7 @@
 
 .nav-item.active .root-leaf-bud,
 .admin-nav-item.active .root-leaf-bud,
+.mobile-nav-link.active .root-leaf-bud,
 .button.active .root-leaf-bud,
 .btn.active .root-leaf-bud,
 [data-roots].active .root-leaf-bud {
@@ -136,6 +142,7 @@
 /* Living Breath Pulse on Active Button Roots */
 .nav-item.active .btn-root-anchor,
 .admin-nav-item.active .btn-root-anchor,
+.mobile-nav-link.active .btn-root-anchor,
 .button.active .btn-root-anchor,
 .btn.active .btn-root-anchor,
 [data-roots].active .btn-root-anchor {
@@ -143,10 +150,13 @@
 }
 
 @keyframes rootActivePulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
   }
+
   50% {
     transform: scale(1.05) translate(-0.5px, 0.5px);
     filter: drop-shadow(0 0 5px rgba(186, 210, 89, 0.6));
@@ -167,6 +177,8 @@
 .btn:hover:not(.active):not(:disabled) .root-tendril-main,
 .nav-item:hover:not(.active) .root-tendril-main,
 .admin-nav-item:hover:not(.active) .root-tendril-main,
+.mobile-nav-link:hover:not(.active) .root-tendril-main,
+.mobile-nav-link:active:not(.active) .root-tendril-main,
 .nav-login-btn:hover:not(.active) .root-tendril-main,
 .final-return-btn:hover:not(.active) .root-tendril-main,
 [data-roots]:hover:not(.active):not(:disabled) .root-tendril-main {
@@ -179,6 +191,8 @@
 .btn:hover:not(.active):not(:disabled) .root-tendril-sub,
 .nav-item:hover:not(.active) .root-tendril-sub,
 .admin-nav-item:hover:not(.active) .root-tendril-sub,
+.mobile-nav-link:hover:not(.active) .root-tendril-sub,
+.mobile-nav-link:active:not(.active) .root-tendril-sub,
 .nav-login-btn:hover:not(.active) .root-tendril-sub,
 .final-return-btn:hover:not(.active) .root-tendril-sub,
 [data-roots]:hover:not(.active):not(:disabled) .root-tendril-sub {
@@ -191,6 +205,8 @@
 .btn:hover:not(.active):not(:disabled) .root-leaf-bud,
 .nav-item:hover:not(.active) .root-leaf-bud,
 .admin-nav-item:hover:not(.active) .root-leaf-bud,
+.mobile-nav-link:hover:not(.active) .root-leaf-bud,
+.mobile-nav-link:active:not(.active) .root-leaf-bud,
 .nav-login-btn:hover:not(.active) .root-leaf-bud,
 .final-return-btn:hover:not(.active) .root-leaf-bud,
 [data-roots]:hover:not(.active):not(:disabled) .root-leaf-bud {
@@ -222,6 +238,8 @@
 .nav-item:not(:hover):not(.active) .root-tendril-sub,
 .admin-nav-item:not(:hover):not(.active) .root-tendril-main,
 .admin-nav-item:not(:hover):not(.active) .root-tendril-sub,
+.mobile-nav-link:not(:hover):not(.active) .root-tendril-main,
+.mobile-nav-link:not(:hover):not(.active) .root-tendril-sub,
 .nav-login-btn:not(:hover):not(.active) .root-tendril-main,
 .nav-login-btn:not(:hover):not(.active) .root-tendril-sub,
 .final-return-btn:not(:hover):not(.active) .root-tendril-main,
@@ -239,6 +257,7 @@
 .btn:not(:hover):not(.active) .root-leaf-bud,
 .nav-item:not(:hover):not(.active) .root-leaf-bud,
 .admin-nav-item:not(:hover):not(.active) .root-leaf-bud,
+.mobile-nav-link:not(:hover):not(.active) .root-leaf-bud,
 .nav-login-btn:not(:hover):not(.active) .root-leaf-bud,
 .final-return-btn:not(:hover):not(.active) .root-leaf-bud,
 [data-roots]:not(:hover):not(.active) .root-leaf-bud {
@@ -247,6 +266,64 @@
   transition:
     transform 0.4s ease,
     opacity 0.3s ease;
+}
+
+/* --------------------------------------------------------------------------
+   4b. Mobile Navigation Drawer Living Root Vine (Header Divider)
+   -------------------------------------------------------------------------- */
+.drawer-root-vine {
+  position: absolute;
+  bottom: -10px;
+  right: 18px;
+  width: 140px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+
+.drawer-vine-stem,
+.drawer-vine-branch {
+  fill: none;
+  stroke: #2d553e;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+    opacity 0.4s ease 0.15s;
+}
+
+.drawer-vine-stem {
+  stroke-width: 2px;
+}
+
+.drawer-vine-branch {
+  stroke-width: 1.4px;
+  stroke: #487853;
+}
+
+.drawer-vine-bud {
+  transform: scale(0);
+  opacity: 0;
+  fill: #88aa38;
+  transform-origin: center;
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s,
+    opacity 0.35s ease 0.5s;
+}
+
+.mobile-nav-drawer.is-open .drawer-vine-stem,
+.mobile-nav-drawer.is-open .drawer-vine-branch {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+.mobile-nav-drawer.is-open .drawer-vine-bud {
+  transform: scale(1);
+  opacity: 1;
 }
 
 /* --------------------------------------------------------------------------
@@ -281,7 +358,8 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 65;
-  stroke-dashoffset: 65; /* Retracted by default */
+  stroke-dashoffset: 65;
+  /* Retracted by default */
   opacity: 0;
   transition:
     stroke-dashoffset 0.75s cubic-bezier(0.16, 1, 0.3, 1),
@@ -434,6 +512,7 @@
    6. Accessibility & Motion Safeguards
    -------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
+
   .btn-root-anchor,
   .root-tendril-main,
   .root-tendril-sub,

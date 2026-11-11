@@ -11,6 +11,7 @@ export function initRootGrow() {
         '.btn',
         '.nav-item',
         '.admin-nav-item',
+        '.mobile-nav-link',
         '.nav-login-btn',
         '.final-return-btn',
         '[data-roots]'
