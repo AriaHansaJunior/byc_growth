@@ -164,33 +164,6 @@
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 32px !important;
   }
-      gap: 28px !important;
-    }
-
-    .home-copy h1 {
-      font-size: clamp(32px, 8.5vw, 48px) !important;
-      margin: 12px 0 16px !important;
-    }
-
-    .home-copy>p {
-      font-size: 15px !important;
-      margin-bottom: 22px !important;
-    }
-
-    .home-actions {
-      flex-direction: column !important;
-      width: 100% !important;
-      gap: 12px !important;
-    }
-
-    .home-actions .button {
-      width: 100% !important;
-      justify-content: center !important;
-    }
-
-    .hero-photo-wrap {
-      max-width: 100% !important;
-    }
 
     .scripture-section {
       padding: 32px 16px !important;
@@ -261,8 +234,9 @@
     }
 
     .destinations-grid {
-      grid-template-columns: 1fr !important;
-      gap: 18px !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 16px !important;
     }
 
     .destination-card {
@@ -272,8 +246,8 @@
 
     /* About Page */
     .about-hero-showcase {
-      padding: 24px 20px !important;
-      border-radius: 18px !important;
+      padding: 32px 28px !important;
+      border-radius: 20px !important;
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
@@ -281,11 +255,11 @@
     }
 
     .about-focal-column {
-      gap: 20px !important;
+      gap: 24px !important;
     }
 
     .about-location-city {
-      font-size: clamp(22px, 6.5vw, 28px) !important;
+      font-size: clamp(24px, 4vw, 30px) !important;
       line-height: 1.25 !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
@@ -293,14 +267,15 @@
 
     .about-location-details {
       white-space: normal !important;
-      font-size: 14.5px !important;
+      font-size: 15px !important;
       line-height: 1.5 !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
     }
 
     .about-gathering-unit {
-      padding: 16px 18px !important;
+      padding: 18px 22px !important;
+      border-radius: 16px !important;
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
@@ -308,7 +283,7 @@
 
     .about-gathering-time {
       white-space: normal !important;
-      font-size: clamp(18px, 5.2vw, 22px) !important;
+      font-size: clamp(20px, 3.2vw, 24px) !important;
       line-height: 1.35 !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
@@ -316,35 +291,37 @@
 
     .about-contact-role {
       white-space: normal !important;
-      font-size: clamp(17px, 5vw, 19px) !important;
+      font-size: clamp(17px, 3vw, 19px) !important;
       line-height: 1.3 !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
     }
 
     .about-contact-channels {
-      grid-template-columns: 1fr !important;
-      gap: 10px !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 14px !important;
     }
 
     .about-contact-card {
-      padding: 12px 16px !important;
+      padding: 14px 16px !important;
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
+      min-width: 0 !important;
     }
 
     .about-channel-value {
-      font-size: 14.5px !important;
+      font-size: 14px !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
     }
 
-    /* About Philosophy Section */
+    /* About Philosophy Section (Optimized for Tablets: Full-width story & 3 spacious pillars) */
     .about-philosophy-card {
-      padding: 26px 20px !important;
-      border-radius: 18px !important;
-      margin-bottom: 24px !important;
+      padding: 36px 32px !important;
+      border-radius: 20px !important;
+      margin-bottom: 32px !important;
       box-sizing: border-box !important;
       width: 100% !important;
       max-width: 100% !important;
@@ -353,7 +330,7 @@
 
     .about-philosophy-grid {
       grid-template-columns: 1fr !important;
-      gap: 24px !important;
+      gap: 28px !important;
     }
 
     .about-philosophy-visual {
@@ -368,25 +345,58 @@
     }
 
     .about-philosophy-aura {
-      width: 170px !important;
-      height: 170px !important;
+      width: 180px !important;
+      height: 180px !important;
     }
 
     .about-philosophy-groot-img {
-      width: 160px !important;
+      width: 170px !important;
       max-width: 100% !important;
     }
 
     .about-philosophy-title {
-      font-size: clamp(22px, 6.5vw, 28px) !important;
+      font-size: clamp(24px, 4vw, 30px) !important;
       line-height: 1.25 !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
     }
 
+    .about-philosophy-subtitle {
+      font-size: 15px !important;
+      line-height: 1.5 !important;
+    }
+
+    .about-philosophy-story p {
+      font-size: 14.5px !important;
+      line-height: 1.65 !important;
+    }
+
+    .about-faith-quote-bar {
+      padding: 16px 20px !important;
+    }
+
     .about-philosophy-pillars {
-      grid-template-columns: 1fr !important;
-      gap: 12px !important;
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 16px !important;
+    }
+
+    .about-pillar-item {
+      padding: 18px 16px !important;
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+    }
+
+    .about-pillar-body h4 {
+      font-size: 15px !important;
+      word-break: break-word !important;
+      line-height: 1.3 !important;
+    }
+
+    .about-pillar-body p {
+      font-size: 13px !important;
+      line-height: 1.55 !important;
+      word-break: normal !important;
     }
 
     .feature-grid-3 {
@@ -438,7 +448,8 @@
     }
 
     .game-center-grid {
-      grid-template-columns: 1fr !important;
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
       gap: 20px !important;
     }
 
@@ -931,6 +942,572 @@
       max-height: calc(100vh - 140px) !important;
       overflow-y: auto !important;
       -webkit-overflow-scrolling: touch !important;
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     3. Dedicated Tablet Viewports (768px – 1024px)
+     Optimized for iPad Mini (768px), Galaxy Tab (800px), iPad 10th/Air (820px),
+     iPad Pro 11" (834px), Surface Pro (912px), and iPad Pro 12.9" / Landscape (1024px)
+     -------------------------------------------------------------------------- */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    /* Tablet Topbar & Shell */
+    .header-container {
+      padding: 12px 28px !important;
+    }
+
+    .mobile-nav-drawer {
+      width: min(380px, 75vw) !important;
+    }
+
+    .mobile-nav-item {
+      font-size: 16px !important;
+      padding: 13px 20px !important;
+    }
+
+    .page-shell {
+      padding: 32px 28px 64px !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .user-page-container {
+      padding: 28px 24px 52px !important;
+    }
+
+    .page-header {
+      margin-bottom: 28px !important;
+    }
+
+    .page-header h1 {
+      font-size: clamp(30px, 4vw, 38px) !important;
+      margin: 8px 0 12px !important;
+    }
+
+    .page-header p {
+      font-size: 15.5px !important;
+      max-width: 720px !important;
+    }
+
+    /* 1. Homepage on Tablets */
+    .home-hero {
+      grid-template-columns: 1fr !important;
+      gap: 32px !important;
+      text-align: center !important;
+      padding: 40px 24px 32px !important;
+    }
+
+    .home-copy {
+      max-width: 680px !important;
+      margin: 0 auto !important;
+    }
+
+    .home-copy h1 {
+      font-size: clamp(34px, 4.5vw, 44px) !important;
+    }
+
+    .home-copy > p {
+      font-size: 16px !important;
+      line-height: 1.6 !important;
+      max-width: 620px !important;
+      margin: 0 auto 24px !important;
+    }
+
+    .home-actions {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 14px !important;
+      width: 100% !important;
+    }
+
+    .home-actions .button {
+      width: auto !important;
+      min-width: 180px !important;
+      justify-content: center !important;
+    }
+
+    .hero-photo-wrap {
+      max-width: 620px !important;
+      margin: 0 auto !important;
+    }
+
+    .scripture-section {
+      padding: 36px 20px !important;
+    }
+
+    .scripture-card {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 32px 36px !important;
+      border-radius: 24px !important;
+      gap: 24px !important;
+    }
+
+    .scripture-content {
+      max-width: calc(100% - 70px) !important;
+    }
+
+    .destinations-section {
+      padding: 48px 24px 64px !important;
+    }
+
+    .destinations-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 18px !important;
+    }
+
+    .destination-card {
+      padding: 26px 20px !important;
+      min-height: 240px !important;
+    }
+
+    .footer-top {
+      grid-template-columns: 1fr !important;
+      gap: 32px !important;
+    }
+
+    .footer-columns {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 24px !important;
+    }
+
+    /* 2. About Page on Tablets (Full Width Story & 3 Comfortable Pillars) */
+    .about-hero-showcase {
+      padding: 36px 32px !important;
+      border-radius: 22px !important;
+    }
+
+    .about-focal-column {
+      gap: 24px !important;
+    }
+
+    .about-location-city {
+      font-size: 28px !important;
+    }
+
+    .about-gathering-unit {
+      padding: 20px 24px !important;
+      border-radius: 18px !important;
+    }
+
+    .about-gathering-time {
+      font-size: 24px !important;
+    }
+
+    .about-contact-channels {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+    }
+
+    .about-contact-card {
+      padding: 16px !important;
+      min-width: 0 !important;
+    }
+
+    .about-channel-value {
+      font-size: 13.5px !important;
+      word-break: break-all !important;
+    }
+
+    .about-philosophy-card {
+      padding: 38px 34px !important;
+      border-radius: 22px !important;
+      margin-bottom: 32px !important;
+    }
+
+    .about-philosophy-grid {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 28px !important;
+    }
+
+    .about-philosophy-visual {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin-bottom: 8px !important;
+    }
+
+    .about-philosophy-figure-frame {
+      min-height: 220px !important;
+      max-width: 220px !important;
+      margin: 0 auto !important;
+    }
+
+    .about-philosophy-aura {
+      width: 190px !important;
+      height: 190px !important;
+    }
+
+    .about-philosophy-groot-img {
+      width: 180px !important;
+    }
+
+    .about-philosophy-title {
+      font-size: 30px !important;
+    }
+
+    .about-philosophy-subtitle {
+      font-size: 15.5px !important;
+      line-height: 1.55 !important;
+    }
+
+    .about-philosophy-story p {
+      font-size: 15px !important;
+      line-height: 1.65 !important;
+    }
+
+    .about-philosophy-pillars {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 16px !important;
+      width: 100% !important;
+    }
+
+    .about-pillar-item {
+      padding: 22px 18px !important;
+      box-sizing: border-box !important;
+      min-width: 0 !important;
+    }
+
+    .about-pillar-body h4 {
+      font-size: 15.5px !important;
+      line-height: 1.35 !important;
+      word-break: normal !important;
+    }
+
+    .about-pillar-body p {
+      font-size: 13.5px !important;
+      line-height: 1.55 !important;
+      word-break: normal !important;
+    }
+
+    /* 3. Activities Page on Tablets */
+    .activity-card {
+      padding: 28px 30px !important;
+      border-radius: 20px !important;
+    }
+
+    .activity-header {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+    }
+
+    .activity-gallery {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+    }
+
+    /* 4. Members Directory on Tablets */
+    .members-search-wrapper {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      gap: 16px !important;
+    }
+
+    #form-search-members {
+      max-width: 440px !important;
+      flex: 1 !important;
+    }
+
+    .members-grid {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 20px !important;
+    }
+
+    .member-card {
+      padding: 20px 16px !important;
+      border-radius: 18px !important;
+    }
+
+    .member-photo-frame {
+      width: 130px !important;
+      height: 130px !important;
+    }
+
+    /* 5. Game Center Hub on Tablets */
+    .game-center-hub {
+      padding: 32px 28px 56px !important;
+    }
+
+    .game-center-hero {
+      display: grid !important;
+      grid-template-columns: 1.2fr 0.8fr !important;
+      gap: 28px !important;
+      align-items: center !important;
+      padding: 32px 30px !important;
+      border-radius: 22px !important;
+    }
+
+    .game-center-art-frame img {
+      height: 220px !important;
+      object-fit: cover !important;
+      border-radius: 18px !important;
+    }
+
+    .game-center-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 20px !important;
+    }
+
+    .gc-card {
+      padding: 28px 24px !important;
+      border-radius: 20px !important;
+    }
+
+    .gc-scoreboard {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 24px 28px !important;
+      gap: 20px !important;
+    }
+
+    .gc-scoreboard-info {
+      text-align: left !important;
+    }
+
+    .gc-scoreboard-teams {
+      margin: 0 !important;
+    }
+
+    .gc-scoreboard-teams .score-pair {
+      display: flex !important;
+      gap: 14px !important;
+    }
+
+    /* 6. Guess Me Gameplay on Tablets */
+    .guess-stage {
+      display: grid !important;
+      grid-template-columns: 1.1fr 0.9fr !important;
+      gap: 24px !important;
+      align-items: center !important;
+      min-height: 380px !important;
+      padding: 26px !important;
+    }
+
+    .guess-image {
+      min-height: 280px !important;
+      height: 100% !important;
+    }
+
+    .guess-image img {
+      max-height: 320px !important;
+      width: 100% !important;
+      object-fit: contain !important;
+    }
+
+    .host-panel {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      padding: 20px 24px !important;
+      border-radius: 18px !important;
+    }
+
+    /* 7. Growth 100 Gameplay on Tablets */
+    .growth-content {
+      width: 100% !important;
+      max-width: 900px !important;
+      margin: 0 auto !important;
+      padding: 20px 24px 36px !important;
+    }
+
+    .growth-title {
+      display: grid !important;
+      grid-template-columns: 1fr auto auto !important;
+      align-items: center !important;
+      gap: 20px !important;
+      text-align: left !important;
+    }
+
+    .answers-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 14px 18px !important;
+    }
+
+    .answer-tile {
+      min-height: 64px !important;
+      padding: 14px 18px !important;
+      font-size: 15px !important;
+    }
+
+    .growth-bottom {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+    }
+
+    /* 8. Final Screen on Tablets */
+    .final-screen {
+      padding: 56px 28px 44px !important;
+    }
+
+    .final-tie-board {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: center !important;
+      align-items: stretch !important;
+      gap: 24px !important;
+    }
+
+    .final-tie-board .final-team {
+      flex: 0 1 320px !important;
+      max-width: 340px !important;
+    }
+
+    .winner-podium {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: center !important;
+      align-items: flex-end !important;
+      gap: 20px !important;
+    }
+
+    .final-actions {
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: center !important;
+      gap: 14px !important;
+    }
+
+    .final-actions .button {
+      width: auto !important;
+      min-width: 170px !important;
+    }
+
+    /* 9. Profile & Birthday Wishes on Tablets */
+    .profile-layout-grid {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 24px !important;
+    }
+
+    .wishes-controls-card {
+      padding: 22px 26px !important;
+    }
+
+    .wishes-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 18px !important;
+    }
+
+    /* 10. Modals & Dialogs on Tablets */
+    .modal-card,
+    .admin-modal-card,
+    .scoreboard-modal-panel,
+    .dialog-card {
+      width: min(680px, calc(100vw - 48px)) !important;
+      max-height: 85vh !important;
+      padding: 28px 24px !important;
+      border-radius: 20px !important;
+    }
+  }
+
+  /* --------------------------------------------------------------------------
+     4. Handheld Phones & Small Viewports (< 768px)
+     -------------------------------------------------------------------------- */
+  @media (max-width: 767.98px) {
+    .header-container {
+      padding: 10px 18px !important;
+    }
+
+    .page-shell {
+      padding: 24px 16px 48px !important;
+    }
+
+    .home-hero {
+      padding: 28px 16px 40px !important;
+      gap: 28px !important;
+    }
+
+    .home-actions {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 12px !important;
+    }
+
+    .home-actions .button {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+
+    .destinations-grid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+
+    .about-hero-showcase {
+      padding: 24px 20px !important;
+      border-radius: 18px !important;
+    }
+
+    .about-contact-channels {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+
+    .about-philosophy-card {
+      padding: 26px 20px !important;
+      border-radius: 18px !important;
+      margin-bottom: 24px !important;
+    }
+
+    .about-philosophy-pillars {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+    }
+
+    .game-center-grid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+
+    .gc-scoreboard {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 16px !important;
+    }
+
+    .gc-scoreboard-teams .score-pair {
+      justify-content: center !important;
+    }
+
+    .final-tie-board {
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 14px !important;
+    }
+
+    .final-tie-board .final-team {
+      width: 100% !important;
+      max-width: 290px !important;
+    }
+
+    .members-search-wrapper {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 12px !important;
     }
   }
 

@@ -7,6 +7,17 @@
    1. Large Tablets & Medium Screens (<= 1024px)
    -------------------------------------------------------------------------- */
 @media (max-width: 1024px) {
+  html,
+  body {
+    overflow-x: clip !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .admin-brand-wrap {
+    min-width: auto !important;
+  }
+
   .admin-stats-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 16px !important;
@@ -19,9 +30,143 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. Tablets & Mobile Viewports (<= 768px)
+   2. Dedicated Tablet Viewports (768px – 1024px)
+   Admin Dashboard, Topbar Navigation, Data Tables, Forms & Modals
+   Optimized for iPad Mini, iPad 10th/Air, iPad Pro 11", Galaxy Tab, Surface Pro
    -------------------------------------------------------------------------- */
-@media (max-width: 768px) {
+@media (min-width: 768px) and (max-width: 1024px) {
+  .admin-shell {
+    padding: 24px 28px 48px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Admin Topbar: 2-row layout with scrollable tabs for 8 modules */
+  .admin-topbar {
+    padding: 12px 24px !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-brand-wrap {
+    order: 1 !important;
+    flex-shrink: 0 !important;
+    gap: 10px !important;
+  }
+
+  .admin-user-nav {
+    order: 2 !important;
+    margin-left: auto !important;
+  }
+
+  .admin-quick-nav {
+    order: 3 !important;
+    width: 100% !important;
+    flex: 0 0 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding: 8px 0 4px !important;
+    border-top: 1px solid var(--line) !important;
+    margin-top: 4px !important;
+    display: flex !important;
+    gap: 8px !important;
+    scrollbar-width: none !important;
+  }
+
+  .admin-quick-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .admin-nav-item {
+    font-size: 13px !important;
+    padding: 7px 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Admin Dashboard Metrics & Feature Grid */
+  .admin-welcome-card {
+    padding: 26px 28px !important;
+    border-radius: 20px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .admin-stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .feature-grid-3 {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .cash-summary-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  .admin-page-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    margin-bottom: 24px !important;
+    gap: 16px !important;
+  }
+
+  .admin-card {
+    padding: 24px 22px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Filter Bars on Tablet */
+  .admin-filter-bar,
+  .activities-filter-form,
+  .wishes-filter-bar,
+  .cash-filter-card form {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    align-items: flex-end !important;
+  }
+
+  /* Responsive Data Tables */
+  .admin-table-wrap {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    margin-bottom: 16px !important;
+    border-radius: 12px !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    padding: 12px 14px !important;
+    font-size: 13.5px !important;
+  }
+
+  /* Modals on Tablet */
+  .admin-modal-card {
+    max-width: min(640px, calc(100vw - 40px)) !important;
+    max-height: 85vh !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Handheld Phones & Small Viewports (< 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
 
   html {
     overflow-x: clip !important;
