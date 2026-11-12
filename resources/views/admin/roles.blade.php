@@ -32,6 +32,11 @@
             </div>
             <div class="roles-stat-divider"></div>
             <div class="roles-stat-item">
+                <span class="roles-stat-label">Super Admins</span>
+                <strong class="roles-stat-val roles-stat-val--super" style="color: #b45309;">{{ $totalSuperAdminsCount ?? 0 }}</strong>
+            </div>
+            <div class="roles-stat-divider"></div>
+            <div class="roles-stat-item">
                 <span class="roles-stat-label">Administrators</span>
                 <strong class="roles-stat-val roles-stat-val--admin">{{ $totalAdminsCount }}</strong>
             </div>
@@ -61,6 +66,7 @@
                     <label style="display: block; font-size: 11.5px; font-weight: 700; color: var(--muted); margin-bottom: 4px;">Role</label>
                     <select name="role" class="form-input" style="height: 40px; font-size: 13.5px; padding: 8px 12px;">
                         <option value="all" {{ ($filters['role'] ?? 'all') === 'all' ? 'selected' : '' }}>All Roles</option>
+                        <option value="super_admin" {{ ($filters['role'] ?? '') === 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                         <option value="admin" {{ ($filters['role'] ?? '') === 'admin' ? 'selected' : '' }}>Administrator</option>
                         <option value="user" {{ ($filters['role'] ?? '') === 'user' ? 'selected' : '' }}>Standard User</option>
                     </select>

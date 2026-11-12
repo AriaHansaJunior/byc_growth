@@ -454,10 +454,11 @@ select.input-field,
   font-family: 'DM Sans', 'Manrope', -apple-system, sans-serif !important;
   font-size: 13.5px !important;
   font-weight: 600 !important;
+  color-scheme: light !important;
   color: var(--ink, #141f17) !important;
   cursor: pointer !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
   box-sizing: border-box !important;
 }
 
@@ -470,11 +471,14 @@ select.input-field:hover {
 
 select:focus,
 select.form-input:focus,
-select.input-field:focus {
+select.input-field:focus,
+select:active,
+select.form-input:active {
   outline: none !important;
   border-color: var(--forest, #224229) !important;
   box-shadow: 0 0 0 3px rgba(186, 210, 89, 0.35) !important;
   background-color: var(--white, #ffffff) !important;
+  transition: none !important;
 }
 
 select:disabled,

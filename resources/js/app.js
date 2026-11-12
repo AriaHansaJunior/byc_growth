@@ -14,6 +14,7 @@ import { initAdminGames } from './components/admin-games';
 import { initMobileNav } from './components/mobile-nav';
 import { initPasswordToggle } from './components/password-toggle';
 import { initRootGrow } from './components/root-grow';
+import { initThemedSelects } from './components/themed-select';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize organic button root tendril animations
@@ -21,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize global password visibility toggles
     initPasswordToggle();
+
+    // Initialize BYC Growth themed custom select dropdowns
+    initThemedSelects();
 
     // Initialize mobile navigation drawer
     initMobileNav();

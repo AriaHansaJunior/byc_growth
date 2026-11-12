@@ -38,7 +38,7 @@ class RoleController extends Controller
         if ($role === 'super_admin') {
             $query->where('role', User::ROLE_SUPER_ADMIN);
         } elseif ($role === 'admin') {
-            $query->whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN]);
+            $query->where('role', User::ROLE_ADMIN);
         } elseif ($role === 'user') {
             $query->where('role', User::ROLE_USER);
         }
@@ -69,7 +69,8 @@ class RoleController extends Controller
         $members = Member::where('is_active', true)->orderBy('full_name', 'asc')->get();
 
         $totalUsersCount = User::count();
-        $totalAdminsCount = User::whereIn('role', [User::ROLE_ADMIN, User::ROLE_SUPER_ADMIN])->count();
+        $totalSuperAdminsCount = User::where('role', User::ROLE_SUPER_ADMIN)->count();
+        $totalAdminsCount = User::where('role', User::ROLE_ADMIN)->count();
         $totalStandardUsersCount = User::where('role', User::ROLE_USER)->count();
 
         return view('admin.roles', [
@@ -77,6 +78,7 @@ class RoleController extends Controller
             'members' => $members,
             'currentUser' => Auth::guard('admin')->user() ?? Auth::user(),
             'totalUsersCount' => $totalUsersCount,
+            'totalSuperAdminsCount' => $totalSuperAdminsCount,
             'totalAdminsCount' => $totalAdminsCount,
             'totalStandardUsersCount' => $totalStandardUsersCount,
             'filters' => [

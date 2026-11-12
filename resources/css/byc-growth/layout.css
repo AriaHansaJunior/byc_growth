@@ -191,7 +191,6 @@
   padding: 6px;
   box-shadow: 0 12px 30px rgba(32, 48, 41, 0.18);
   z-index: 1000;
-  animation: dropIn 0.18s ease-out;
 }
 
 .nav-user-dropdown-item {
@@ -240,17 +239,6 @@
 .nav-user-logout-item:hover {
   background: var(--cream);
   color: var(--red);
-}
-
-@keyframes dropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* Welcome Notification Toast (S0 Notification Foundation) */

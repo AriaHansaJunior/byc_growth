@@ -199,18 +199,6 @@ body.modal-open {
 
 .admin-profile-dropdown-wrap.is-open .admin-profile-dropdown-menu {
   display: block !important;
-  animation: adminDropIn 0.18s ease-out;
-}
-
-@keyframes adminDropIn {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .admin-profile-menu-header {
