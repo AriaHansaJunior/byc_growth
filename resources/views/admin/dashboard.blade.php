@@ -110,7 +110,7 @@
                 'name' => 'Members',
                 'desc' => 'Add/edit member profiles, upload photos, and maintain confidential birthday records.',
                 'route' => route('admin.members'),
-                'icon' => 'users',
+                'icon' => 'user',
             ],
             'games' => [
                 'name' => 'Games',

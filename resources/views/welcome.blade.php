@@ -117,7 +117,7 @@
             <a href="{{ route('members') }}" class="destination-card dest-members">
                 <div class="destination-card-top">
                     <div class="destination-icon-box">
-                        <x-icon name="users" />
+                        <x-icon name="user" />
                     </div>
                     <span class="dest-number">02</span>
                 </div>

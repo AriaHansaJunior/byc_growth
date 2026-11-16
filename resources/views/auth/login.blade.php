@@ -9,9 +9,9 @@
     <div class="auth-card">
         {{-- Brand / Header --}}
         <div class="auth-header">
-            <a href="{{ route('home') }}" class="auth-brand-link" title="Return to Website">
+            <div class="auth-brand-wrap">
                 <x-brand :compact="true" />
-            </a>
+            </div>
             <h1>Sign In</h1>
             <p>Enter your email to access your account.</p>
         </div>
