@@ -583,8 +583,8 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Generate cropped and compressed image blob
-        function getCroppedBlob() {
+        // Generate cropped and compressed image DataURL within strict server body limits
+        function getCroppedPayload() {
             return new Promise((resolve, reject) => {
                 try {
                     const { scale, currentVpSize } = getDimensions();
@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     const cropW = currentVpSize / scale;
                     const cropH = currentVpSize / scale;
 
-                    const targetSize = Math.min(1200, Math.max(480, Math.round(cropW)));
+                    const targetSize = Math.min(800, Math.max(480, Math.round(cropW)));
                     const canvas = document.createElement('canvas');
                     canvas.width = targetSize;
                     canvas.height = targetSize;
@@ -603,18 +603,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     ctx.imageSmoothingQuality = 'high';
                     ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, targetSize, targetSize);
 
-                    const mimeType = (originalFile && originalFile.type) ? originalFile.type : 'image/jpeg';
-                    canvas.toBlob((blob) => {
-                        if (blob) resolve(blob);
-                        else reject(new Error('Canvas export failed'));
-                    }, mimeType.includes('png') ? 'image/png' : 'image/jpeg', 0.90);
+                    if (typeof window.bycCanvasToDataUrl === 'function') {
+                        window.bycCanvasToDataUrl(canvas, 160 * 1024, 0.85)
+                            .then((res) => resolve(res.dataUrl))
+                            .catch(reject);
+                    } else {
+                        canvas.toBlob((blob) => {
+                            if (!blob) { reject(new Error('Canvas export failed')); return; }
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(blob);
+                        }, 'image/jpeg', 0.82);
+                    }
                 } catch (err) {
                     reject(err);
                 }
             });
         }
 
-        // Intercept form submit to validate and attach compressed cropped file
+        // Intercept form submit to validate and attach compressed cropped image
         form.addEventListener('submit', async (e) => {
             if (!validateMemberForm(form)) {
                 e.preventDefault();
@@ -632,13 +640,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             try {
-                const blob = await getCroppedBlob();
-                const base64Data = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
+                const base64Data = await getCroppedPayload();
 
                 let base64Input = form.querySelector('input[name="photo_base64"]');
                 if (!base64Input) {
@@ -649,27 +651,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 base64Input.value = base64Data;
 
-                const croppedFile = new File([blob], originalFile ? originalFile.name : 'member_photo.jpg', {
-                    type: blob.type || 'image/jpeg',
-                    lastModified: Date.now()
-                });
-
-                if (window.DataTransfer) {
-                    const dt = new DataTransfer();
-                    dt.items.add(croppedFile);
-                    fileInput.files = dt.files;
-                    form.submit();
-                } else {
-                    const formData = new FormData(form);
-                    formData.set('photo_base64', base64Data);
-                    formData.set('photo', croppedFile, croppedFile.name);
-                    await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                    });
-                    window.location.reload();
+                // Clear raw file input to avoid duplicate upload payload
+                if (fileInput) {
+                    fileInput.value = '';
                 }
+                form.submit();
             } catch (err) {
                 console.warn('Fallback submit due to:', err);
                 form.submit();

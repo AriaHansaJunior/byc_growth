@@ -193,11 +193,16 @@
 @media (max-width: 640px),
 (max-height: 760px) {
   .auth-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    padding: 16px 14px;
+    overflow-x: clip;
+  }
+
+  .site-wrapper.has-global-header .auth-shell {
     min-height: calc(100vh - 68px);
     min-height: calc(100dvh - 68px);
-    height: auto;
-    padding: 14px 14px 28px;
-    overflow-x: clip;
   }
 
   .auth-card {
@@ -216,8 +221,15 @@
     margin-bottom: 5px !important;
   }
 
+  .auth-header .brand-compact {
+    min-height: 0;
+    min-width: 0;
+  }
+
   .auth-header .brand-logo {
     height: 30px !important;
+    width: auto !important;
+    min-width: 0 !important;
   }
 
   .auth-header h1 {
@@ -300,5 +312,74 @@
     font-size: 11.5px;
     margin-bottom: 8px;
     border-radius: 8px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Login Keyboard Active State (Raised Card Above Virtual Keyboard)
+   Keeps card centered on initial load, then smoothly shifts card upward when
+   user taps Email or Password on mobile/touch screens.
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+  .auth-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px 14px;
+    overflow-x: clip;
+  }
+}
+
+body.is-auth-keyboard-open .site-wrapper.no-global-header,
+body.is-auth-keyboard-open .site-wrapper.no-global-header .site-main {
+  min-height: var(--auth-vv-height, 100dvh) !important;
+}
+
+.auth-shell.is-keyboard-open {
+  min-height: var(--auth-vv-height, 100dvh) !important;
+  justify-content: flex-start !important;
+  padding: 10px 14px 18px !important;
+}
+
+@media (max-width: 767.98px),
+(pointer: coarse) {
+  .auth-shell.is-keyboard-open .auth-card {
+    padding: 14px 16px 12px;
+  }
+
+  .auth-shell.is-keyboard-open .auth-header {
+    margin-bottom: 8px;
+  }
+
+  .auth-shell.is-keyboard-open .auth-header .brand-compact {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .auth-shell.is-keyboard-open .auth-header .brand-logo {
+    height: 26px !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .auth-shell.is-keyboard-open .auth-header h1 {
+    font-size: 18px;
+    margin: 0 0 2px;
+  }
+
+  .auth-shell.is-keyboard-open .admin-login-warning-box {
+    padding: 6px 10px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .auth-shell.is-keyboard-open .auth-form .form-group {
+    margin-bottom: 7px !important;
+  }
+
+  .auth-shell.is-keyboard-open .auth-form .form-group.form-group--last {
+    margin-bottom: 9px !important;
+  }
+
+  .auth-shell.is-keyboard-open .auth-footer {
+    margin-top: 6px;
   }
 }

@@ -947,8 +947,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Export cropped canvas to blob
-    function getCroppedBlob() {
+    // Export cropped canvas with adaptive size budget to avoid server HTTP 413 payload limits
+    function getCroppedPayload() {
         return new Promise((resolve, reject) => {
             try {
                 const { scale } = getDimensions();
@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cropW = vpSize / scale;
                 const cropH = vpSize / scale;
 
-                const targetSize = Math.min(1200, Math.max(480, Math.round(cropW)));
+                const targetSize = Math.min(800, Math.max(480, Math.round(cropW)));
                 const canvas = document.createElement('canvas');
                 canvas.width = targetSize;
                 canvas.height = targetSize;
@@ -967,13 +967,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(cropImg, cropX, cropY, cropW, cropH, 0, 0, targetSize, targetSize);
 
-                const mimeType = (originalFile && originalFile.type && originalFile.type.startsWith('image/'))
-                    ? originalFile.type
-                    : 'image/jpeg';
-                canvas.toBlob((blob) => {
-                    if (blob) resolve(blob);
-                    else reject(new Error('Canvas export failed'));
-                }, mimeType.includes('png') ? 'image/png' : 'image/jpeg', 0.90);
+                if (typeof window.bycCanvasToDataUrl === 'function') {
+                    window.bycCanvasToDataUrl(canvas, 160 * 1024, 0.85)
+                        .then((res) => resolve(res.dataUrl))
+                        .catch(reject);
+                } else {
+                    canvas.toBlob((blob) => {
+                        if (!blob) { reject(new Error('Canvas export failed')); return; }
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg', 0.82);
+                }
             } catch (err) {
                 reject(err);
             }
@@ -995,18 +1001,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 try {
-                    const blob = await getCroppedBlob();
-                    const base64Data = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
+                    const base64Data = await getCroppedPayload();
                     if (base64Input) {
                         base64Input.value = base64Data;
                     }
                     const rawInput = document.getElementById('create-raw-photo-base64');
-                    if (rawInput) rawInput.value = rawPhotoBase64 || '';
+                    if (rawInput) {
+                        if (originalFile && typeof window.bycCompressRawImage === 'function') {
+                            rawInput.value = await window.bycCompressRawImage(cropImg, 1200, 240 * 1024);
+                        } else if (rawPhotoBase64 && rawPhotoBase64.length <= 360 * 1024) {
+                            rawInput.value = rawPhotoBase64;
+                        } else {
+                            rawInput.value = '';
+                        }
+                    }
                     const zoomInput = document.getElementById('create-crop-zoom');
                     if (zoomInput) zoomInput.value = currentZoom.toFixed(2);
                     const offsetXInput = document.getElementById('create-crop-offset-x');
@@ -1014,27 +1022,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const offsetYInput = document.getElementById('create-crop-offset-y');
                     if (offsetYInput) offsetYInput.value = Math.round(currentOffsetY);
                     if (fileInput) {
-                        try {
-                            const croppedFile = new File([blob], originalFile ? originalFile.name : 'member_photo.jpg', {
-                                type: blob.type || 'image/jpeg',
-                                lastModified: Date.now()
-                            });
-                            if (window.DataTransfer) {
-                                const dt = new DataTransfer();
-                                dt.items.add(croppedFile);
-                                fileInput.files = dt.files;
-                            } else {
-                                fileInput.value = '';
-                            }
-                        } catch (_) {
-                            fileInput.value = '';
-                        }
+                        fileInput.value = '';
                     }
                     isSubmitting = true;
                     if (submitBtn) submitBtn.textContent = 'Saving...';
                     form.submit();
                 } catch (err) {
                     console.warn('Canvas crop fallback, submitting raw file:', err);
+                    if (base64Input) base64Input.value = '';
+                    const rawInput = document.getElementById('create-raw-photo-base64');
+                    if (rawInput) rawInput.value = '';
                     isSubmitting = true;
                     if (submitBtn) submitBtn.textContent = 'Saving...';
                     form.submit();

@@ -15,8 +15,15 @@ import { initMobileNav } from './components/mobile-nav';
 import { initPasswordToggle } from './components/password-toggle';
 import { initRootGrow } from './components/root-grow';
 import { initThemedSelects } from './components/themed-select';
+import { initAuthKeyboardShift } from './components/auth-keyboard';
+import { registerImageCompressHelpers } from './components/image-compress';
+
+registerImageCompressHelpers();
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize mobile keyboard card positioning on Member & Admin login pages
+    initAuthKeyboardShift();
+
     // Initialize organic button root tendril animations
     initRootGrow();
 

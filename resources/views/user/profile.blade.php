@@ -590,8 +590,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Generate Cropped Blob
-    function getCroppedBlob() {
+    // Generate Cropped & Compressed DataURL within strict server body limits
+    function getCroppedPayload() {
         return new Promise((resolve, reject) => {
             try {
                 const { scale, vpSize } = getDimensions();
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cropW = vpSize / scale;
                 const cropH = vpSize / scale;
 
-                const targetSize = Math.min(1200, Math.max(500, Math.round(cropW)));
+                const targetSize = Math.min(800, Math.max(500, Math.round(cropW)));
                 const canvas = document.createElement('canvas');
                 canvas.width = targetSize;
                 canvas.height = targetSize;
@@ -610,11 +610,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(cropImg, cropX, cropY, cropW, cropH, 0, 0, targetSize, targetSize);
 
-                const mimeType = (originalFile && originalFile.type) ? originalFile.type : 'image/jpeg';
-                canvas.toBlob((blob) => {
-                    if (blob) resolve(blob);
-                    else reject(new Error('Canvas toBlob failed'));
-                }, mimeType, 0.9);
+                if (typeof window.bycCanvasToDataUrl === 'function') {
+                    window.bycCanvasToDataUrl(canvas, 160 * 1024, 0.85)
+                        .then((res) => resolve(res.dataUrl))
+                        .catch(reject);
+                } else {
+                    canvas.toBlob((blob) => {
+                        if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    }, 'image/jpeg', 0.82);
+                }
             } catch (err) {
                 reject(err);
             }
@@ -698,35 +706,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 confirmSaveBtn.disabled = true;
                 confirmSaveBtn.textContent = 'Saving...';
 
-                // If a photo was cropped, extract the cropped image as Base64 Data URI
+                // If a photo was cropped, extract the compressed cropped image as Base64 Data URI
                 if (hasNewCrop) {
                     try {
-                        const blob = await getCroppedBlob();
-                        const base64Data = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(blob);
-                        });
-
+                        const base64Data = await getCroppedPayload();
                         const base64Input = document.getElementById('profile-photo-base64');
                         if (base64Input) {
                             base64Input.value = base64Data;
                         }
-
-                        // Also attach to file input for compatibility
-                        try {
-                            const croppedFile = new File([blob], originalFile ? originalFile.name : 'avatar.jpg', {
-                                type: blob.type || 'image/jpeg',
-                                lastModified: Date.now()
-                            });
-                            if (window.DataTransfer) {
-                                const dt = new DataTransfer();
-                                dt.items.add(croppedFile);
-                                fileInput.files = dt.files;
-                            }
-                        } catch (e) {
-                            // File input fallback ignored since base64 input is populated
+                        if (fileInput) {
+                            fileInput.value = '';
                         }
                     } catch (err) {
                         console.error('Failed to crop photo, uploading original:', err);
