@@ -3,6 +3,8 @@
  * Controls tabs, Guess Me & Growth 100 round modals, live validation, crop studio, and team config.
  */
 
+import { compressCanvasToBlob } from './image-compress';
+
 export function initAdminGames() {
     // ------------------------------------------------------------------
     // TAB SWITCHING
@@ -331,7 +333,7 @@ export function initAdminGames() {
                 const cropW = guessViewportW / scale;
                 const cropH = guessViewportH / scale;
 
-                const targetW = Math.min(1600, Math.max(800, Math.round(cropW)));
+                const targetW = Math.min(1200, Math.max(640, Math.round(cropW)));
                 const targetH = Math.round(targetW * 3 / 4);
                 const canvas = document.createElement('canvas');
                 canvas.width = targetW;
@@ -346,11 +348,9 @@ export function initAdminGames() {
                     0, 0, targetW, targetH
                 );
 
-                const mimeType = (guessOriginalFile && guessOriginalFile.type) ? guessOriginalFile.type : 'image/jpeg';
-                canvas.toBlob((blob) => {
-                    if (blob) resolve(blob);
-                    else reject(new Error('Canvas export failed'));
-                }, mimeType.includes('png') ? 'image/png' : 'image/jpeg', 0.92);
+                compressCanvasToBlob(canvas, 300 * 1024, 0.85, 520)
+                    .then(resolve)
+                    .catch(reject);
             } catch (err) {
                 reject(err);
             }
@@ -370,8 +370,8 @@ export function initAdminGames() {
 
                 if (guessOriginalFile) {
                     const blob = await getGuessCroppedBlob();
-                    const fileName = guessOriginalFile.name || 'guess_clue.jpg';
-                    formData.set('image', blob, fileName);
+                    const baseName = (guessOriginalFile.name || 'guess_clue').replace(/\.[^/.]+$/, '');
+                    formData.set('image', blob, baseName + '.jpg');
                 }
 
                 const actionUrl = formGuess.action || window.location.href;
@@ -387,7 +387,9 @@ export function initAdminGames() {
                 const data = await response.json().catch(() => ({}));
 
                 if (!response.ok || (data && data.success === false)) {
-                    const errorMsg = data.error || data.message || 'Validation error. Please check your clue and answer.';
+                    const errorMsg = response.status === 413
+                        ? 'Image is too large for the server upload limit. Please try a smaller photo.'
+                        : (data.error || data.message || 'Validation error. Please check your clue and answer.');
                     if (guessFeedback) {
                         guessFeedback.textContent = errorMsg;
                         guessFeedback.style.color = '#dc2626';

@@ -16,11 +16,14 @@ import { initPasswordToggle } from './components/password-toggle';
 import { initRootGrow } from './components/root-grow';
 import { initThemedSelects } from './components/themed-select';
 import { initAuthKeyboardShift } from './components/auth-keyboard';
-import { registerImageCompressHelpers } from './components/image-compress';
+import { registerImageCompressHelpers, initAutoFileCompression } from './components/image-compress';
 
 registerImageCompressHelpers();
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize auto-compression for standard multi/single photo upload forms (Activities, Cash Proof, etc.)
+    initAutoFileCompression();
+
     // Initialize mobile keyboard card positioning on Member & Admin login pages
     initAuthKeyboardShift();
 

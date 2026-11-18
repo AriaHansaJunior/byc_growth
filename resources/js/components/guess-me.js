@@ -1,5 +1,6 @@
 import { postJson, postFormData, deleteJson } from './api';
 import { showGameAlert } from './dialog';
+import { compressImageFile } from './image-compress';
 import {
     animateScoreAward,
     updateScoreboard,
@@ -575,6 +576,11 @@ export function initGuessMe() {
             try {
                 btnSaveRound.disabled = true;
                 btnSaveRound.textContent = 'Saving...';
+
+                if (inputFile && inputFile.files && inputFile.files[0]) {
+                    const compressedImg = await compressImageFile(inputFile.files[0], 1200, 300 * 1024);
+                    formData.set('image', compressedImg, compressedImg.name);
+                }
 
                 const res = await postFormData('/game/guess-me/round', formData);
                 if (res.success) {

@@ -26,6 +26,9 @@ export async function postJson(url, data) {
         if (response.status === 403) {
             throw new Error('Access denied: You must login as an admin account.');
         }
+        if (response.status === 413) {
+            throw new Error('Uploaded file exceeds server size limit. Please choose a smaller image.');
+        }
         if (response.status === 419) {
             throw new Error('Security session expired. Please refresh the page.');
         }
@@ -52,6 +55,9 @@ export async function postFormData(url, formData) {
         if (response.status === 403) {
             throw new Error('Access denied: You must login as an admin account.');
         }
+        if (response.status === 413) {
+            throw new Error('Uploaded file exceeds server size limit. Please choose a smaller image.');
+        }
         if (response.status === 419) {
             throw new Error('Security session expired. Please refresh the page.');
         }
@@ -76,6 +82,9 @@ export async function deleteJson(url) {
         }
         if (response.status === 403) {
             throw new Error('Access denied: You must login as an admin account.');
+        }
+        if (response.status === 413) {
+            throw new Error('Uploaded file exceeds server size limit. Please choose a smaller image.');
         }
         if (response.status === 419) {
             throw new Error('Security session expired. Please refresh the page.');

@@ -3,6 +3,8 @@
  * Controls slideshow preview, cropping studio, drag-and-drop reordering, and AJAX deletions.
  */
 
+import { compressCanvasToBlob } from './image-compress';
+
 export function initAdminHomepage() {
     const modal = document.getElementById('modal-add-slide');
     if (modal) {
@@ -251,7 +253,7 @@ export function initAdminHomepage() {
                     const cropW = viewportW / scale;
                     const cropH = viewportH / scale;
 
-                    const targetW = Math.min(1600, Math.max(800, Math.round(cropW)));
+                    const targetW = Math.min(1400, Math.max(800, Math.round(cropW)));
                     const targetH = Math.round(targetW * 3 / 4);
                     const canvas = document.createElement('canvas');
                     canvas.width = targetW;
@@ -266,11 +268,9 @@ export function initAdminHomepage() {
                         0, 0, targetW, targetH
                     );
 
-                    const mimeType = (originalFile && originalFile.type) ? originalFile.type : 'image/jpeg';
-                    canvas.toBlob((blob) => {
-                        if (blob) resolve(blob);
-                        else reject(new Error('Canvas export failed'));
-                    }, mimeType.includes('png') ? 'image/png' : 'image/jpeg', 0.92);
+                    compressCanvasToBlob(canvas, 360 * 1024, 0.86, 640)
+                        .then(resolve)
+                        .catch(reject);
                 } catch (err) {
                     reject(err);
                 }
@@ -289,20 +289,17 @@ export function initAdminHomepage() {
 
                 try {
                     const blob = await getCroppedBlob();
-                    const croppedFile = new File([blob], originalFile.name, {
-                        type: blob.type || originalFile.type,
+                    const baseName = (originalFile.name || 'slide').replace(/\.[^/.]+$/, '');
+                    const jpgName = baseName + '.jpg';
+                    const croppedFile = new File([blob], jpgName, {
+                        type: 'image/jpeg',
                         lastModified: Date.now()
                     });
 
-                    const base64Data = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = () => resolve(reader.result);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    });
+                    // Ensure we don't send duplicate base64 copy alongside binary file
                     const base64Input = form.querySelector('input[name="image_base64"]');
                     if (base64Input) {
-                        base64Input.value = base64Data;
+                        base64Input.value = '';
                     }
 
                     if (window.DataTransfer && fileInput) {
@@ -312,10 +309,8 @@ export function initAdminHomepage() {
                         form.submit();
                     } else {
                         const formData = new FormData(form);
-                        formData.set('image', croppedFile, originalFile.name);
-                        if (base64Data) {
-                            formData.set('image_base64', base64Data);
-                        }
+                        formData.set('image', croppedFile, jpgName);
+                        formData.delete('image_base64');
                         await fetch(form.action, {
                             method: 'POST',
                             body: formData,
@@ -557,7 +552,7 @@ export function initAdminHomepage() {
                     const cropW = editViewportW / scale;
                     const cropH = editViewportH / scale;
 
-                    const targetW = Math.min(1600, Math.max(800, Math.round(cropW)));
+                    const targetW = Math.min(1400, Math.max(800, Math.round(cropW)));
                     const targetH = Math.round(targetW * (editViewportH / editViewportW));
                     const canvas = document.createElement('canvas');
                     canvas.width = targetW;
@@ -572,11 +567,9 @@ export function initAdminHomepage() {
                         0, 0, targetW, targetH
                     );
 
-                    const mimeType = (editBlob && editBlob.type) ? editBlob.type : 'image/jpeg';
-                    canvas.toBlob((blob) => {
-                        if (blob) resolve(blob);
-                        else reject(new Error('Canvas export failed'));
-                    }, mimeType.includes('png') ? 'image/png' : 'image/jpeg', 0.92);
+                    compressCanvasToBlob(canvas, 360 * 1024, 0.86, 640)
+                        .then(resolve)
+                        .catch(reject);
                 } catch (err) {
                     reject(err);
                 }
@@ -595,18 +588,17 @@ export function initAdminHomepage() {
 
                 try {
                     const blob = await getEditCroppedBlob();
-                    const mimeType = (blob && blob.type) ? blob.type : 'image/jpeg';
-                    const ext = mimeType.includes('png') ? '.png' : (mimeType.includes('webp') ? '.webp' : '.jpg');
                     const baseName = editFileName.replace(/\.[^/.]+$/, "");
-                    const fileName = baseName + ext;
+                    const fileName = baseName + '.jpg';
 
                     const croppedFile = new File([blob], fileName, {
-                        type: mimeType,
+                        type: 'image/jpeg',
                         lastModified: Date.now()
                     });
 
                     const formData = new FormData(editForm);
                     formData.set('image', croppedFile, fileName);
+                    formData.delete('image_base64');
 
                     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
                                  document.querySelector('input[name="_token"]')?.value;
@@ -643,7 +635,10 @@ export function initAdminHomepage() {
                             window.showAdminToast('Photo position updated successfully.', 'success');
                         }
                     } else {
-                        alert(data.error || 'Failed to update photo position.');
+                        const msg = response.status === 413
+                            ? 'Photo is too large for the server upload limit. Please try a smaller photo.'
+                            : (data.error || 'Failed to update photo position.');
+                        alert(msg);
                     }
                 } catch (err) {
                     console.error('Save failed:', err);
